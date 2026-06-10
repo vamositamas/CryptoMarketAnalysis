@@ -13,7 +13,29 @@
     "lib": ["es2020", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "paths": {}
+    "paths": {
+      "@crypto-market-analysis/shared/types": [
+        "./libs/shared/types/src/index.ts"
+      ],
+      "@crypto-market-analysis/shared/utils": [
+        "./libs/shared/utils/src/index.ts"
+      ],
+      "@crypto-market-analysis/shared/constants": [
+        "./libs/shared/constants/src/index.ts"
+      ],
+      "@crypto-market-analysis/calculation-engines/indicators": [
+        "./libs/calculation-engines/indicators/src/index.ts"
+      ],
+      "@crypto-market-analysis/calculation-engines/formula-parser": [
+        "./libs/calculation-engines/formula-parser/src/index.ts"
+      ],
+      "@crypto-market-analysis/ui/components": [
+        "./libs/ui/components/src/index.ts"
+      ],
+      "@crypto-market-analysis/data-access/api-client": [
+        "./libs/data-access/api-client/src/index.ts"
+      ]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }
