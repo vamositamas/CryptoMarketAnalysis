@@ -125,6 +125,11 @@ main button {
   background: #145c4b;
 }
 
+main button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
 .hero {
   display: grid;
   grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
@@ -327,6 +332,22 @@ main .secondary-button {
   color: #17202a;
   border-color: #cbd8d1;
   background: #ffffff;
+}
+
+main .form-message {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #ebcaca;
+  border-radius: 6px;
+  color: #7f1d1d;
+  background: #fff5f5;
+  font-weight: 700;
+}
+
+main .form-message.success {
+  border-color: #badbcc;
+  color: #155c3f;
+  background: #effaf4;
 }
 
 @media (max-width: 860px) {

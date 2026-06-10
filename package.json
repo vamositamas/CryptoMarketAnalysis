@@ -2,6 +2,12 @@
   "name": "crypto-market-analysis",
   "version": "0.0.0",
   "private": true,
+  "scripts": {
+    "dev:api": "nx serve api",
+    "dev:web": "nx serve web",
+    "build": "nx run-many --target=build",
+    "test": "nx run-many --target=test"
+  },
   "engines": {
     "node": ">=20 <21",
     "npm": ">=10 <11"

@@ -13,6 +13,15 @@ Deploy the Angular frontend and Node.js API on Vercel with Node.js 20 runtime.
 - Install command: `npm install`
 - Node.js runtime: 20.x
 
+## Local Development
+
+Run the API and frontend in separate terminals:
+
+- API: `npm run dev:api`
+- Web: `npm run dev:web`
+
+The Angular dev server uses `apps/web/proxy.conf.json` to forward `/api/*` requests to `http://localhost:3000`, so browser requests can use the same `/api` paths as production.
+
 ## API Runtime
 
 The root `vercel.json` declares `apps/api/src/main.ts` as a Node.js 20 serverless function with a 10 second max duration.
