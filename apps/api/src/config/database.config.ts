@@ -11,6 +11,9 @@ export function getDatabasePool(): Pool | undefined {
 
   pool ??= new Pool({
     connectionString,
+    ssl: {
+      rejectUnauthorized: false,
+    },
     max: 1,
     idleTimeoutMillis: 5_000,
     connectionTimeoutMillis: 5_000,

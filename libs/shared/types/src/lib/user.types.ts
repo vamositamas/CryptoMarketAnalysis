@@ -25,8 +25,39 @@ export interface CreateUserInput {
   fullName?: string;
   languagePreference?: LanguagePreference;
   role?: UserRole;
+  emailVerified?: boolean;
   oauthProvider?: string;
   oauthProviderId?: string;
+}
+
+export interface RegisterRequest {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  languagePreference: LanguagePreference;
+  fullName?: string;
+}
+
+export interface RegisterResponse {
+  message: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface AuthenticatedUser {
+  id: string;
+  email: string;
+  fullName?: string;
+  role: UserRole;
+  languagePreference: LanguagePreference;
+}
+
+export interface LoginResponse {
+  accessToken: string;
+  user: AuthenticatedUser;
 }
 
 export interface UserRow {
