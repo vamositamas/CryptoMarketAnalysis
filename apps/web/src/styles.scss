@@ -1,1 +1,371 @@
-/* You can add global styles to this file, and also import other style files */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  background: #f7f8f4;
+}
+
+body {
+  margin: 0;
+}
+
+app-root {
+  display: block;
+  min-height: 100vh;
+  color: #17202a;
+  background:
+    linear-gradient(135deg, rgba(19, 64, 116, 0.08), rgba(19, 116, 91, 0.05)),
+    #f7f8f4;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.topbar,
+.hero,
+.kpi-grid,
+main .content-section {
+  width: min(1180px, calc(100% - 32px));
+  margin-inline: auto;
+}
+
+.topbar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 24px;
+  min-height: 72px;
+}
+
+.brand,
+nav,
+.topbar-actions,
+.hero-actions,
+.language-toggle,
+.metric-strip {
+  display: flex;
+  align-items: center;
+}
+
+.brand {
+  gap: 10px;
+  color: inherit;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.brand-mark {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  color: #101820;
+  background: #f7b731;
+  border-radius: 50%;
+}
+
+nav {
+  justify-content: center;
+  gap: 6px;
+}
+
+nav a,
+.ghost-link,
+.primary-link,
+.language-toggle button,
+main button {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+nav a.active,
+nav a:hover,
+.ghost-link,
+.language-toggle button.active {
+  border-color: #cdd8d2;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.topbar-actions {
+  justify-content: end;
+  gap: 8px;
+}
+
+.language-toggle {
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid #d7ded8;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.64);
+}
+
+.language-toggle button {
+  min-width: 42px;
+  cursor: pointer;
+  background: transparent;
+}
+
+.primary-link,
+main button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  background: #145c4b;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+  align-items: center;
+  gap: 48px;
+  min-height: 430px;
+  padding-block: 44px 30px;
+}
+
+.hero-copy h1 {
+  max-width: 760px;
+  margin: 0;
+  font-size: clamp(2.3rem, 7vw, 5.7rem);
+  line-height: 0.95;
+}
+
+.hero-copy p {
+  max-width: 620px;
+  color: #4c5b57;
+  font-size: 1.08rem;
+}
+
+.eyebrow,
+main .eyebrow {
+  margin: 0 0 10px;
+  color: #8a5c00;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.hero-actions {
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 26px;
+}
+
+.market-panel,
+.kpi-grid article,
+main .model-grid article,
+main .auth-form {
+  border: 1px solid #dce2dd;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 20px 70px rgba(20, 92, 75, 0.12);
+}
+
+.market-panel {
+  padding: 22px;
+}
+
+.panel-header,
+.metric-strip {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.signal-chart {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  align-items: end;
+  gap: 10px;
+  height: 230px;
+  margin: 24px 0;
+  padding: 16px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #fdfbf4, #edf6f1);
+}
+
+.bar {
+  border-radius: 6px 6px 2px 2px;
+  background: linear-gradient(180deg, #f7b731, #145c4b);
+}
+
+.bar-one {
+  height: 34%;
+}
+
+.bar-two {
+  height: 56%;
+}
+
+.bar-three {
+  height: 42%;
+}
+
+.bar-four {
+  height: 76%;
+}
+
+.bar-five {
+  height: 62%;
+}
+
+.bar-six {
+  height: 88%;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.kpi-grid article,
+main .model-grid article {
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+}
+
+.kpi-grid strong,
+main .model-grid strong {
+  font-size: 2rem;
+}
+
+.kpi-grid small,
+main small,
+main .content-section p {
+  color: #65736f;
+}
+
+main .content-section {
+  padding-block: 28px 54px;
+}
+
+main .section-heading h2,
+main .content-section h2 {
+  margin: 0 0 18px;
+  font-size: 1.8rem;
+}
+
+main .model-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+main .chart-list {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+main .chart-list a {
+  min-height: 64px;
+  padding: 14px;
+  border: 1px solid #dce2dd;
+  border-radius: 8px;
+  color: #173f36;
+  background: #ffffff;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+main .split-section {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
+  gap: 28px;
+}
+
+main .compact-form,
+main .auth-form {
+  display: grid;
+  gap: 14px;
+}
+
+main .auth-section {
+  display: grid;
+  place-items: start center;
+}
+
+main .auth-form {
+  width: min(100%, 430px);
+  padding: 22px;
+}
+
+main label {
+  display: grid;
+  gap: 6px;
+  color: #344540;
+  font-weight: 700;
+}
+
+main input,
+main select {
+  min-height: 42px;
+  border: 1px solid #cbd8d1;
+  border-radius: 6px;
+  padding: 0 12px;
+  color: #17202a;
+  background: #ffffff;
+  font: inherit;
+}
+
+main .secondary-button {
+  color: #17202a;
+  border-color: #cbd8d1;
+  background: #ffffff;
+}
+
+@media (max-width: 860px) {
+  .topbar {
+    grid-template-columns: 1fr;
+    padding-block: 12px;
+  }
+
+  nav,
+  .topbar-actions {
+    justify-content: start;
+    flex-wrap: wrap;
+  }
+
+  .hero,
+  .kpi-grid,
+  main .model-grid,
+  main .split-section {
+    grid-template-columns: 1fr;
+  }
+
+  main .chart-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .topbar,
+  .hero,
+  .kpi-grid,
+  main .content-section {
+    width: min(100% - 20px, 1180px);
+  }
+
+  .hero-copy h1 {
+    font-size: 2.45rem;
+  }
+
+  main .chart-list {
+    grid-template-columns: 1fr;
+  }
+}
