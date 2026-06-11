@@ -5,6 +5,8 @@ import {
   ApiClientError,
   AuthApiClient,
 } from '@crypto-market-analysis/data-access/api-client';
+import { roleGuard } from './guards/role.guard';
+import { AuthSessionService } from './services/auth-session.service';
 
 @Component({
   selector: 'app-dashboard-page',
@@ -55,6 +57,26 @@ export class DashboardPage {}
   `,
 })
 export class ChartsPage {}
+
+@Component({
+  selector: 'app-admin-users-page',
+  template: `
+    <section class="content-section">
+      <div class="section-heading">
+        <p class="eyebrow">Admin</p>
+        <h2>User management</h2>
+      </div>
+      <div class="model-grid">
+        <article>
+          <span>Users</span>
+          <strong>Ready</strong>
+          <small>Administrative user list API access is role protected.</small>
+        </article>
+      </div>
+    </section>
+  `,
+})
+export class AdminUsersPage {}
 
 @Component({
   selector: 'app-onboarding-page',
@@ -129,6 +151,7 @@ export class OnboardingPage {
 export class LoginPage {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthApiClient);
+  private readonly authSession = inject(AuthSessionService);
   protected readonly isSubmitting = signal(false);
   protected readonly message = signal('');
   protected readonly isSuccess = signal(false);
@@ -148,7 +171,8 @@ export class LoginPage {
     this.isSuccess.set(false);
 
     try {
-      await this.auth.login(this.form.getRawValue());
+      const response = await this.auth.login(this.form.getRawValue());
+      this.authSession.setCurrentUser(response.user);
       this.isSuccess.set(true);
       this.message.set('Login successful. Redirecting to dashboard is coming next.');
     } catch (error) {
@@ -418,7 +442,14 @@ function getErrorMessage(error: unknown): string {
 
 export const appRoutes: Route[] = [
   { path: '', component: DashboardPage },
+  { path: 'dashboard', component: DashboardPage },
   { path: 'charts', component: ChartsPage },
+  {
+    path: 'admin/users',
+    component: AdminUsersPage,
+    canActivate: [roleGuard],
+    data: { roles: ['administrator'] },
+  },
   { path: 'onboarding', component: OnboardingPage },
   { path: 'login', component: LoginPage },
   { path: 'forgot-password', component: ForgotPasswordPage },

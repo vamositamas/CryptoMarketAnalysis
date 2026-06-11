@@ -1,6 +1,8 @@
 import express from 'express';
 import { csrfProtection, issueCsrfToken } from './middleware/csrf.middleware';
 import { enforceHttps, securityHeaders } from './middleware/security.middleware';
+import { createAdminRouter } from './routes/admin.route';
+import { createAlertsRouter } from './routes/alerts.route';
 import { createAuthRouter } from './routes/auth.route';
 import { createHealthRouter } from './routes/health.route';
 
@@ -14,6 +16,8 @@ export function createApp() {
   app.get('/api/csrf-token', issueCsrfToken);
   app.use(csrfProtection);
   app.use('/api/auth', createAuthRouter());
+  app.use('/api/admin', createAdminRouter());
+  app.use('/api/alerts', createAlertsRouter());
   app.use('/api/health', createHealthRouter());
 
   app.get('/', (req, res) => {
