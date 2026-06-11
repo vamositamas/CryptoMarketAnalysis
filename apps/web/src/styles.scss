@@ -334,6 +334,17 @@ main .secondary-button {
   background: #ffffff;
 }
 
+main .form-link {
+  color: #145c4b;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+}
+
+main .form-link:hover {
+  text-decoration: underline;
+}
+
 main .form-message {
   margin: 0;
   padding: 10px 12px;

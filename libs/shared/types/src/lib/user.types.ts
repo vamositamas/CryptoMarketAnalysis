@@ -60,6 +60,28 @@ export interface LoginResponse {
   user: AuthenticatedUser;
 }
 
+export interface RequestPasswordResetRequest {
+  email: string;
+}
+
+export interface RequestPasswordResetResponse {
+  message: string;
+}
+
+export interface ValidatePasswordResetTokenResponse {
+  valid: boolean;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  password: string;
+  confirmPassword: string;
+}
+
+export interface ResetPasswordResponse {
+  message: string;
+}
+
 export interface UserRow {
   id: string;
   email: string;

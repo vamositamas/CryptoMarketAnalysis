@@ -85,6 +85,17 @@ export class UserRepository extends BaseRepository {
     );
   }
 
+  async updatePasswordHash(userId: string, passwordHash: string): Promise<void> {
+    const pool = this.requirePool();
+
+    await pool.query(
+      `UPDATE users
+       SET password_hash = $2
+       WHERE id = $1`,
+      [userId, passwordHash],
+    );
+  }
+
   private requirePool(): Pick<Pool, 'query'> {
     if (!this.pool) {
       throw new Error('Database is not configured');

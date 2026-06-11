@@ -94,6 +94,36 @@ describe('AuthApiClient', () => {
       statusCode: 401,
     });
   });
+
+  it('requests password reset with CSRF protection', async () => {
+    const promise = client.requestPasswordReset({ email: 'user@example.com' });
+
+    http.expectOne('/api/csrf-token').flush({ csrfToken: 'csrf-token' });
+    await waitForRequestQueue();
+
+    const resetRequest = http.expectOne('/api/auth/password-reset/request');
+    expect(resetRequest.request.method).toBe('POST');
+    expect(resetRequest.request.headers.get('x-csrf-token')).toBe('csrf-token');
+    resetRequest.flush({
+      message: "If that email exists, we've sent password reset instructions",
+    });
+
+    await expect(promise).resolves.toEqual({
+      message: "If that email exists, we've sent password reset instructions",
+    });
+  });
+
+  it('validates password reset tokens without requiring CSRF', async () => {
+    const promise = client.validatePasswordResetToken('reset-token');
+
+    const validateRequest = http.expectOne(
+      '/api/auth/password-reset/validate?token=reset-token',
+    );
+    expect(validateRequest.request.method).toBe('GET');
+    validateRequest.flush({ valid: true });
+
+    await expect(promise).resolves.toEqual({ valid: true });
+  });
 });
 
 function waitForRequestQueue(): Promise<void> {

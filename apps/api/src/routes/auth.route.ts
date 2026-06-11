@@ -4,6 +4,7 @@ import {
   AuthService,
   LoginError,
   OAuthError,
+  PasswordResetError,
   RegistrationError,
   VerificationError,
 } from '../services/auth.service';
@@ -51,6 +52,40 @@ export function createAuthRouter(authService = new AuthService()): Router {
       res.redirect(302, '/login?message=Email%20verified!%20You%20can%20now%20log%20in.');
     } catch (error) {
       if (error instanceof VerificationError) {
+        res.status(error.statusCode).json({ error: error.message });
+        return;
+      }
+
+      next(error);
+    }
+  });
+
+  router.post('/password-reset/request', async (req, res, next) => {
+    try {
+      const response = await authService.requestPasswordReset(req.body);
+      res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.get('/password-reset/validate', async (req, res, next) => {
+    try {
+      const response = await authService.validatePasswordResetToken(
+        req.query.token?.toString(),
+      );
+      res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post('/password-reset/confirm', async (req, res, next) => {
+    try {
+      const response = await authService.resetPassword(req.body);
+      res.status(200).json(response);
+    } catch (error) {
+      if (error instanceof PasswordResetError) {
         res.status(error.statusCode).json({ error: error.message });
         return;
       }

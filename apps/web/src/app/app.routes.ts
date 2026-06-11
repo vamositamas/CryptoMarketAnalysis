@@ -1,6 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Route } from '@angular/router';
+import { ActivatedRoute, Route, Router, RouterLink } from '@angular/router';
 import {
   ApiClientError,
   AuthApiClient,
@@ -102,7 +102,6 @@ export class OnboardingPage {
 
 @Component({
   selector: 'app-login-page',
-  imports: [ReactiveFormsModule],
   template: `
     <section class="content-section auth-section">
       <form class="auth-form" [formGroup]="form" (ngSubmit)="submit()">
@@ -121,9 +120,11 @@ export class OnboardingPage {
         <button type="button" class="secondary-button" (click)="continueWithGoogle()">
           Continue with Google
         </button>
+        <a class="form-link" routerLink="/forgot-password">Forgot password?</a>
       </form>
     </section>
   `,
+  imports: [ReactiveFormsModule, RouterLink],
 })
 export class LoginPage {
   private readonly fb = inject(FormBuilder);
@@ -159,6 +160,165 @@ export class LoginPage {
 
   protected continueWithGoogle(): void {
     this.auth.startGoogleLogin();
+  }
+}
+
+@Component({
+  selector: 'app-forgot-password-page',
+  imports: [ReactiveFormsModule],
+  template: `
+    <section class="content-section auth-section">
+      <form class="auth-form" [formGroup]="form" (ngSubmit)="submit()">
+        <h2>Reset password</h2>
+        <label>Email<input type="email" autocomplete="email" formControlName="email" /></label>
+        @if (message()) {
+          <p class="form-message" [class.success]="isSuccess()">{{ message() }}</p>
+        }
+        <button type="submit" [disabled]="form.invalid || isSubmitting()">
+          {{ isSubmitting() ? 'Sending...' : 'Send reset instructions' }}
+        </button>
+      </form>
+    </section>
+  `,
+})
+export class ForgotPasswordPage {
+  private readonly fb = inject(FormBuilder);
+  private readonly auth = inject(AuthApiClient);
+  protected readonly isSubmitting = signal(false);
+  protected readonly message = signal('');
+  protected readonly isSuccess = signal(false);
+  protected readonly form = this.fb.nonNullable.group({
+    email: ['', [Validators.required, Validators.email]],
+  });
+
+  protected async submit(): Promise<void> {
+    if (this.form.invalid || this.isSubmitting()) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    this.isSubmitting.set(true);
+    this.message.set('');
+    this.isSuccess.set(false);
+
+    try {
+      const response = await this.auth.requestPasswordReset(this.form.getRawValue());
+      this.isSuccess.set(true);
+      this.message.set(response.message);
+    } catch (error) {
+      this.message.set(getErrorMessage(error));
+    } finally {
+      this.isSubmitting.set(false);
+    }
+  }
+}
+
+@Component({
+  selector: 'app-reset-password-page',
+  imports: [ReactiveFormsModule],
+  template: `
+    <section class="content-section auth-section">
+      <form class="auth-form" [formGroup]="form" (ngSubmit)="submit()">
+        <h2>Choose a new password</h2>
+        @if (isTokenValid() === false) {
+          <p class="form-message">Reset link is invalid or expired</p>
+        } @else {
+          <label>
+            New password
+            <input type="password" autocomplete="new-password" formControlName="password" />
+          </label>
+          <label>
+            Confirm password
+            <input
+              type="password"
+              autocomplete="new-password"
+              formControlName="confirmPassword"
+            />
+          </label>
+          @if (passwordMismatch()) {
+            <p class="form-message">Passwords do not match.</p>
+          }
+          @if (message()) {
+            <p class="form-message" [class.success]="isSuccess()">{{ message() }}</p>
+          }
+          <button
+            type="submit"
+            [disabled]="form.invalid || passwordMismatch() || isSubmitting() || !isTokenValid()"
+          >
+            {{ isSubmitting() ? 'Resetting...' : 'Reset password' }}
+          </button>
+        }
+      </form>
+    </section>
+  `,
+})
+export class ResetPasswordPage {
+  private readonly fb = inject(FormBuilder);
+  private readonly auth = inject(AuthApiClient);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly token = this.route.snapshot.queryParamMap.get('token') ?? '';
+  protected readonly isSubmitting = signal(false);
+  protected readonly isTokenValid = signal<boolean | null>(null);
+  protected readonly message = signal('');
+  protected readonly isSuccess = signal(false);
+  protected readonly form = this.fb.nonNullable.group({
+    password: ['', Validators.required],
+    confirmPassword: ['', Validators.required],
+  });
+  protected readonly passwordMismatch = computed(() => {
+    const { password, confirmPassword } = this.form.getRawValue();
+    return Boolean(password && confirmPassword && password !== confirmPassword);
+  });
+
+  constructor() {
+    void this.validateToken();
+  }
+
+  protected async submit(): Promise<void> {
+    if (
+      this.form.invalid ||
+      this.passwordMismatch() ||
+      this.isSubmitting() ||
+      !this.isTokenValid()
+    ) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    this.isSubmitting.set(true);
+    this.message.set('');
+    this.isSuccess.set(false);
+
+    try {
+      const response = await this.auth.resetPassword({
+        token: this.token,
+        ...this.form.getRawValue(),
+      });
+      this.isSuccess.set(true);
+      this.message.set(response.message);
+      await this.router.navigate(['/login'], {
+        queryParams: { message: response.message },
+      });
+    } catch (error) {
+      this.message.set(getErrorMessage(error));
+    } finally {
+      this.isSubmitting.set(false);
+    }
+  }
+
+  private async validateToken(): Promise<void> {
+    if (!this.token) {
+      this.isTokenValid.set(false);
+      return;
+    }
+
+    try {
+      const response = await this.auth.validatePasswordResetToken(this.token);
+      this.isTokenValid.set(response.valid);
+    } catch {
+      this.isTokenValid.set(false);
+    }
   }
 }
 
@@ -261,6 +421,8 @@ export const appRoutes: Route[] = [
   { path: 'charts', component: ChartsPage },
   { path: 'onboarding', component: OnboardingPage },
   { path: 'login', component: LoginPage },
+  { path: 'forgot-password', component: ForgotPasswordPage },
+  { path: 'reset-password', component: ResetPasswordPage },
   { path: 'register', component: RegisterPage },
   { path: '**', redirectTo: '' },
 ];

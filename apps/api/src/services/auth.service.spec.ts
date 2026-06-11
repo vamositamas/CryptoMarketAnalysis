@@ -470,4 +470,168 @@ describe('AuthService', () => {
       message: 'An account with this email already exists. Account linking is required.',
     });
   });
+
+  it('creates a password reset token for password users without exposing account existence', async () => {
+    const users = {
+      findByEmail: jest
+        .fn()
+        .mockResolvedValue(createUser({ passwordHash: 'existing-password-hash' })),
+      create: jest.fn(),
+      markEmailVerified: jest.fn(),
+    };
+    const passwordResetTokens = {
+      create: jest.fn().mockResolvedValue(undefined),
+      findByToken: jest.fn(),
+      deleteByToken: jest.fn(),
+    };
+    const passwordResetEmails = {
+      sendPasswordResetEmail: jest.fn().mockResolvedValue(undefined),
+    };
+    const service = new AuthService(
+      users,
+      { create: jest.fn(), findByToken: jest.fn(), deleteByToken: jest.fn() },
+      passwordResetTokens,
+      { invalidateUserTokens: jest.fn() },
+      passwordResetEmails,
+    );
+
+    const response = await service.requestPasswordReset({ email: 'USER@example.com' });
+
+    expect(response).toEqual({
+      message: "If that email exists, we've sent password reset instructions",
+    });
+    expect(users.findByEmail).toHaveBeenCalledWith('user@example.com');
+    expect(passwordResetTokens.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: 'user-id',
+        token: expect.any(String),
+        expiresAt: expect.any(Date),
+      }),
+    );
+    expect(passwordResetEmails.sendPasswordResetEmail).toHaveBeenCalledWith({
+      email: 'user@example.com',
+      resetUrl: expect.stringContaining('/reset-password?token='),
+    });
+  });
+
+  it('returns the same password reset response for unknown emails', async () => {
+    const passwordResetTokens = {
+      create: jest.fn(),
+      findByToken: jest.fn(),
+      deleteByToken: jest.fn(),
+    };
+    const service = new AuthService(
+      {
+        findByEmail: jest.fn().mockResolvedValue(undefined),
+        create: jest.fn(),
+        markEmailVerified: jest.fn(),
+      },
+      { create: jest.fn(), findByToken: jest.fn(), deleteByToken: jest.fn() },
+      passwordResetTokens,
+      { invalidateUserTokens: jest.fn() },
+    );
+
+    await expect(service.requestPasswordReset({ email: 'missing@example.com' })).resolves.toEqual({
+      message: "If that email exists, we've sent password reset instructions",
+    });
+    expect(passwordResetTokens.create).not.toHaveBeenCalled();
+  });
+
+  it('validates active password reset tokens', async () => {
+    const service = new AuthService(
+      {
+        findByEmail: jest.fn(),
+        create: jest.fn(),
+        markEmailVerified: jest.fn(),
+      },
+      { create: jest.fn(), findByToken: jest.fn(), deleteByToken: jest.fn() },
+      {
+        create: jest.fn(),
+        findByToken: jest.fn().mockResolvedValue({
+          userId: 'user-id',
+          expiresAt: new Date(Date.now() + 60_000),
+        }),
+        deleteByToken: jest.fn(),
+      },
+      { invalidateUserTokens: jest.fn() },
+    );
+
+    await expect(service.validatePasswordResetToken('reset-token')).resolves.toEqual({
+      valid: true,
+    });
+  });
+
+  it('resets password, consumes the token, and records token invalidation', async () => {
+    const users = {
+      findByEmail: jest.fn(),
+      create: jest.fn(),
+      markEmailVerified: jest.fn(),
+      updatePasswordHash: jest.fn().mockResolvedValue(undefined),
+    };
+    const passwordResetTokens = {
+      create: jest.fn(),
+      findByToken: jest.fn().mockResolvedValue({
+        userId: 'user-id',
+        expiresAt: new Date(Date.now() + 60_000),
+      }),
+      deleteByToken: jest.fn().mockResolvedValue(undefined),
+    };
+    const tokenInvalidations = {
+      invalidateUserTokens: jest.fn().mockResolvedValue(undefined),
+    };
+    const service = new AuthService(
+      users,
+      { create: jest.fn(), findByToken: jest.fn(), deleteByToken: jest.fn() },
+      passwordResetTokens,
+      tokenInvalidations,
+    );
+
+    const response = await service.resetPassword({
+      token: 'reset-token',
+      password: 'NewSecurePass456!',
+      confirmPassword: 'NewSecurePass456!',
+    });
+
+    expect(response).toEqual({
+      message: 'Password reset successful. Please log in with your new password.',
+    });
+    const passwordHash = users.updatePasswordHash.mock.calls[0][1] as string;
+    await expect(bcrypt.compare('NewSecurePass456!', passwordHash)).resolves.toBe(true);
+    expect(passwordResetTokens.deleteByToken).toHaveBeenCalledWith('reset-token');
+    expect(tokenInvalidations.invalidateUserTokens).toHaveBeenCalledWith('user-id');
+  });
+
+  it('rejects expired password reset tokens', async () => {
+    const users = {
+      findByEmail: jest.fn(),
+      create: jest.fn(),
+      markEmailVerified: jest.fn(),
+      updatePasswordHash: jest.fn(),
+    };
+    const service = new AuthService(
+      users,
+      { create: jest.fn(), findByToken: jest.fn(), deleteByToken: jest.fn() },
+      {
+        create: jest.fn(),
+        findByToken: jest.fn().mockResolvedValue({
+          userId: 'user-id',
+          expiresAt: new Date(Date.now() - 60_000),
+        }),
+        deleteByToken: jest.fn(),
+      },
+      { invalidateUserTokens: jest.fn() },
+    );
+
+    await expect(
+      service.resetPassword({
+        token: 'expired-token',
+        password: 'NewSecurePass456!',
+        confirmPassword: 'NewSecurePass456!',
+      }),
+    ).rejects.toMatchObject({
+      statusCode: 400,
+      message: 'Reset link is invalid or expired',
+    });
+    expect(users.updatePasswordHash).not.toHaveBeenCalled();
+  });
 });

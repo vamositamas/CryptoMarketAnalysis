@@ -30,6 +30,28 @@ export interface LoginResponse {
   };
 }
 
+export interface RequestPasswordResetRequest {
+  email: string;
+}
+
+export interface RequestPasswordResetResponse {
+  message: string;
+}
+
+export interface ValidatePasswordResetTokenResponse {
+  valid: boolean;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  password: string;
+  confirmPassword: string;
+}
+
+export interface ResetPasswordResponse {
+  message: string;
+}
+
 interface CsrfTokenResponse {
   csrfToken: string;
 }
@@ -54,6 +76,40 @@ export class AuthApiClient {
 
   async login(request: LoginRequest): Promise<LoginResponse> {
     return this.postWithCsrf<LoginResponse>('/api/auth/login', request);
+  }
+
+  async requestPasswordReset(
+    request: RequestPasswordResetRequest,
+  ): Promise<RequestPasswordResetResponse> {
+    return this.postWithCsrf<RequestPasswordResetResponse>(
+      '/api/auth/password-reset/request',
+      request,
+    );
+  }
+
+  async validatePasswordResetToken(
+    token: string,
+  ): Promise<ValidatePasswordResetTokenResponse> {
+    try {
+      return await firstValueFrom(
+        this.http.get<ValidatePasswordResetTokenResponse>(
+          '/api/auth/password-reset/validate',
+          {
+            params: { token },
+            withCredentials: true,
+          },
+        ),
+      );
+    } catch (error) {
+      throw toApiClientError(error);
+    }
+  }
+
+  async resetPassword(request: ResetPasswordRequest): Promise<ResetPasswordResponse> {
+    return this.postWithCsrf<ResetPasswordResponse>(
+      '/api/auth/password-reset/confirm',
+      request,
+    );
   }
 
   startGoogleLogin(): void {

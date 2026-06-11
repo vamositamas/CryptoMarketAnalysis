@@ -1,6 +1,10 @@
 import type { Request, Response } from 'express';
 import { createAuthRouter } from './auth.route';
-import { RegistrationError, VerificationError } from '../services/auth.service';
+import {
+  PasswordResetError,
+  RegistrationError,
+  VerificationError,
+} from '../services/auth.service';
 
 type Handler = (req: Request, res: Response, next: jest.Mock) => Promise<void>;
 
@@ -10,6 +14,17 @@ function getRegisterHandler(authService: { register: jest.Mock }): Handler {
 
   if (!layer?.route?.stack[0]?.handle) {
     throw new Error('Register route not found');
+  }
+
+  return layer.route.stack[0].handle as Handler;
+}
+
+function getHandler(authService: object, path: string): Handler {
+  const router = createAuthRouter(authService as never);
+  const layer = router.stack.find((entry) => entry.route?.path === path);
+
+  if (!layer?.route?.stack[0]?.handle) {
+    throw new Error(`${path} route not found`);
   }
 
   return layer.route.stack[0].handle as Handler;
@@ -162,6 +177,59 @@ describe('auth route', () => {
 
     expect(response.statusCode).toBe(400);
     expect(response.body).toEqual({ error: 'Verification link has expired' });
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  it('requests password reset instructions', async () => {
+    const authService = {
+      requestPasswordReset: jest.fn().mockResolvedValue({
+        message: "If that email exists, we've sent password reset instructions",
+      }),
+    };
+    const handler = getHandler(authService, '/password-reset/request');
+    const response = createResponse();
+    const next = jest.fn();
+
+    await handler({ body: { email: 'user@example.com' } } as Request, response, next);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toEqual({
+      message: "If that email exists, we've sent password reset instructions",
+    });
+    expect(authService.requestPasswordReset).toHaveBeenCalledWith({
+      email: 'user@example.com',
+    });
+  });
+
+  it('validates password reset tokens', async () => {
+    const authService = {
+      validatePasswordResetToken: jest.fn().mockResolvedValue({ valid: true }),
+    };
+    const handler = getHandler(authService, '/password-reset/validate');
+    const response = createResponse();
+    const next = jest.fn();
+
+    await handler({ query: { token: 'reset-token' } } as unknown as Request, response, next);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toEqual({ valid: true });
+    expect(authService.validatePasswordResetToken).toHaveBeenCalledWith('reset-token');
+  });
+
+  it('returns password reset errors as JSON responses', async () => {
+    const authService = {
+      resetPassword: jest
+        .fn()
+        .mockRejectedValue(new PasswordResetError(400, 'Reset link is invalid or expired')),
+    };
+    const handler = getHandler(authService, '/password-reset/confirm');
+    const response = createResponse();
+    const next = jest.fn();
+
+    await handler({ body: { token: 'expired-token' } } as Request, response, next);
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body).toEqual({ error: 'Reset link is invalid or expired' });
     expect(next).not.toHaveBeenCalled();
   });
 

@@ -5,13 +5,21 @@ import {
   type AuthenticatedUser,
   type LoginRequest,
   type LoginResponse,
+  type RequestPasswordResetRequest,
+  type RequestPasswordResetResponse,
+  type ResetPasswordRequest,
+  type ResetPasswordResponse,
   type RegisterRequest,
   type RegisterResponse,
   type UserRole,
   type LanguagePreference,
+  type ValidatePasswordResetTokenResponse,
 } from '@crypto-market-analysis/shared/types';
 import { EmailVerificationTokenRepository } from '../repositories/email-verification-token.repository';
+import { PasswordResetTokenRepository } from '../repositories/password-reset-token.repository';
+import { TokenBlacklistRepository } from '../repositories/token-blacklist.repository';
 import { UserRepository } from '../repositories/user.repository';
+import { ResendEmailService, type PasswordResetEmailSender } from './email.service';
 
 const PASSWORD_STRENGTH_ERROR =
   'Password must be at least 8 characters with 1 uppercase, 1 number, and 1 special character';
@@ -52,6 +60,15 @@ export class OAuthError extends Error {
   }
 }
 
+export class PasswordResetError extends Error {
+  constructor(
+    public readonly statusCode: number,
+    message: string,
+  ) {
+    super(message);
+  }
+}
+
 interface AuthUser {
   id: string;
   email: string;
@@ -77,6 +94,7 @@ interface UserStore {
     oauthProviderId?: string;
   }): Promise<{ id: string }>;
   markEmailVerified(userId: string): Promise<void>;
+  updatePasswordHash?(userId: string, passwordHash: string): Promise<void>;
 }
 
 interface EmailVerificationTokenStore {
@@ -85,10 +103,23 @@ interface EmailVerificationTokenStore {
   deleteByToken(token: string): Promise<void>;
 }
 
+interface PasswordResetTokenStore {
+  create(input: { userId: string; token: string; expiresAt: Date }): Promise<void>;
+  findByToken(token: string): Promise<{ userId: string; expiresAt: Date } | undefined>;
+  deleteByToken(token: string): Promise<void>;
+}
+
+interface TokenInvalidationStore {
+  invalidateUserTokens(userId: string, invalidatedAt?: Date): Promise<void>;
+}
+
 export class AuthService {
   constructor(
     private readonly users: UserStore = new UserRepository(),
     private readonly emailVerificationTokens: EmailVerificationTokenStore = new EmailVerificationTokenRepository(),
+    private readonly passwordResetTokens: PasswordResetTokenStore = new PasswordResetTokenRepository(),
+    private readonly tokenInvalidations: TokenInvalidationStore = new TokenBlacklistRepository(),
+    private readonly passwordResetEmails: PasswordResetEmailSender = new ResendEmailService(),
   ) {}
 
   async register(request: RegisterRequest): Promise<RegisterResponse> {
@@ -161,6 +192,73 @@ export class AuthService {
     return createLoginResponse(user);
   }
 
+  async requestPasswordReset(
+    request: RequestPasswordResetRequest,
+  ): Promise<RequestPasswordResetResponse> {
+    const normalizedEmail = normalizeEmail(request.email);
+    const response = {
+      message: "If that email exists, we've sent password reset instructions",
+    };
+
+    if (!isValidEmail(normalizedEmail)) {
+      return response;
+    }
+
+    const user = await this.users.findByEmail(normalizedEmail);
+    if (!user?.passwordHash) {
+      return response;
+    }
+
+    const token = createVerificationToken();
+    await this.passwordResetTokens.create({
+      userId: user.id,
+      token,
+      expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+    });
+    await this.passwordResetEmails.sendPasswordResetEmail({
+      email: user.email,
+      resetUrl: `${getFrontendUrl()}/reset-password?token=${token}`,
+    });
+
+    return response;
+  }
+
+  async validatePasswordResetToken(
+    token: string | undefined,
+  ): Promise<ValidatePasswordResetTokenResponse> {
+    const resetToken = await this.findValidPasswordResetToken(token);
+
+    return { valid: Boolean(resetToken) };
+  }
+
+  async resetPassword(request: ResetPasswordRequest): Promise<ResetPasswordResponse> {
+    const resetToken = await this.findValidPasswordResetToken(request.token);
+    if (!resetToken) {
+      throw new PasswordResetError(400, 'Reset link is invalid or expired');
+    }
+
+    if (!isStrongPassword(request.password)) {
+      throw new PasswordResetError(400, PASSWORD_STRENGTH_ERROR);
+    }
+
+    if (request.password !== request.confirmPassword) {
+      throw new PasswordResetError(400, 'Passwords do not match');
+    }
+
+    const passwordHash = await bcrypt.hash(request.password, 12);
+    if (!this.users.updatePasswordHash) {
+      throw new Error('User store does not support password updates');
+    }
+
+    await this.users.updatePasswordHash(resetToken.userId, passwordHash);
+    await this.passwordResetTokens.deleteByToken(request.token);
+    await this.tokenInvalidations.invalidateUserTokens(resetToken.userId);
+
+    return {
+      message: 'Password reset successful. Please log in with your new password.',
+    };
+  }
+
   createGoogleAuthorizationUrl(state: string): string {
     const clientId = getRequiredEnv('GOOGLE_CLIENT_ID');
     const redirectUri = getGoogleRedirectUri();
@@ -221,6 +319,21 @@ export class AuthService {
       oauthProvider: 'google',
       oauthProviderId: profile.id,
     });
+  }
+
+  private async findValidPasswordResetToken(
+    token: string | undefined,
+  ): Promise<{ userId: string; expiresAt: Date } | undefined> {
+    if (!token) {
+      return undefined;
+    }
+
+    const resetToken = await this.passwordResetTokens.findByToken(token);
+    if (!resetToken || resetToken.expiresAt.getTime() <= Date.now()) {
+      return undefined;
+    }
+
+    return resetToken;
   }
 }
 
@@ -369,4 +482,8 @@ function logFailedLogin(email: string): void {
       timestamp: new Date().toISOString(),
     }),
   );
+}
+
+function getFrontendUrl(): string {
+  return process.env.FRONTEND_URL ?? 'http://localhost:4200';
 }
