@@ -183,8 +183,20 @@
         <target>Beállítások mentése</target>
       </trans-unit>
       <trans-unit id="auth.loginSuccess" datatype="html">
-        <source>Login successful. Redirecting to dashboard is coming next.</source>
-        <target>Sikeres belépés. Az irányítópultra irányítás következik.</target>
+        <source>Login successful. Redirecting to dashboard.</source>
+        <target>Sikeres belépés. Átirányítás az irányítópultra.</target>
+      </trans-unit>
+      <trans-unit id="auth.loginOnboardingRequired" datatype="html">
+        <source>Login successful. Complete the quick orientation to continue.</source>
+        <target>Sikeres belépés. A folytatáshoz végezd el a gyors áttekintést.</target>
+      </trans-unit>
+      <trans-unit id="onboarding.completing" datatype="html">
+        <source>Completing onboarding...</source>
+        <target>Onboarding befejezése...</target>
+      </trans-unit>
+      <trans-unit id="onboarding.dialog" datatype="html">
+        <source>Onboarding</source>
+        <target>Onboarding</target>
       </trans-unit>
       <trans-unit id="form.email" datatype="html">
         <source>Email<x id="TAG_INPUT"/></source>

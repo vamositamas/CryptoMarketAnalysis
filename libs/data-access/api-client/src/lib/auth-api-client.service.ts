@@ -164,6 +164,13 @@ export class AuthApiClient {
     );
   }
 
+  async completeCurrentUserOnboarding(): Promise<UserProfileResponse> {
+    return this.postWithCsrf<UserProfileResponse>(
+      '/api/users/me/complete-onboarding',
+      {},
+    );
+  }
+
   startGoogleLogin(): void {
     window.location.assign('/api/auth/google');
   }

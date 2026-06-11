@@ -29,6 +29,7 @@ interface UserProfileStore {
     input: { fullName?: string; languagePreference: LanguagePreference },
   ): Promise<User | undefined>;
   updatePasswordHash(userId: string, passwordHash: string): Promise<void>;
+  markOnboardingCompleted(userId: string): Promise<User | undefined>;
 }
 
 interface TokenInvalidationStore {
@@ -101,6 +102,17 @@ export class UserProfileService {
     return {
       message: 'Password changed successfully. Please log in again.',
     };
+  }
+
+  async completeOnboarding(userId: string): Promise<UserProfileResponse> {
+    await this.findExistingUser(userId);
+    const updatedUser = await this.users.markOnboardingCompleted(userId);
+
+    if (!updatedUser) {
+      throw new UserProfileError(404, 'User not found');
+    }
+
+    return toUserProfileResponse(updatedUser);
   }
 
   private async findExistingUser(userId: string): Promise<User> {

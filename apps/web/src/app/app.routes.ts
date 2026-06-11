@@ -11,6 +11,7 @@ import { AuthSessionService } from './services/auth-session.service';
 
 @Component({
   selector: 'app-dashboard-page',
+  imports: [OnboardingCarouselComponent],
   template: `
     <section class="content-section">
       <div class="section-heading">
@@ -42,10 +43,53 @@ import { AuthSessionService } from './services/auth-session.service';
           </small>
         </article>
       </div>
+
+      @if (showOnboarding()) {
+        <div
+          class="onboarding-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Onboarding"
+          i18n-aria-label="Onboarding dialog label@@onboarding.dialog"
+        >
+          <app-onboarding-carousel
+            (skipped)="completeOnboarding()"
+            (completed)="completeOnboarding()"
+          ></app-onboarding-carousel>
+        </div>
+      }
     </section>
   `,
 })
-export class DashboardPage {}
+export class DashboardPage {
+  private readonly auth = inject(AuthApiClient);
+  private readonly authSession = inject(AuthSessionService);
+  protected readonly showOnboarding = signal(false);
+
+  constructor() {
+    void this.checkOnboardingStatus();
+  }
+
+  protected async completeOnboarding(): Promise<void> {
+    try {
+      const profile = await this.auth.completeCurrentUserOnboarding();
+      this.authSession.setCurrentUser(profile);
+      this.showOnboarding.set(false);
+    } catch {
+      this.showOnboarding.set(true);
+    }
+  }
+
+  private async checkOnboardingStatus(): Promise<void> {
+    try {
+      const profile = await this.auth.getCurrentUserProfile();
+      this.authSession.setCurrentUser(profile);
+      this.showOnboarding.set(!profile.onboardingCompleted);
+    } catch {
+      this.showOnboarding.set(false);
+    }
+  }
+}
 
 @Component({
   selector: 'app-charts-page',
@@ -155,15 +199,33 @@ export class OnboardingPage {
           Forgot password?
         </a>
       </form>
+
+      @if (showOnboarding()) {
+        <div
+          class="onboarding-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Onboarding"
+          i18n-aria-label="Onboarding dialog label@@onboarding.dialog"
+        >
+          <app-onboarding-carousel
+            (skipped)="completeOnboarding()"
+            (completed)="completeOnboarding()"
+          ></app-onboarding-carousel>
+        </div>
+      }
     </section>
   `,
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, OnboardingCarouselComponent],
 })
 export class LoginPage {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthApiClient);
   private readonly authSession = inject(AuthSessionService);
+  private readonly router = inject(Router);
   protected readonly isSubmitting = signal(false);
+  protected readonly isCompletingOnboarding = signal(false);
+  protected readonly showOnboarding = signal(false);
   protected readonly message = signal('');
   protected readonly isSuccess = signal(false);
   protected readonly form = this.fb.nonNullable.group({
@@ -182,16 +244,49 @@ export class LoginPage {
     this.isSuccess.set(false);
 
     try {
-      const response = await this.auth.login(this.form.getRawValue());
-      this.authSession.setCurrentUser(response.user);
+      await this.auth.login(this.form.getRawValue());
+      const profile = await this.auth.getCurrentUserProfile();
+      this.authSession.setCurrentUser(profile);
       this.isSuccess.set(true);
+
+      if (!profile.onboardingCompleted) {
+        this.showOnboarding.set(true);
+        this.message.set(
+          $localize`:Login onboarding required message@@auth.loginOnboardingRequired:Login successful. Complete the quick orientation to continue.`,
+        );
+        return;
+      }
+
       this.message.set(
-        $localize`:Login success message@@auth.loginSuccess:Login successful. Redirecting to dashboard is coming next.`,
+        $localize`:Login success message@@auth.loginSuccess:Login successful. Redirecting to dashboard.`,
       );
+      await this.router.navigate(['/dashboard']);
     } catch (error) {
       this.message.set(getErrorMessage(error));
     } finally {
       this.isSubmitting.set(false);
+    }
+  }
+
+  protected async completeOnboarding(): Promise<void> {
+    if (this.isCompletingOnboarding()) {
+      return;
+    }
+
+    this.isCompletingOnboarding.set(true);
+    this.message.set(
+      $localize`:Completing onboarding state@@onboarding.completing:Completing onboarding...`,
+    );
+
+    try {
+      const profile = await this.auth.completeCurrentUserOnboarding();
+      this.authSession.setCurrentUser(profile);
+      this.showOnboarding.set(false);
+      await this.router.navigate(['/dashboard']);
+    } catch (error) {
+      this.message.set(getErrorMessage(error));
+    } finally {
+      this.isCompletingOnboarding.set(false);
     }
   }
 

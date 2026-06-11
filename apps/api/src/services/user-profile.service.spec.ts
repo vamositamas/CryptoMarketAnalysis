@@ -31,6 +31,7 @@ describe('UserProfileService', () => {
       findById: jest.fn().mockResolvedValue(createUser()),
       updateProfile: jest.fn(),
       updatePasswordHash: jest.fn(),
+      markOnboardingCompleted: jest.fn(),
     };
     const service = new UserProfileService(users, {
       invalidateUserTokens: jest.fn(),
@@ -58,6 +59,7 @@ describe('UserProfileService', () => {
         }),
       ),
       updatePasswordHash: jest.fn(),
+      markOnboardingCompleted: jest.fn(),
     };
     const service = new UserProfileService(users, {
       invalidateUserTokens: jest.fn(),
@@ -83,6 +85,7 @@ describe('UserProfileService', () => {
       findById: jest.fn().mockResolvedValue(createUser()),
       updateProfile: jest.fn(),
       updatePasswordHash: jest.fn(),
+      markOnboardingCompleted: jest.fn(),
     };
     const service = new UserProfileService(users, {
       invalidateUserTokens: jest.fn(),
@@ -104,6 +107,7 @@ describe('UserProfileService', () => {
       findById: jest.fn().mockResolvedValue(createUser()),
       updateProfile: jest.fn(),
       updatePasswordHash: jest.fn().mockResolvedValue(undefined),
+      markOnboardingCompleted: jest.fn(),
     };
     const tokenInvalidations = {
       invalidateUserTokens: jest.fn().mockResolvedValue(undefined),
@@ -134,6 +138,7 @@ describe('UserProfileService', () => {
       findById: jest.fn().mockResolvedValue(createUser()),
       updateProfile: jest.fn(),
       updatePasswordHash: jest.fn(),
+      markOnboardingCompleted: jest.fn(),
     };
     const tokenInvalidations = {
       invalidateUserTokens: jest.fn(),
@@ -151,5 +156,27 @@ describe('UserProfileService', () => {
     } satisfies Partial<UserProfileError>);
     expect(users.updatePasswordHash).not.toHaveBeenCalled();
     expect(tokenInvalidations.invalidateUserTokens).not.toHaveBeenCalled();
+  });
+
+  it('marks onboarding as completed and returns the updated profile', async () => {
+    const users = {
+      findById: jest.fn().mockResolvedValue(createUser()),
+      updateProfile: jest.fn(),
+      updatePasswordHash: jest.fn(),
+      markOnboardingCompleted: jest.fn().mockResolvedValue(
+        createUser({
+          onboardingCompleted: true,
+        }),
+      ),
+    };
+    const service = new UserProfileService(users, {
+      invalidateUserTokens: jest.fn(),
+    });
+
+    await expect(service.completeOnboarding('user-id')).resolves.toMatchObject({
+      id: 'user-id',
+      onboardingCompleted: true,
+    });
+    expect(users.markOnboardingCompleted).toHaveBeenCalledWith('user-id');
   });
 });

@@ -23,6 +23,7 @@ export interface UserProfileManager {
     userId: string,
     request: ChangePasswordRequest,
   ): Promise<ChangePasswordResponse>;
+  completeOnboarding(userId: string): Promise<UserProfileResponse>;
 }
 
 export function createUsersRouter(
@@ -62,6 +63,21 @@ export function createUsersRouter(
         const response = await userProfileService.changePassword(
           (req as AuthenticatedRequest).user?.userId ?? '',
           req.body,
+        );
+        res.status(200).json(response);
+      } catch (error) {
+        handleUserProfileError(error, res, next);
+      }
+    },
+  );
+
+  router.post(
+    '/me/complete-onboarding',
+    requireAuth(tokenInvalidations),
+    async (req, res, next) => {
+      try {
+        const response = await userProfileService.completeOnboarding(
+          (req as AuthenticatedRequest).user?.userId ?? '',
         );
         res.status(200).json(response);
       } catch (error) {

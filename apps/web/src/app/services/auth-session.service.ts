@@ -8,6 +8,7 @@ export interface SessionUser {
   fullName?: string;
   role: SessionUserRole;
   languagePreference: 'en' | 'hu';
+  onboardingCompleted?: boolean;
 }
 
 const STORAGE_KEY = 'cryptoMarketAnalysis.authUser';
@@ -42,4 +43,3 @@ function readStoredUser(): SessionUser | null {
     return null;
   }
 }
-

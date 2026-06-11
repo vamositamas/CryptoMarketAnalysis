@@ -201,6 +201,32 @@ describe('AuthApiClient', () => {
       message: 'Password changed successfully. Please log in again.',
     });
   });
+
+  it('marks current user onboarding completed with CSRF protection', async () => {
+    const promise = client.completeCurrentUserOnboarding();
+
+    http.expectOne('/api/csrf-token').flush({ csrfToken: 'csrf-token' });
+    await waitForRequestQueue();
+
+    const onboardingRequest = http.expectOne('/api/users/me/complete-onboarding');
+    expect(onboardingRequest.request.method).toBe('POST');
+    expect(onboardingRequest.request.headers.get('x-csrf-token')).toBe('csrf-token');
+    expect(onboardingRequest.request.body).toEqual({});
+    onboardingRequest.flush({
+      id: 'user-id',
+      email: 'user@example.com',
+      fullName: 'Ada Analyst',
+      languagePreference: 'en',
+      role: 'free_user',
+      emailVerified: true,
+      onboardingCompleted: true,
+      createdAt: '2026-06-11T10:00:00.000Z',
+    });
+
+    await expect(promise).resolves.toMatchObject({
+      onboardingCompleted: true,
+    });
+  });
 });
 
 function waitForRequestQueue(): Promise<void> {

@@ -145,7 +145,10 @@
       <trans-unit id="onboardingCarousel.slide3.metric1" datatype="html"><source>Chart library</source><target>Chart library</target></trans-unit>
       <trans-unit id="onboardingCarousel.slide3.metric2" datatype="html"><source>Timeframes</source><target>Timeframes</target></trans-unit>
       <trans-unit id="onboardingCarousel.slide3.metric3" datatype="html"><source>Alerts</source><target>Alerts</target></trans-unit>
-      <trans-unit id="auth.loginSuccess" datatype="html"><source>Login successful. Redirecting to dashboard is coming next.</source><target>Login successful. Redirecting to dashboard is coming next.</target></trans-unit>
+      <trans-unit id="auth.loginSuccess" datatype="html"><source>Login successful. Redirecting to dashboard.</source><target>Login successful. Redirecting to dashboard.</target></trans-unit>
+      <trans-unit id="auth.loginOnboardingRequired" datatype="html"><source>Login successful. Complete the quick orientation to continue.</source><target>Login successful. Complete the quick orientation to continue.</target></trans-unit>
+      <trans-unit id="onboarding.completing" datatype="html"><source>Completing onboarding...</source><target>Completing onboarding...</target></trans-unit>
+      <trans-unit id="onboarding.dialog" datatype="html"><source>Onboarding</source><target>Onboarding</target></trans-unit>
       <trans-unit id="form.email" datatype="html"><source>Email<x id="TAG_INPUT"/></source><target>Email<x id="TAG_INPUT"/></target></trans-unit>
       <trans-unit id="form.password" datatype="html"><source>Password <x id="TAG_INPUT"/></source><target>Password <x id="TAG_INPUT"/></target></trans-unit>
       <trans-unit id="auth.google" datatype="html"><source>Continue with Google</source><target>Continue with Google</target></trans-unit>

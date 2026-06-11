@@ -155,6 +155,7 @@ describe('protected route wiring', () => {
       }),
       updateProfile: jest.fn(),
       changePassword: jest.fn(),
+      completeOnboarding: jest.fn(),
     };
     const response = createResponse();
 
@@ -186,6 +187,7 @@ describe('protected route wiring', () => {
         createdAt: '2026-06-11T10:00:00.000Z',
       }),
       changePassword: jest.fn(),
+      completeOnboarding: jest.fn(),
     };
     const response = createResponse();
     const requestBody = { fullName: 'John Doe', languagePreference: 'hu' };
@@ -211,6 +213,7 @@ describe('protected route wiring', () => {
       changePassword: jest.fn().mockResolvedValue({
         message: 'Password changed successfully. Please log in again.',
       }),
+      completeOnboarding: jest.fn(),
     };
     const response = createResponse();
     const requestBody = {
@@ -232,6 +235,40 @@ describe('protected route wiring', () => {
     expect(response.statusCode).toBe(200);
     expect(response.body).toEqual({
       message: 'Password changed successfully. Please log in again.',
+    });
+  });
+
+  it('marks onboarding completed for the authenticated user', async () => {
+    const userProfileService = {
+      getProfile: jest.fn(),
+      updateProfile: jest.fn(),
+      changePassword: jest.fn(),
+      completeOnboarding: jest.fn().mockResolvedValue({
+        id: 'user-id',
+        email: 'user@example.com',
+        languagePreference: 'en',
+        role: 'free_user',
+        emailVerified: true,
+        onboardingCompleted: true,
+        createdAt: '2026-06-11T10:00:00.000Z',
+      }),
+    };
+    const response = createResponse();
+
+    await runHandlers(
+      getHandler(
+        createUsersRouter(userProfileService, tokenInvalidations),
+        '/me/complete-onboarding',
+        'post',
+      ),
+      createRequest(createToken('free_user')),
+      response,
+    );
+
+    expect(userProfileService.completeOnboarding).toHaveBeenCalledWith('user-id');
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toMatchObject({
+      onboardingCompleted: true,
     });
   });
 });
