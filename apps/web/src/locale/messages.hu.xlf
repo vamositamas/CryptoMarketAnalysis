@@ -266,6 +266,122 @@
         <source>The request could not be completed. Please try again.</source>
         <target>A kérést nem sikerült teljesíteni. Próbáld újra.</target>
       </trans-unit>
+      <trans-unit id="onboarding.dismissed" datatype="html">
+        <source>Onboarding dismissed. Account completion tracking will be enabled next.</source>
+        <target>Az onboarding bezárva. A fiókhoz kötött befejezéskövetés következőként érkezik.</target>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.aria" datatype="html">
+        <source>Onboarding carousel</source>
+        <target>Onboarding körhinta</target>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.skip" datatype="html">
+        <source>Skip</source>
+        <target>Kihagyás</target>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.previous" datatype="html">
+        <source>Previous slide</source>
+        <target>Előző dia</target>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.eyebrow" datatype="html">
+        <source>Quick orientation</source>
+        <target>Gyors áttekintés</target>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.next" datatype="html">
+        <source>Next</source>
+        <target>Tovább</target>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.complete" datatype="html">
+        <source>Get Started</source>
+        <target>Kezdjük</target>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.indicators" datatype="html">
+        <source>Onboarding slides</source>
+        <target>Onboarding diák</target>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide1.headline" datatype="html">
+        <source>Welcome to CryptoMarketAnalysis</source>
+        <target>Üdv a CryptoMarketAnalysisben</target>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide1.subheading" datatype="html">
+        <source>Professional Bitcoin analysis tools, free forever</source>
+        <target>Professzionális Bitcoin elemzőeszközök, örökre ingyen</target>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide1.body" datatype="html">
+        <source>Follow cycle signals, valuation models, and on-chain context from a focused workspace built for long-term market decisions.</source>
+        <target>Kövesd a ciklusjeleket, értékelési modelleket és on-chain kontextust egy hosszú távú piaci döntésekre épített fókuszált munkafelületen.</target>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide1.visual" datatype="html">
+        <source>Cycle signal</source>
+        <target>Ciklusjelzés</target>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide1.metric1" datatype="html">
+        <source>Market state</source>
+        <target>Piaci állapot</target>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide1.metric2" datatype="html">
+        <source>Cycle risk</source>
+        <target>Cikluskockázat</target>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide1.metric3" datatype="html">
+        <source>Model context</source>
+        <target>Modellkörnyezet</target>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide2.headline" datatype="html">
+        <source>Personalize your dashboard</source>
+        <target>Szabd személyre az irányítópultodat</target>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide2.subheading" datatype="html">
+        <source>Keep the indicators you care about closest</source>
+        <target>Tartsd közel a számodra fontos indikátorokat</target>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide2.body" datatype="html">
+        <source>Start with curated KPI widgets, then shape your workspace around valuation, momentum, alerts, and research workflows.</source>
+        <target>Kezdj válogatott KPI panelekkel, majd alakítsd a munkafelületet értékelés, momentum, riasztások és kutatási folyamatok köré.</target>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide2.visual" datatype="html">
+        <source>Dashboard widgets</source>
+        <target>Irányítópult panelek</target>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide2.metric1" datatype="html">
+        <source>MVRV Z-Score</source>
+        <target>MVRV Z-Score</target>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide2.metric2" datatype="html">
+        <source>Rainbow band</source>
+        <target>Rainbow sáv</target>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide2.metric3" datatype="html">
+        <source>Pi Cycle</source>
+        <target>Pi Cycle</target>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide3.headline" datatype="html">
+        <source>Explore charts and alerts</source>
+        <target>Fedezd fel a grafikonokat és riasztásokat</target>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide3.subheading" datatype="html">
+        <source>Turn Bitcoin models into daily operating signals</source>
+        <target>Alakítsd a Bitcoin modelleket napi működési jelzésekké</target>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide3.body" datatype="html">
+        <source>Open historical charts, compare timeframes, and prepare alerts so important threshold changes do not slip past you.</source>
+        <target>Nyiss meg historikus grafikonokat, hasonlíts össze időtávokat, és készíts riasztásokat, hogy a fontos küszöbváltozások ne maradjanak észrevétlenül.</target>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide3.visual" datatype="html">
+        <source>Charts and alerts</source>
+        <target>Grafikonok és riasztások</target>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide3.metric1" datatype="html">
+        <source>Chart library</source>
+        <target>Grafikontár</target>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide3.metric2" datatype="html">
+        <source>Timeframes</source>
+        <target>Időtávok</target>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide3.metric3" datatype="html">
+        <source>Alerts</source>
+        <target>Riasztások</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

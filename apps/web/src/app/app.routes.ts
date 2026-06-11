@@ -5,6 +5,7 @@ import {
   ApiClientError,
   AuthApiClient,
 } from '@crypto-market-analysis/data-access/api-client';
+import { OnboardingCarouselComponent } from './components/onboarding-carousel/onboarding-carousel.component';
 import { roleGuard } from './guards/role.guard';
 import { AuthSessionService } from './services/auth-session.service';
 
@@ -92,56 +93,25 @@ export class AdminUsersPage {}
 
 @Component({
   selector: 'app-onboarding-page',
-  imports: [ReactiveFormsModule],
+  imports: [OnboardingCarouselComponent],
   template: `
-    <section class="content-section split-section">
-      <div>
-        <p class="eyebrow" i18n="Onboarding eyebrow@@onboarding.eyebrow">
-          Onboarding
-        </p>
-        <h2 i18n="Onboarding title@@onboarding.title">Set your analysis profile</h2>
-        <p i18n="Onboarding description@@onboarding.description">
-          Choose a trading horizon, preferred language, and alert sensitivity after registration.
-        </p>
-      </div>
-      <form class="compact-form" [formGroup]="form" (ngSubmit)="save()">
-        <label>
-          <span i18n="Trading horizon label@@onboarding.tradingHorizon">
-            Trading horizon
-          </span>
-          <select formControlName="tradingHorizon">
-            <option i18n="Cycle investor option@@onboarding.cycleInvestor">
-              Cycle investor
-            </option>
-            <option i18n="Swing trader option@@onboarding.swingTrader">Swing trader</option>
-            <option i18n="Research only option@@onboarding.researchOnly">Research only</option>
-          </select>
-        </label>
-        <label i18n="Alert sensitivity label@@onboarding.alertSensitivity">
-          Alert sensitivity
-          <input type="range" min="1" max="5" formControlName="alertSensitivity" />
-        </label>
-        @if (message()) {
-          <p class="form-message success">{{ message() }}</p>
-        }
-        <button type="submit" i18n="Save preferences button@@onboarding.save">
-          Save preferences
-        </button>
-      </form>
+    <section class="content-section">
+      <app-onboarding-carousel
+        (skipped)="closeCarousel()"
+        (completed)="closeCarousel()"
+      ></app-onboarding-carousel>
+      @if (message()) {
+        <p class="form-message success">{{ message() }}</p>
+      }
     </section>
   `,
 })
 export class OnboardingPage {
-  private readonly fb = inject(FormBuilder);
   protected readonly message = signal('');
-  protected readonly form = this.fb.nonNullable.group({
-    tradingHorizon: ['Cycle investor', Validators.required],
-    alertSensitivity: [3, Validators.required],
-  });
 
-  protected save(): void {
+  protected closeCarousel(): void {
     this.message.set(
-      $localize`:Onboarding saved message@@onboarding.saved:Preferences saved locally. Account sync will be enabled next.`,
+      $localize`:Onboarding dismissed message@@onboarding.dismissed:Onboarding dismissed. Account completion tracking will be enabled next.`,
     );
   }
 }

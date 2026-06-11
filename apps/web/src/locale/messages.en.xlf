@@ -116,6 +116,35 @@
       <trans-unit id="onboarding.researchOnly" datatype="html"><source>Research only</source><target>Research only</target></trans-unit>
       <trans-unit id="onboarding.alertSensitivity" datatype="html"><source>Alert sensitivity <x id="TAG_INPUT"/></source><target>Alert sensitivity <x id="TAG_INPUT"/></target></trans-unit>
       <trans-unit id="onboarding.save" datatype="html"><source>Save preferences</source><target>Save preferences</target></trans-unit>
+      <trans-unit id="onboarding.dismissed" datatype="html"><source>Onboarding dismissed. Account completion tracking will be enabled next.</source><target>Onboarding dismissed. Account completion tracking will be enabled next.</target></trans-unit>
+      <trans-unit id="onboardingCarousel.aria" datatype="html"><source>Onboarding carousel</source><target>Onboarding carousel</target></trans-unit>
+      <trans-unit id="onboardingCarousel.skip" datatype="html"><source>Skip</source><target>Skip</target></trans-unit>
+      <trans-unit id="onboardingCarousel.previous" datatype="html"><source>Previous slide</source><target>Previous slide</target></trans-unit>
+      <trans-unit id="onboardingCarousel.eyebrow" datatype="html"><source>Quick orientation</source><target>Quick orientation</target></trans-unit>
+      <trans-unit id="onboardingCarousel.next" datatype="html"><source>Next</source><target>Next</target></trans-unit>
+      <trans-unit id="onboardingCarousel.complete" datatype="html"><source>Get Started</source><target>Get Started</target></trans-unit>
+      <trans-unit id="onboardingCarousel.indicators" datatype="html"><source>Onboarding slides</source><target>Onboarding slides</target></trans-unit>
+      <trans-unit id="onboardingCarousel.slide1.headline" datatype="html"><source>Welcome to CryptoMarketAnalysis</source><target>Welcome to CryptoMarketAnalysis</target></trans-unit>
+      <trans-unit id="onboardingCarousel.slide1.subheading" datatype="html"><source>Professional Bitcoin analysis tools, free forever</source><target>Professional Bitcoin analysis tools, free forever</target></trans-unit>
+      <trans-unit id="onboardingCarousel.slide1.body" datatype="html"><source>Follow cycle signals, valuation models, and on-chain context from a focused workspace built for long-term market decisions.</source><target>Follow cycle signals, valuation models, and on-chain context from a focused workspace built for long-term market decisions.</target></trans-unit>
+      <trans-unit id="onboardingCarousel.slide1.visual" datatype="html"><source>Cycle signal</source><target>Cycle signal</target></trans-unit>
+      <trans-unit id="onboardingCarousel.slide1.metric1" datatype="html"><source>Market state</source><target>Market state</target></trans-unit>
+      <trans-unit id="onboardingCarousel.slide1.metric2" datatype="html"><source>Cycle risk</source><target>Cycle risk</target></trans-unit>
+      <trans-unit id="onboardingCarousel.slide1.metric3" datatype="html"><source>Model context</source><target>Model context</target></trans-unit>
+      <trans-unit id="onboardingCarousel.slide2.headline" datatype="html"><source>Personalize your dashboard</source><target>Personalize your dashboard</target></trans-unit>
+      <trans-unit id="onboardingCarousel.slide2.subheading" datatype="html"><source>Keep the indicators you care about closest</source><target>Keep the indicators you care about closest</target></trans-unit>
+      <trans-unit id="onboardingCarousel.slide2.body" datatype="html"><source>Start with curated KPI widgets, then shape your workspace around valuation, momentum, alerts, and research workflows.</source><target>Start with curated KPI widgets, then shape your workspace around valuation, momentum, alerts, and research workflows.</target></trans-unit>
+      <trans-unit id="onboardingCarousel.slide2.visual" datatype="html"><source>Dashboard widgets</source><target>Dashboard widgets</target></trans-unit>
+      <trans-unit id="onboardingCarousel.slide2.metric1" datatype="html"><source>MVRV Z-Score</source><target>MVRV Z-Score</target></trans-unit>
+      <trans-unit id="onboardingCarousel.slide2.metric2" datatype="html"><source>Rainbow band</source><target>Rainbow band</target></trans-unit>
+      <trans-unit id="onboardingCarousel.slide2.metric3" datatype="html"><source>Pi Cycle</source><target>Pi Cycle</target></trans-unit>
+      <trans-unit id="onboardingCarousel.slide3.headline" datatype="html"><source>Explore charts and alerts</source><target>Explore charts and alerts</target></trans-unit>
+      <trans-unit id="onboardingCarousel.slide3.subheading" datatype="html"><source>Turn Bitcoin models into daily operating signals</source><target>Turn Bitcoin models into daily operating signals</target></trans-unit>
+      <trans-unit id="onboardingCarousel.slide3.body" datatype="html"><source>Open historical charts, compare timeframes, and prepare alerts so important threshold changes do not slip past you.</source><target>Open historical charts, compare timeframes, and prepare alerts so important threshold changes do not slip past you.</target></trans-unit>
+      <trans-unit id="onboardingCarousel.slide3.visual" datatype="html"><source>Charts and alerts</source><target>Charts and alerts</target></trans-unit>
+      <trans-unit id="onboardingCarousel.slide3.metric1" datatype="html"><source>Chart library</source><target>Chart library</target></trans-unit>
+      <trans-unit id="onboardingCarousel.slide3.metric2" datatype="html"><source>Timeframes</source><target>Timeframes</target></trans-unit>
+      <trans-unit id="onboardingCarousel.slide3.metric3" datatype="html"><source>Alerts</source><target>Alerts</target></trans-unit>
       <trans-unit id="auth.loginSuccess" datatype="html"><source>Login successful. Redirecting to dashboard is coming next.</source><target>Login successful. Redirecting to dashboard is coming next.</target></trans-unit>
       <trans-unit id="form.email" datatype="html"><source>Email<x id="TAG_INPUT"/></source><target>Email<x id="TAG_INPUT"/></target></trans-unit>
       <trans-unit id="form.password" datatype="html"><source>Password <x id="TAG_INPUT"/></source><target>Password <x id="TAG_INPUT"/></target></trans-unit>

@@ -1,0 +1,90 @@
+<section
+  class="onboarding-carousel"
+  aria-label="Onboarding carousel"
+  i18n-aria-label="Onboarding carousel accessibility label@@onboardingCarousel.aria"
+  (touchstart)="onTouchStart($event)"
+  (touchend)="onTouchEnd($event)"
+>
+  <button
+    type="button"
+    class="skip-button"
+    (click)="skip()"
+    i18n="Skip onboarding button@@onboardingCarousel.skip"
+  >
+    Skip
+  </button>
+
+  <div class="slide-shell">
+    <button
+      type="button"
+      class="nav-button previous-button"
+      [class.is-hidden]="isFirstSlide()"
+      [attr.aria-hidden]="isFirstSlide()"
+      [disabled]="isFirstSlide()"
+      (click)="previous()"
+      aria-label="Previous slide"
+      i18n-aria-label="Previous slide button@@onboardingCarousel.previous"
+    >
+      <span aria-hidden="true">‹</span>
+    </button>
+
+    <article class="slide-card" [attr.aria-live]="'polite'">
+      <div class="slide-copy">
+        <p class="eyebrow" i18n="Onboarding carousel eyebrow@@onboardingCarousel.eyebrow">
+          Quick orientation
+        </p>
+        <h2>{{ currentSlide().headline }}</h2>
+        <p class="subheading">{{ currentSlide().subheading }}</p>
+        <p>{{ currentSlide().body }}</p>
+      </div>
+
+      <div class="slide-visual" aria-hidden="true">
+        <div class="visual-chart">
+          @for (metric of currentSlide().metrics; track metric; let index = $index) {
+            <span [style.--bar-index]="index + 1"></span>
+          }
+        </div>
+        <strong>{{ currentSlide().visualLabel }}</strong>
+        <div class="metric-list">
+          @for (metric of currentSlide().metrics; track metric) {
+            <span>{{ metric }}</span>
+          }
+        </div>
+      </div>
+    </article>
+
+    <button
+      type="button"
+      class="nav-button next-button"
+      (click)="isLastSlide() ? complete() : next()"
+      [attr.aria-label]="isLastSlide() ? completeLabel.textContent : nextLabel.textContent"
+    >
+      <span #nextLabel [class.visually-hidden]="isLastSlide()" i18n="Next slide button@@onboardingCarousel.next">Next</span>
+      <span
+        #completeLabel
+        [class.visually-hidden]="!isLastSlide()"
+        i18n="Complete onboarding button@@onboardingCarousel.complete"
+      >
+        Get Started
+      </span>
+    </button>
+  </div>
+
+  <div
+    class="slide-indicators"
+    role="tablist"
+    aria-label="Onboarding slides"
+    i18n-aria-label="Slide indicator group@@onboardingCarousel.indicators"
+  >
+    @for (slide of slides; track slide.headline; let index = $index) {
+      <button
+        type="button"
+        role="tab"
+        [class.active]="currentIndex() === index"
+        [attr.aria-selected]="currentIndex() === index"
+        [attr.aria-label]="slide.headline"
+        (click)="goToSlide(index)"
+      ></button>
+    }
+  </div>
+</section>
