@@ -3,6 +3,7 @@ import type { Request, Response, Router } from 'express';
 import { createAdminRouter } from './admin.route';
 import { createAlertsRouter } from './alerts.route';
 import type { TokenInvalidationReader } from '../middleware/rbac.middleware';
+import { createUsersRouter } from './users.route';
 
 type Handler = (req: Request, res: Response, next: jest.Mock) => Promise<void> | void;
 
@@ -23,13 +24,14 @@ function createResponse() {
   return response as Response & typeof response;
 }
 
-function createRequest(token?: string): Request {
+function createRequest(token?: string, body?: unknown): Request {
   const headers = new Map<string, string>();
   if (token) {
     headers.set('authorization', `Bearer ${token}`);
   }
 
   return {
+    body,
     headers: Object.fromEntries(headers),
     get(name: string) {
       return headers.get(name.toLowerCase());
@@ -49,8 +51,12 @@ function createToken(role: 'administrator' | 'premium_user' | 'free_user'): stri
   );
 }
 
-function getHandler(router: Router, path: string): Handler[] {
-  const layer = router.stack.find((entry) => entry.route?.path === path);
+function getHandler(router: Router, path: string, method = 'get'): Handler[] {
+  const layer = router.stack.find(
+    (entry) =>
+      entry.route?.path === path &&
+      ((entry.route as unknown as { methods: Record<string, boolean> }).methods[method]),
+  );
 
   if (!layer?.route?.stack) {
     throw new Error(`${path} route not found`);
@@ -113,8 +119,8 @@ describe('protected route wiring', () => {
   it('allows authenticated users to create alerts', async () => {
     const response = createResponse();
 
-    await runHandlers(
-      getHandler(createAlertsRouter(tokenInvalidations), '/'),
+  await runHandlers(
+      getHandler(createAlertsRouter(tokenInvalidations), '/', 'post'),
       createRequest(createToken('free_user')),
       response,
     );
@@ -127,12 +133,105 @@ describe('protected route wiring', () => {
     const response = createResponse();
 
     await runHandlers(
-      getHandler(createAlertsRouter(tokenInvalidations), '/'),
+      getHandler(createAlertsRouter(tokenInvalidations), '/', 'post'),
       createRequest(),
       response,
     );
 
-    expect(response.statusCode).toBe(401);
-    expect(response.body).toEqual({ error: 'Unauthorized' });
+  expect(response.statusCode).toBe(401);
+  expect(response.body).toEqual({ error: 'Unauthorized' });
+});
+
+  it('returns the authenticated user profile', async () => {
+    const userProfileService = {
+      getProfile: jest.fn().mockResolvedValue({
+        id: 'user-id',
+        email: 'user@example.com',
+        languagePreference: 'en',
+        role: 'free_user',
+        emailVerified: true,
+        onboardingCompleted: false,
+        createdAt: '2026-06-11T10:00:00.000Z',
+      }),
+      updateProfile: jest.fn(),
+      changePassword: jest.fn(),
+    };
+    const response = createResponse();
+
+    await runHandlers(
+      getHandler(createUsersRouter(userProfileService, tokenInvalidations), '/me'),
+      createRequest(createToken('free_user')),
+      response,
+    );
+
+    expect(userProfileService.getProfile).toHaveBeenCalledWith('user-id');
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toMatchObject({
+      id: 'user-id',
+      email: 'user@example.com',
+    });
+  });
+
+  it('updates the authenticated user profile', async () => {
+    const userProfileService = {
+      getProfile: jest.fn(),
+      updateProfile: jest.fn().mockResolvedValue({
+        id: 'user-id',
+        email: 'user@example.com',
+        fullName: 'John Doe',
+        languagePreference: 'hu',
+        role: 'free_user',
+        emailVerified: true,
+        onboardingCompleted: false,
+        createdAt: '2026-06-11T10:00:00.000Z',
+      }),
+      changePassword: jest.fn(),
+    };
+    const response = createResponse();
+    const requestBody = { fullName: 'John Doe', languagePreference: 'hu' };
+
+    await runHandlers(
+      getHandler(createUsersRouter(userProfileService, tokenInvalidations), '/me', 'patch'),
+      createRequest(createToken('free_user'), requestBody),
+      response,
+    );
+
+    expect(userProfileService.updateProfile).toHaveBeenCalledWith('user-id', requestBody);
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toMatchObject({
+      fullName: 'John Doe',
+      languagePreference: 'hu',
+    });
+  });
+
+  it('changes the authenticated user password', async () => {
+    const userProfileService = {
+      getProfile: jest.fn(),
+      updateProfile: jest.fn(),
+      changePassword: jest.fn().mockResolvedValue({
+        message: 'Password changed successfully. Please log in again.',
+      }),
+    };
+    const response = createResponse();
+    const requestBody = {
+      currentPassword: 'CurrentPass123!',
+      newPassword: 'NewPass123!',
+    };
+
+    await runHandlers(
+      getHandler(
+        createUsersRouter(userProfileService, tokenInvalidations),
+        '/me/change-password',
+        'post',
+      ),
+      createRequest(createToken('free_user'), requestBody),
+      response,
+    );
+
+    expect(userProfileService.changePassword).toHaveBeenCalledWith('user-id', requestBody);
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toEqual({
+      message: 'Password changed successfully. Please log in again.',
+    });
   });
 });

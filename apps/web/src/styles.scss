@@ -103,17 +103,25 @@ nav a:hover,
 }
 
 .language-toggle {
-  gap: 2px;
-  padding: 3px;
+  gap: 6px;
+  min-height: 40px;
+  padding: 3px 8px;
   border: 1px solid #d7ded8;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.64);
+  color: #4c5b57;
+  font-size: 0.86rem;
+  font-weight: 700;
 }
 
-.language-toggle button {
-  min-width: 42px;
-  cursor: pointer;
+.language-toggle select {
+  min-width: 96px;
+  border: 0;
+  color: #17202a;
   background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
 }
 
 .primary-link,

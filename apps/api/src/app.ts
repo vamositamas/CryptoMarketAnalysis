@@ -1,10 +1,12 @@
 import express from 'express';
 import { csrfProtection, issueCsrfToken } from './middleware/csrf.middleware';
+import { createApiRateLimitMiddleware } from './middleware/rate-limit.middleware';
 import { enforceHttps, securityHeaders } from './middleware/security.middleware';
 import { createAdminRouter } from './routes/admin.route';
 import { createAlertsRouter } from './routes/alerts.route';
 import { createAuthRouter } from './routes/auth.route';
 import { createHealthRouter } from './routes/health.route';
+import { createUsersRouter } from './routes/users.route';
 
 export function createApp() {
   const app = express();
@@ -12,10 +14,12 @@ export function createApp() {
   app.set('trust proxy', 1);
   app.use(securityHeaders);
   app.use(enforceHttps);
+  app.use('/api', createApiRateLimitMiddleware());
   app.use(express.json());
   app.get('/api/csrf-token', issueCsrfToken);
   app.use(csrfProtection);
   app.use('/api/auth', createAuthRouter());
+  app.use('/api/users', createUsersRouter());
   app.use('/api/admin', createAdminRouter());
   app.use('/api/alerts', createAlertsRouter());
   app.use('/api/health', createHealthRouter());

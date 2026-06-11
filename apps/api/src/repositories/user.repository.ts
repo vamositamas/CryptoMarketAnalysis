@@ -32,6 +32,13 @@ export class UserRepository extends BaseRepository {
     return result.rows[0] ? this.toCamelCase<User>(result.rows[0]) : undefined;
   }
 
+  async findById(userId: string): Promise<User | undefined> {
+    const pool = this.requirePool();
+    const result = await pool.query('SELECT * FROM users WHERE id = $1 LIMIT 1', [userId]);
+
+    return result.rows[0] ? this.toCamelCase<User>(result.rows[0]) : undefined;
+  }
+
   async create(input: CreateUserInput): Promise<User> {
     const pool = this.requirePool();
     const row = this.toSnakeCase<UserInsertRow>({
@@ -94,6 +101,23 @@ export class UserRepository extends BaseRepository {
        WHERE id = $1`,
       [userId, passwordHash],
     );
+  }
+
+  async updateProfile(
+    userId: string,
+    input: { fullName?: string; languagePreference: LanguagePreference },
+  ): Promise<User | undefined> {
+    const pool = this.requirePool();
+    const result = await pool.query(
+      `UPDATE users
+       SET full_name = $2,
+           language_preference = $3
+       WHERE id = $1
+       RETURNING *`,
+      [userId, input.fullName, input.languagePreference],
+    );
+
+    return result.rows[0] ? this.toCamelCase<User>(result.rows[0]) : undefined;
   }
 
   private requirePool(): Pick<Pool, 'query'> {

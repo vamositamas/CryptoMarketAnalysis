@@ -82,6 +82,31 @@ export interface ResetPasswordResponse {
   message: string;
 }
 
+export interface UserProfileResponse {
+  id: string;
+  email: string;
+  fullName?: string;
+  languagePreference: LanguagePreference;
+  role: UserRole;
+  emailVerified: boolean;
+  onboardingCompleted: boolean;
+  createdAt: string;
+}
+
+export interface UpdateUserProfileRequest {
+  fullName?: string;
+  languagePreference?: LanguagePreference;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface ChangePasswordResponse {
+  message: string;
+}
+
 export interface UserRow {
   id: string;
   email: string;

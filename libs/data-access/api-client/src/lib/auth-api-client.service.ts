@@ -52,6 +52,31 @@ export interface ResetPasswordResponse {
   message: string;
 }
 
+export interface UserProfileResponse {
+  id: string;
+  email: string;
+  fullName?: string;
+  languagePreference: 'en' | 'hu';
+  role: 'administrator' | 'premium_user' | 'free_user';
+  emailVerified: boolean;
+  onboardingCompleted: boolean;
+  createdAt: string;
+}
+
+export interface UpdateUserProfileRequest {
+  fullName?: string;
+  languagePreference?: 'en' | 'hu';
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface ChangePasswordResponse {
+  message: string;
+}
+
 interface CsrfTokenResponse {
   csrfToken: string;
 }
@@ -112,6 +137,33 @@ export class AuthApiClient {
     );
   }
 
+  async getCurrentUserProfile(): Promise<UserProfileResponse> {
+    try {
+      return await firstValueFrom(
+        this.http.get<UserProfileResponse>('/api/users/me', {
+          withCredentials: true,
+        }),
+      );
+    } catch (error) {
+      throw toApiClientError(error);
+    }
+  }
+
+  async updateCurrentUserProfile(
+    request: UpdateUserProfileRequest,
+  ): Promise<UserProfileResponse> {
+    return this.patchWithCsrf<UserProfileResponse>('/api/users/me', request);
+  }
+
+  async changeCurrentUserPassword(
+    request: ChangePasswordRequest,
+  ): Promise<ChangePasswordResponse> {
+    return this.postWithCsrf<ChangePasswordResponse>(
+      '/api/users/me/change-password',
+      request,
+    );
+  }
+
   startGoogleLogin(): void {
     window.location.assign('/api/auth/google');
   }
@@ -125,6 +177,24 @@ export class AuthApiClient {
 
       return await firstValueFrom(
         this.http.post<TResponse>(url, body, {
+          headers: { 'x-csrf-token': csrfToken },
+          withCredentials: true,
+        }),
+      );
+    } catch (error) {
+      throw toApiClientError(error);
+    }
+  }
+
+  private async patchWithCsrf<TResponse>(
+    url: string,
+    body: unknown,
+  ): Promise<TResponse> {
+    try {
+      const csrfToken = await this.getCsrfToken();
+
+      return await firstValueFrom(
+        this.http.patch<TResponse>(url, body, {
           headers: { 'x-csrf-token': csrfToken },
           withCredentials: true,
         }),

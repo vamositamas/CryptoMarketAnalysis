@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file source-language="en" target-language="en" datatype="plaintext" original="ng2.template">
+    <body>
+      <trans-unit id="app.name" datatype="html">
+        <source>CryptoMarketAnalysis</source>
+        <target>CryptoMarketAnalysis</target>
+      </trans-unit>
+      <trans-unit id="nav.dashboard" datatype="html">
+        <source>Dashboard</source>
+        <target>Dashboard</target>
+      </trans-unit>
+      <trans-unit id="nav.charts" datatype="html">
+        <source>Charts</source>
+        <target>Charts</target>
+      </trans-unit>
+      <trans-unit id="nav.onboarding" datatype="html">
+        <source>Onboarding</source>
+        <target>Onboarding</target>
+      </trans-unit>
+      <trans-unit id="language.selector" datatype="html">
+        <source>Language</source>
+        <target>Language</target>
+      </trans-unit>
+      <trans-unit id="language.english" datatype="html">
+        <source>English</source>
+        <target>English</target>
+      </trans-unit>
+      <trans-unit id="language.hungarian" datatype="html">
+        <source>Hungarian</source>
+        <target>Hungarian</target>
+      </trans-unit>
+      <trans-unit id="auth.login" datatype="html">
+        <source>Login</source>
+        <target>Login</target>
+      </trans-unit>
+      <trans-unit id="auth.register" datatype="html">
+        <source>Register</source>
+        <target>Register</target>
+      </trans-unit>
+      <trans-unit id="hero.eyebrow" datatype="html">
+        <source>Bitcoin analytics workspace</source>
+        <target>Bitcoin analytics workspace</target>
+      </trans-unit>
+      <trans-unit id="hero.title" datatype="html">
+        <source>Bitcoin market intelligence for cycle-aware decisions</source>
+        <target>Bitcoin market intelligence for cycle-aware decisions</target>
+      </trans-unit>
+      <trans-unit id="hero.text" datatype="html">
+        <source>Track on-chain valuation, cycle signals, and model context in one focused workspace.</source>
+        <target>Track on-chain valuation, cycle signals, and model context in one focused workspace.</target>
+      </trans-unit>
+      <trans-unit id="hero.cta" datatype="html">
+        <source>Review dashboard</source>
+        <target>Review dashboard</target>
+      </trans-unit>
+      <trans-unit id="hero.secondaryCta" datatype="html">
+        <source>Create account</source>
+        <target>Create account</target>
+      </trans-unit>
+      <trans-unit id="market.previewAria" datatype="html">
+        <source>Bitcoin market signal preview</source>
+        <target>Bitcoin market signal preview</target>
+      </trans-unit>
+      <trans-unit id="market.state" datatype="html">
+        <source>Market state</source>
+        <target>Market state</target>
+      </trans-unit>
+      <trans-unit id="metric.risk" datatype="html">
+        <source>Cycle risk</source>
+        <target>Cycle risk</target>
+      </trans-unit>
+      <trans-unit id="metric.signalQuality" datatype="html">
+        <source>Signal quality</source>
+        <target>Signal quality</target>
+      </trans-unit>
+      <trans-unit id="kpi.gridAria" datatype="html">
+        <source>Market KPI widgets</source>
+        <target>Market KPI widgets</target>
+      </trans-unit>
+      <trans-unit id="metric.cycle" datatype="html">
+        <source>Cycle</source>
+        <target>Cycle</target>
+      </trans-unit>
+      <trans-unit id="metric.activeModels" datatype="html">
+        <source>Active models</source>
+        <target>Active models</target>
+      </trans-unit>
+      <trans-unit id="metric.model" datatype="html">
+        <source>Model</source>
+        <target>Model</target>
+      </trans-unit>
+      <trans-unit id="metric.momentum" datatype="html">
+        <source>Momentum</source>
+        <target>Momentum</target>
+      </trans-unit>
+      <trans-unit id="dashboard.eyebrow" datatype="html"><source>Model overview</source><target>Model overview</target></trans-unit>
+      <trans-unit id="dashboard.title" datatype="html"><source>Bitcoin cycle dashboard</source><target>Bitcoin cycle dashboard</target></trans-unit>
+      <trans-unit id="dashboard.mvrvSummary" datatype="html"><source>Valuation stretch is below overheated territory.</source><target>Valuation stretch is below overheated territory.</target></trans-unit>
+      <trans-unit id="dashboard.rainbowSummary" datatype="html"><source>Price sits in the accumulation-to-fair-value band.</source><target>Price sits in the accumulation-to-fair-value band.</target></trans-unit>
+      <trans-unit id="dashboard.piCycleSummary" datatype="html"><source>Moving averages have not produced a top signal.</source><target>Moving averages have not produced a top signal.</target></trans-unit>
+      <trans-unit id="charts.eyebrow" datatype="html"><source>Chart library</source><target>Chart library</target></trans-unit>
+      <trans-unit id="charts.title" datatype="html"><source>Tracked Bitcoin models</source><target>Tracked Bitcoin models</target></trans-unit>
+      <trans-unit id="admin.eyebrow" datatype="html"><source>Admin</source><target>Admin</target></trans-unit>
+      <trans-unit id="admin.usersTitle" datatype="html"><source>User management</source><target>User management</target></trans-unit>
+      <trans-unit id="admin.users" datatype="html"><source>Users</source><target>Users</target></trans-unit>
+      <trans-unit id="status.ready" datatype="html"><source>Ready</source><target>Ready</target></trans-unit>
+      <trans-unit id="admin.usersSummary" datatype="html"><source>Administrative user list API access is role protected.</source><target>Administrative user list API access is role protected.</target></trans-unit>
+      <trans-unit id="onboarding.saved" datatype="html"><source>Preferences saved locally. Account sync will be enabled next.</source><target>Preferences saved locally. Account sync will be enabled next.</target></trans-unit>
+      <trans-unit id="onboarding.eyebrow" datatype="html"><source>Onboarding</source><target>Onboarding</target></trans-unit>
+      <trans-unit id="onboarding.title" datatype="html"><source>Set your analysis profile</source><target>Set your analysis profile</target></trans-unit>
+      <trans-unit id="onboarding.description" datatype="html"><source>Choose a trading horizon, preferred language, and alert sensitivity after registration.</source><target>Choose a trading horizon, preferred language, and alert sensitivity after registration.</target></trans-unit>
+      <trans-unit id="onboarding.tradingHorizon" datatype="html"><source>Trading horizon</source><target>Trading horizon</target></trans-unit>
+      <trans-unit id="onboarding.cycleInvestor" datatype="html"><source>Cycle investor</source><target>Cycle investor</target></trans-unit>
+      <trans-unit id="onboarding.swingTrader" datatype="html"><source>Swing trader</source><target>Swing trader</target></trans-unit>
+      <trans-unit id="onboarding.researchOnly" datatype="html"><source>Research only</source><target>Research only</target></trans-unit>
+      <trans-unit id="onboarding.alertSensitivity" datatype="html"><source>Alert sensitivity <x id="TAG_INPUT"/></source><target>Alert sensitivity <x id="TAG_INPUT"/></target></trans-unit>
+      <trans-unit id="onboarding.save" datatype="html"><source>Save preferences</source><target>Save preferences</target></trans-unit>
+      <trans-unit id="auth.loginSuccess" datatype="html"><source>Login successful. Redirecting to dashboard is coming next.</source><target>Login successful. Redirecting to dashboard is coming next.</target></trans-unit>
+      <trans-unit id="form.email" datatype="html"><source>Email<x id="TAG_INPUT"/></source><target>Email<x id="TAG_INPUT"/></target></trans-unit>
+      <trans-unit id="form.password" datatype="html"><source>Password <x id="TAG_INPUT"/></source><target>Password <x id="TAG_INPUT"/></target></trans-unit>
+      <trans-unit id="auth.google" datatype="html"><source>Continue with Google</source><target>Continue with Google</target></trans-unit>
+      <trans-unit id="auth.forgotPassword" datatype="html"><source>Forgot password?</source><target>Forgot password?</target></trans-unit>
+      <trans-unit id="auth.loggingIn" datatype="html"><source>Logging in...</source><target>Logging in...</target></trans-unit>
+      <trans-unit id="passwordReset.title" datatype="html"><source>Reset password</source><target>Reset password</target></trans-unit>
+      <trans-unit id="passwordReset.sending" datatype="html"><source>Sending...</source><target>Sending...</target></trans-unit>
+      <trans-unit id="passwordReset.send" datatype="html"><source>Send reset instructions</source><target>Send reset instructions</target></trans-unit>
+      <trans-unit id="passwordReset.chooseNew" datatype="html"><source>Choose a new password</source><target>Choose a new password</target></trans-unit>
+      <trans-unit id="passwordReset.invalidToken" datatype="html"><source>Reset link is invalid or expired</source><target>Reset link is invalid or expired</target></trans-unit>
+      <trans-unit id="form.newPassword" datatype="html"><source>New password <x id="TAG_INPUT"/></source><target>New password <x id="TAG_INPUT"/></target></trans-unit>
+      <trans-unit id="form.confirmPassword" datatype="html"><source>Confirm password <x id="TAG_INPUT"/></source><target>Confirm password <x id="TAG_INPUT"/></target></trans-unit>
+      <trans-unit id="form.passwordMismatch" datatype="html"><source>Passwords do not match.</source><target>Passwords do not match.</target></trans-unit>
+      <trans-unit id="passwordReset.resetting" datatype="html"><source>Resetting...</source><target>Resetting...</target></trans-unit>
+      <trans-unit id="passwordReset.reset" datatype="html"><source>Reset password</source><target>Reset password</target></trans-unit>
+      <trans-unit id="form.fullName" datatype="html"><source>Full name<x id="TAG_INPUT"/></source><target>Full name<x id="TAG_INPUT"/></target></trans-unit>
+      <trans-unit id="form.language" datatype="html"><source>Language</source><target>Language</target></trans-unit>
+      <trans-unit id="auth.creatingAccount" datatype="html"><source>Creating account...</source><target>Creating account...</target></trans-unit>
+      <trans-unit id="auth.createAccount" datatype="html"><source>Create account</source><target>Create account</target></trans-unit>
+      <trans-unit id="errors.requestFailed" datatype="html"><source>The request could not be completed. Please try again.</source><target>The request could not be completed. Please try again.</target></trans-unit>
+    </body>
+  </file>
+</xliff>

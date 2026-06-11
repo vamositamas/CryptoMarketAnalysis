@@ -12,22 +12,24 @@ function getRegisterHandler(authService: { register: jest.Mock }): Handler {
   const router = createAuthRouter(authService as never);
   const layer = router.stack.find((entry) => entry.route?.path === '/register');
 
-  if (!layer?.route?.stack[0]?.handle) {
+  const routeHandler = layer?.route?.stack.at(-1)?.handle;
+  if (!routeHandler) {
     throw new Error('Register route not found');
   }
 
-  return layer.route.stack[0].handle as Handler;
+  return routeHandler as Handler;
 }
 
 function getHandler(authService: object, path: string): Handler {
   const router = createAuthRouter(authService as never);
   const layer = router.stack.find((entry) => entry.route?.path === path);
 
-  if (!layer?.route?.stack[0]?.handle) {
+  const routeHandler = layer?.route?.stack.at(-1)?.handle;
+  if (!routeHandler) {
     throw new Error(`${path} route not found`);
   }
 
-  return layer.route.stack[0].handle as Handler;
+  return routeHandler as Handler;
 }
 
 function createResponse() {
@@ -118,7 +120,7 @@ describe('auth route', () => {
     };
     const router = createAuthRouter(authService as never);
     const layer = router.stack.find((entry) => entry.route?.path === '/login');
-    const handler = layer?.route?.stack[0]?.handle as Handler;
+    const handler = layer?.route?.stack.at(-1)?.handle as Handler;
     const response = createResponse();
     const next = jest.fn();
 
@@ -146,7 +148,7 @@ describe('auth route', () => {
     };
     const router = createAuthRouter(authService as never);
     const layer = router.stack.find((entry) => entry.route?.path === '/verify');
-    const handler = layer?.route?.stack[0]?.handle as Handler;
+    const handler = layer?.route?.stack.at(-1)?.handle as Handler;
     const response = createResponse();
     const next = jest.fn();
 
@@ -169,7 +171,7 @@ describe('auth route', () => {
     };
     const router = createAuthRouter(authService as never);
     const layer = router.stack.find((entry) => entry.route?.path === '/verify');
-    const handler = layer?.route?.stack[0]?.handle as Handler;
+    const handler = layer?.route?.stack.at(-1)?.handle as Handler;
     const response = createResponse();
     const next = jest.fn();
 
@@ -244,7 +246,7 @@ describe('auth route', () => {
     };
     const router = createAuthRouter(authService as never);
     const layer = router.stack.find((entry) => entry.route?.path === '/google');
-    const handler = layer?.route?.stack[0]?.handle as Handler;
+    const handler = layer?.route?.stack.at(-1)?.handle as Handler;
     const response = createResponse();
     const next = jest.fn();
 
@@ -269,7 +271,7 @@ describe('auth route', () => {
     };
     const router = createAuthRouter(authService as never);
     const layer = router.stack.find((entry) => entry.route?.path === '/google/callback');
-    const handler = layer?.route?.stack[0]?.handle as Handler;
+    const handler = layer?.route?.stack.at(-1)?.handle as Handler;
     const response = createResponse();
     const next = jest.fn();
 
@@ -300,7 +302,7 @@ describe('auth route', () => {
     };
     const router = createAuthRouter(authService as never);
     const layer = router.stack.find((entry) => entry.route?.path === '/google/callback');
-    const handler = layer?.route?.stack[0]?.handle as Handler;
+    const handler = layer?.route?.stack.at(-1)?.handle as Handler;
     const response = createResponse();
     const next = jest.fn();
 

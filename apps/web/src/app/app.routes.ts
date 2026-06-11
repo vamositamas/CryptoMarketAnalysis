@@ -13,24 +13,32 @@ import { AuthSessionService } from './services/auth-session.service';
   template: `
     <section class="content-section">
       <div class="section-heading">
-        <p class="eyebrow">Model overview</p>
-        <h2>Bitcoin cycle dashboard</h2>
+        <p class="eyebrow" i18n="Dashboard eyebrow@@dashboard.eyebrow">
+          Model overview
+        </p>
+        <h2 i18n="Dashboard title@@dashboard.title">Bitcoin cycle dashboard</h2>
       </div>
       <div class="model-grid">
         <article>
           <span>MVRV Z-Score</span>
           <strong>1.84</strong>
-          <small>Valuation stretch is below overheated territory.</small>
+          <small i18n="MVRV summary@@dashboard.mvrvSummary">
+            Valuation stretch is below overheated territory.
+          </small>
         </article>
         <article>
           <span>Bitcoin Rainbow</span>
           <strong>Green</strong>
-          <small>Price sits in the accumulation-to-fair-value band.</small>
+          <small i18n="Rainbow summary@@dashboard.rainbowSummary">
+            Price sits in the accumulation-to-fair-value band.
+          </small>
         </article>
         <article>
           <span>Pi Cycle Top</span>
           <strong>Clear</strong>
-          <small>Moving averages have not produced a top signal.</small>
+          <small i18n="Pi Cycle summary@@dashboard.piCycleSummary">
+            Moving averages have not produced a top signal.
+          </small>
         </article>
       </div>
     </section>
@@ -43,8 +51,10 @@ export class DashboardPage {}
   template: `
     <section class="content-section">
       <div class="section-heading">
-        <p class="eyebrow">Chart library</p>
-        <h2>Tracked Bitcoin models</h2>
+        <p class="eyebrow" i18n="Chart library eyebrow@@charts.eyebrow">
+          Chart library
+        </p>
+        <h2 i18n="Chart library title@@charts.title">Tracked Bitcoin models</h2>
       </div>
       <div class="chart-list">
         <a href="/docs/specificaton/MVRVZ-Score.md">MVRV Z-Score</a>
@@ -63,14 +73,16 @@ export class ChartsPage {}
   template: `
     <section class="content-section">
       <div class="section-heading">
-        <p class="eyebrow">Admin</p>
-        <h2>User management</h2>
+        <p class="eyebrow" i18n="Admin eyebrow@@admin.eyebrow">Admin</p>
+        <h2 i18n="User management title@@admin.usersTitle">User management</h2>
       </div>
       <div class="model-grid">
         <article>
-          <span>Users</span>
-          <strong>Ready</strong>
-          <small>Administrative user list API access is role protected.</small>
+          <span i18n="Users label@@admin.users">Users</span>
+          <strong i18n="Ready status@@status.ready">Ready</strong>
+          <small i18n="Admin user access summary@@admin.usersSummary">
+            Administrative user list API access is role protected.
+          </small>
         </article>
       </div>
     </section>
@@ -84,27 +96,37 @@ export class AdminUsersPage {}
   template: `
     <section class="content-section split-section">
       <div>
-        <p class="eyebrow">Onboarding</p>
-        <h2>Set your analysis profile</h2>
-        <p>Choose a trading horizon, preferred language, and alert sensitivity after registration.</p>
+        <p class="eyebrow" i18n="Onboarding eyebrow@@onboarding.eyebrow">
+          Onboarding
+        </p>
+        <h2 i18n="Onboarding title@@onboarding.title">Set your analysis profile</h2>
+        <p i18n="Onboarding description@@onboarding.description">
+          Choose a trading horizon, preferred language, and alert sensitivity after registration.
+        </p>
       </div>
       <form class="compact-form" [formGroup]="form" (ngSubmit)="save()">
         <label>
-          Trading horizon
+          <span i18n="Trading horizon label@@onboarding.tradingHorizon">
+            Trading horizon
+          </span>
           <select formControlName="tradingHorizon">
-            <option>Cycle investor</option>
-            <option>Swing trader</option>
-            <option>Research only</option>
+            <option i18n="Cycle investor option@@onboarding.cycleInvestor">
+              Cycle investor
+            </option>
+            <option i18n="Swing trader option@@onboarding.swingTrader">Swing trader</option>
+            <option i18n="Research only option@@onboarding.researchOnly">Research only</option>
           </select>
         </label>
-        <label>
+        <label i18n="Alert sensitivity label@@onboarding.alertSensitivity">
           Alert sensitivity
           <input type="range" min="1" max="5" formControlName="alertSensitivity" />
         </label>
         @if (message()) {
           <p class="form-message success">{{ message() }}</p>
         }
-        <button type="submit">Save preferences</button>
+        <button type="submit" i18n="Save preferences button@@onboarding.save">
+          Save preferences
+        </button>
       </form>
     </section>
   `,
@@ -118,7 +140,9 @@ export class OnboardingPage {
   });
 
   protected save(): void {
-    this.message.set('Preferences saved locally. Account sync will be enabled next.');
+    this.message.set(
+      $localize`:Onboarding saved message@@onboarding.saved:Preferences saved locally. Account sync will be enabled next.`,
+    );
   }
 }
 
@@ -127,9 +151,11 @@ export class OnboardingPage {
   template: `
     <section class="content-section auth-section">
       <form class="auth-form" [formGroup]="form" (ngSubmit)="submit()">
-        <h2>Login</h2>
-        <label>Email<input type="email" autocomplete="email" formControlName="email" /></label>
-        <label>
+        <h2 i18n="Login title@@auth.login">Login</h2>
+        <label i18n="Email label@@form.email">
+          Email<input type="email" autocomplete="email" formControlName="email" />
+        </label>
+        <label i18n="Password label@@form.password">
           Password
           <input type="password" autocomplete="current-password" formControlName="password" />
         </label>
@@ -137,12 +163,27 @@ export class OnboardingPage {
           <p class="form-message" [class.success]="isSuccess()">{{ message() }}</p>
         }
         <button type="submit" [disabled]="form.invalid || isSubmitting()">
-          {{ isSubmitting() ? 'Logging in...' : 'Login' }}
+          @if (isSubmitting()) {
+            <ng-container i18n="Logging in state@@auth.loggingIn">Logging in...</ng-container>
+          } @else {
+            <ng-container i18n="Login button@@auth.login">Login</ng-container>
+          }
         </button>
-        <button type="button" class="secondary-button" (click)="continueWithGoogle()">
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="continueWithGoogle()"
+          i18n="Continue with Google button@@auth.google"
+        >
           Continue with Google
         </button>
-        <a class="form-link" routerLink="/forgot-password">Forgot password?</a>
+        <a
+          class="form-link"
+          routerLink="/forgot-password"
+          i18n="Forgot password link@@auth.forgotPassword"
+        >
+          Forgot password?
+        </a>
       </form>
     </section>
   `,
@@ -174,7 +215,9 @@ export class LoginPage {
       const response = await this.auth.login(this.form.getRawValue());
       this.authSession.setCurrentUser(response.user);
       this.isSuccess.set(true);
-      this.message.set('Login successful. Redirecting to dashboard is coming next.');
+      this.message.set(
+        $localize`:Login success message@@auth.loginSuccess:Login successful. Redirecting to dashboard is coming next.`,
+      );
     } catch (error) {
       this.message.set(getErrorMessage(error));
     } finally {
@@ -193,13 +236,21 @@ export class LoginPage {
   template: `
     <section class="content-section auth-section">
       <form class="auth-form" [formGroup]="form" (ngSubmit)="submit()">
-        <h2>Reset password</h2>
-        <label>Email<input type="email" autocomplete="email" formControlName="email" /></label>
+        <h2 i18n="Reset password title@@passwordReset.title">Reset password</h2>
+        <label i18n="Email label@@form.email">
+          Email<input type="email" autocomplete="email" formControlName="email" />
+        </label>
         @if (message()) {
           <p class="form-message" [class.success]="isSuccess()">{{ message() }}</p>
         }
         <button type="submit" [disabled]="form.invalid || isSubmitting()">
-          {{ isSubmitting() ? 'Sending...' : 'Send reset instructions' }}
+          @if (isSubmitting()) {
+            <ng-container i18n="Sending state@@passwordReset.sending">Sending...</ng-container>
+          } @else {
+            <ng-container i18n="Send reset instructions button@@passwordReset.send">
+              Send reset instructions
+            </ng-container>
+          }
         </button>
       </form>
     </section>
@@ -243,15 +294,19 @@ export class ForgotPasswordPage {
   template: `
     <section class="content-section auth-section">
       <form class="auth-form" [formGroup]="form" (ngSubmit)="submit()">
-        <h2>Choose a new password</h2>
+        <h2 i18n="Choose new password title@@passwordReset.chooseNew">
+          Choose a new password
+        </h2>
         @if (isTokenValid() === false) {
-          <p class="form-message">Reset link is invalid or expired</p>
+          <p class="form-message" i18n="Invalid reset token message@@passwordReset.invalidToken">
+            Reset link is invalid or expired
+          </p>
         } @else {
-          <label>
+          <label i18n="New password label@@form.newPassword">
             New password
             <input type="password" autocomplete="new-password" formControlName="password" />
           </label>
-          <label>
+          <label i18n="Confirm password label@@form.confirmPassword">
             Confirm password
             <input
               type="password"
@@ -260,7 +315,9 @@ export class ForgotPasswordPage {
             />
           </label>
           @if (passwordMismatch()) {
-            <p class="form-message">Passwords do not match.</p>
+            <p class="form-message" i18n="Passwords mismatch@@form.passwordMismatch">
+              Passwords do not match.
+            </p>
           }
           @if (message()) {
             <p class="form-message" [class.success]="isSuccess()">{{ message() }}</p>
@@ -269,7 +326,15 @@ export class ForgotPasswordPage {
             type="submit"
             [disabled]="form.invalid || passwordMismatch() || isSubmitting() || !isTokenValid()"
           >
-            {{ isSubmitting() ? 'Resetting...' : 'Reset password' }}
+            @if (isSubmitting()) {
+              <ng-container i18n="Resetting password state@@passwordReset.resetting">
+                Resetting...
+              </ng-container>
+            } @else {
+              <ng-container i18n="Reset password button@@passwordReset.reset">
+                Reset password
+              </ng-container>
+            }
           </button>
         }
       </form>
@@ -352,14 +417,18 @@ export class ResetPasswordPage {
   template: `
     <section class="content-section auth-section">
       <form class="auth-form" [formGroup]="form" (ngSubmit)="submit()">
-        <h2>Register</h2>
-        <label>Full name<input type="text" autocomplete="name" formControlName="fullName" /></label>
-        <label>Email<input type="email" autocomplete="email" formControlName="email" /></label>
-        <label>
+        <h2 i18n="Register title@@auth.register">Register</h2>
+        <label i18n="Full name label@@form.fullName">
+          Full name<input type="text" autocomplete="name" formControlName="fullName" />
+        </label>
+        <label i18n="Email label@@form.email">
+          Email<input type="email" autocomplete="email" formControlName="email" />
+        </label>
+        <label i18n="Password label@@form.password">
           Password
           <input type="password" autocomplete="new-password" formControlName="password" />
         </label>
-        <label>
+        <label i18n="Confirm password label@@form.confirmPassword">
           Confirm password
           <input
             type="password"
@@ -368,20 +437,34 @@ export class ResetPasswordPage {
           />
         </label>
         <label>
-          Language
+          <span i18n="Language form label@@form.language">Language</span>
           <select formControlName="languagePreference">
-            <option value="en">English</option>
-            <option value="hu">Hungarian</option>
+            <option value="en" i18n="English language option@@language.english">
+              English
+            </option>
+            <option value="hu" i18n="Hungarian language option@@language.hungarian">
+              Hungarian
+            </option>
           </select>
         </label>
         @if (passwordMismatch()) {
-          <p class="form-message">Passwords do not match.</p>
+          <p class="form-message" i18n="Passwords mismatch@@form.passwordMismatch">
+            Passwords do not match.
+          </p>
         }
         @if (message()) {
           <p class="form-message" [class.success]="isSuccess()">{{ message() }}</p>
         }
         <button type="submit" [disabled]="form.invalid || passwordMismatch() || isSubmitting()">
-          {{ isSubmitting() ? 'Creating account...' : 'Create account' }}
+          @if (isSubmitting()) {
+            <ng-container i18n="Creating account state@@auth.creatingAccount">
+              Creating account...
+            </ng-container>
+          } @else {
+            <ng-container i18n="Create account button@@auth.createAccount">
+              Create account
+            </ng-container>
+          }
         </button>
       </form>
     </section>
@@ -437,7 +520,7 @@ export class RegisterPage {
 function getErrorMessage(error: unknown): string {
   return error instanceof ApiClientError
     ? error.message
-    : 'The request could not be completed. Please try again.';
+    : $localize`:Generic request failure@@errors.requestFailed:The request could not be completed. Please try again.`;
 }
 
 export const appRoutes: Route[] = [

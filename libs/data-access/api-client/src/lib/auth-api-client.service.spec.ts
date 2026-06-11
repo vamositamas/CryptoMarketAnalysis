@@ -124,6 +124,83 @@ describe('AuthApiClient', () => {
 
     await expect(promise).resolves.toEqual({ valid: true });
   });
+
+  it('fetches the current user profile without requiring CSRF', async () => {
+    const promise = client.getCurrentUserProfile();
+
+    const profileRequest = http.expectOne('/api/users/me');
+    expect(profileRequest.request.method).toBe('GET');
+    expect(profileRequest.request.withCredentials).toBe(true);
+    profileRequest.flush({
+      id: 'user-id',
+      email: 'user@example.com',
+      fullName: 'Ada Analyst',
+      languagePreference: 'en',
+      role: 'free_user',
+      emailVerified: true,
+      onboardingCompleted: false,
+      createdAt: '2026-06-11T10:00:00.000Z',
+    });
+
+    await expect(promise).resolves.toMatchObject({
+      id: 'user-id',
+      email: 'user@example.com',
+    });
+  });
+
+  it('updates the current user profile with CSRF protection', async () => {
+    const promise = client.updateCurrentUserProfile({
+      fullName: 'John Doe',
+      languagePreference: 'hu',
+    });
+
+    http.expectOne('/api/csrf-token').flush({ csrfToken: 'csrf-token' });
+    await waitForRequestQueue();
+
+    const profileRequest = http.expectOne('/api/users/me');
+    expect(profileRequest.request.method).toBe('PATCH');
+    expect(profileRequest.request.headers.get('x-csrf-token')).toBe('csrf-token');
+    expect(profileRequest.request.body).toEqual({
+      fullName: 'John Doe',
+      languagePreference: 'hu',
+    });
+    profileRequest.flush({
+      id: 'user-id',
+      email: 'user@example.com',
+      fullName: 'John Doe',
+      languagePreference: 'hu',
+      role: 'free_user',
+      emailVerified: true,
+      onboardingCompleted: false,
+      createdAt: '2026-06-11T10:00:00.000Z',
+    });
+
+    await expect(promise).resolves.toMatchObject({
+      fullName: 'John Doe',
+      languagePreference: 'hu',
+    });
+  });
+
+  it('changes the current user password with CSRF protection', async () => {
+    const promise = client.changeCurrentUserPassword({
+      currentPassword: 'CurrentPass123!',
+      newPassword: 'NewPass123!',
+    });
+
+    http.expectOne('/api/csrf-token').flush({ csrfToken: 'csrf-token' });
+    await waitForRequestQueue();
+
+    const passwordRequest = http.expectOne('/api/users/me/change-password');
+    expect(passwordRequest.request.method).toBe('POST');
+    expect(passwordRequest.request.headers.get('x-csrf-token')).toBe('csrf-token');
+    passwordRequest.flush({
+      message: 'Password changed successfully. Please log in again.',
+    });
+
+    await expect(promise).resolves.toEqual({
+      message: 'Password changed successfully. Please log in again.',
+    });
+  });
 });
 
 function waitForRequestQueue(): Promise<void> {

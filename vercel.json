@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "npx nx build web --configuration=production",
+  "buildCommand": "npx nx build web --configuration=production-i18n",
   "outputDirectory": "dist/apps/web/browser",
   "framework": "angular",
   "functions": {
@@ -38,8 +38,16 @@
   ],
   "rewrites": [
     {
-      "source": "/((?!api/.*).*)",
-      "destination": "/index.html"
+      "source": "/",
+      "destination": "/en/locale-redirect.html"
+    },
+    {
+      "source": "/en/(.*)",
+      "destination": "/en/index.html"
+    },
+    {
+      "source": "/hu/(.*)",
+      "destination": "/hu/index.html"
     }
   ]
 }

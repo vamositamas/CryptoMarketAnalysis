@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file source-language="en" target-language="hu" datatype="plaintext" original="ng2.template">
+    <body>
+      <trans-unit id="app.name" datatype="html">
+        <source>CryptoMarketAnalysis</source>
+        <target>CryptoMarketAnalysis</target>
+      </trans-unit>
+      <trans-unit id="nav.dashboard" datatype="html">
+        <source>Dashboard</source>
+        <target>Irányítópult</target>
+      </trans-unit>
+      <trans-unit id="nav.charts" datatype="html">
+        <source>Charts</source>
+        <target>Grafikonok</target>
+      </trans-unit>
+      <trans-unit id="nav.onboarding" datatype="html">
+        <source>Onboarding</source>
+        <target>Onboarding</target>
+      </trans-unit>
+      <trans-unit id="language.selector" datatype="html">
+        <source>Language</source>
+        <target>Nyelv</target>
+      </trans-unit>
+      <trans-unit id="language.english" datatype="html">
+        <source>English</source>
+        <target>Angol</target>
+      </trans-unit>
+      <trans-unit id="language.hungarian" datatype="html">
+        <source>Hungarian</source>
+        <target>Magyar</target>
+      </trans-unit>
+      <trans-unit id="auth.login" datatype="html">
+        <source>Login</source>
+        <target>Belépés</target>
+      </trans-unit>
+      <trans-unit id="auth.register" datatype="html">
+        <source>Register</source>
+        <target>Regisztráció</target>
+      </trans-unit>
+      <trans-unit id="hero.eyebrow" datatype="html">
+        <source>Bitcoin analytics workspace</source>
+        <target>Bitcoin elemzési munkafelület</target>
+      </trans-unit>
+      <trans-unit id="hero.title" datatype="html">
+        <source>Bitcoin market intelligence for cycle-aware decisions</source>
+        <target>Bitcoin piaci elemzés ciklustudatos döntésekhez</target>
+      </trans-unit>
+      <trans-unit id="hero.text" datatype="html">
+        <source>Track on-chain valuation, cycle signals, and model context in one focused workspace.</source>
+        <target>Kövesd az on-chain értékelést, a ciklusjeleket és a modellkörnyezetet egy fókuszált munkafelületen.</target>
+      </trans-unit>
+      <trans-unit id="hero.cta" datatype="html">
+        <source>Review dashboard</source>
+        <target>Irányítópult megnyitása</target>
+      </trans-unit>
+      <trans-unit id="hero.secondaryCta" datatype="html">
+        <source>Create account</source>
+        <target>Fiók létrehozása</target>
+      </trans-unit>
+      <trans-unit id="market.previewAria" datatype="html">
+        <source>Bitcoin market signal preview</source>
+        <target>Bitcoin piaci jelzések előnézete</target>
+      </trans-unit>
+      <trans-unit id="market.state" datatype="html">
+        <source>Market state</source>
+        <target>Piaci állapot</target>
+      </trans-unit>
+      <trans-unit id="metric.risk" datatype="html">
+        <source>Cycle risk</source>
+        <target>Cikluskockázat</target>
+      </trans-unit>
+      <trans-unit id="metric.signalQuality" datatype="html">
+        <source>Signal quality</source>
+        <target>Jelminőség</target>
+      </trans-unit>
+      <trans-unit id="kpi.gridAria" datatype="html">
+        <source>Market KPI widgets</source>
+        <target>Piaci KPI panelek</target>
+      </trans-unit>
+      <trans-unit id="metric.cycle" datatype="html">
+        <source>Cycle</source>
+        <target>Ciklus</target>
+      </trans-unit>
+      <trans-unit id="metric.activeModels" datatype="html">
+        <source>Active models</source>
+        <target>Aktív modellek</target>
+      </trans-unit>
+      <trans-unit id="metric.model" datatype="html">
+        <source>Model</source>
+        <target>Modell</target>
+      </trans-unit>
+      <trans-unit id="metric.momentum" datatype="html">
+        <source>Momentum</source>
+        <target>Momentum</target>
+      </trans-unit>
+      <trans-unit id="dashboard.eyebrow" datatype="html">
+        <source>Model overview</source>
+        <target>Modelláttekintés</target>
+      </trans-unit>
+      <trans-unit id="dashboard.title" datatype="html">
+        <source>Bitcoin cycle dashboard</source>
+        <target>Bitcoin ciklus irányítópult</target>
+      </trans-unit>
+      <trans-unit id="dashboard.mvrvSummary" datatype="html">
+        <source>Valuation stretch is below overheated territory.</source>
+        <target>Az értékeltségi feszültség még nem érte el a túlfűtött zónát.</target>
+      </trans-unit>
+      <trans-unit id="dashboard.rainbowSummary" datatype="html">
+        <source>Price sits in the accumulation-to-fair-value band.</source>
+        <target>Az ár az akkumuláció és a fair érték közötti sávban van.</target>
+      </trans-unit>
+      <trans-unit id="dashboard.piCycleSummary" datatype="html">
+        <source>Moving averages have not produced a top signal.</source>
+        <target>A mozgóátlagok még nem adtak csúcsjelzést.</target>
+      </trans-unit>
+      <trans-unit id="charts.eyebrow" datatype="html">
+        <source>Chart library</source>
+        <target>Grafikontár</target>
+      </trans-unit>
+      <trans-unit id="charts.title" datatype="html">
+        <source>Tracked Bitcoin models</source>
+        <target>Követett Bitcoin modellek</target>
+      </trans-unit>
+      <trans-unit id="admin.eyebrow" datatype="html">
+        <source>Admin</source>
+        <target>Admin</target>
+      </trans-unit>
+      <trans-unit id="admin.usersTitle" datatype="html">
+        <source>User management</source>
+        <target>Felhasználókezelés</target>
+      </trans-unit>
+      <trans-unit id="admin.users" datatype="html">
+        <source>Users</source>
+        <target>Felhasználók</target>
+      </trans-unit>
+      <trans-unit id="status.ready" datatype="html">
+        <source>Ready</source>
+        <target>Kész</target>
+      </trans-unit>
+      <trans-unit id="admin.usersSummary" datatype="html">
+        <source>Administrative user list API access is role protected.</source>
+        <target>Az adminisztratív felhasználólista API-elérése szerepkör alapján védett.</target>
+      </trans-unit>
+      <trans-unit id="onboarding.saved" datatype="html">
+        <source>Preferences saved locally. Account sync will be enabled next.</source>
+        <target>A beállításokat helyben mentettük. A fiókszinkronizálás következőként érkezik.</target>
+      </trans-unit>
+      <trans-unit id="onboarding.eyebrow" datatype="html">
+        <source>Onboarding</source>
+        <target>Onboarding</target>
+      </trans-unit>
+      <trans-unit id="onboarding.title" datatype="html">
+        <source>Set your analysis profile</source>
+        <target>Állítsd be az elemzési profilodat</target>
+      </trans-unit>
+      <trans-unit id="onboarding.description" datatype="html">
+        <source>Choose a trading horizon, preferred language, and alert sensitivity after registration.</source>
+        <target>Regisztráció után válassz kereskedési időtávot, előnyben részesített nyelvet és riasztási érzékenységet.</target>
+      </trans-unit>
+      <trans-unit id="onboarding.tradingHorizon" datatype="html">
+        <source>Trading horizon</source>
+        <target>Kereskedési időtáv</target>
+      </trans-unit>
+      <trans-unit id="onboarding.cycleInvestor" datatype="html">
+        <source>Cycle investor</source>
+        <target>Ciklusbefektető</target>
+      </trans-unit>
+      <trans-unit id="onboarding.swingTrader" datatype="html">
+        <source>Swing trader</source>
+        <target>Swing trader</target>
+      </trans-unit>
+      <trans-unit id="onboarding.researchOnly" datatype="html">
+        <source>Research only</source>
+        <target>Csak kutatás</target>
+      </trans-unit>
+      <trans-unit id="onboarding.alertSensitivity" datatype="html">
+        <source>Alert sensitivity <x id="TAG_INPUT"/></source>
+        <target>Riasztási érzékenység <x id="TAG_INPUT"/></target>
+      </trans-unit>
+      <trans-unit id="onboarding.save" datatype="html">
+        <source>Save preferences</source>
+        <target>Beállítások mentése</target>
+      </trans-unit>
+      <trans-unit id="auth.loginSuccess" datatype="html">
+        <source>Login successful. Redirecting to dashboard is coming next.</source>
+        <target>Sikeres belépés. Az irányítópultra irányítás következik.</target>
+      </trans-unit>
+      <trans-unit id="form.email" datatype="html">
+        <source>Email<x id="TAG_INPUT"/></source>
+        <target>E-mail<x id="TAG_INPUT"/></target>
+      </trans-unit>
+      <trans-unit id="form.password" datatype="html">
+        <source>Password <x id="TAG_INPUT"/></source>
+        <target>Jelszó <x id="TAG_INPUT"/></target>
+      </trans-unit>
+      <trans-unit id="auth.google" datatype="html">
+        <source>Continue with Google</source>
+        <target>Folytatás Google-fiókkal</target>
+      </trans-unit>
+      <trans-unit id="auth.forgotPassword" datatype="html">
+        <source>Forgot password?</source>
+        <target>Elfelejtetted a jelszavad?</target>
+      </trans-unit>
+      <trans-unit id="auth.loggingIn" datatype="html">
+        <source>Logging in...</source>
+        <target>Belépés...</target>
+      </trans-unit>
+      <trans-unit id="passwordReset.title" datatype="html">
+        <source>Reset password</source>
+        <target>Jelszó visszaállítása</target>
+      </trans-unit>
+      <trans-unit id="passwordReset.sending" datatype="html">
+        <source>Sending...</source>
+        <target>Küldés...</target>
+      </trans-unit>
+      <trans-unit id="passwordReset.send" datatype="html">
+        <source>Send reset instructions</source>
+        <target>Visszaállítási útmutató küldése</target>
+      </trans-unit>
+      <trans-unit id="passwordReset.chooseNew" datatype="html">
+        <source>Choose a new password</source>
+        <target>Válassz új jelszót</target>
+      </trans-unit>
+      <trans-unit id="passwordReset.invalidToken" datatype="html">
+        <source>Reset link is invalid or expired</source>
+        <target>A visszaállítási link érvénytelen vagy lejárt</target>
+      </trans-unit>
+      <trans-unit id="form.newPassword" datatype="html">
+        <source>New password <x id="TAG_INPUT"/></source>
+        <target>Új jelszó <x id="TAG_INPUT"/></target>
+      </trans-unit>
+      <trans-unit id="form.confirmPassword" datatype="html">
+        <source>Confirm password <x id="TAG_INPUT"/></source>
+        <target>Jelszó megerősítése <x id="TAG_INPUT"/></target>
+      </trans-unit>
+      <trans-unit id="form.passwordMismatch" datatype="html">
+        <source>Passwords do not match.</source>
+        <target>A jelszavak nem egyeznek.</target>
+      </trans-unit>
+      <trans-unit id="passwordReset.resetting" datatype="html">
+        <source>Resetting...</source>
+        <target>Visszaállítás...</target>
+      </trans-unit>
+      <trans-unit id="passwordReset.reset" datatype="html">
+        <source>Reset password</source>
+        <target>Jelszó visszaállítása</target>
+      </trans-unit>
+      <trans-unit id="form.fullName" datatype="html">
+        <source>Full name<x id="TAG_INPUT"/></source>
+        <target>Teljes név<x id="TAG_INPUT"/></target>
+      </trans-unit>
+      <trans-unit id="form.language" datatype="html">
+        <source>Language</source>
+        <target>Nyelv</target>
+      </trans-unit>
+      <trans-unit id="auth.creatingAccount" datatype="html">
+        <source>Creating account...</source>
+        <target>Fiók létrehozása...</target>
+      </trans-unit>
+      <trans-unit id="auth.createAccount" datatype="html">
+        <source>Create account</source>
+        <target>Fiók létrehozása</target>
+      </trans-unit>
+      <trans-unit id="errors.requestFailed" datatype="html">
+        <source>The request could not be completed. Please try again.</source>
+        <target>A kérést nem sikerült teljesíteni. Próbáld újra.</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto';
 import { Router } from 'express';
+import { createAuthRateLimitMiddleware } from '../middleware/rate-limit.middleware';
 import {
   AuthService,
   LoginError,
@@ -11,8 +12,9 @@ import {
 
 export function createAuthRouter(authService = new AuthService()): Router {
   const router = Router();
+  const authRateLimit = createAuthRateLimitMiddleware();
 
-  router.post('/register', async (req, res, next) => {
+  router.post('/register', authRateLimit, async (req, res, next) => {
     try {
       const response = await authService.register(req.body);
       res.status(201).json(response);
@@ -26,7 +28,7 @@ export function createAuthRouter(authService = new AuthService()): Router {
     }
   });
 
-  router.post('/login', async (req, res, next) => {
+  router.post('/login', authRateLimit, async (req, res, next) => {
     try {
       const response = await authService.login(req.body);
       const secure = process.env.NODE_ENV === 'production' ? ' Secure;' : '';
@@ -60,7 +62,7 @@ export function createAuthRouter(authService = new AuthService()): Router {
     }
   });
 
-  router.post('/password-reset/request', async (req, res, next) => {
+  router.post('/password-reset/request', authRateLimit, async (req, res, next) => {
     try {
       const response = await authService.requestPasswordReset(req.body);
       res.status(200).json(response);
@@ -80,7 +82,7 @@ export function createAuthRouter(authService = new AuthService()): Router {
     }
   });
 
-  router.post('/password-reset/confirm', async (req, res, next) => {
+  router.post('/password-reset/confirm', authRateLimit, async (req, res, next) => {
     try {
       const response = await authService.resetPassword(req.body);
       res.status(200).json(response);
@@ -94,7 +96,7 @@ export function createAuthRouter(authService = new AuthService()): Router {
     }
   });
 
-  router.get('/google', (req, res, next) => {
+  router.get('/google', authRateLimit, (req, res, next) => {
     try {
       const state = createOAuthState();
       const secure = process.env.NODE_ENV === 'production' ? ' Secure;' : '';

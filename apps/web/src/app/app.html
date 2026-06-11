@@ -2,46 +2,69 @@
   <header class="topbar">
     <a class="brand" routerLink="/">
       <span class="brand-mark" aria-hidden="true">₿</span>
-      <span>{{ t('appName') }}</span>
+      <span i18n="Application name@@app.name">CryptoMarketAnalysis</span>
     </a>
 
     <nav aria-label="Primary navigation">
       <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-        {{ t('dashboard') }}
+        <ng-container i18n="Dashboard navigation label@@nav.dashboard">Dashboard</ng-container>
       </a>
-      <a routerLink="/charts" routerLinkActive="active">{{ t('charts') }}</a>
-      <a routerLink="/onboarding" routerLinkActive="active">{{ t('onboarding') }}</a>
+      <a routerLink="/charts" routerLinkActive="active">
+        <ng-container i18n="Charts navigation label@@nav.charts">Charts</ng-container>
+      </a>
+      <a routerLink="/onboarding" routerLinkActive="active">
+        <ng-container i18n="Onboarding navigation label@@nav.onboarding">Onboarding</ng-container>
+      </a>
     </nav>
 
     <div class="topbar-actions">
-      <div class="language-toggle" aria-label="Language selector">
-        <button type="button" [class.active]="language() === 'en'" (click)="setLanguage('en')">
-          EN
-        </button>
-        <button type="button" [class.active]="language() === 'hu'" (click)="setLanguage('hu')">
-          HU
-        </button>
-      </div>
-      <a class="ghost-link" routerLink="/login">{{ t('login') }}</a>
-      <a class="primary-link" routerLink="/register">{{ t('register') }}</a>
+      <label class="language-toggle">
+        <span i18n="Language selector label@@language.selector">Language</span>
+        <select [value]="language" (change)="switchLanguage($event)">
+          <option value="en" i18n="English language option@@language.english">English</option>
+          <option value="hu" i18n="Hungarian language option@@language.hungarian">Hungarian</option>
+        </select>
+      </label>
+      <a class="ghost-link" routerLink="/login" i18n="Login link@@auth.login">Login</a>
+      <a class="primary-link" routerLink="/register" i18n="Register link@@auth.register">
+        Register
+      </a>
     </div>
   </header>
 
   <main>
     <section class="hero" aria-labelledby="dashboard-title">
       <div class="hero-copy">
-        <p class="eyebrow">Bitcoin analytics workspace</p>
-        <h1 id="dashboard-title">{{ t('heroTitle') }}</h1>
-        <p>{{ t('heroText') }}</p>
+        <p class="eyebrow" i18n="Hero eyebrow@@hero.eyebrow">
+          Bitcoin analytics workspace
+        </p>
+        <h1 id="dashboard-title" i18n="Hero title@@hero.title">
+          Bitcoin market intelligence for cycle-aware decisions
+        </h1>
+        <p i18n="Hero supporting copy@@hero.text">
+          Track on-chain valuation, cycle signals, and model context in one focused workspace.
+        </p>
         <div class="hero-actions">
-          <a class="primary-link" routerLink="/">{{ t('cta') }}</a>
-          <a class="ghost-link" routerLink="/register">{{ t('secondaryCta') }}</a>
+          <a class="primary-link" routerLink="/" i18n="Hero primary action@@hero.cta">
+            Review dashboard
+          </a>
+          <a
+            class="ghost-link"
+            routerLink="/register"
+            i18n="Hero secondary action@@hero.secondaryCta"
+          >
+            Create account
+          </a>
         </div>
       </div>
 
-      <div class="market-panel" aria-label="Bitcoin market signal preview">
+      <div
+        class="market-panel"
+        aria-label="Bitcoin market signal preview"
+        i18n-aria-label="Market preview accessibility label@@market.previewAria"
+      >
         <div class="panel-header">
-          <span>{{ t('marketState') }}</span>
+          <span i18n="Market state label@@market.state">Market state</span>
           <strong>Neutral Bull</strong>
         </div>
         <div class="signal-chart" aria-hidden="true">
@@ -53,27 +76,31 @@
           <span class="bar bar-six"></span>
         </div>
         <div class="metric-strip">
-          <span>{{ t('risk') }} <strong>42%</strong></span>
-          <span>{{ t('signalQuality') }} <strong>87%</strong></span>
+          <span><ng-container i18n="Cycle risk label@@metric.risk">Cycle risk</ng-container> <strong>42%</strong></span>
+          <span><ng-container i18n="Signal quality label@@metric.signalQuality">Signal quality</ng-container> <strong>87%</strong></span>
         </div>
       </div>
     </section>
 
-    <section class="kpi-grid" aria-label="Market KPI widgets">
+    <section
+      class="kpi-grid"
+      aria-label="Market KPI widgets"
+      i18n-aria-label="Market KPI widgets accessibility label@@kpi.gridAria"
+    >
       <article>
-        <span>{{ t('risk') }}</span>
+        <span i18n="Cycle risk label@@metric.risk">Cycle risk</span>
         <strong>42%</strong>
-        <small>{{ t('cycle') }}</small>
+        <small i18n="Cycle label@@metric.cycle">Cycle</small>
       </article>
       <article>
-        <span>{{ t('activeModels') }}</span>
+        <span i18n="Active models label@@metric.activeModels">Active models</span>
         <strong>5</strong>
-        <small>{{ t('model') }}</small>
+        <small i18n="Model label@@metric.model">Model</small>
       </article>
       <article>
-        <span>{{ t('signalQuality') }}</span>
+        <span i18n="Signal quality label@@metric.signalQuality">Signal quality</span>
         <strong>87%</strong>
-        <small>{{ t('momentum') }}</small>
+        <small i18n="Momentum label@@metric.momentum">Momentum</small>
       </article>
     </section>
 
