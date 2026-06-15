@@ -29,12 +29,18 @@ describe('AuthService', () => {
   const originalGoogleClientId = process.env.GOOGLE_CLIENT_ID;
   const originalGoogleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
   const originalGoogleRedirectUri = process.env.GOOGLE_REDIRECT_URI;
+  const originalNodeEnv = process.env.NODE_ENV;
+  const originalDevAdminEmail = process.env.DEV_ADMIN_EMAIL;
+  const originalDevAdminPassword = process.env.DEV_ADMIN_PASSWORD;
 
   beforeEach(() => {
     process.env.JWT_SECRET = 'test-jwt-secret';
     process.env.GOOGLE_CLIENT_ID = 'google-client-id';
     process.env.GOOGLE_CLIENT_SECRET = 'google-client-secret';
     process.env.GOOGLE_REDIRECT_URI = 'http://localhost:3000/api/auth/google/callback';
+    process.env.NODE_ENV = 'test';
+    delete process.env.DEV_ADMIN_EMAIL;
+    delete process.env.DEV_ADMIN_PASSWORD;
   });
 
   afterEach(() => {
@@ -42,6 +48,9 @@ describe('AuthService', () => {
     process.env.GOOGLE_CLIENT_ID = originalGoogleClientId;
     process.env.GOOGLE_CLIENT_SECRET = originalGoogleClientSecret;
     process.env.GOOGLE_REDIRECT_URI = originalGoogleRedirectUri;
+    process.env.NODE_ENV = originalNodeEnv;
+    process.env.DEV_ADMIN_EMAIL = originalDevAdminEmail;
+    process.env.DEV_ADMIN_PASSWORD = originalDevAdminPassword;
     jest.restoreAllMocks();
   });
 
@@ -80,6 +89,181 @@ describe('AuthService', () => {
         expiresAt: expect.any(Date),
       }),
     );
+  });
+
+  it('registers the development admin email as a verified administrator', async () => {
+    const users = {
+      findByEmail: jest.fn().mockResolvedValue(undefined),
+      create: jest.fn().mockResolvedValue(createUser({ id: 'admin-id' })),
+      markEmailVerified: jest.fn(),
+    };
+    const tokens = {
+      create: jest.fn(),
+      findByToken: jest.fn(),
+      deleteByToken: jest.fn(),
+    };
+    const service = new AuthService(users, tokens);
+
+    const response = await service.register({
+      ...baseRequest,
+      email: 'admin@cryptomarketanalysis.com',
+      fullName: 'Admin User',
+    });
+
+    expect(response).toEqual({
+      message: 'Development administrator account is ready. You can log in now.',
+    });
+    expect(users.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email: 'admin@cryptomarketanalysis.com',
+        fullName: 'Admin User',
+        role: 'administrator',
+        emailVerified: true,
+      }),
+    );
+    expect(tokens.create).not.toHaveBeenCalled();
+  });
+
+  it('repairs an existing development admin account through registration', async () => {
+    const users = {
+      findByEmail: jest.fn().mockResolvedValue(
+        createUser({
+          email: 'admin@cryptomarketanalysis.com',
+          role: 'free_user',
+          emailVerified: false,
+        }),
+      ),
+      create: jest.fn(),
+      updateDevelopmentAdminCredentials: jest.fn().mockResolvedValue(
+        createUser({
+          email: 'admin@cryptomarketanalysis.com',
+          role: 'administrator',
+          emailVerified: true,
+        }),
+      ),
+      markEmailVerified: jest.fn(),
+    };
+    const tokens = {
+      create: jest.fn(),
+      findByToken: jest.fn(),
+      deleteByToken: jest.fn(),
+    };
+    const service = new AuthService(users, tokens);
+
+    const response = await service.register({
+      ...baseRequest,
+      email: 'admin@cryptomarketanalysis.com',
+      password: 'AdminPass123!',
+      confirmPassword: 'AdminPass123!',
+      fullName: 'Admin User',
+    });
+
+    expect(response).toEqual({
+      message: 'Development administrator account is ready. You can log in now.',
+    });
+    expect(users.create).not.toHaveBeenCalled();
+    expect(users.updateDevelopmentAdminCredentials).toHaveBeenCalledWith(
+      'admin@cryptomarketanalysis.com',
+      expect.objectContaining({
+        fullName: 'Admin User',
+        languagePreference: 'en',
+        passwordHash: expect.any(String),
+      }),
+    );
+    expect(tokens.create).not.toHaveBeenCalled();
+  });
+
+  it('does not repair the development admin email in production', async () => {
+    process.env.NODE_ENV = 'production';
+    const users = {
+      findByEmail: jest.fn().mockResolvedValue(
+        createUser({
+          email: 'admin@cryptomarketanalysis.com',
+        }),
+      ),
+      create: jest.fn(),
+      updateDevelopmentAdminCredentials: jest.fn(),
+      markEmailVerified: jest.fn(),
+    };
+    const service = new AuthService(
+      users,
+      { create: jest.fn(), findByToken: jest.fn(), deleteByToken: jest.fn() },
+    );
+
+    await expect(
+      service.register({
+        ...baseRequest,
+        email: 'admin@cryptomarketanalysis.com',
+      }),
+    ).rejects.toMatchObject({
+      statusCode: 400,
+      message: 'Email already registered',
+    });
+    expect(users.updateDevelopmentAdminCredentials).not.toHaveBeenCalled();
+  });
+
+  it('uses a development admin fallback when the database is unavailable', async () => {
+    const databaseError = new Error(
+      'getaddrinfo ENOTFOUND db.ughyikvmlmassbxhhnin.supabase.co',
+    );
+    const users = {
+      findByEmail: jest.fn().mockRejectedValue(databaseError),
+      create: jest.fn(),
+      updateDevelopmentAdminCredentials: jest.fn(),
+      markEmailVerified: jest.fn(),
+    };
+    const service = new AuthService(
+      users,
+      { create: jest.fn(), findByToken: jest.fn(), deleteByToken: jest.fn() },
+    );
+    jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+    await expect(
+      service.register({
+        ...baseRequest,
+        email: 'admin@cryptomarketanalysis.com',
+        password: 'AdminPass123!',
+        confirmPassword: 'AdminPass123!',
+      }),
+    ).resolves.toEqual({
+      message: 'Development administrator account is ready. You can log in now.',
+    });
+
+    const loginResponse = await service.login({
+      email: 'admin@cryptomarketanalysis.com',
+      password: 'AdminPass123!',
+    });
+
+    expect(loginResponse.user).toMatchObject({
+      id: 'development-admin-user',
+      email: 'admin@cryptomarketanalysis.com',
+      role: 'administrator',
+    });
+  });
+
+  it('rejects the development admin fallback with the wrong password', async () => {
+    const users = {
+      findByEmail: jest
+        .fn()
+        .mockRejectedValue(new Error('getaddrinfo ENOTFOUND db.example.supabase.co')),
+      create: jest.fn(),
+      markEmailVerified: jest.fn(),
+    };
+    const service = new AuthService(
+      users,
+      { create: jest.fn(), findByToken: jest.fn(), deleteByToken: jest.fn() },
+    );
+    jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+    await expect(
+      service.login({
+        email: 'admin@cryptomarketanalysis.com',
+        password: 'WrongPass123!',
+      }),
+    ).rejects.toMatchObject({
+      statusCode: 401,
+      message: 'Invalid email or password',
+    });
   });
 
   it('rejects duplicate email', async () => {

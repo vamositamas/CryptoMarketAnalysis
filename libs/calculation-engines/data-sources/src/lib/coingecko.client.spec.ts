@@ -71,6 +71,7 @@ describe('CoinGeckoClient', () => {
     const client = new CoinGeckoClient({
       fetchFn: fetchFn as never,
       logger,
+      retryAttempts: 0,
     });
 
     await expect(client.fetchBitcoinMarketData('2026-06-10')).rejects.toMatchObject({
@@ -92,6 +93,7 @@ describe('CoinGeckoClient', () => {
     const client = new CoinGeckoClient({
       fetchFn: jest.fn() as never,
       logger: { error: jest.fn() },
+      retryAttempts: 0,
     });
 
     await expect(client.fetchBitcoinMarketData('10-06-2026')).rejects.toThrow(
@@ -103,11 +105,40 @@ describe('CoinGeckoClient', () => {
     const client = new CoinGeckoClient({
       fetchFn: jest.fn().mockResolvedValue(createJsonResponse({ market_data: {} })) as never,
       logger: { error: jest.fn() },
+      retryAttempts: 0,
     });
 
     await expect(client.fetchBitcoinMarketData('2026-06-10')).rejects.toThrow(
       'CoinGecko response is missing USD price',
     );
+  });
+
+  it('retries 429 responses with exponential backoff before succeeding', async () => {
+    const sleep = jest.fn().mockResolvedValue(undefined);
+    const fetchFn = jest
+      .fn()
+      .mockResolvedValueOnce({ ok: false, status: 429, json: jest.fn() })
+      .mockResolvedValueOnce({ ok: false, status: 429, json: jest.fn() })
+      .mockResolvedValue(
+        createJsonResponse({
+          market_data: {
+            current_price: { usd: 67234.5 },
+          },
+        }),
+      );
+    const client = new CoinGeckoClient({
+      fetchFn: fetchFn as never,
+      logger: { error: jest.fn() },
+      sleep,
+    });
+
+    await expect(client.fetchBitcoinMarketData('2026-06-10')).resolves.toMatchObject({
+      priceUsd: 67234.5,
+    });
+
+    expect(fetchFn).toHaveBeenCalledTimes(3);
+    expect(sleep).toHaveBeenCalledWith(1000);
+    expect(sleep).toHaveBeenCalledWith(2000);
   });
 });
 

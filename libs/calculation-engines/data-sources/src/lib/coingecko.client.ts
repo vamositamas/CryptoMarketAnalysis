@@ -1,4 +1,5 @@
 import PQueue from 'p-queue';
+import { retryWithBackoff, type RetryWithBackoffOptions } from './retry.util';
 
 export interface CoinGeckoBitcoinMarketData {
   date: string;
@@ -12,6 +13,9 @@ export interface CoinGeckoClientOptions {
   fetchFn?: typeof fetch;
   logger?: Pick<Console, 'error'>;
   queue?: RateLimitQueue;
+  retryAttempts?: number;
+  retryBaseDelayMs?: number;
+  sleep?: RetryWithBackoffOptions['sleep'];
 }
 
 interface RateLimitQueue {
@@ -37,11 +41,17 @@ export class CoinGeckoClient {
   private readonly fetchFn: typeof fetch;
   private readonly logger: Pick<Console, 'error'>;
   private readonly queue: RateLimitQueue;
+  private readonly retryAttempts: number;
+  private readonly retryBaseDelayMs: number;
+  private readonly sleep: RetryWithBackoffOptions['sleep'];
 
   constructor(options: CoinGeckoClientOptions = {}) {
     this.baseUrl = options.baseUrl ?? DEFAULT_BASE_URL;
     this.fetchFn = options.fetchFn ?? fetch;
     this.logger = options.logger ?? console;
+    this.retryAttempts = options.retryAttempts ?? 3;
+    this.retryBaseDelayMs = options.retryBaseDelayMs ?? 1000;
+    this.sleep = options.sleep;
     this.queue =
       options.queue ??
       new PQueue({
@@ -58,7 +68,17 @@ export class CoinGeckoClient {
   }
 
   async fetchBitcoinMarketData(date: string): Promise<CoinGeckoBitcoinMarketData> {
-    return this.queue.add(() => this.fetchBitcoinMarketDataNow(date));
+    return this.queue.add(() =>
+      retryWithBackoff(
+        () => this.fetchBitcoinMarketDataNow(date),
+        this.retryAttempts,
+        this.retryBaseDelayMs,
+        {
+          sleep: this.sleep,
+          shouldRetry: isRetryableCoinGeckoError,
+        },
+      ),
+    );
   }
 
   private async fetchBitcoinMarketDataNow(
@@ -98,6 +118,14 @@ export class CoinGeckoClient {
 
     return url.toString();
   }
+}
+
+function isRetryableCoinGeckoError(error: unknown): boolean {
+  if (!(error instanceof CoinGeckoClientError)) {
+    return true;
+  }
+
+  return error.statusCode === undefined || error.statusCode === 429 || error.statusCode >= 500;
 }
 
 export class CoinGeckoClientError extends Error {

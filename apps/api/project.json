@@ -37,6 +37,46 @@
         }
       }
     },
+    "build-init-historical": {
+      "executor": "@nx/esbuild:esbuild",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "platform": "node",
+        "outputPath": "dist/apps/api-init-historical",
+        "format": ["cjs"],
+        "bundle": false,
+        "main": "apps/api/src/jobs/init-historical-data.cli.ts",
+        "tsConfig": "apps/api/tsconfig.app.json",
+        "assets": [],
+        "generatePackageJson": false,
+        "esbuildOptions": {
+          "sourcemap": true,
+          "outExtension": {
+            ".js": ".js"
+          }
+        }
+      },
+      "configurations": {
+        "development": {},
+        "production": {
+          "esbuildOptions": {
+            "sourcemap": false,
+            "outExtension": {
+              ".js": ".js"
+            }
+          }
+        }
+      }
+    },
+    "data-init-historical": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build-init-historical"],
+      "options": {
+        "command": "node dist/apps/api-init-historical/init-historical-data.cli.js",
+        "forwardAllArgs": true
+      }
+    },
     "prune-lockfile": {
       "dependsOn": ["build"],
       "cache": true,

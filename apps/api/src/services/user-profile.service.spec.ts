@@ -21,8 +21,10 @@ function createUser(overrides: Partial<User> = {}): User {
 describe('UserProfileService', () => {
   const bcryptCompare = jest.spyOn(bcrypt, 'compare');
   const bcryptHash = jest.spyOn(bcrypt, 'hash');
+  const originalNodeEnv = process.env.NODE_ENV;
 
   afterEach(() => {
+    process.env.NODE_ENV = originalNodeEnv;
     jest.resetAllMocks();
   });
 
@@ -46,6 +48,29 @@ describe('UserProfileService', () => {
       emailVerified: true,
       onboardingCompleted: false,
       createdAt: '2026-06-11T10:00:00.000Z',
+    });
+  });
+
+  it('returns the development admin profile when the database is unavailable', async () => {
+    process.env.NODE_ENV = 'development';
+    const users = {
+      findById: jest
+        .fn()
+        .mockRejectedValue(new Error('getaddrinfo ENOTFOUND db.example.supabase.co')),
+      updateProfile: jest.fn(),
+      updatePasswordHash: jest.fn(),
+      markOnboardingCompleted: jest.fn(),
+    };
+    const service = new UserProfileService(users, {
+      invalidateUserTokens: jest.fn(),
+    });
+
+    await expect(service.getProfile('development-admin-user')).resolves.toMatchObject({
+      id: 'development-admin-user',
+      email: 'admin@cryptomarketanalysis.com',
+      role: 'administrator',
+      emailVerified: true,
+      onboardingCompleted: true,
     });
   });
 

@@ -107,6 +107,32 @@ describe('RBAC middleware', () => {
     expect(req.user?.role).toBe('free_user');
   });
 
+  it('allows the development admin token when token invalidation storage is unavailable', async () => {
+    const req = createRequest();
+    req.setHeader(
+      'authorization',
+      `Bearer ${createToken({
+        userId: 'development-admin-user',
+        email: 'admin@cryptomarketanalysis.com',
+        role: 'administrator',
+      })}`,
+    );
+    const res = createResponse();
+    const next = jest.fn() as NextFunction;
+
+    await requireAuth({
+      findLatestInvalidationForUser: jest
+        .fn()
+        .mockRejectedValue(new Error('getaddrinfo ENOTFOUND db.example.supabase.co')),
+    })(req, res, next);
+
+    expect(next).toHaveBeenCalled();
+    expect(req.user).toMatchObject({
+      userId: 'development-admin-user',
+      role: 'administrator',
+    });
+  });
+
   it('rejects tokens invalidated after issue time', async () => {
     const token = jwt.sign(
       {

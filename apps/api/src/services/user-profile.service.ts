@@ -7,6 +7,11 @@ import {
   type User,
   type UserProfileResponse,
 } from '@crypto-market-analysis/shared/types';
+import {
+  createDevelopmentAdminUser,
+  isDatabaseUnavailableError,
+  isDevelopmentAdminUserId,
+} from '../config/development-admin.config';
 import { TokenBlacklistRepository } from '../repositories/token-blacklist.repository';
 import { UserRepository } from '../repositories/user.repository';
 
@@ -116,8 +121,23 @@ export class UserProfileService {
   }
 
   private async findExistingUser(userId: string): Promise<User> {
-    const user = await this.users.findById(userId);
+    let user: User | undefined;
+
+    try {
+      user = await this.users.findById(userId);
+    } catch (error) {
+      if (isDevelopmentAdminUserId(userId) && isDatabaseUnavailableError(error)) {
+        return createDevelopmentAdminUser();
+      }
+
+      throw error;
+    }
+
     if (!user) {
+      if (isDevelopmentAdminUserId(userId)) {
+        return createDevelopmentAdminUser();
+      }
+
       throw new UserProfileError(404, 'User not found');
     }
 

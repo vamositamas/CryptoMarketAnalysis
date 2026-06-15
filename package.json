@@ -5,6 +5,7 @@
   "scripts": {
     "dev:api": "nx serve api",
     "dev:web": "nx serve web",
+    "data:init-historical": "nx run api:data-init-historical",
     "build": "nx run-many --target=build",
     "test": "nx run-many --target=test"
   },

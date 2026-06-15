@@ -19,10 +19,17 @@ import { EmailVerificationTokenRepository } from '../repositories/email-verifica
 import { PasswordResetTokenRepository } from '../repositories/password-reset-token.repository';
 import { TokenBlacklistRepository } from '../repositories/token-blacklist.repository';
 import { UserRepository } from '../repositories/user.repository';
+import {
+  createDevelopmentAdminUser,
+  getDevelopmentAdminPassword,
+  isDatabaseUnavailableError,
+  isDevelopmentAdminEmail,
+} from '../config/development-admin.config';
 import { ResendEmailService, type PasswordResetEmailSender } from './email.service';
 
 const PASSWORD_STRENGTH_ERROR =
   'Password must be at least 8 characters with 1 uppercase, 1 number, and 1 special character';
+let developmentAdminFallbackPassword: string | undefined;
 
 export class RegistrationError extends Error {
   constructor(
@@ -88,11 +95,19 @@ interface UserStore {
     passwordHash?: string;
     fullName?: string;
     languagePreference: RegisterRequest['languagePreference'];
-    role: 'free_user';
+    role: UserRole;
     emailVerified?: boolean;
     oauthProvider?: string;
     oauthProviderId?: string;
   }): Promise<{ id: string }>;
+  updateDevelopmentAdminCredentials?(
+    email: string,
+    input: {
+      passwordHash: string;
+      fullName?: string;
+      languagePreference: RegisterRequest['languagePreference'];
+    },
+  ): Promise<AuthUser | undefined>;
   markEmailVerified(userId: string): Promise<void>;
   updatePasswordHash?(userId: string, passwordHash: string): Promise<void>;
 }
@@ -127,19 +142,69 @@ export class AuthService {
 
     validateRegistrationRequest({ ...request, email: normalizedEmail });
 
-    const existingUser = await this.users.findByEmail(normalizedEmail);
-    if (existingUser) {
-      throw new RegistrationError(400, 'Email already registered');
+    const shouldBootstrapDevelopmentAdmin = isDevelopmentAdminEmail(normalizedEmail);
+    let existingUser: AuthUser | undefined;
+
+    try {
+      existingUser = await this.users.findByEmail(normalizedEmail);
+    } catch (error) {
+      if (shouldBootstrapDevelopmentAdmin && isDatabaseUnavailableError(error)) {
+        setDevelopmentAdminFallbackPassword(request.password);
+        logDevelopmentAdminFallback(error);
+
+        return {
+          message: 'Development administrator account is ready. You can log in now.',
+        };
+      }
+
+      throw error;
     }
 
     const passwordHash = await bcrypt.hash(request.password, 12);
+
+    if (existingUser) {
+      if (shouldBootstrapDevelopmentAdmin) {
+        try {
+          await this.updateDevelopmentAdminAccount(normalizedEmail, {
+            passwordHash,
+            fullName: request.fullName,
+            languagePreference: request.languagePreference,
+          });
+        } catch (error) {
+          if (isDatabaseUnavailableError(error)) {
+            setDevelopmentAdminFallbackPassword(request.password);
+            logDevelopmentAdminFallback(error);
+
+            return {
+              message: 'Development administrator account is ready. You can log in now.',
+            };
+          }
+
+          throw error;
+        }
+
+        return {
+          message: 'Development administrator account is ready. You can log in now.',
+        };
+      }
+
+      throw new RegistrationError(400, 'Email already registered');
+    }
+
     const user = await this.users.create({
       email: normalizedEmail,
       passwordHash,
       fullName: request.fullName,
       languagePreference: request.languagePreference,
-      role: 'free_user',
+      role: shouldBootstrapDevelopmentAdmin ? 'administrator' : 'free_user',
+      emailVerified: shouldBootstrapDevelopmentAdmin ? true : undefined,
     });
+
+    if (shouldBootstrapDevelopmentAdmin) {
+      return {
+        message: 'Development administrator account is ready. You can log in now.',
+      };
+    }
 
     await this.emailVerificationTokens.create({
       userId: user.id,
@@ -172,7 +237,19 @@ export class AuthService {
 
   async login(request: LoginRequest): Promise<LoginResponse> {
     const normalizedEmail = normalizeEmail(request.email);
-    const user = await this.users.findByEmail(normalizedEmail);
+    let user: AuthUser | undefined;
+
+    try {
+      user = await this.users.findByEmail(normalizedEmail);
+    } catch (error) {
+      if (isDevelopmentAdminEmail(normalizedEmail) && isDatabaseUnavailableError(error)) {
+        logDevelopmentAdminFallback(error);
+
+        return createDevelopmentAdminLoginResponse(request.password);
+      }
+
+      throw error;
+    }
 
     if (!user?.passwordHash) {
       logFailedLogin(normalizedEmail);
@@ -335,6 +412,24 @@ export class AuthService {
 
     return resetToken;
   }
+
+  private async updateDevelopmentAdminAccount(
+    email: string,
+    input: {
+      passwordHash: string;
+      fullName?: string;
+      languagePreference: RegisterRequest['languagePreference'];
+    },
+  ): Promise<void> {
+    if (!this.users.updateDevelopmentAdminCredentials) {
+      throw new Error('User store does not support development admin bootstrap');
+    }
+
+    const updatedUser = await this.users.updateDevelopmentAdminCredentials(email, input);
+    if (!updatedUser) {
+      throw new Error('Development admin account could not be updated');
+    }
+  }
 }
 
 function validateRegistrationRequest(request: RegisterRequest): void {
@@ -482,6 +577,35 @@ function logFailedLogin(email: string): void {
       timestamp: new Date().toISOString(),
     }),
   );
+}
+
+function logDevelopmentAdminFallback(error: unknown): void {
+  const message = error instanceof Error ? error.message : String(error);
+
+  console.warn(
+    JSON.stringify({
+      event: 'auth.development_admin_fallback',
+      message,
+      timestamp: new Date().toISOString(),
+    }),
+  );
+}
+
+function setDevelopmentAdminFallbackPassword(password: string): void {
+  developmentAdminFallbackPassword = password;
+}
+
+function getActiveDevelopmentAdminPassword(): string {
+  return developmentAdminFallbackPassword ?? getDevelopmentAdminPassword();
+}
+
+function createDevelopmentAdminLoginResponse(password: string): LoginResponse {
+  if (password !== getActiveDevelopmentAdminPassword()) {
+    logFailedLogin('development-admin');
+    throw new LoginError(401, 'Invalid email or password');
+  }
+
+  return createLoginResponse(createDevelopmentAdminUser());
 }
 
 function getFrontendUrl(): string {

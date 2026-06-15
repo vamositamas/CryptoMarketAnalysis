@@ -77,6 +77,31 @@ export interface ChangePasswordResponse {
   message: string;
 }
 
+export type RefreshFrequency = 'daily' | 'hourly' | 'manual';
+export type HistoricalDepth = '1_year' | '2_years' | '5_years' | 'all_time';
+
+export interface DataRefreshConfigurationResponse {
+  refreshFrequency: RefreshFrequency;
+  historicalDepth: HistoricalDepth;
+  lastRefresh: {
+    timestamp: string | null;
+    status: 'success' | 'failed' | 'never';
+  };
+}
+
+export interface UpdateDataRefreshConfigurationRequest {
+  refreshFrequency?: RefreshFrequency;
+  historicalDepth?: HistoricalDepth;
+}
+
+export interface ManualDataRefreshResponse {
+  success: true;
+  date: string;
+  dataPoints: number;
+  source: 'coingecko' | 'blockchain-info';
+  executionTimeMs: number;
+}
+
 interface CsrfTokenResponse {
   csrfToken: string;
 }
@@ -167,6 +192,35 @@ export class AuthApiClient {
   async completeCurrentUserOnboarding(): Promise<UserProfileResponse> {
     return this.postWithCsrf<UserProfileResponse>(
       '/api/users/me/complete-onboarding',
+      {},
+    );
+  }
+
+  async getDataRefreshConfiguration(): Promise<DataRefreshConfigurationResponse> {
+    try {
+      return await firstValueFrom(
+        this.http.get<DataRefreshConfigurationResponse>(
+          '/api/admin/data-configuration',
+          { withCredentials: true },
+        ),
+      );
+    } catch (error) {
+      throw toApiClientError(error);
+    }
+  }
+
+  async updateDataRefreshConfiguration(
+    request: UpdateDataRefreshConfigurationRequest,
+  ): Promise<DataRefreshConfigurationResponse> {
+    return this.patchWithCsrf<DataRefreshConfigurationResponse>(
+      '/api/admin/data-configuration',
+      request,
+    );
+  }
+
+  async runDataRefreshNow(): Promise<ManualDataRefreshResponse> {
+    return this.postWithCsrf<ManualDataRefreshResponse>(
+      '/api/admin/data-configuration/refresh-now',
       {},
     );
   }

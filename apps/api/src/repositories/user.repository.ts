@@ -103,6 +103,33 @@ export class UserRepository extends BaseRepository {
     );
   }
 
+  async updateDevelopmentAdminCredentials(
+    email: string,
+    input: {
+      passwordHash: string;
+      fullName?: string;
+      languagePreference: LanguagePreference;
+    },
+  ): Promise<User | undefined> {
+    const pool = this.requirePool();
+    const result = await pool.query(
+      `UPDATE users
+       SET password_hash = $2,
+           full_name = COALESCE($3, full_name, 'Admin User'),
+           language_preference = $4,
+           role = 'administrator',
+           email_verified = true,
+           oauth_provider = NULL,
+           oauth_provider_id = NULL,
+           updated_at = now()
+       WHERE email = $1
+       RETURNING *`,
+      [email, input.passwordHash, input.fullName, input.languagePreference],
+    );
+
+    return result.rows[0] ? this.toCamelCase<User>(result.rows[0]) : undefined;
+  }
+
   async updateProfile(
     userId: string,
     input: { fullName?: string; languagePreference: LanguagePreference },

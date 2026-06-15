@@ -1,6 +1,10 @@
 import jwt from 'jsonwebtoken';
 import type { NextFunction, Request, Response } from 'express';
 import type { UserRole } from '@crypto-market-analysis/shared/types';
+import {
+  isDatabaseUnavailableError,
+  isDevelopmentAdminUserId,
+} from '../config/development-admin.config';
 import { TokenBlacklistRepository } from '../repositories/token-blacklist.repository';
 
 export interface AuthenticatedRequest extends Request {
@@ -51,7 +55,8 @@ export function requireAuth(
       }
 
       const issuedAt = new Date(payload.iat * 1000);
-      const invalidatedAt = await tokenInvalidations.findLatestInvalidationForUser(
+      const invalidatedAt = await findLatestInvalidation(
+        tokenInvalidations,
         payload.userId,
       );
       if (invalidatedAt && issuedAt.getTime() <= invalidatedAt.getTime()) {
@@ -71,6 +76,21 @@ export function requireAuth(
       res.status(401).json({ error: 'Unauthorized' });
     }
   };
+}
+
+async function findLatestInvalidation(
+  tokenInvalidations: TokenInvalidationReader,
+  userId: string,
+): Promise<Date | undefined> {
+  try {
+    return await tokenInvalidations.findLatestInvalidationForUser(userId);
+  } catch (error) {
+    if (isDevelopmentAdminUserId(userId) && isDatabaseUnavailableError(error)) {
+      return undefined;
+    }
+
+    throw error;
+  }
 }
 
 export function requireRole(allowedRoles: UserRole[]) {

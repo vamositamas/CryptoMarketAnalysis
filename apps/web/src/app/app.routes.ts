@@ -4,6 +4,9 @@ import { ActivatedRoute, Route, Router, RouterLink } from '@angular/router';
 import {
   ApiClientError,
   AuthApiClient,
+  type DataRefreshConfigurationResponse,
+  type HistoricalDepth,
+  type RefreshFrequency,
 } from '@crypto-market-analysis/data-access/api-client';
 import { OnboardingCarouselComponent } from './components/onboarding-carousel/onboarding-carousel.component';
 import { roleGuard } from './guards/role.guard';
@@ -134,6 +137,190 @@ export class ChartsPage {}
   `,
 })
 export class AdminUsersPage {}
+
+@Component({
+  selector: 'app-admin-data-configuration-page',
+  imports: [ReactiveFormsModule],
+  template: `
+    <section class="content-section admin-config-section">
+      <div class="section-heading">
+        <p class="eyebrow" i18n="Admin data configuration eyebrow@@adminDataConfig.eyebrow">
+          Admin
+        </p>
+        <h2 i18n="Data configuration title@@adminDataConfig.title">
+          Data refresh configuration
+        </h2>
+      </div>
+
+      <form class="admin-config-form" [formGroup]="form" (ngSubmit)="save()">
+        <fieldset>
+          <legend i18n="Refresh frequency legend@@adminDataConfig.refreshFrequency">
+            Refresh frequency
+          </legend>
+          <label>
+            <input type="radio" formControlName="refreshFrequency" value="daily" />
+            <span i18n="Daily frequency option@@adminDataConfig.daily">Daily</span>
+          </label>
+          <label>
+            <input type="radio" formControlName="refreshFrequency" value="hourly" />
+            <span i18n="Hourly frequency option@@adminDataConfig.hourly">Hourly</span>
+          </label>
+          <label>
+            <input type="radio" formControlName="refreshFrequency" value="manual" />
+            <span i18n="Manual frequency option@@adminDataConfig.manual">Manual</span>
+          </label>
+        </fieldset>
+
+        <label class="select-label">
+          <span i18n="Historical depth label@@adminDataConfig.historicalDepth">
+            Historical depth
+          </span>
+          <select formControlName="historicalDepth">
+            <option value="1_year" i18n="One year depth@@adminDataConfig.oneYear">1 Year</option>
+            <option value="2_years" i18n="Two years depth@@adminDataConfig.twoYears">2 Years</option>
+            <option value="5_years" i18n="Five years depth@@adminDataConfig.fiveYears">5 Years</option>
+            <option value="all_time" i18n="All time depth@@adminDataConfig.allTime">All-time</option>
+          </select>
+        </label>
+
+        <div class="refresh-status">
+          <span i18n="Last refresh label@@adminDataConfig.lastRefresh">Last refresh</span>
+          <strong>{{ lastRefreshText() }}</strong>
+        </div>
+
+        @if (message()) {
+          <p class="form-message" [class.success]="isSuccess()">{{ message() }}</p>
+        }
+
+        <div class="admin-actions">
+          <button type="submit" [disabled]="form.invalid || isSaving()">
+            @if (isSaving()) {
+              <ng-container i18n="Saving configuration state@@adminDataConfig.saving">
+                Saving...
+              </ng-container>
+            } @else {
+              <ng-container i18n="Save configuration button@@adminDataConfig.save">
+                Save Configuration
+              </ng-container>
+            }
+          </button>
+
+          @if (configuration()?.refreshFrequency === 'manual') {
+            <button
+              type="button"
+              class="secondary-button"
+              (click)="refreshNow()"
+              [disabled]="isRefreshing()"
+            >
+              @if (isRefreshing()) {
+                <ng-container i18n="Refreshing now state@@adminDataConfig.refreshing">
+                  Refreshing...
+                </ng-container>
+              } @else {
+                <ng-container i18n="Refresh now button@@adminDataConfig.refreshNow">
+                  Refresh Now
+                </ng-container>
+              }
+            </button>
+          }
+        </div>
+      </form>
+    </section>
+  `,
+})
+export class AdminDataConfigurationPage {
+  private readonly fb = inject(FormBuilder);
+  private readonly auth = inject(AuthApiClient);
+  protected readonly configuration = signal<DataRefreshConfigurationResponse | null>(null);
+  protected readonly isSaving = signal(false);
+  protected readonly isRefreshing = signal(false);
+  protected readonly message = signal('');
+  protected readonly isSuccess = signal(false);
+  protected readonly form = this.fb.nonNullable.group({
+    refreshFrequency: this.fb.nonNullable.control<RefreshFrequency>('daily', Validators.required),
+    historicalDepth: this.fb.nonNullable.control<HistoricalDepth>('all_time', Validators.required),
+  });
+
+  constructor() {
+    void this.loadConfiguration();
+  }
+
+  protected lastRefreshText(): string {
+    const lastRefresh = this.configuration()?.lastRefresh;
+
+    if (!lastRefresh || !lastRefresh.timestamp) {
+      return $localize`:Never refreshed status@@adminDataConfig.never:Never`;
+    }
+
+    return `${new Date(lastRefresh.timestamp).toISOString().replace('T', ' ').replace('.000Z', ' UTC')} (${lastRefresh.status})`;
+  }
+
+  protected async save(): Promise<void> {
+    if (this.form.invalid || this.isSaving()) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    this.isSaving.set(true);
+    this.message.set('');
+    this.isSuccess.set(false);
+
+    try {
+      const configuration = await this.auth.updateDataRefreshConfiguration(
+        this.form.getRawValue(),
+      );
+      this.configuration.set(configuration);
+      this.form.setValue({
+        refreshFrequency: configuration.refreshFrequency,
+        historicalDepth: configuration.historicalDepth,
+      });
+      this.isSuccess.set(true);
+      this.message.set(
+        $localize`:Configuration updated success@@adminDataConfig.updated:Configuration updated successfully`,
+      );
+    } catch (error) {
+      this.message.set(getErrorMessage(error));
+    } finally {
+      this.isSaving.set(false);
+    }
+  }
+
+  protected async refreshNow(): Promise<void> {
+    if (this.isRefreshing()) {
+      return;
+    }
+
+    this.isRefreshing.set(true);
+    this.message.set('');
+    this.isSuccess.set(false);
+
+    try {
+      await this.auth.runDataRefreshNow();
+      await this.loadConfiguration();
+      this.isSuccess.set(true);
+      this.message.set(
+        $localize`:Manual refresh success@@adminDataConfig.refreshComplete:Data refresh completed successfully`,
+      );
+    } catch (error) {
+      this.message.set(getErrorMessage(error));
+    } finally {
+      this.isRefreshing.set(false);
+    }
+  }
+
+  private async loadConfiguration(): Promise<void> {
+    try {
+      const configuration = await this.auth.getDataRefreshConfiguration();
+      this.configuration.set(configuration);
+      this.form.setValue({
+        refreshFrequency: configuration.refreshFrequency,
+        historicalDepth: configuration.historicalDepth,
+      });
+    } catch (error) {
+      this.message.set(getErrorMessage(error));
+    }
+  }
+}
 
 @Component({
   selector: 'app-onboarding-page',
@@ -591,6 +778,12 @@ export const appRoutes: Route[] = [
   {
     path: 'admin/users',
     component: AdminUsersPage,
+    canActivate: [roleGuard],
+    data: { roles: ['administrator'] },
+  },
+  {
+    path: 'admin/data-configuration',
+    component: AdminDataConfigurationPage,
     canActivate: [roleGuard],
     data: { roles: ['administrator'] },
   },

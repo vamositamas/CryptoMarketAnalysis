@@ -116,6 +116,89 @@ describe('protected route wiring', () => {
     expect(response.body).toEqual({ error: 'Insufficient permissions' });
   });
 
+  it('allows administrators to read data refresh configuration', async () => {
+    const dataRefreshConfigurationService = {
+      getConfiguration: jest.fn().mockResolvedValue({
+        refreshFrequency: 'daily',
+        historicalDepth: 'all_time',
+        lastRefresh: { timestamp: '2026-06-09T00:05:23.000Z', status: 'success' },
+      }),
+      updateConfiguration: jest.fn(),
+    };
+    const response = createResponse();
+
+    await runHandlers(
+      getHandler(
+        createAdminRouter({ dataRefreshConfigurationService, tokenInvalidations }),
+        '/data-configuration',
+      ),
+      createRequest(createToken('administrator')),
+      response,
+    );
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toMatchObject({
+      refreshFrequency: 'daily',
+      historicalDepth: 'all_time',
+    });
+  });
+
+  it('allows administrators to update data refresh configuration', async () => {
+    const dataRefreshConfigurationService = {
+      getConfiguration: jest.fn(),
+      updateConfiguration: jest.fn().mockResolvedValue({
+        refreshFrequency: 'manual',
+        historicalDepth: '1_year',
+        lastRefresh: { timestamp: null, status: 'never' },
+      }),
+    };
+    const response = createResponse();
+    const requestBody = { refreshFrequency: 'manual', historicalDepth: '1_year' };
+
+    await runHandlers(
+      getHandler(
+        createAdminRouter({ dataRefreshConfigurationService, tokenInvalidations }),
+        '/data-configuration',
+        'patch',
+      ),
+      createRequest(createToken('administrator'), requestBody),
+      response,
+    );
+
+    expect(dataRefreshConfigurationService.updateConfiguration).toHaveBeenCalledWith(requestBody);
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toMatchObject({
+      refreshFrequency: 'manual',
+      historicalDepth: '1_year',
+    });
+  });
+
+  it('allows administrators to manually trigger data refresh', async () => {
+    const dailyDataRefreshService = {
+      run: jest.fn().mockResolvedValue({
+        success: true,
+        date: '2026-06-09',
+        dataPoints: 1,
+        source: 'coingecko',
+      }),
+    };
+    const response = createResponse();
+
+    await runHandlers(
+      getHandler(
+        createAdminRouter({ dailyDataRefreshService, tokenInvalidations }),
+        '/data-configuration/refresh-now',
+        'post',
+      ),
+      createRequest(createToken('administrator')),
+      response,
+    );
+
+    expect(dailyDataRefreshService.run).toHaveBeenCalledTimes(1);
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toMatchObject({ success: true, dataPoints: 1 });
+  });
+
   it('allows authenticated users to create alerts', async () => {
     const response = createResponse();
 
