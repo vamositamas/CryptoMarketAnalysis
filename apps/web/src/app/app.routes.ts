@@ -504,12 +504,8 @@ export class ResetPasswordPage {
         <label>
           <span i18n="Language form label@@form.language">Language</span>
           <select formControlName="languagePreference">
-            <option value="en" i18n="English language option@@language.english">
-              English
-            </option>
-            <option value="hu" i18n="Hungarian language option@@language.hungarian">
-              Hungarian
-            </option>
+            <option value="en" i18n="English language option@@language.english">English</option>
+            <option value="hu" i18n="Hungarian language option@@language.hungarian">Hungarian</option>
           </select>
         </label>
         @if (passwordMismatch()) {

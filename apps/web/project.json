@@ -89,6 +89,15 @@
       },
       "defaultConfiguration": "development"
     },
+    "extract-i18n": {
+      "executor": "@angular/build:extract-i18n",
+      "options": {
+        "buildTarget": "web:build:development",
+        "format": "xlf",
+        "outputPath": "apps/web/src/locale",
+        "outFile": "messages.xlf"
+      }
+    },
     "lint": {
       "executor": "@nx/eslint:lint"
     },

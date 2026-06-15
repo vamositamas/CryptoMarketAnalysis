@@ -1,0 +1,26 @@
+{
+  "name": "data-sources",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/calculation-engines/data-sources/src",
+  "projectType": "library",
+  "tags": ["type:util", "scope:backend"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/calculation-engines/data-sources",
+        "main": "libs/calculation-engines/data-sources/src/index.ts",
+        "tsConfig": "libs/calculation-engines/data-sources/tsconfig.lib.json",
+        "assets": ["libs/calculation-engines/data-sources/*.md"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/calculation-engines/data-sources/jest.config.cts"
+      }
+    }
+  }
+}

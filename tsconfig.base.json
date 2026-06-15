@@ -26,6 +26,9 @@
       "@crypto-market-analysis/calculation-engines/indicators": [
         "./libs/calculation-engines/indicators/src/index.ts"
       ],
+      "@crypto-market-analysis/calculation-engines/data-sources": [
+        "./libs/calculation-engines/data-sources/src/index.ts"
+      ],
       "@crypto-market-analysis/calculation-engines/formula-parser": [
         "./libs/calculation-engines/formula-parser/src/index.ts"
       ],

@@ -1,0 +1,767 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file source-language="en" datatype="plaintext" original="ng2.template">
+    <body>
+      <trans-unit id="app.name" datatype="html">
+        <source>CryptoMarketAnalysis</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">5,8</context>
+        </context-group>
+        <note priority="1" from="description">Application name</note>
+      </trans-unit>
+      <trans-unit id="nav.dashboard" datatype="html">
+        <source>Dashboard</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">10,12</context>
+        </context-group>
+        <note priority="1" from="description">Dashboard navigation label</note>
+      </trans-unit>
+      <trans-unit id="nav.charts" datatype="html">
+        <source>Charts</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">13,15</context>
+        </context-group>
+        <note priority="1" from="description">Charts navigation label</note>
+      </trans-unit>
+      <trans-unit id="nav.onboarding" datatype="html">
+        <source>Onboarding</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">16,20</context>
+        </context-group>
+        <note priority="1" from="description">Onboarding navigation label</note>
+      </trans-unit>
+      <trans-unit id="language.selector" datatype="html">
+        <source>Language</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">22,23</context>
+        </context-group>
+        <note priority="1" from="description">Language selector label</note>
+      </trans-unit>
+      <trans-unit id="language.english" datatype="html">
+        <source>English</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">24,25</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">507,508</context>
+        </context-group>
+        <note priority="1" from="description">English language option</note>
+      </trans-unit>
+      <trans-unit id="language.hungarian" datatype="html">
+        <source>Hungarian</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">25,28</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">508,511</context>
+        </context-group>
+        <note priority="1" from="description">Hungarian language option</note>
+      </trans-unit>
+      <trans-unit id="auth.login" datatype="html">
+        <source>Login</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">28,29</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">168,169</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">183,185</context>
+        </context-group>
+        <note priority="1" from="description">Login link</note>
+      </trans-unit>
+      <trans-unit id="auth.register" datatype="html">
+        <source>Register</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">29,34</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">485,486</context>
+        </context-group>
+        <note priority="1" from="description">Register link</note>
+      </trans-unit>
+      <trans-unit id="hero.eyebrow" datatype="html">
+        <source> Bitcoin analytics workspace </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">37,39</context>
+        </context-group>
+        <note priority="1" from="description">Hero eyebrow</note>
+      </trans-unit>
+      <trans-unit id="hero.title" datatype="html">
+        <source> Bitcoin market intelligence for cycle-aware decisions </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">40,42</context>
+        </context-group>
+        <note priority="1" from="description">Hero title</note>
+      </trans-unit>
+      <trans-unit id="hero.text" datatype="html">
+        <source> Track on-chain valuation, cycle signals, and model context in one focused workspace. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">43,45</context>
+        </context-group>
+        <note priority="1" from="description">Hero supporting copy</note>
+      </trans-unit>
+      <trans-unit id="hero.cta" datatype="html">
+        <source> Review dashboard </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">47,50</context>
+        </context-group>
+        <note priority="1" from="description">Hero primary action</note>
+      </trans-unit>
+      <trans-unit id="hero.secondaryCta" datatype="html">
+        <source> Create account </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">54,57</context>
+        </context-group>
+        <note priority="1" from="description">Hero secondary action</note>
+      </trans-unit>
+      <trans-unit id="market.previewAria" datatype="html">
+        <source>Bitcoin market signal preview</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">61,62</context>
+        </context-group>
+        <note priority="1" from="description">Market preview accessibility label</note>
+      </trans-unit>
+      <trans-unit id="market.state" datatype="html">
+        <source>Market state</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">65,66</context>
+        </context-group>
+        <note priority="1" from="description">Market state label</note>
+      </trans-unit>
+      <trans-unit id="metric.risk" datatype="html">
+        <source>Cycle risk</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">77</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">89,91</context>
+        </context-group>
+        <note priority="1" from="description">Cycle risk label</note>
+      </trans-unit>
+      <trans-unit id="metric.signalQuality" datatype="html">
+        <source>Signal quality</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">78,79</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">99,101</context>
+        </context-group>
+        <note priority="1" from="description">Signal quality label</note>
+      </trans-unit>
+      <trans-unit id="kpi.gridAria" datatype="html">
+        <source>Market KPI widgets</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">85,86</context>
+        </context-group>
+        <note priority="1" from="description">Market KPI widgets accessibility label</note>
+      </trans-unit>
+      <trans-unit id="metric.cycle" datatype="html">
+        <source>Cycle</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">91,93</context>
+        </context-group>
+        <note priority="1" from="description">Cycle label</note>
+      </trans-unit>
+      <trans-unit id="metric.activeModels" datatype="html">
+        <source>Active models</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">94,96</context>
+        </context-group>
+        <note priority="1" from="description">Active models label</note>
+      </trans-unit>
+      <trans-unit id="metric.model" datatype="html">
+        <source>Model</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">96,98</context>
+        </context-group>
+        <note priority="1" from="description">Model label</note>
+      </trans-unit>
+      <trans-unit id="metric.momentum" datatype="html">
+        <source>Momentum</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">101,105</context>
+        </context-group>
+        <note priority="1" from="description">Momentum label</note>
+      </trans-unit>
+      <trans-unit id="dashboard.eyebrow" datatype="html">
+        <source> Model overview </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">19,21</context>
+        </context-group>
+        <note priority="1" from="description">Dashboard eyebrow</note>
+      </trans-unit>
+      <trans-unit id="dashboard.title" datatype="html">
+        <source>Bitcoin cycle dashboard</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">21,23</context>
+        </context-group>
+        <note priority="1" from="description">Dashboard title</note>
+      </trans-unit>
+      <trans-unit id="dashboard.mvrvSummary" datatype="html">
+        <source> Valuation stretch is below overheated territory. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">28,30</context>
+        </context-group>
+        <note priority="1" from="description">MVRV summary</note>
+      </trans-unit>
+      <trans-unit id="dashboard.rainbowSummary" datatype="html">
+        <source> Price sits in the accumulation-to-fair-value band. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">35,38</context>
+        </context-group>
+        <note priority="1" from="description">Rainbow summary</note>
+      </trans-unit>
+      <trans-unit id="dashboard.piCycleSummary" datatype="html">
+        <source> Moving averages have not produced a top signal. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">42,45</context>
+        </context-group>
+        <note priority="1" from="description">Pi Cycle summary</note>
+      </trans-unit>
+      <trans-unit id="onboarding.dialog" datatype="html">
+        <source>Onboarding</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">52,53</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">208,209</context>
+        </context-group>
+        <note priority="1" from="description">Onboarding dialog label</note>
+      </trans-unit>
+      <trans-unit id="charts.eyebrow" datatype="html">
+        <source> Chart library </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">100,102</context>
+        </context-group>
+        <note priority="1" from="description">Chart library eyebrow</note>
+      </trans-unit>
+      <trans-unit id="charts.title" datatype="html">
+        <source>Tracked Bitcoin models</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">102,104</context>
+        </context-group>
+        <note priority="1" from="description">Chart library title</note>
+      </trans-unit>
+      <trans-unit id="admin.eyebrow" datatype="html">
+        <source>Admin</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">121,122</context>
+        </context-group>
+        <note priority="1" from="description">Admin eyebrow</note>
+      </trans-unit>
+      <trans-unit id="admin.usersTitle" datatype="html">
+        <source>User management</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">122,125</context>
+        </context-group>
+        <note priority="1" from="description">User management title</note>
+      </trans-unit>
+      <trans-unit id="admin.users" datatype="html">
+        <source>Users</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">126,127</context>
+        </context-group>
+        <note priority="1" from="description">Users label</note>
+      </trans-unit>
+      <trans-unit id="status.ready" datatype="html">
+        <source>Ready</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">127,128</context>
+        </context-group>
+        <note priority="1" from="description">Ready status</note>
+      </trans-unit>
+      <trans-unit id="admin.usersSummary" datatype="html">
+        <source> Administrative user list API access is role protected. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">129,132</context>
+        </context-group>
+        <note priority="1" from="description">Admin user access summary</note>
+      </trans-unit>
+      <trans-unit id="onboarding.dismissed" datatype="html">
+        <source>Onboarding dismissed. Account completion tracking will be enabled next.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">158</context>
+        </context-group>
+        <note priority="1" from="description">Onboarding dismissed message</note>
+      </trans-unit>
+      <trans-unit id="form.email" datatype="html">
+        <source> Email<x id="TAG_INPUT" ctype="x-input" equiv-text="&lt;input type=&quot;email&quot; autocomplete=&quot;email&quot; formControlName=&quot;email&quot; /&gt;"/></source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">170,171</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">306,307</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">490,491</context>
+        </context-group>
+        <note priority="1" from="description">Email label</note>
+      </trans-unit>
+      <trans-unit id="form.password" datatype="html">
+        <source> Password <x id="TAG_INPUT" ctype="x-input" equiv-text="&lt;input type=&quot;password&quot; autocomplete=&quot;current-password&quot; formControlName=&quot;password&quot; /&gt;"/></source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">173,175</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">493,495</context>
+        </context-group>
+        <note priority="1" from="description">Password label</note>
+      </trans-unit>
+      <trans-unit id="auth.loggingIn" datatype="html">
+        <source>Logging in...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">181,183</context>
+        </context-group>
+        <note priority="1" from="description">Logging in state</note>
+      </trans-unit>
+      <trans-unit id="auth.google" datatype="html">
+        <source> Continue with Google </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">192,195</context>
+        </context-group>
+        <note priority="1" from="description">Continue with Google button</note>
+      </trans-unit>
+      <trans-unit id="auth.forgotPassword" datatype="html">
+        <source> Forgot password? </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">199,203</context>
+        </context-group>
+        <note priority="1" from="description">Forgot password link</note>
+      </trans-unit>
+      <trans-unit id="auth.loginOnboardingRequired" datatype="html">
+        <source>Login successful. Complete the quick orientation to continue.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">255</context>
+        </context-group>
+        <note priority="1" from="description">Login onboarding required message</note>
+      </trans-unit>
+      <trans-unit id="auth.loginSuccess" datatype="html">
+        <source>Login successful. Redirecting to dashboard.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">261</context>
+        </context-group>
+        <note priority="1" from="description">Login success message</note>
+      </trans-unit>
+      <trans-unit id="onboarding.completing" datatype="html">
+        <source>Completing onboarding...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">278</context>
+        </context-group>
+        <note priority="1" from="description">Completing onboarding state</note>
+      </trans-unit>
+      <trans-unit id="passwordReset.title" datatype="html">
+        <source>Reset password</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">304,306</context>
+        </context-group>
+        <note priority="1" from="description">Reset password title</note>
+      </trans-unit>
+      <trans-unit id="passwordReset.sending" datatype="html">
+        <source>Sending...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">313,315</context>
+        </context-group>
+        <note priority="1" from="description">Sending state</note>
+      </trans-unit>
+      <trans-unit id="passwordReset.send" datatype="html">
+        <source> Send reset instructions </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">316,319</context>
+        </context-group>
+        <note priority="1" from="description">Send reset instructions button</note>
+      </trans-unit>
+      <trans-unit id="passwordReset.chooseNew" datatype="html">
+        <source> Choose a new password </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">363,365</context>
+        </context-group>
+        <note priority="1" from="description">Choose new password title</note>
+      </trans-unit>
+      <trans-unit id="passwordReset.invalidToken" datatype="html">
+        <source> Reset link is invalid or expired </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">367,370</context>
+        </context-group>
+        <note priority="1" from="description">Invalid reset token message</note>
+      </trans-unit>
+      <trans-unit id="form.newPassword" datatype="html">
+        <source> New password <x id="TAG_INPUT" ctype="x-input" equiv-text="&lt;input type=&quot;password&quot; autocomplete=&quot;new-password&quot; formControlName=&quot;password&quot; /&gt;"/></source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">371,373</context>
+        </context-group>
+        <note priority="1" from="description">New password label</note>
+      </trans-unit>
+      <trans-unit id="form.confirmPassword" datatype="html">
+        <source> Confirm password <x id="TAG_INPUT" ctype="x-input" equiv-text="&lt;input
+              type=&quot;password&quot;
+              autocomplete=&quot;new-password&quot;
+              formControlName=&quot;confirmPassword&quot;
+            /&gt;"/></source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">375,381</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">497,503</context>
+        </context-group>
+        <note priority="1" from="description">Confirm password label</note>
+      </trans-unit>
+      <trans-unit id="form.passwordMismatch" datatype="html">
+        <source> Passwords do not match. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">384,387</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">513,516</context>
+        </context-group>
+        <note priority="1" from="description">Passwords mismatch</note>
+      </trans-unit>
+      <trans-unit id="passwordReset.resetting" datatype="html">
+        <source> Resetting... </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">396,398</context>
+        </context-group>
+        <note priority="1" from="description">Resetting password state</note>
+      </trans-unit>
+      <trans-unit id="passwordReset.reset" datatype="html">
+        <source> Reset password </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">400,402</context>
+        </context-group>
+        <note priority="1" from="description">Reset password button</note>
+      </trans-unit>
+      <trans-unit id="form.fullName" datatype="html">
+        <source> Full name<x id="TAG_INPUT" ctype="x-input" equiv-text="&lt;input type=&quot;text&quot; autocomplete=&quot;name&quot; formControlName=&quot;fullName&quot; /&gt;"/></source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">487,488</context>
+        </context-group>
+        <note priority="1" from="description">Full name label</note>
+      </trans-unit>
+      <trans-unit id="form.language" datatype="html">
+        <source>Language</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">505,506</context>
+        </context-group>
+        <note priority="1" from="description">Language form label</note>
+      </trans-unit>
+      <trans-unit id="auth.creatingAccount" datatype="html">
+        <source> Creating account... </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">522,524</context>
+        </context-group>
+        <note priority="1" from="description">Creating account state</note>
+      </trans-unit>
+      <trans-unit id="auth.createAccount" datatype="html">
+        <source> Create account </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">526,529</context>
+        </context-group>
+        <note priority="1" from="description">Create account button</note>
+      </trans-unit>
+      <trans-unit id="errors.requestFailed" datatype="html">
+        <source>The request could not be completed. Please try again.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">584</context>
+        </context-group>
+        <note priority="1" from="description">Generic request failure</note>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.aria" datatype="html">
+        <source>Onboarding carousel</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/onboarding-carousel/onboarding-carousel.component.html</context>
+          <context context-type="linenumber">3,4</context>
+        </context-group>
+        <note priority="1" from="description">Onboarding carousel accessibility label</note>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.skip" datatype="html">
+        <source> Skip </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/onboarding-carousel/onboarding-carousel.component.html</context>
+          <context context-type="linenumber">14,19</context>
+        </context-group>
+        <note priority="1" from="description">Skip onboarding button</note>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.previous" datatype="html">
+        <source>Previous slide</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/onboarding-carousel/onboarding-carousel.component.html</context>
+          <context context-type="linenumber">25,26</context>
+        </context-group>
+        <note priority="1" from="description">Previous slide button</note>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.eyebrow" datatype="html">
+        <source> Quick orientation </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/onboarding-carousel/onboarding-carousel.component.html</context>
+          <context context-type="linenumber">34,36</context>
+        </context-group>
+        <note priority="1" from="description">Onboarding carousel eyebrow</note>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.next" datatype="html">
+        <source>Next</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/onboarding-carousel/onboarding-carousel.component.html</context>
+          <context context-type="linenumber">62,65</context>
+        </context-group>
+        <note priority="1" from="description">Next slide button</note>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.complete" datatype="html">
+        <source> Get Started </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/onboarding-carousel/onboarding-carousel.component.html</context>
+          <context context-type="linenumber">68,74</context>
+        </context-group>
+        <note priority="1" from="description">Complete onboarding button</note>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.indicators" datatype="html">
+        <source>Onboarding slides</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/onboarding-carousel/onboarding-carousel.component.html</context>
+          <context context-type="linenumber">76,77</context>
+        </context-group>
+        <note priority="1" from="description">Slide indicator group</note>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide1.headline" datatype="html">
+        <source>Welcome to CryptoMarketAnalysis</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/onboarding-carousel/onboarding-carousel.component.ts</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+        <note priority="1" from="description">Onboarding slide 1 headline</note>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide1.subheading" datatype="html">
+        <source>Professional Bitcoin analysis tools, free forever</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/onboarding-carousel/onboarding-carousel.component.ts</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+        <note priority="1" from="description">Onboarding slide 1 subheading</note>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide1.body" datatype="html">
+        <source>Follow cycle signals, valuation models, and on-chain context from a focused workspace built for long-term market decisions.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/onboarding-carousel/onboarding-carousel.component.ts</context>
+          <context context-type="linenumber">26</context>
+        </context-group>
+        <note priority="1" from="description">Onboarding slide 1 body</note>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide1.visual" datatype="html">
+        <source>Cycle signal</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/onboarding-carousel/onboarding-carousel.component.ts</context>
+          <context context-type="linenumber">27</context>
+        </context-group>
+        <note priority="1" from="description">Onboarding slide 1 visual</note>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide1.metric1" datatype="html">
+        <source>Market state</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/onboarding-carousel/onboarding-carousel.component.ts</context>
+          <context context-type="linenumber">29</context>
+        </context-group>
+        <note priority="1" from="description">Onboarding slide 1 metric 1</note>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide1.metric2" datatype="html">
+        <source>Cycle risk</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/onboarding-carousel/onboarding-carousel.component.ts</context>
+          <context context-type="linenumber">30</context>
+        </context-group>
+        <note priority="1" from="description">Onboarding slide 1 metric 2</note>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide1.metric3" datatype="html">
+        <source>Model context</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/onboarding-carousel/onboarding-carousel.component.ts</context>
+          <context context-type="linenumber">31</context>
+        </context-group>
+        <note priority="1" from="description">Onboarding slide 1 metric 3</note>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide2.headline" datatype="html">
+        <source>Personalize your dashboard</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/onboarding-carousel/onboarding-carousel.component.ts</context>
+          <context context-type="linenumber">35</context>
+        </context-group>
+        <note priority="1" from="description">Onboarding slide 2 headline</note>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide2.subheading" datatype="html">
+        <source>Keep the indicators you care about closest</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/onboarding-carousel/onboarding-carousel.component.ts</context>
+          <context context-type="linenumber">36</context>
+        </context-group>
+        <note priority="1" from="description">Onboarding slide 2 subheading</note>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide2.body" datatype="html">
+        <source>Start with curated KPI widgets, then shape your workspace around valuation, momentum, alerts, and research workflows.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/onboarding-carousel/onboarding-carousel.component.ts</context>
+          <context context-type="linenumber">37</context>
+        </context-group>
+        <note priority="1" from="description">Onboarding slide 2 body</note>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide2.visual" datatype="html">
+        <source>Dashboard widgets</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/onboarding-carousel/onboarding-carousel.component.ts</context>
+          <context context-type="linenumber">38</context>
+        </context-group>
+        <note priority="1" from="description">Onboarding slide 2 visual</note>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide2.metric1" datatype="html">
+        <source>MVRV Z-Score</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/onboarding-carousel/onboarding-carousel.component.ts</context>
+          <context context-type="linenumber">40</context>
+        </context-group>
+        <note priority="1" from="description">Onboarding slide 2 metric 1</note>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide2.metric2" datatype="html">
+        <source>Rainbow band</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/onboarding-carousel/onboarding-carousel.component.ts</context>
+          <context context-type="linenumber">41</context>
+        </context-group>
+        <note priority="1" from="description">Onboarding slide 2 metric 2</note>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide2.metric3" datatype="html">
+        <source>Pi Cycle</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/onboarding-carousel/onboarding-carousel.component.ts</context>
+          <context context-type="linenumber">42</context>
+        </context-group>
+        <note priority="1" from="description">Onboarding slide 2 metric 3</note>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide3.headline" datatype="html">
+        <source>Explore charts and alerts</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/onboarding-carousel/onboarding-carousel.component.ts</context>
+          <context context-type="linenumber">46</context>
+        </context-group>
+        <note priority="1" from="description">Onboarding slide 3 headline</note>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide3.subheading" datatype="html">
+        <source>Turn Bitcoin models into daily operating signals</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/onboarding-carousel/onboarding-carousel.component.ts</context>
+          <context context-type="linenumber">47</context>
+        </context-group>
+        <note priority="1" from="description">Onboarding slide 3 subheading</note>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide3.body" datatype="html">
+        <source>Open historical charts, compare timeframes, and prepare alerts so important threshold changes do not slip past you.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/onboarding-carousel/onboarding-carousel.component.ts</context>
+          <context context-type="linenumber">48</context>
+        </context-group>
+        <note priority="1" from="description">Onboarding slide 3 body</note>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide3.visual" datatype="html">
+        <source>Charts and alerts</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/onboarding-carousel/onboarding-carousel.component.ts</context>
+          <context context-type="linenumber">49</context>
+        </context-group>
+        <note priority="1" from="description">Onboarding slide 3 visual</note>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide3.metric1" datatype="html">
+        <source>Chart library</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/onboarding-carousel/onboarding-carousel.component.ts</context>
+          <context context-type="linenumber">51</context>
+        </context-group>
+        <note priority="1" from="description">Onboarding slide 3 metric 1</note>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide3.metric2" datatype="html">
+        <source>Timeframes</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/onboarding-carousel/onboarding-carousel.component.ts</context>
+          <context context-type="linenumber">52</context>
+        </context-group>
+        <note priority="1" from="description">Onboarding slide 3 metric 2</note>
+      </trans-unit>
+      <trans-unit id="onboardingCarousel.slide3.metric3" datatype="html">
+        <source>Alerts</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/onboarding-carousel/onboarding-carousel.component.ts</context>
+          <context context-type="linenumber">53</context>
+        </context-group>
+        <note priority="1" from="description">Onboarding slide 3 metric 3</note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
