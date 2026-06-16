@@ -5,6 +5,7 @@ import { enforceHttps, securityHeaders } from './middleware/security.middleware'
 import { createAdminRouter } from './routes/admin.route';
 import { createAlertsRouter } from './routes/alerts.route';
 import { createAuthRouter } from './routes/auth.route';
+import { createChartsRouter } from './routes/charts.route';
 import { errorHandler } from './middleware/error.middleware';
 import { createHealthRouter } from './routes/health.route';
 import { createUsersRouter } from './routes/users.route';
@@ -25,6 +26,7 @@ export function createApp() {
   app.use('/api/users', createUsersRouter());
   app.use('/api/admin', createAdminRouter());
   app.use('/api/alerts', createAlertsRouter());
+  app.use('/api/charts', createChartsRouter());
   app.use('/api/health', createHealthRouter());
 
   app.get('/', (req, res) => {

@@ -95,28 +95,6 @@ export class DashboardPage {
 }
 
 @Component({
-  selector: 'app-charts-page',
-  template: `
-    <section class="content-section">
-      <div class="section-heading">
-        <p class="eyebrow" i18n="Chart library eyebrow@@charts.eyebrow">
-          Chart library
-        </p>
-        <h2 i18n="Chart library title@@charts.title">Tracked Bitcoin models</h2>
-      </div>
-      <div class="chart-list">
-        <a href="/docs/specificaton/MVRVZ-Score.md">MVRV Z-Score</a>
-        <a href="/docs/specificaton/BitcoinRainbowPriceChartIndicator.md">Bitcoin Rainbow Price Chart</a>
-        <a href="/docs/specificaton/PiCycleTopIndicator.md">Pi Cycle Top Indicator</a>
-        <a href="/docs/specificaton/Stock-to-FlowModel.md">Stock-to-Flow Model</a>
-        <a href="/docs/specificaton/RealizedPrice.md">Realized Price</a>
-      </div>
-    </section>
-  `,
-})
-export class ChartsPage {}
-
-@Component({
   selector: 'app-admin-users-page',
   template: `
     <section class="content-section">
@@ -774,7 +752,27 @@ function getErrorMessage(error: unknown): string {
 export const appRoutes: Route[] = [
   { path: '', component: DashboardPage },
   { path: 'dashboard', component: DashboardPage },
-  { path: 'charts', component: ChartsPage },
+  {
+    path: 'charts',
+    loadComponent: () =>
+      import('./components/chart-library/chart-library.component').then(
+        (module) => module.ChartLibraryComponent,
+      ),
+  },
+  {
+    path: 'charts/bitcoin-rainbow',
+    loadComponent: () =>
+      import(
+        './components/bitcoin-rainbow-chart-page/bitcoin-rainbow-chart-page.component'
+      ).then((module) => module.BitcoinRainbowChartPageComponent),
+  },
+  {
+    path: 'charts/:chartId',
+    loadComponent: () =>
+      import(
+        './components/chart-detail-placeholder/chart-detail-placeholder.component'
+      ).then((module) => module.ChartDetailPlaceholderComponent),
+  },
   {
     path: 'admin/users',
     component: AdminUsersPage,

@@ -227,6 +227,26 @@ describe('AuthApiClient', () => {
       onboardingCompleted: true,
     });
   });
+
+  it('fetches Bitcoin Rainbow chart data without requiring CSRF', async () => {
+    const promise = client.getBitcoinRainbowChartData('all');
+
+    const chartRequest = http.expectOne('/api/charts/bitcoin-rainbow?timeframe=all');
+    expect(chartRequest.request.method).toBe('GET');
+    expect(chartRequest.request.withCredentials).toBe(true);
+    chartRequest.flush({
+      chartId: 'bitcoin-rainbow',
+      title: 'Bitcoin Rainbow Price Chart',
+      timeframe: 'all',
+      dataPoints: [{ date: '2026-06-10', priceUsd: 67234.5, rainbowBand: 5 }],
+      lastUpdated: '2026-06-10T00:05:23.000Z',
+    });
+
+    await expect(promise).resolves.toMatchObject({
+      chartId: 'bitcoin-rainbow',
+      dataPoints: [{ date: '2026-06-10', priceUsd: 67234.5, rainbowBand: 5 }],
+    });
+  });
 });
 
 function waitForRequestQueue(): Promise<void> {

@@ -1,0 +1,9 @@
+<div class="chart-viewer">
+  <canvas
+    #canvas
+    aria-label="Interactive chart"
+    role="img"
+    (dblclick)="resetZoom()"
+    (touchend)="handleTouchEnd($event)"
+  ></canvas>
+</div>

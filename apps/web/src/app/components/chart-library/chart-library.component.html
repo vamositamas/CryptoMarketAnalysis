@@ -1,0 +1,58 @@
+<section class="content-section chart-library-section">
+  <div class="section-heading chart-library-heading">
+    <div>
+      <p class="eyebrow" i18n="Chart library eyebrow@@charts.eyebrow">
+        Chart library
+      </p>
+      <h2 i18n="Chart library title@@charts.title">Tracked Bitcoin models</h2>
+    </div>
+
+    <label class="chart-search">
+      <span i18n="Chart search label@@charts.searchLabel">Search charts</span>
+      <input
+        type="search"
+        [value]="searchQuery()"
+        (input)="updateSearch($event)"
+        placeholder="Search by title or signal"
+        i18n-placeholder="Chart search placeholder@@charts.searchPlaceholder"
+      />
+    </label>
+  </div>
+
+  @if (premiumNotice()) {
+    <p class="form-message">{{ premiumNotice() }}</p>
+  }
+
+  @for (group of filteredCategories(); track group.category) {
+    <section class="chart-category" [attr.aria-labelledby]="group.category">
+      <h3 [id]="group.category">{{ group.category }}</h3>
+      <div class="chart-card-grid">
+        @for (chart of group.charts; track chart.id) {
+          <article class="chart-card" tabindex="0" (click)="openChart(chart)" (keyup.enter)="openChart(chart)">
+            <div class="chart-thumbnail {{ chart.thumbnailClass }}" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <div class="chart-card-body">
+              <div class="chart-card-title-row">
+                <h4>{{ chart.title }}</h4>
+                <span class="tier-badge" [class.premium]="chart.accessTier === 'premium'">
+                  {{ tierLabel(chart.accessTier) }}
+                </span>
+              </div>
+              <p>{{ chart.description }}</p>
+              <button type="button" (click)="$event.stopPropagation(); openChart(chart)">
+                <ng-container i18n="View chart button@@charts.viewChart">View Chart</ng-container>
+              </button>
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+  } @empty {
+    <p class="empty-state" i18n="No charts found message@@charts.empty">
+      No charts match this search.
+    </p>
+  }
+</section>

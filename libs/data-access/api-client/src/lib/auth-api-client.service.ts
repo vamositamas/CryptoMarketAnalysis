@@ -102,6 +102,22 @@ export interface ManualDataRefreshResponse {
   executionTimeMs: number;
 }
 
+export type ChartTimeframe = '1m' | '3m' | '6m' | '1y' | '2y' | 'all';
+
+export interface BitcoinRainbowChartDataPoint {
+  date: string;
+  priceUsd: number;
+  rainbowBand: number | null;
+}
+
+export interface BitcoinRainbowChartResponse {
+  chartId: 'bitcoin-rainbow';
+  title: 'Bitcoin Rainbow Price Chart';
+  timeframe: ChartTimeframe;
+  dataPoints: BitcoinRainbowChartDataPoint[];
+  lastUpdated: string | null;
+}
+
 interface CsrfTokenResponse {
   csrfToken: string;
 }
@@ -223,6 +239,21 @@ export class AuthApiClient {
       '/api/admin/data-configuration/refresh-now',
       {},
     );
+  }
+
+  async getBitcoinRainbowChartData(
+    timeframe: ChartTimeframe,
+  ): Promise<BitcoinRainbowChartResponse> {
+    try {
+      return await firstValueFrom(
+        this.http.get<BitcoinRainbowChartResponse>('/api/charts/bitcoin-rainbow', {
+          params: { timeframe },
+          withCredentials: true,
+        }),
+      );
+    } catch (error) {
+      throw toApiClientError(error);
+    }
   }
 
   startGoogleLogin(): void {

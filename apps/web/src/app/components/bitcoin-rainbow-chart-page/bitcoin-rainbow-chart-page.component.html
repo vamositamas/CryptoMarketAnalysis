@@ -1,0 +1,107 @@
+<section class="content-section rainbow-chart-page">
+  <div class="chart-page-header">
+    <div>
+      <a class="form-link" routerLink="/charts" i18n="Back to chart library@@charts.backToLibrary">
+        Back to chart library
+      </a>
+      <p class="eyebrow" i18n="Bitcoin Rainbow eyebrow@@charts.rainbowEyebrow">
+        Cycle indicator
+      </p>
+      <h2 i18n="Bitcoin Rainbow title@@charts.rainbowTitle">
+        Bitcoin Rainbow Price Chart
+      </h2>
+      <p i18n="Bitcoin Rainbow subtitle@@charts.rainbowSubtitle">
+        Logarithmic growth curve with color-coded valuation bands
+      </p>
+    </div>
+    <div class="chart-status">
+      <span i18n="Chart last updated label@@charts.lastUpdated">Last updated</span>
+      <strong>{{ lastUpdatedText() }}</strong>
+    </div>
+  </div>
+
+  <div class="chart-toolbar" aria-label="Chart controls" i18n-aria-label="Chart controls aria@@charts.controls">
+    <div class="timeframe-selector" role="group" aria-label="Timeframe selector" i18n-aria-label="Timeframe selector aria@@charts.timeframeSelector">
+      @for (timeframe of timeframes; track timeframe.value) {
+        <button
+          type="button"
+          class="timeframe-button"
+          [class.active]="selectedTimeframe() === timeframe.value"
+          [disabled]="isLoading()"
+          (click)="selectTimeframe(timeframe.value)"
+        >
+          {{ timeframe.label }}
+        </button>
+      }
+    </div>
+    <div class="chart-actions">
+      <button type="button" class="secondary-button" i18n="Zoom control label@@charts.zoomControl">
+        Zoom
+      </button>
+      <button type="button" class="secondary-button" disabled i18n="Export control label@@charts.exportControl">
+        Export
+      </button>
+      <button type="button" class="secondary-button" disabled i18n="Annotate control label@@charts.annotateControl">
+        Annotate
+      </button>
+      <button type="button" class="secondary-button" (click)="toggleInfo()" i18n="Info control label@@charts.infoControl">
+        Info
+      </button>
+    </div>
+  </div>
+
+  @if (errorMessage()) {
+    <p class="form-message">{{ errorMessage() }}</p>
+  }
+
+  <div class="chart-workspace" [class.info-collapsed]="!infoOpen()">
+    <div class="chart-stage">
+      @if (isLoading()) {
+        <div class="loading-state" role="status">
+          <span class="loading-spinner" aria-hidden="true"></span>
+          <span i18n="Chart loading state@@charts.loading">Loading chart data...</span>
+        </div>
+      }
+
+      @if (dataPoints().length > 0) {
+        <app-chart-viewer
+          [chartData]="chartData()"
+          [chartOptions]="chartOptions()"
+        ></app-chart-viewer>
+      } @else if (!isLoading() && !errorMessage()) {
+        <p class="empty-state" i18n="No chart data message@@charts.noData">
+          No Bitcoin Rainbow chart data is available yet.
+        </p>
+      }
+    </div>
+
+    @if (infoOpen()) {
+      <aside class="chart-info-panel">
+        <h3 i18n="Rainbow info heading@@charts.rainbowInfoHeading">Methodology</h3>
+        <p i18n="Rainbow info text@@charts.rainbowInfoText">
+          The Bitcoin Rainbow chart places daily Bitcoin price against logarithmic valuation
+          bands. Cooler colors highlight historically depressed zones, while warmer colors
+          highlight overheated market periods.
+        </p>
+        <dl>
+          <div>
+            <dt i18n="Rainbow data source term@@charts.dataSource">Data source</dt>
+            <dd i18n="Rainbow data source description@@charts.dataSourceDescription">
+              Daily Bitcoin price and calculated rainbow band metrics
+            </dd>
+          </div>
+          <div>
+            <dt i18n="Rainbow scale term@@charts.scale">Scale</dt>
+            <dd i18n="Rainbow scale description@@charts.scaleDescription">Logarithmic USD price</dd>
+          </div>
+          <div>
+            <dt i18n="Rainbow caveat term@@charts.caveat">Caveat</dt>
+            <dd i18n="Rainbow caveat description@@charts.caveatDescription">
+              This model is contextual research, not investment advice.
+            </dd>
+          </div>
+        </dl>
+      </aside>
+    }
+  </div>
+</section>

@@ -279,27 +279,317 @@ main .model-grid {
   gap: 16px;
 }
 
-main .chart-list {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(150px, 1fr));
-  gap: 10px;
-}
-
-main .chart-list a {
-  min-height: 64px;
-  padding: 14px;
-  border: 1px solid #dce2dd;
-  border-radius: 8px;
-  color: #173f36;
-  background: #ffffff;
-  font-weight: 800;
-  text-decoration: none;
-}
-
 main .split-section {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
   gap: 28px;
+}
+
+main .chart-library-section {
+  display: grid;
+  gap: 24px;
+}
+
+main .chart-library-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 360px);
+  align-items: end;
+  gap: 18px;
+}
+
+main .chart-search {
+  display: grid;
+  gap: 6px;
+}
+
+main .chart-category {
+  display: grid;
+  gap: 12px;
+}
+
+main .chart-category h3 {
+  margin: 0;
+  color: #243832;
+  font-size: 1.18rem;
+}
+
+main .chart-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+main .chart-card {
+  display: grid;
+  grid-template-rows: 154px 1fr;
+  overflow: hidden;
+  border: 1px solid #dce2dd;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 18px 48px rgba(20, 92, 75, 0.1);
+  cursor: pointer;
+}
+
+main .chart-card:focus-visible {
+  outline: 3px solid rgba(20, 92, 75, 0.32);
+  outline-offset: 3px;
+}
+
+main .chart-thumbnail {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: end;
+  gap: 10px;
+  min-height: 154px;
+  padding: 20px;
+  background: #eef5f2;
+}
+
+main .chart-thumbnail::before {
+  position: absolute;
+  inset: 20px;
+  border: 1px solid rgba(23, 32, 42, 0.12);
+  border-radius: 8px;
+  content: '';
+}
+
+main .chart-thumbnail span {
+  position: relative;
+  z-index: 1;
+  display: block;
+  border-radius: 6px 6px 2px 2px;
+}
+
+main .chart-thumbnail span:nth-child(1) {
+  height: 42%;
+}
+
+main .chart-thumbnail span:nth-child(2) {
+  height: 68%;
+}
+
+main .chart-thumbnail span:nth-child(3) {
+  height: 84%;
+}
+
+main .chart-thumbnail.stock-to-flow span {
+  background: linear-gradient(180deg, #3d6f8e, #145c4b);
+}
+
+main .chart-thumbnail.bitcoin-rainbow {
+  background: linear-gradient(180deg, #fff3c4, #eaf4f0);
+}
+
+main .chart-thumbnail.bitcoin-rainbow span:nth-child(1) {
+  background: #2f80ed;
+}
+
+main .chart-thumbnail.bitcoin-rainbow span:nth-child(2) {
+  background: #27ae60;
+}
+
+main .chart-thumbnail.bitcoin-rainbow span:nth-child(3) {
+  background: #f2a900;
+}
+
+main .chart-thumbnail.pi-cycle-top span {
+  background: linear-gradient(180deg, #f7b731, #7f4f24);
+}
+
+main .chart-card-body {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 12px;
+  padding: 16px;
+}
+
+main .chart-card-title-row {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+main .chart-card h4 {
+  margin: 0;
+  color: #17202a;
+  font-size: 1rem;
+}
+
+main .chart-card p {
+  margin: 0;
+}
+
+main .tier-badge {
+  flex: 0 0 auto;
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: #145c4b;
+  background: #dff5e9;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+main .tier-badge.premium {
+  color: #694400;
+  background: #ffe6a3;
+}
+
+main .empty-state,
+main .chart-detail-placeholder {
+  padding: 20px;
+  border: 1px solid #dce2dd;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.86);
+}
+
+main .rainbow-chart-page {
+  display: grid;
+  gap: 18px;
+}
+
+main .chart-page-header,
+main .chart-toolbar,
+main .chart-workspace {
+  display: grid;
+  gap: 16px;
+}
+
+main .chart-page-header {
+  grid-template-columns: minmax(0, 1fr) minmax(210px, auto);
+  align-items: end;
+}
+
+main .chart-page-header h2 {
+  margin-bottom: 8px;
+}
+
+main .chart-status {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid #dce2dd;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.86);
+}
+
+main .chart-status span {
+  color: #65736f;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+main .chart-toolbar {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid #dce2dd;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+main .timeframe-selector,
+main .chart-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+main .timeframe-button {
+  color: #17202a;
+  border-color: #cbd8d1;
+  background: #ffffff;
+}
+
+main .timeframe-button.active {
+  color: #ffffff;
+  background: #145c4b;
+}
+
+main .chart-workspace {
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+  align-items: stretch;
+}
+
+main .chart-workspace.info-collapsed {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+main .chart-stage,
+main .chart-info-panel {
+  border: 1px solid #dce2dd;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+main .chart-stage {
+  position: relative;
+  min-height: 520px;
+  padding: 18px;
+}
+
+main .chart-stage app-chart-viewer {
+  min-height: 484px;
+}
+
+main .loading-state {
+  position: absolute;
+  inset: 18px;
+  z-index: 2;
+  display: grid;
+  place-content: center;
+  gap: 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.74);
+  color: #344540;
+  font-weight: 800;
+  text-align: center;
+}
+
+main .loading-spinner {
+  width: 34px;
+  height: 34px;
+  margin-inline: auto;
+  border: 4px solid #dce2dd;
+  border-top-color: #145c4b;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+main .chart-info-panel {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: 18px;
+}
+
+main .chart-info-panel h3,
+main .chart-info-panel p {
+  margin: 0;
+}
+
+main .chart-info-panel dl {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+}
+
+main .chart-info-panel dt {
+  color: #344540;
+  font-weight: 900;
+}
+
+main .chart-info-panel dd {
+  margin: 4px 0 0;
+  color: #65736f;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 main .compact-form,
@@ -459,8 +749,12 @@ main .form-message.success {
     grid-template-columns: 1fr;
   }
 
-  main .chart-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  main .chart-library-heading,
+  main .chart-card-grid,
+  main .chart-page-header,
+  main .chart-toolbar,
+  main .chart-workspace {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -476,7 +770,11 @@ main .form-message.success {
     font-size: 2.45rem;
   }
 
-  main .chart-list {
-    grid-template-columns: 1fr;
+  main .chart-card {
+    grid-template-rows: 132px 1fr;
+  }
+
+  main .chart-thumbnail {
+    min-height: 132px;
   }
 }

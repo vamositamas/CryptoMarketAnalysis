@@ -16,7 +16,7 @@ Epic 5: Chart Visualization System
 | Epic 2: User Authentication & Role Management | Done | Registration, verification, login, OAuth, password reset, RBAC, auth rate limiting, and profile endpoints are complete. |
 | Epic 3: User Onboarding Experience | Done | i18n, onboarding carousel, completion tracking, and translations are complete. |
 | Epic 4: Bitcoin Data Pipeline & Calculation Engine | Done | Stories 4.1 through 4.8 are complete. |
-| Epic 5: Chart Visualization System | Backlog | Story 5.1 is next. |
+| Epic 5: Chart Visualization System | In progress | Stories 5.1 through 5.4 are complete; Story 5.5 is next. |
 | Epics 6-9 | Backlog | Dashboard, alerts, donation, and admin management work remain. |
 
 ## Epic 4 Progress
@@ -34,6 +34,21 @@ Epic 5: Chart Visualization System
 
 ## Latest Verification
 
+- `npm exec nx -- run web:test --skip-nx-cache` passed with 14 tests.
+- `npm exec nx -- run web:build:production --skip-nx-cache` passed.
+- `npm exec nx -- run web:eslint:lint --skip-nx-cache` passed.
+- `npm exec nx -- run data-access-api-client:test --skip-nx-cache` passed with 11 tests.
+- `npm exec nx -- run data-access-api-client:build:production --skip-nx-cache` passed.
+- `npm exec nx -- run data-access-api-client:eslint:lint --skip-nx-cache` passed.
+- `npm exec nx -- run web:test --skip-nx-cache` passed with 14 tests.
+- `npm exec nx -- run web:build:production --skip-nx-cache` passed.
+- `npm exec nx -- run web:eslint:lint --skip-nx-cache` passed.
+- `npm exec nx -- run web:test --skip-nx-cache` passed with 10 tests.
+- `npm exec nx -- run web:build:production --skip-nx-cache` passed.
+- `npm exec nx -- run web:eslint:lint --skip-nx-cache` passed.
+- `npm exec nx -- run api:test --skip-nx-cache` passed with 107 tests.
+- `npm exec nx -- run api:build:production --skip-nx-cache` passed.
+- `npm exec nx -- run api:eslint:lint --skip-nx-cache` passed.
 - `npm exec nx -- run api:test --skip-nx-cache` passed with 99 tests.
 - `npm exec nx -- run api:build:production --skip-nx-cache` passed.
 - `npm exec nx -- run api:eslint:lint --skip-nx-cache` passed.
@@ -49,13 +64,13 @@ Epic 5: Chart Visualization System
 
 ## Next Step
 
-Begin Epic 5, Story 5.1: Create Chart Data API Endpoints.
+Begin Epic 5, Story 5.5: Implement Pi Cycle Top Indicator Chart Page.
 
 Expected work:
 
-- Add chart data API endpoints for Bitcoin Rainbow, Pi Cycle Top, and Stock-to-Flow.
-- Query `bitcoin_price_daily` and `bitcoin_metrics_daily` with timeframe filtering.
-- Return Chart.js-friendly data contracts.
+- Replace the Pi Cycle Top placeholder detail page with a real chart page.
+- Fetch `/api/charts/pi-cycle-top` data and transform it for Chart.js.
+- Add timeframe controls, loading/error states, and crossover signal presentation.
 - Update this file and the sprint tracker when complete.
 
 ## Notes

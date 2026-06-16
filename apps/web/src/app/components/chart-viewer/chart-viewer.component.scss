@@ -1,0 +1,19 @@
+:host {
+  display: block;
+  width: 100%;
+  min-height: 320px;
+}
+
+.chart-viewer {
+  position: relative;
+  width: 100%;
+  min-height: inherit;
+  height: 100%;
+  touch-action: pan-y;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
