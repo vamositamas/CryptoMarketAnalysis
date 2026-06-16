@@ -247,6 +247,102 @@ describe('AuthApiClient', () => {
       dataPoints: [{ date: '2026-06-10', priceUsd: 67234.5, rainbowBand: 5 }],
     });
   });
+
+  it('fetches Pi Cycle Top chart data without requiring CSRF', async () => {
+    const promise = client.getPiCycleTopChartData('all');
+
+    const chartRequest = http.expectOne('/api/charts/pi-cycle-top?timeframe=all');
+    expect(chartRequest.request.method).toBe('GET');
+    expect(chartRequest.request.withCredentials).toBe(true);
+    chartRequest.flush({
+      chartId: 'pi-cycle-top',
+      title: 'Pi Cycle Top Indicator',
+      timeframe: 'all',
+      dataPoints: [
+        {
+          date: '2026-06-10',
+          priceUsd: 67234.5,
+          ma111: 65000,
+          ma350x2: 63000,
+        },
+      ],
+      lastUpdated: '2026-06-10T00:05:23.000Z',
+    });
+
+    await expect(promise).resolves.toMatchObject({
+      chartId: 'pi-cycle-top',
+      dataPoints: [{ date: '2026-06-10', ma111: 65000, ma350x2: 63000 }],
+    });
+  });
+
+  it('fetches Stock-to-Flow chart data without requiring CSRF', async () => {
+    const promise = client.getStockToFlowChartData('all');
+
+    const chartRequest = http.expectOne('/api/charts/stock-to-flow?timeframe=all');
+    expect(chartRequest.request.method).toBe('GET');
+    expect(chartRequest.request.withCredentials).toBe(true);
+    chartRequest.flush({
+      chartId: 'stock-to-flow',
+      title: 'Stock-to-Flow Model',
+      timeframe: 'all',
+      dataPoints: [
+        {
+          date: '2026-06-10',
+          priceUsd: 67234.5,
+          stockToFlowRatio: 56.2,
+          modelPrice: 62000,
+        },
+      ],
+      lastUpdated: '2026-06-10T00:05:23.000Z',
+    });
+
+    await expect(promise).resolves.toMatchObject({
+      chartId: 'stock-to-flow',
+      dataPoints: [{ date: '2026-06-10', stockToFlowRatio: 56.2, modelPrice: 62000 }],
+    });
+  });
+
+  it('manages chart annotations with authenticated requests', async () => {
+    const listPromise = client.getChartAnnotations('bitcoin-rainbow');
+    const listRequest = http.expectOne('/api/users/me/annotations?chartId=bitcoin-rainbow');
+    expect(listRequest.request.method).toBe('GET');
+    listRequest.flush([]);
+    await expect(listPromise).resolves.toEqual([]);
+
+    const createPromise = client.createChartAnnotation({
+      chartId: 'bitcoin-rainbow',
+      type: 'note',
+      date: '2026-06-10',
+      priceLevel: 70000,
+      text: 'Resistance',
+      color: '#FFEB3B',
+    });
+    http.expectOne('/api/csrf-token').flush({ csrfToken: 'csrf-token' });
+    await waitForRequestQueue();
+    const createRequest = http.expectOne('/api/users/me/annotations');
+    expect(createRequest.request.method).toBe('POST');
+    expect(createRequest.request.headers.get('x-csrf-token')).toBe('csrf-token');
+    createRequest.flush({
+      id: 'annotation-id',
+      userId: 'user-id',
+      chartId: 'bitcoin-rainbow',
+      type: 'note',
+      date: '2026-06-10',
+      priceLevel: 70000,
+      text: 'Resistance',
+      color: '#FFEB3B',
+      createdAt: '2026-06-10T00:00:00.000Z',
+    });
+    await expect(createPromise).resolves.toMatchObject({ id: 'annotation-id' });
+
+    const deletePromise = client.deleteChartAnnotation('annotation-id');
+    await waitForRequestQueue();
+    const deleteRequest = http.expectOne('/api/users/me/annotations/annotation-id');
+    expect(deleteRequest.request.method).toBe('DELETE');
+    expect(deleteRequest.request.headers.get('x-csrf-token')).toBe('csrf-token');
+    deleteRequest.flush(null, { status: 204, statusText: 'No Content' });
+    await expect(deletePromise).resolves.toBeUndefined();
+  });
 });
 
 function waitForRequestQueue(): Promise<void> {

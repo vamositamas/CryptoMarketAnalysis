@@ -2,9 +2,11 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  EventEmitter,
   Input,
   OnChanges,
   OnDestroy,
+  Output,
   SimpleChanges,
   ViewChild,
 } from '@angular/core';
@@ -21,6 +23,11 @@ import zoomPlugin from 'chartjs-plugin-zoom';
 
 export type SupportedChartType = 'line' | 'bar';
 
+export interface ChartPointSelection {
+  date: string;
+  value: number;
+}
+
 Chart.register(...registerables, zoomPlugin, annotationPlugin);
 
 @Component({
@@ -32,6 +39,7 @@ export class ChartViewerComponent implements AfterViewInit, OnChanges, OnDestroy
   @Input({ required: true }) chartData!: ChartData;
   @Input() chartType: SupportedChartType = 'line';
   @Input() chartOptions: ChartOptions = {};
+  @Output() chartPointSelected = new EventEmitter<ChartPointSelection>();
 
   @ViewChild('canvas') private readonly canvas?: ElementRef<HTMLCanvasElement>;
 
@@ -67,6 +75,10 @@ export class ChartViewerComponent implements AfterViewInit, OnChanges, OnDestroy
     this.chart?.resetZoom();
   }
 
+  exportImage(): string | null {
+    return this.chart?.toBase64Image('image/png', 1) ?? null;
+  }
+
   protected handleTouchEnd(event: TouchEvent): void {
     if (event.touches.length > 0) {
       return;
@@ -81,6 +93,33 @@ export class ChartViewerComponent implements AfterViewInit, OnChanges, OnDestroy
     }
 
     this.lastTapTime = now;
+  }
+
+  protected handleClick(event: MouseEvent): void {
+    if (!this.chart) {
+      return;
+    }
+
+    const points = this.chart.getElementsAtEventForMode(
+      event,
+      'nearest',
+      { intersect: false },
+      false,
+    );
+    const point = points[0];
+
+    if (!point) {
+      return;
+    }
+
+    const label = this.chart.data.labels?.[point.index];
+    const value = this.chart.data.datasets[point.datasetIndex]?.data[point.index];
+
+    if (typeof label !== 'string' || typeof value !== 'number') {
+      return;
+    }
+
+    this.chartPointSelected.emit({ date: label, value });
   }
 
   private recreateChart(): void {

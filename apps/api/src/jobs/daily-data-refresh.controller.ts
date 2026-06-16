@@ -4,6 +4,8 @@ import jwt, { type JwtPayload } from 'jsonwebtoken';
 import {
   BlockchainInfoClient,
   CoinGeckoClient,
+  FearGreedClient,
+  MvrvZScoreClient,
   RetryExhaustedError,
 } from '@crypto-market-analysis/calculation-engines/data-sources';
 import {
@@ -48,6 +50,8 @@ interface BitcoinMetricRecord {
 interface DailyDataRefreshOptions {
   coinGeckoClient?: Pick<CoinGeckoClient, 'fetchBitcoinMarketData'>;
   blockchainInfoClient?: Pick<BlockchainInfoClient, 'fetchMarketPrice'>;
+  fearGreedClient?: Pick<FearGreedClient, 'fetchLatest'>;
+  mvrvZScoreClient?: Pick<MvrvZScoreClient, 'fetchLatest'>;
   database?: Parameters<typeof insertBitcoinPriceDaily>[0];
   emailService?: DailyDataRefreshFailureEmailSender;
   logger?: Pick<Console, 'error' | 'log' | 'warn'>;
@@ -94,6 +98,8 @@ export function createDailyDataRefreshRouter(
 export class DailyDataRefreshService {
   private readonly coinGeckoClient: Pick<CoinGeckoClient, 'fetchBitcoinMarketData'>;
   private readonly blockchainInfoClient: Pick<BlockchainInfoClient, 'fetchMarketPrice'>;
+  private readonly fearGreedClient: Pick<FearGreedClient, 'fetchLatest'>;
+  private readonly mvrvZScoreClient: Pick<MvrvZScoreClient, 'fetchLatest'>;
   private readonly database: Parameters<typeof insertBitcoinPriceDaily>[0] | undefined;
   private readonly emailService: DailyDataRefreshFailureEmailSender;
   private readonly logger: Pick<Console, 'error' | 'log' | 'warn'>;
@@ -102,6 +108,8 @@ export class DailyDataRefreshService {
   constructor(options: DailyDataRefreshOptions = {}) {
     this.coinGeckoClient = options.coinGeckoClient ?? new CoinGeckoClient();
     this.blockchainInfoClient = options.blockchainInfoClient ?? new BlockchainInfoClient();
+    this.fearGreedClient = options.fearGreedClient ?? new FearGreedClient();
+    this.mvrvZScoreClient = options.mvrvZScoreClient ?? new MvrvZScoreClient();
     this.database = options.database ?? getDatabasePool();
     this.emailService = options.emailService ?? new ResendEmailService();
     this.logger = options.logger ?? console;
@@ -120,10 +128,11 @@ export class DailyDataRefreshService {
     const { record, source } = await this.fetchDailyPriceRecord(date);
     await insertBitcoinPriceDaily(database, [record]);
     const metrics = await calculateAndInsertDailyMetrics(database, date);
+    const externalMetrics = await this.fetchAndInsertExternalMetrics(database);
     await updateLastRefreshStatus(database, this.now(), 'success');
     this.logger.log('Daily data refresh metrics calculated', {
       date,
-      metrics: metrics.map((metric) => metric.metricName),
+      metrics: [...metrics, ...externalMetrics].map((metric) => metric.metricName),
     });
     this.logger.log('Alert evaluation deferred to Epic 7.', { date });
 
@@ -195,6 +204,40 @@ export class DailyDataRefreshService {
         });
         throw new Error(message);
       }
+    }
+  }
+
+  private async fetchAndInsertExternalMetrics(
+    database: Parameters<typeof insertBitcoinPriceDaily>[0],
+  ): Promise<BitcoinMetricRecord[]> {
+    const records = [
+      ...(await this.fetchExternalMetric('fear_greed_index', () =>
+        this.fearGreedClient.fetchLatest(),
+      )),
+      ...(await this.fetchExternalMetric('mvrv_zscore', () => this.mvrvZScoreClient.fetchLatest())),
+    ];
+
+    if (records.length > 0) {
+      await insertBitcoinMetricsDaily(database, records);
+    }
+
+    return records;
+  }
+
+  private async fetchExternalMetric(
+    metricName: string,
+    fetcher: () => Promise<{ date: string; value: number }>,
+  ): Promise<BitcoinMetricRecord[]> {
+    try {
+      const point = await fetcher();
+
+      return [{ date: point.date, metricName, metricValue: point.value }];
+    } catch (error) {
+      this.logger.warn(`Failed to fetch ${metricName}; skipping for this run`, {
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      return [];
     }
   }
 }

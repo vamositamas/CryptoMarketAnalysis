@@ -1,0 +1,45 @@
+<details class="chart-info-panel" open>
+  <summary>
+    <span i18n="Chart information summary@@charts.infoSummary">Chart information</span>
+    <strong>{{ title }}</strong>
+  </summary>
+
+  <div class="chart-info-grid">
+    <section>
+      <h3 i18n="About indicator heading@@charts.aboutIndicator">About This Indicator</h3>
+      <p>{{ about }}</p>
+    </section>
+
+    <section>
+      <h3 i18n="Current value heading@@charts.currentValue">Current Value & Interpretation</h3>
+      <dl class="chart-info-current">
+        @for (field of currentFields; track field.label) {
+          <div>
+            <dt>{{ field.label }}</dt>
+            <dd>{{ field.value }}</dd>
+          </div>
+        }
+      </dl>
+      <p>{{ interpretation }}</p>
+    </section>
+
+    <section>
+      <h3 i18n="Data sources heading@@charts.dataSources">Data Sources</h3>
+      <ul>
+        @for (source of dataSources; track source) {
+          <li>{{ source }}</li>
+        }
+      </ul>
+    </section>
+
+    <section>
+      <h3 i18n="Last updated heading@@charts.lastUpdated">Last Updated</h3>
+      <p>{{ lastUpdated }}</p>
+      @if (learnMoreHref) {
+        <a class="form-link" [href]="learnMoreHref" target="_blank" rel="noreferrer">
+          <ng-container i18n="Learn more link@@charts.learnMore">Learn more</ng-container>
+        </a>
+      }
+    </section>
+  </div>
+</details>

@@ -14,9 +14,9 @@ describe('App', () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain(
-      'Bitcoin market intelligence',
-    );
     expect(compiled.querySelector('.brand')?.textContent).toContain('CryptoMarketAnalysis');
+    expect(compiled.querySelector('nav')).toBeNull();
+    expect(compiled.querySelector('.topbar-actions')?.textContent).toContain('Login');
+    expect(compiled.querySelector('.topbar-actions')?.textContent).toContain('Register');
   });
 });

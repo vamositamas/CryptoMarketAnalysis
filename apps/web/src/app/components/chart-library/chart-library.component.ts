@@ -9,6 +9,7 @@ interface ChartLibraryItem {
   category: 'Valuation Models' | 'Cycle Indicators';
   accessTier: ChartAccessTier;
   description: string;
+  signal: string;
   thumbnailClass: string;
 }
 
@@ -18,6 +19,7 @@ const CHARTS: ChartLibraryItem[] = [
     title: 'Stock-to-Flow Model',
     category: 'Valuation Models',
     accessTier: 'free',
+    signal: 'Scarcity valuation',
     description:
       'Tracks Bitcoin scarcity using circulating supply and issuance flow, with a simplified model price for long-term valuation context.',
     thumbnailClass: 'stock-to-flow',
@@ -27,6 +29,7 @@ const CHARTS: ChartLibraryItem[] = [
     title: 'Bitcoin Rainbow Price Chart',
     category: 'Cycle Indicators',
     accessTier: 'free',
+    signal: 'Cycle valuation bands',
     description:
       'Shows price against logarithmic cycle bands to quickly spot cooler accumulation zones and overheated market periods.',
     thumbnailClass: 'bitcoin-rainbow',
@@ -36,6 +39,7 @@ const CHARTS: ChartLibraryItem[] = [
     title: 'Pi Cycle Top Indicator',
     category: 'Cycle Indicators',
     accessTier: 'free',
+    signal: 'Cycle top crossover',
     description:
       'Compares the 111-day moving average with twice the 350-day moving average to identify potential cycle-top signals.',
     thumbnailClass: 'pi-cycle-top',
@@ -46,13 +50,18 @@ const CATEGORIES: ChartLibraryItem['category'][] = ['Valuation Models', 'Cycle I
 
 @Component({
   selector: 'app-chart-library',
+  standalone: true,
   templateUrl: './chart-library.component.html',
 })
 export class ChartLibraryComponent {
   private readonly router = inject(Router);
   private readonly query = signal('');
+  private readonly selectedChartId = signal(CHARTS[0].id);
   protected readonly searchQuery = this.query.asReadonly();
   protected readonly categories = CATEGORIES;
+  protected readonly selectedChart = computed(
+    () => this.filteredCharts().find((chart) => chart.id === this.selectedChartId()) ?? this.filteredCharts()[0],
+  );
   protected readonly filteredCategories = computed(() =>
     this.categories
       .map((category) => ({
@@ -78,6 +87,14 @@ export class ChartLibraryComponent {
 
   protected updateSearch(event: Event): void {
     this.query.set((event.target as HTMLInputElement).value);
+    const firstMatch = this.filteredCharts()[0];
+    if (firstMatch) {
+      this.selectedChartId.set(firstMatch.id);
+    }
+  }
+
+  protected selectChart(chart: ChartLibraryItem): void {
+    this.selectedChartId.set(chart.id);
   }
 
   protected async openChart(chart: ChartLibraryItem): Promise<void> {

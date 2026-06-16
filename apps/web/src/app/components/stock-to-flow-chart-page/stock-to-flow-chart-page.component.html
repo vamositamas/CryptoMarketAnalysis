@@ -4,14 +4,12 @@
       <a class="form-link" routerLink="/charts" i18n="Back to chart library@@charts.backToLibrary">
         Back to chart library
       </a>
-      <p class="eyebrow" i18n="Bitcoin Rainbow eyebrow@@charts.rainbowEyebrow">
-        Cycle indicator
+      <p class="eyebrow" i18n="Stock to Flow eyebrow@@charts.stockToFlowEyebrow">
+        Valuation model
       </p>
-      <h2 i18n="Bitcoin Rainbow title@@charts.rainbowTitle">
-        Bitcoin Rainbow Price Chart
-      </h2>
-      <p i18n="Bitcoin Rainbow subtitle@@charts.rainbowSubtitle">
-        Logarithmic growth curve with color-coded valuation bands
+      <h2 i18n="Stock to Flow title@@charts.stockToFlowTitle">Stock-to-Flow Model</h2>
+      <p i18n="Stock to Flow subtitle@@charts.stockToFlowSubtitle">
+        Scarcity-driven model price compared with Bitcoin market price
       </p>
     </div>
     <div class="chart-status">
@@ -54,7 +52,7 @@
         }
       </div>
       <app-chart-annotations
-        chartId="bitcoin-rainbow"
+        chartId="stock-to-flow"
         (annotationsChanged)="updateUserAnnotations($event)"
       ></app-chart-annotations>
       <button type="button" class="secondary-button" (click)="toggleInfo()" i18n="Info control label@@charts.infoControl">
@@ -84,7 +82,7 @@
         ></app-chart-viewer>
       } @else if (!isLoading() && !errorMessage()) {
         <p class="empty-state" i18n="No chart data message@@charts.noData">
-          No Bitcoin Rainbow chart data is available yet.
+          No Stock-to-Flow chart data is available yet.
         </p>
       }
     </div>
@@ -93,13 +91,13 @@
 
   @if (infoOpen()) {
     <app-chart-info-panel
-      title="Bitcoin Rainbow Price Chart"
+      title="Stock-to-Flow Model"
       [about]="infoAbout"
       [currentFields]="infoCurrentFields()"
       [interpretation]="infoInterpretation()"
       [dataSources]="infoDataSources"
       [lastUpdated]="infoLastUpdated()"
-      learnMoreHref="/assets/docs/specificaton/BitcoinRainbowPriceChartIndicator.md"
+      learnMoreHref="/assets/docs/specificaton/Stock-to-FlowModel.md"
     ></app-chart-info-panel>
   }
 </section>

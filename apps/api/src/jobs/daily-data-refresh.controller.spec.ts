@@ -75,6 +75,8 @@ describe('daily data refresh job', () => {
     const service = new DailyDataRefreshService({
       coinGeckoClient,
       blockchainInfoClient,
+      fearGreedClient: createFearGreedClientStub(),
+      mvrvZScoreClient: createMvrvZScoreClientStub(),
       database,
       emailService: { sendDailyDataRefreshFailureAlert: jest.fn() },
       logger: createLogger(),
@@ -136,6 +138,8 @@ describe('daily data refresh job', () => {
         fetchBitcoinMarketData: jest.fn().mockRejectedValue(new Error('rate limited')),
       },
       blockchainInfoClient,
+      fearGreedClient: createFearGreedClientStub(),
+      mvrvZScoreClient: createMvrvZScoreClientStub(),
       database,
       emailService: { sendDailyDataRefreshFailureAlert: jest.fn() },
       logger: createLogger(),
@@ -200,6 +204,8 @@ describe('daily data refresh job', () => {
         }),
       },
       blockchainInfoClient: { fetchMarketPrice: jest.fn() },
+      fearGreedClient: createFearGreedClientStub(),
+      mvrvZScoreClient: createMvrvZScoreClientStub(),
       database: {
         query: jest
           .fn()

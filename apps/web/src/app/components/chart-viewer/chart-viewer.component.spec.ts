@@ -12,6 +12,10 @@ jest.mock('chart.js', () => {
     type: unknown;
     destroy = jest.fn();
     resetZoom = jest.fn();
+    toBase64Image = jest.fn().mockReturnValue('data:image/png;base64,chart');
+    getElementsAtEventForMode = jest.fn().mockReturnValue([
+      { datasetIndex: 0, index: 0 },
+    ]);
     update = jest.fn();
 
     constructor(_canvas: HTMLCanvasElement, configuration: { data: unknown; options: unknown; type: unknown }) {
@@ -37,6 +41,8 @@ interface MockChart {
   type: unknown;
   destroy: jest.Mock;
   resetZoom: jest.Mock;
+  toBase64Image: jest.Mock;
+  getElementsAtEventForMode: jest.Mock;
   update: jest.Mock;
 }
 
@@ -126,6 +132,24 @@ describe('ChartViewerComponent', () => {
       },
     });
     expect(chartInstances[0].resetZoom).toHaveBeenCalledTimes(1);
+  });
+
+  it('exports the current chart as a PNG data URL', () => {
+    const fixture = createComponent(chartData);
+
+    expect(fixture.componentInstance.exportImage()).toBe('data:image/png;base64,chart');
+    expect(chartInstances[0].toBase64Image).toHaveBeenCalledWith('image/png', 1);
+  });
+
+  it('emits selected chart coordinates on click', () => {
+    const fixture = createComponent(chartData);
+    const selected: unknown[] = [];
+    fixture.componentInstance.chartPointSelected.subscribe((point) => selected.push(point));
+
+    const canvas = fixture.nativeElement.querySelector('canvas') as HTMLCanvasElement;
+    canvas.dispatchEvent(new MouseEvent('click'));
+
+    expect(selected).toEqual([{ date: '2026-06-10', value: 65000 }]);
   });
 });
 

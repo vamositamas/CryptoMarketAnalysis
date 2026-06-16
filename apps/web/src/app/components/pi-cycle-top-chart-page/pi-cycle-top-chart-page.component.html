@@ -4,14 +4,12 @@
       <a class="form-link" routerLink="/charts" i18n="Back to chart library@@charts.backToLibrary">
         Back to chart library
       </a>
-      <p class="eyebrow" i18n="Bitcoin Rainbow eyebrow@@charts.rainbowEyebrow">
+      <p class="eyebrow" i18n="Pi Cycle eyebrow@@charts.piCycleEyebrow">
         Cycle indicator
       </p>
-      <h2 i18n="Bitcoin Rainbow title@@charts.rainbowTitle">
-        Bitcoin Rainbow Price Chart
-      </h2>
-      <p i18n="Bitcoin Rainbow subtitle@@charts.rainbowSubtitle">
-        Logarithmic growth curve with color-coded valuation bands
+      <h2 i18n="Pi Cycle title@@charts.piCycleTitle">Pi Cycle Top Indicator</h2>
+      <p i18n="Pi Cycle subtitle@@charts.piCycleSubtitle">
+        Moving-average crossover signal for potential Bitcoin cycle tops
       </p>
     </div>
     <div class="chart-status">
@@ -54,7 +52,7 @@
         }
       </div>
       <app-chart-annotations
-        chartId="bitcoin-rainbow"
+        chartId="pi-cycle-top"
         (annotationsChanged)="updateUserAnnotations($event)"
       ></app-chart-annotations>
       <button type="button" class="secondary-button" (click)="toggleInfo()" i18n="Info control label@@charts.infoControl">
@@ -65,6 +63,10 @@
 
   @if (errorMessage()) {
     <p class="form-message">{{ errorMessage() }}</p>
+  }
+
+  @if (signalNotice()) {
+    <p class="form-message success">{{ signalNotice() }}</p>
   }
 
   <div class="chart-workspace info-collapsed">
@@ -84,7 +86,7 @@
         ></app-chart-viewer>
       } @else if (!isLoading() && !errorMessage()) {
         <p class="empty-state" i18n="No chart data message@@charts.noData">
-          No Bitcoin Rainbow chart data is available yet.
+          No Pi Cycle Top chart data is available yet.
         </p>
       }
     </div>
@@ -93,13 +95,13 @@
 
   @if (infoOpen()) {
     <app-chart-info-panel
-      title="Bitcoin Rainbow Price Chart"
+      title="Pi Cycle Top Indicator"
       [about]="infoAbout"
       [currentFields]="infoCurrentFields()"
       [interpretation]="infoInterpretation()"
       [dataSources]="infoDataSources"
       [lastUpdated]="infoLastUpdated()"
-      learnMoreHref="/assets/docs/specificaton/BitcoinRainbowPriceChartIndicator.md"
+      learnMoreHref="/assets/docs/specificaton/PiCycleTopIndicator.md"
     ></app-chart-info-panel>
   }
 </section>

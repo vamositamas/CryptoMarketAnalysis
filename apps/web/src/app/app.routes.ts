@@ -9,8 +9,122 @@ import {
   type RefreshFrequency,
 } from '@crypto-market-analysis/data-access/api-client';
 import { OnboardingCarouselComponent } from './components/onboarding-carousel/onboarding-carousel.component';
+import { authGuard } from './guards/auth.guard';
 import { roleGuard } from './guards/role.guard';
 import { AuthSessionService } from './services/auth-session.service';
+
+@Component({
+  selector: 'app-landing-page',
+  imports: [RouterLink],
+  template: `
+    <section class="landing-hero" aria-labelledby="landing-title">
+      <div class="landing-copy">
+        <p class="eyebrow" i18n="Landing eyebrow@@landing.eyebrow">
+          Bitcoin cycle intelligence
+        </p>
+        <h1 id="landing-title" i18n="Landing title@@landing.title">
+          CryptoMarketAnalysis
+        </h1>
+        <p i18n="Landing supporting copy@@landing.text">
+          A focused research workspace for Bitcoin valuation models, cycle signals,
+          and long-term market context. Create an account to open the live charts.
+        </p>
+        <div class="hero-actions">
+          <a class="primary-link" routerLink="/register" i18n="Landing primary CTA@@landing.primaryCta">
+            Create account
+          </a>
+          <a class="ghost-link" routerLink="/login" i18n="Landing secondary CTA@@landing.secondaryCta">
+            Login
+          </a>
+        </div>
+      </div>
+
+      <div
+        class="market-panel landing-preview"
+        aria-label="Bitcoin analytics preview"
+        i18n-aria-label="Landing preview accessibility label@@landing.previewAria"
+      >
+        <div class="panel-header">
+          <span i18n="Landing preview label@@landing.previewLabel">Research preview</span>
+          <strong>Members only</strong>
+        </div>
+        <div class="signal-chart" aria-hidden="true">
+          <span class="bar bar-one"></span>
+          <span class="bar bar-two"></span>
+          <span class="bar bar-three"></span>
+          <span class="bar bar-four"></span>
+          <span class="bar bar-five"></span>
+          <span class="bar bar-six"></span>
+        </div>
+        <div class="metric-strip">
+          <span><ng-container i18n="Landing preview rainbow@@landing.rainbow">Rainbow</ng-container> <strong>Locked</strong></span>
+          <span><ng-container i18n="Landing preview pi cycle@@landing.piCycle">Pi Cycle</ng-container> <strong>Locked</strong></span>
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="landing-section"
+      aria-labelledby="models-title"
+    >
+      <div class="section-heading">
+        <p class="eyebrow" i18n="Landing models eyebrow@@landing.modelsEyebrow">
+          Model library
+        </p>
+        <h2 id="models-title" i18n="Landing models title@@landing.modelsTitle">
+          Professional Bitcoin market tools after login
+        </h2>
+      </div>
+      <div class="feature-grid">
+        <article>
+          <span>01</span>
+          <h3>Bitcoin Rainbow</h3>
+          <p i18n="Landing rainbow copy@@landing.rainbowCopy">
+            Long-term logarithmic valuation bands for market-cycle context.
+          </p>
+        </article>
+        <article>
+          <span>02</span>
+          <h3>Pi Cycle Top</h3>
+          <p i18n="Landing pi cycle copy@@landing.piCycleCopy">
+            Moving-average crossover signals designed for cycle-top awareness.
+          </p>
+        </article>
+        <article>
+          <span>03</span>
+          <h3>Stock-to-Flow</h3>
+          <p i18n="Landing stock to flow copy@@landing.stockToFlowCopy">
+            Scarcity model tracking with halving context and divergence views.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section class="landing-section landing-access">
+      <div>
+        <p class="eyebrow" i18n="Landing access eyebrow@@landing.accessEyebrow">
+          Private workspace
+        </p>
+        <h2 i18n="Landing access title@@landing.accessTitle">
+          Charts, annotations, exports, and admin tools require an account.
+        </h2>
+      </div>
+      <a class="primary-link" routerLink="/register" i18n="Landing access CTA@@landing.accessCta">
+        Start with registration
+      </a>
+    </section>
+  `,
+})
+export class LandingPage {
+  private readonly authSession = inject(AuthSessionService);
+  private readonly router = inject(Router);
+
+  constructor() {
+    if (this.authSession.currentUser()) {
+      void this.router.navigate(['/dashboard']);
+    }
+  }
+}
 
 @Component({
   selector: 'app-dashboard-page',
@@ -341,6 +455,16 @@ export class OnboardingPage {
         @if (message()) {
           <p class="form-message" [class.success]="isSuccess()">{{ message() }}</p>
         }
+        @if (showDevelopmentAdminHelper) {
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="useDevelopmentAdminCredentials()"
+            i18n="Use development admin button@@auth.useDevelopmentAdmin"
+          >
+            Use dev admin
+          </button>
+        }
         <button type="submit" [disabled]="form.invalid || isSubmitting()">
           @if (isSubmitting()) {
             <ng-container i18n="Logging in state@@auth.loggingIn">Logging in...</ng-container>
@@ -387,16 +511,29 @@ export class LoginPage {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthApiClient);
   private readonly authSession = inject(AuthSessionService);
+  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   protected readonly isSubmitting = signal(false);
   protected readonly isCompletingOnboarding = signal(false);
   protected readonly showOnboarding = signal(false);
   protected readonly message = signal('');
   protected readonly isSuccess = signal(false);
+  protected readonly showDevelopmentAdminHelper = !window.location.hostname.endsWith(
+    'cryptomarketanalysis.com',
+  );
   protected readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', Validators.required],
   });
+
+  protected useDevelopmentAdminCredentials(): void {
+    this.form.setValue({
+      email: 'admin@cryptomarketanalysis.com',
+      password: 'AdminPass123!',
+    });
+    this.message.set('');
+    this.isSuccess.set(false);
+  }
 
   protected async submit(): Promise<void> {
     if (this.form.invalid || this.isSubmitting()) {
@@ -425,7 +562,7 @@ export class LoginPage {
       this.message.set(
         $localize`:Login success message@@auth.loginSuccess:Login successful. Redirecting to dashboard.`,
       );
-      await this.router.navigate(['/dashboard']);
+      await this.router.navigateByUrl(this.route.snapshot.queryParamMap.get('returnUrl') ?? '/dashboard');
     } catch (error) {
       this.message.set(getErrorMessage(error));
     } finally {
@@ -750,10 +887,11 @@ function getErrorMessage(error: unknown): string {
 }
 
 export const appRoutes: Route[] = [
-  { path: '', component: DashboardPage },
-  { path: 'dashboard', component: DashboardPage },
+  { path: '', component: LandingPage },
+  { path: 'dashboard', component: DashboardPage, canActivate: [authGuard] },
   {
     path: 'charts',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./components/chart-library/chart-library.component').then(
         (module) => module.ChartLibraryComponent,
@@ -761,13 +899,31 @@ export const appRoutes: Route[] = [
   },
   {
     path: 'charts/bitcoin-rainbow',
+    canActivate: [authGuard],
     loadComponent: () =>
       import(
         './components/bitcoin-rainbow-chart-page/bitcoin-rainbow-chart-page.component'
       ).then((module) => module.BitcoinRainbowChartPageComponent),
   },
   {
+    path: 'charts/pi-cycle-top',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/pi-cycle-top-chart-page/pi-cycle-top-chart-page.component').then(
+        (module) => module.PiCycleTopChartPageComponent,
+      ),
+  },
+  {
+    path: 'charts/stock-to-flow',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/stock-to-flow-chart-page/stock-to-flow-chart-page.component').then(
+        (module) => module.StockToFlowChartPageComponent,
+      ),
+  },
+  {
     path: 'charts/:chartId',
+    canActivate: [authGuard],
     loadComponent: () =>
       import(
         './components/chart-detail-placeholder/chart-detail-placeholder.component'
@@ -776,16 +932,16 @@ export const appRoutes: Route[] = [
   {
     path: 'admin/users',
     component: AdminUsersPage,
-    canActivate: [roleGuard],
+    canActivate: [authGuard, roleGuard],
     data: { roles: ['administrator'] },
   },
   {
     path: 'admin/data-configuration',
     component: AdminDataConfigurationPage,
-    canActivate: [roleGuard],
+    canActivate: [authGuard, roleGuard],
     data: { roles: ['administrator'] },
   },
-  { path: 'onboarding', component: OnboardingPage },
+  { path: 'onboarding', component: OnboardingPage, canActivate: [authGuard] },
   { path: 'login', component: LoginPage },
   { path: 'forgot-password', component: ForgotPasswordPage },
   { path: 'reset-password', component: ResetPasswordPage },

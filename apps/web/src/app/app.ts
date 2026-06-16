@@ -1,5 +1,6 @@
 import { Component, LOCALE_ID, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { AuthSessionService } from './services/auth-session.service';
 
 type Language = 'en' | 'hu';
 
@@ -11,7 +12,9 @@ type Language = 'en' | 'hu';
 })
 export class App {
   private readonly locale = inject(LOCALE_ID);
+  private readonly authSession = inject(AuthSessionService);
   protected readonly language = normalizeLanguage(this.locale);
+  protected readonly currentUser = this.authSession.currentUser;
 
   protected switchLanguage(event: Event): void {
     const language = (event.target as HTMLSelectElement).value as Language;

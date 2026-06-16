@@ -1,58 +1,109 @@
-<section class="content-section chart-library-section">
-  <div class="section-heading chart-library-heading">
-    <div>
-      <p class="eyebrow" i18n="Chart library eyebrow@@charts.eyebrow">
-        Chart library
-      </p>
-      <h2 i18n="Chart library title@@charts.title">Tracked Bitcoin models</h2>
-    </div>
-
-    <label class="chart-search">
-      <span i18n="Chart search label@@charts.searchLabel">Search charts</span>
+<section class="chart-browser-shell">
+  <aside class="chart-browser-sidebar" aria-label="Chart categories" i18n-aria-label="Chart categories aria@@charts.categoriesAria">
+    <label class="chart-sidebar-search">
+      <span aria-hidden="true">⌕</span>
       <input
         type="search"
         [value]="searchQuery()"
         (input)="updateSearch($event)"
-        placeholder="Search by title or signal"
+        placeholder="Search Metrics"
         i18n-placeholder="Chart search placeholder@@charts.searchPlaceholder"
       />
     </label>
-  </div>
 
-  @if (premiumNotice()) {
-    <p class="form-message">{{ premiumNotice() }}</p>
-  }
-
-  @for (group of filteredCategories(); track group.category) {
-    <section class="chart-category" [attr.aria-labelledby]="group.category">
-      <h3 [id]="group.category">{{ group.category }}</h3>
-      <div class="chart-card-grid">
+    @for (group of filteredCategories(); track group.category) {
+      <section class="chart-sidebar-group">
+        <h3>{{ group.category }}</h3>
         @for (chart of group.charts; track chart.id) {
-          <article class="chart-card" tabindex="0" (click)="openChart(chart)" (keyup.enter)="openChart(chart)">
-            <div class="chart-thumbnail {{ chart.thumbnailClass }}" aria-hidden="true">
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
-            <div class="chart-card-body">
-              <div class="chart-card-title-row">
-                <h4>{{ chart.title }}</h4>
-                <span class="tier-badge" [class.premium]="chart.accessTier === 'premium'">
-                  {{ tierLabel(chart.accessTier) }}
-                </span>
-              </div>
-              <p>{{ chart.description }}</p>
-              <button type="button" (click)="$event.stopPropagation(); openChart(chart)">
-                <ng-container i18n="View chart button@@charts.viewChart">View Chart</ng-container>
-              </button>
-            </div>
-          </article>
+          <button
+            type="button"
+            class="chart-sidebar-item"
+            [class.active]="selectedChart().id === chart.id"
+            (mouseenter)="selectChart(chart)"
+            (focus)="selectChart(chart)"
+            (click)="openChart(chart)"
+          >
+            <span>{{ chart.title }}</span>
+            <small>{{ chart.signal }}</small>
+          </button>
         }
+      </section>
+    } @empty {
+      <p class="empty-state" i18n="No charts found message@@charts.empty">
+        No charts match this search.
+      </p>
+    }
+  </aside>
+
+  <div class="chart-browser-main">
+    <header class="chart-browser-header">
+      <div>
+        <p class="eyebrow" i18n="Chart library eyebrow@@charts.eyebrow">
+          Chart library
+        </p>
+        <h2 i18n="Chart library title@@charts.title">Tracked Bitcoin models</h2>
       </div>
-    </section>
-  } @empty {
-    <p class="empty-state" i18n="No charts found message@@charts.empty">
-      No charts match this search.
-    </p>
-  }
+      <button
+        type="button"
+        [disabled]="!selectedChart()"
+        (click)="selectedChart() && openChart(selectedChart()!)"
+        i18n="Open selected chart button@@charts.openSelected"
+      >
+        Open selected chart
+      </button>
+    </header>
+
+    @if (premiumNotice()) {
+      <p class="form-message">{{ premiumNotice() }}</p>
+    }
+
+    @if (selectedChart(); as chart) {
+      <section class="chart-preview-panel">
+        <div class="chart-preview-titlebar">
+          <div>
+            <span class="chart-coin" aria-hidden="true">₿</span>
+            <h3>{{ chart.title }}</h3>
+          </div>
+          <span class="tier-badge" [class.premium]="chart.accessTier === 'premium'">
+            {{ tierLabel(chart.accessTier) }}
+          </span>
+        </div>
+
+        <div class="chart-preview-canvas {{ chart.thumbnailClass }}" aria-hidden="true">
+          <div class="chart-axis y-axis">
+            <span>$1T</span>
+            <span>$100B</span>
+            <span>$10B</span>
+            <span>$1B</span>
+            <span>$100M</span>
+          </div>
+          <div class="chart-preview-plot">
+            <span class="preview-band hot"></span>
+            <span class="preview-band cool"></span>
+            <span class="preview-line primary-line"></span>
+            <span class="preview-line secondary-line"></span>
+            <span class="preview-spike spike-one"></span>
+            <span class="preview-spike spike-two"></span>
+            <span class="preview-spike spike-three"></span>
+          </div>
+          <div class="chart-axis x-axis">
+            <span>2012</span>
+            <span>2016</span>
+            <span>2020</span>
+            <span>2024</span>
+          </div>
+        </div>
+
+        <div class="chart-preview-footer">
+          <div>
+            <strong>{{ chart.signal }}</strong>
+            <p>{{ chart.description }}</p>
+          </div>
+          <button type="button" (click)="openChart(chart)" i18n="View chart button@@charts.viewChart">
+            View Chart
+          </button>
+        </div>
+      </section>
+    }
+  </div>
 </section>

@@ -1,0 +1,39 @@
+<div class="annotation-controls" [class.crosshair]="cursorHint() === 'crosshair'">
+  @if (mode() === 'off') {
+    <button type="button" class="secondary-button" (click)="startAnnotationMode()">
+      Annotate
+    </button>
+  } @else {
+    <button type="button" class="secondary-button" (click)="selectNoteMode()">
+      Add Note
+    </button>
+    <button type="button" class="secondary-button" (click)="selectTrendlineMode()">
+      Draw Trend Line
+    </button>
+    <button type="button" class="secondary-button" (click)="done()">Done</button>
+  }
+</div>
+
+@if (message()) {
+  <p class="form-message" [class.success]="isSuccess()">{{ message() }}</p>
+}
+
+@if (noteDraft()) {
+  <div class="annotation-modal" role="dialog" aria-modal="true">
+    <div class="annotation-dialog">
+      <h3>Add Note</h3>
+      <label>
+        Note
+        <input [(ngModel)]="noteText" />
+      </label>
+      <label>
+        Color
+        <input type="color" [(ngModel)]="noteColor" />
+      </label>
+      <div class="admin-actions">
+        <button type="button" (click)="saveNote()">Save</button>
+        <button type="button" class="secondary-button" (click)="cancelNote()">Cancel</button>
+      </div>
+    </div>
+  </div>
+}

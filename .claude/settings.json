@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(run)",
+      "Skill(run:*)",
+      "Bash(grep -E \"\\\\.\\(ts|js\\)$\")",
+      "Bash(curl -s -m 8 -o /dev/null -w \"%{http_code}\\\\n\" \"https://api.alternative.me/fng/?limit=1\")",
+      "Bash(curl -s -m 8 -o /dev/null -w \"%{http_code}\\\\n\" \"https://bitcoin-data.com/v1/mvrv-zscore/last\")",
+      "Bash(curl -s -m 8 \"https://api.alternative.me/fng/?limit=2&format=json\")",
+      "Bash(curl -s -m 8 \"https://bitcoin-data.com/v1/mvrv-zscore/last\")",
+      "Bash(curl -s -m 8 \"https://bitcoin-data.com/v1/realised-price/last\")",
+      "Bash(curl -s -m 8 \"https://bitcoin-data.com/v1/mvrv-zscore/\")",
+      "Bash(curl -s -m 8 \"https://bitcoin-data.com/v1/mvrv-zscore/list?range=10d\")",
+      "Bash(curl -s -m 8 \"https://bitcoin-data.com/v1/mvrv-zscore?limit=5\")",
+      "Bash(curl -s -m 8 \"https://bitcoin-data.com/v1/mvrv-zscore/all\")",
+      "Bash(curl -s -m 8 \"https://bitcoin-data.com/\")",
+      "Bash(node -e \"console.log\\(new Date\\(1781568000*1000\\).toISOString\\(\\)\\)\")"
+    ]
+  }
+}

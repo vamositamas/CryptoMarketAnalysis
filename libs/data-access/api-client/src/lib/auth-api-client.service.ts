@@ -118,6 +118,80 @@ export interface BitcoinRainbowChartResponse {
   lastUpdated: string | null;
 }
 
+export interface PiCycleTopChartDataPoint {
+  date: string;
+  priceUsd: number;
+  ma111: number | null;
+  ma350x2: number | null;
+}
+
+export interface PiCycleTopChartResponse {
+  chartId: 'pi-cycle-top';
+  title: 'Pi Cycle Top Indicator';
+  timeframe: ChartTimeframe;
+  dataPoints: PiCycleTopChartDataPoint[];
+  lastUpdated: string | null;
+}
+
+export interface StockToFlowChartDataPoint {
+  date: string;
+  priceUsd: number;
+  stockToFlowRatio: number | null;
+  modelPrice: number | null;
+}
+
+export interface StockToFlowChartResponse {
+  chartId: 'stock-to-flow';
+  title: 'Stock-to-Flow Model';
+  timeframe: ChartTimeframe;
+  dataPoints: StockToFlowChartDataPoint[];
+  lastUpdated: string | null;
+}
+
+export type ChartAnnotation =
+  | {
+      id: string;
+      userId: string;
+      chartId: string;
+      type: 'note';
+      date: string;
+      priceLevel: number;
+      text: string;
+      color: string;
+      createdAt: string;
+    }
+  | {
+      id: string;
+      userId: string;
+      chartId: string;
+      type: 'trendline';
+      startDate: string;
+      startPrice: number;
+      endDate: string;
+      endPrice: number;
+      color: string;
+      createdAt: string;
+    };
+
+export type CreateChartAnnotationRequest =
+  | {
+      chartId: string;
+      type: 'note';
+      date: string;
+      priceLevel: number;
+      text: string;
+      color: string;
+    }
+  | {
+      chartId: string;
+      type: 'trendline';
+      startDate: string;
+      startPrice: number;
+      endDate: string;
+      endPrice: number;
+      color: string;
+    };
+
 interface CsrfTokenResponse {
   csrfToken: string;
 }
@@ -248,6 +322,65 @@ export class AuthApiClient {
       return await firstValueFrom(
         this.http.get<BitcoinRainbowChartResponse>('/api/charts/bitcoin-rainbow', {
           params: { timeframe },
+          withCredentials: true,
+        }),
+      );
+    } catch (error) {
+      throw toApiClientError(error);
+    }
+  }
+
+  async getPiCycleTopChartData(timeframe: ChartTimeframe): Promise<PiCycleTopChartResponse> {
+    try {
+      return await firstValueFrom(
+        this.http.get<PiCycleTopChartResponse>('/api/charts/pi-cycle-top', {
+          params: { timeframe },
+          withCredentials: true,
+        }),
+      );
+    } catch (error) {
+      throw toApiClientError(error);
+    }
+  }
+
+  async getStockToFlowChartData(timeframe: ChartTimeframe): Promise<StockToFlowChartResponse> {
+    try {
+      return await firstValueFrom(
+        this.http.get<StockToFlowChartResponse>('/api/charts/stock-to-flow', {
+          params: { timeframe },
+          withCredentials: true,
+        }),
+      );
+    } catch (error) {
+      throw toApiClientError(error);
+    }
+  }
+
+  async getChartAnnotations(chartId: string): Promise<ChartAnnotation[]> {
+    try {
+      return await firstValueFrom(
+        this.http.get<ChartAnnotation[]>('/api/users/me/annotations', {
+          params: { chartId },
+          withCredentials: true,
+        }),
+      );
+    } catch (error) {
+      throw toApiClientError(error);
+    }
+  }
+
+  async createChartAnnotation(
+    request: CreateChartAnnotationRequest,
+  ): Promise<ChartAnnotation> {
+    return this.postWithCsrf<ChartAnnotation>('/api/users/me/annotations', request);
+  }
+
+  async deleteChartAnnotation(annotationId: string): Promise<void> {
+    try {
+      const csrfToken = await this.getCsrfToken();
+      await firstValueFrom(
+        this.http.delete<void>(`/api/users/me/annotations/${annotationId}`, {
+          headers: { 'x-csrf-token': csrfToken },
           withCredentials: true,
         }),
       );

@@ -6,8 +6,8 @@ import type { AnnotationOptions } from 'chartjs-plugin-annotation';
 import {
   ApiClientError,
   AuthApiClient,
-  type BitcoinRainbowChartDataPoint,
   type ChartTimeframe,
+  type StockToFlowChartDataPoint,
 } from '@crypto-market-analysis/data-access/api-client';
 import { ChartViewerComponent } from '../chart-viewer/chart-viewer.component';
 import { ChartAnnotationsComponent } from '../chart-annotations/chart-annotations.component';
@@ -37,24 +37,19 @@ const TIMEFRAMES: TimeframeOption[] = [
   { label: 'All', value: 'all' },
 ];
 
-const RAINBOW_BANDS = [
-  { label: 'Fire Sale', color: 'rgba(47, 128, 237, 0.14)' },
-  { label: 'Buy', color: 'rgba(86, 204, 242, 0.14)' },
-  { label: 'Accumulate', color: 'rgba(39, 174, 96, 0.14)' },
-  { label: 'Still Cheap', color: 'rgba(111, 207, 151, 0.14)' },
-  { label: 'Fair Value', color: 'rgba(242, 201, 76, 0.16)' },
-  { label: 'Hold', color: 'rgba(242, 153, 74, 0.14)' },
-  { label: 'FOMO', color: 'rgba(235, 87, 87, 0.12)' },
-  { label: 'Sell', color: 'rgba(190, 60, 60, 0.12)' },
-  { label: 'Maximum Bubble', color: 'rgba(127, 29, 29, 0.12)' },
+const HALVING_EVENTS = [
+  { date: '2012-11-28', label: '2012 Halving' },
+  { date: '2016-07-09', label: '2016 Halving' },
+  { date: '2020-05-11', label: '2020 Halving' },
+  { date: '2024-04-20', label: '2024 Halving' },
 ];
 
 @Component({
-  selector: 'app-bitcoin-rainbow-chart-page',
+  selector: 'app-stock-to-flow-chart-page',
   imports: [ChartViewerComponent, ChartAnnotationsComponent, ChartInfoPanelComponent, RouterLink],
-  templateUrl: './bitcoin-rainbow-chart-page.component.html',
+  templateUrl: './stock-to-flow-chart-page.component.html',
 })
-export class BitcoinRainbowChartPageComponent implements AfterViewInit {
+export class StockToFlowChartPageComponent implements AfterViewInit {
   private readonly api = inject(AuthApiClient);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -67,26 +62,43 @@ export class BitcoinRainbowChartPageComponent implements AfterViewInit {
   protected readonly infoOpen = signal(true);
   protected readonly exportMenuOpen = signal(false);
   protected readonly userAnnotations = signal<Record<string, AnnotationOptions>>({});
-  protected readonly dataPoints = signal<BitcoinRainbowChartDataPoint[]>([]);
+  protected readonly dataPoints = signal<StockToFlowChartDataPoint[]>([]);
   protected readonly lastUpdated = signal<string | null>(null);
   protected readonly infoCurrentFields = computed<ChartInfoField[]>(() => {
     const point = this.latestPoint();
 
     return [
-      { label: 'Current Position', value: getBandLabel(point?.rainbowBand ?? null) },
       { label: 'Current Price', value: point ? formatUsd(point.priceUsd) : 'Waiting for data' },
+      { label: 'Model Price', value: point?.modelPrice ? formatUsd(point.modelPrice) : 'Waiting for model' },
+      { label: 'Stock-to-Flow Ratio', value: point?.stockToFlowRatio ? point.stockToFlowRatio.toFixed(2) : 'Waiting for model' },
+      { label: 'Price vs Model', value: point ? formatPremium(point) : 'Waiting for data' },
     ];
   });
-  protected readonly infoInterpretation = computed(() =>
-    getRainbowInterpretation(this.latestPoint()?.rainbowBand ?? null),
-  );
+  protected readonly infoInterpretation = computed(() => {
+    const point = this.latestPoint();
+    const divergenceKind = point ? getDivergenceKind(point) : undefined;
+
+    if (!point || point.modelPrice === null) {
+      return 'Waiting for the latest Stock-to-Flow model calculation.';
+    }
+
+    if (divergenceKind === 'overvalued') {
+      return 'Bitcoin is trading materially above the Stock-to-Flow model price. Treat this as historical context rather than a standalone sell signal.';
+    }
+
+    if (divergenceKind === 'undervalued') {
+      return 'Bitcoin is trading materially below the Stock-to-Flow model price. Historically, this has marked periods where price lagged scarcity-model expectations.';
+    }
+
+    return 'Bitcoin is trading near the Stock-to-Flow model price. The model is best used as long-term scarcity context, not a precise forecast.';
+  });
   protected readonly infoLastUpdated = computed(() => this.lastUpdatedText());
   protected readonly infoAbout =
-    'The Bitcoin Rainbow Chart uses logarithmic growth curves to identify market cycle positions. Nine color-coded bands represent valuation levels from "Fire Sale" (deep undervaluation) to "Maximum Bubble Territory" (extreme overvaluation).';
+    'The Bitcoin Stock-to-Flow model estimates Bitcoin value from scarcity, using the ratio between existing supply and new issuance. It is most useful as long-term historical context around halving cycles.';
   protected readonly infoDataSources = [
     'Bitcoin Price: CoinGecko API',
-    'On-chain Metrics: Blockchain.info',
-    'Calculation: Rainbow bands calculated from logarithmic regression model fit to historical price data since 2009-01-03',
+    'Supply schedule: Bitcoin issuance and halving schedule',
+    'Calculation: Stock-to-Flow ratio and model price calculated from Bitcoin supply and issuance flow',
   ];
   protected readonly chartData = computed<ChartData<'line'>>(() => ({
     labels: this.dataPoints().map((point) => point.date),
@@ -94,12 +106,23 @@ export class BitcoinRainbowChartPageComponent implements AfterViewInit {
       {
         label: 'Bitcoin Price',
         data: this.dataPoints().map((point) => point.priceUsd),
-        borderColor: '#101820',
+        borderColor: '#000000',
         backgroundColor: 'transparent',
         borderWidth: 2,
         pointRadius: 0,
         pointHitRadius: 12,
-        tension: 0.18,
+        tension: 0.16,
+      },
+      {
+        label: 'S2F Model Price',
+        data: this.dataPoints().map((point) => point.modelPrice),
+        borderColor: '#F59E0B',
+        backgroundColor: 'transparent',
+        borderDash: [8, 6],
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHitRadius: 12,
+        tension: 0.16,
       },
     ],
   }));
@@ -124,24 +147,33 @@ export class BitcoinRainbowChartPageComponent implements AfterViewInit {
         },
       },
       plugins: {
-        legend: { display: false },
+        legend: {
+          display: true,
+          position: 'top',
+          labels: { usePointStyle: true },
+        },
         tooltip: {
           callbacks: {
             title: (items) => formatDate(String(items[0]?.label ?? '')),
-            label: (item) => {
-              const point = this.dataPoints()[item.dataIndex];
-              const band = point?.rainbowBand ?? null;
+            label: (item) => `${item.dataset.label}: ${formatUsd(Number(item.parsed.y))}`,
+            afterBody: (items) => {
+              const point = this.dataPoints()[items[0]?.dataIndex ?? -1];
+
+              if (!point) {
+                return '';
+              }
 
               return [
-                `Price: ${formatUsd(Number(item.parsed.y))}`,
-                `Band: ${getBandLabel(band)}${band === null ? '' : ` (Band ${band})`}`,
+                `S2F Ratio: ${formatRatio(point.stockToFlowRatio)}`,
+                `Premium to Model: ${formatPremium(point)}`,
               ];
             },
           },
         },
         annotation: {
           annotations: {
-            ...createRainbowAnnotations(range.min, range.max),
+            ...createHalvingAnnotations(),
+            ...createDivergenceAnnotations(this.dataPoints(), range.min, range.max),
             ...this.userAnnotations(),
           },
         },
@@ -214,8 +246,8 @@ export class BitcoinRainbowChartPageComponent implements AfterViewInit {
     this.exportMenuOpen.set(false);
     await exportChartPng({
       chartImageDataUrl,
-      chartTitle: 'Bitcoin Rainbow Price Chart',
-      fileName: `bitcoin-rainbow-chart_${getExportDateStamp()}.png`,
+      chartTitle: 'Stock-to-Flow Model',
+      fileName: `stock-to-flow_${getExportDateStamp()}.png`,
     });
   }
 
@@ -223,11 +255,12 @@ export class BitcoinRainbowChartPageComponent implements AfterViewInit {
     this.exportMenuOpen.set(false);
     exportChartCsv({
       rows: this.dataPoints(),
-      fileName: `bitcoin-rainbow-chart_${getExportDateStamp()}.csv`,
+      fileName: `stock-to-flow_${getExportDateStamp()}.csv`,
       columns: [
         { header: 'Date', value: (row) => row.date },
         { header: 'Price USD', value: (row) => formatCsvNumber(row.priceUsd) },
-        { header: 'Rainbow Band', value: (row) => row.rainbowBand },
+        { header: 'S2F Model Price', value: (row) => formatCsvNumber(row.modelPrice) },
+        { header: 'S2F Ratio', value: (row) => row.stockToFlowRatio },
       ],
     });
   }
@@ -242,7 +275,7 @@ export class BitcoinRainbowChartPageComponent implements AfterViewInit {
     return new Date(timestamp).toISOString().replace('T', ' ').replace('.000Z', ' UTC');
   }
 
-  private latestPoint(): BitcoinRainbowChartDataPoint | undefined {
+  private latestPoint(): StockToFlowChartDataPoint | undefined {
     const dataPoints = this.dataPoints();
 
     return dataPoints[dataPoints.length - 1];
@@ -254,14 +287,14 @@ export class BitcoinRainbowChartPageComponent implements AfterViewInit {
     this.errorMessage.set('');
 
     try {
-      const response = await this.api.getBitcoinRainbowChartData(timeframe);
+      const response = await this.api.getStockToFlowChartData(timeframe);
       this.dataPoints.set(response.dataPoints);
       this.lastUpdated.set(response.lastUpdated);
     } catch (error) {
       this.errorMessage.set(
         error instanceof ApiClientError
           ? error.message
-          : $localize`:Chart data load failure@@charts.rainbowLoadFailed:Chart data could not be loaded. Please try again.`,
+          : $localize`:Stock to Flow chart load failure@@charts.stockToFlowLoadFailed:Chart data could not be loaded. Please try again.`,
       );
     } finally {
       this.isLoading.set(false);
@@ -269,70 +302,145 @@ export class BitcoinRainbowChartPageComponent implements AfterViewInit {
   }
 }
 
-function getPriceRange(dataPoints: BitcoinRainbowChartDataPoint[]): { min: number; max: number } {
-  const prices = dataPoints.map((point) => point.priceUsd).filter((price) => price > 0);
+function createHalvingAnnotations(): Record<string, AnnotationOptions<'line'>> {
+  return Object.fromEntries(
+    HALVING_EVENTS.map((event) => [
+      `halving${event.date}`,
+      {
+        type: 'line',
+        xMin: event.date,
+        xMax: event.date,
+        borderColor: '#6B7280',
+        borderDash: [4, 5],
+        borderWidth: 1,
+        label: {
+          display: true,
+          content: event.label,
+          position: 'start',
+          backgroundColor: 'rgba(55, 65, 81, 0.88)',
+        },
+      },
+    ]),
+  );
+}
+
+function createDivergenceAnnotations(
+  dataPoints: StockToFlowChartDataPoint[],
+  min: number,
+  max: number,
+): Record<string, AnnotationOptions<'box'>> {
+  return Object.fromEntries(
+    getDivergenceRanges(dataPoints).map((range, index) => [
+      `divergence${index + 1}`,
+      {
+        type: 'box',
+        xMin: range.start,
+        xMax: range.end,
+        yMin: min,
+        yMax: max,
+        backgroundColor:
+          range.kind === 'overvalued' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(34, 197, 94, 0.1)',
+        borderWidth: 0,
+        label: {
+          display: true,
+          content: range.kind === 'overvalued' ? 'Overvalued' : 'Undervalued',
+          position: 'center',
+          backgroundColor:
+            range.kind === 'overvalued' ? 'rgba(239, 68, 68, 0.82)' : 'rgba(34, 197, 94, 0.82)',
+        },
+      },
+    ]),
+  );
+}
+
+function getDivergenceRanges(
+  dataPoints: StockToFlowChartDataPoint[],
+): { start: string; end: string; kind: 'overvalued' | 'undervalued' }[] {
+  const ranges: { start: string; end: string; kind: 'overvalued' | 'undervalued' }[] = [];
+  let currentRange: { start: string; end: string; kind: 'overvalued' | 'undervalued' } | undefined;
+
+  for (const point of dataPoints) {
+    const kind = getDivergenceKind(point);
+
+    if (!kind) {
+      if (currentRange) {
+        ranges.push(currentRange);
+        currentRange = undefined;
+      }
+      continue;
+    }
+
+    if (currentRange?.kind === kind) {
+      currentRange.end = point.date;
+      continue;
+    }
+
+    if (currentRange) {
+      ranges.push(currentRange);
+    }
+
+    currentRange = { start: point.date, end: point.date, kind };
+  }
+
+  if (currentRange) {
+    ranges.push(currentRange);
+  }
+
+  return ranges;
+}
+
+function getDivergenceKind(point: StockToFlowChartDataPoint): 'overvalued' | 'undervalued' | undefined {
+  if (point.modelPrice === null || point.modelPrice <= 0) {
+    return undefined;
+  }
+
+  const premium = (point.priceUsd - point.modelPrice) / point.modelPrice;
+
+  if (premium > 0.2) {
+    return 'overvalued';
+  }
+
+  if (premium < -0.2) {
+    return 'undervalued';
+  }
+
+  return undefined;
+}
+
+function getPriceRange(dataPoints: StockToFlowChartDataPoint[]): { min: number; max: number } {
+  const prices = dataPoints
+    .flatMap((point) => [point.priceUsd, point.modelPrice])
+    .filter((price): price is number => typeof price === 'number' && price > 0);
 
   if (prices.length === 0) {
     return { min: 1, max: 100000 };
   }
 
-  const min = Math.max(0.01, Math.min(...prices) * 0.55);
-  const max = Math.max(...prices) * 1.45;
-
-  return { min, max };
+  return {
+    min: Math.max(0.01, Math.min(...prices) * 0.55),
+    max: Math.max(...prices) * 1.45,
+  };
 }
 
-function getRainbowInterpretation(band: number | null): string {
-  if (band === null) {
-    return 'Waiting for the latest rainbow band calculation.';
+function formatPremium(point: StockToFlowChartDataPoint): string {
+  if (point.modelPrice === null || point.modelPrice <= 0) {
+    return 'n/a';
   }
 
-  if (band <= 2) {
-    return 'Bitcoin is in a historically depressed valuation zone. Cooler bands have often represented long-term accumulation opportunities.';
-  }
+  const premium = ((point.priceUsd - point.modelPrice) / point.modelPrice) * 100;
 
-  if (band <= 5) {
-    return 'Bitcoin is near fair-value to accumulation territory. This zone has historically represented constructive long-term positioning.';
-  }
-
-  if (band <= 7) {
-    return 'Bitcoin is in a warmer valuation zone. Historical cycles suggest risk management becomes more important as price moves higher through the bands.';
-  }
-
-  return 'Bitcoin is in an overheated valuation zone. Upper bands have historically appeared near speculative market-cycle extremes.';
+  return `${premium >= 0 ? '+' : ''}${premium.toFixed(1)}%`;
 }
 
-function createRainbowAnnotations(min: number, max: number): Record<string, AnnotationOptions<'box'>> {
-  const ratio = Math.pow(max / min, 1 / RAINBOW_BANDS.length);
-
-  return Object.fromEntries(
-    RAINBOW_BANDS.map((band, index) => {
-      const yMin = min * Math.pow(ratio, index);
-      const yMax = index === RAINBOW_BANDS.length - 1 ? max : min * Math.pow(ratio, index + 1);
-
-      return [
-        `rainbowBand${index + 1}`,
-        {
-          type: 'box',
-          yMin,
-          yMax,
-          backgroundColor: band.color,
-          borderWidth: 0,
-        },
-      ];
-    }),
-  );
-}
-
-function getBandLabel(band: number | null): string {
-  if (band === null) {
-    return 'Unknown';
-  }
-
-  return RAINBOW_BANDS[band - 1]?.label ?? 'Unknown';
+function formatRatio(value: number | null): string {
+  return value === null ? 'n/a' : value.toFixed(1);
 }
 
 function formatUsd(value: number): string {
+  if (!Number.isFinite(value)) {
+    return 'n/a';
+  }
+
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',

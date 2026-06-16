@@ -3,6 +3,7 @@
     #canvas
     aria-label="Interactive chart"
     role="img"
+    (click)="handleClick($event)"
     (dblclick)="resetZoom()"
     (touchend)="handleTouchEnd($event)"
   ></canvas>

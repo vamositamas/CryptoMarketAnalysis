@@ -41,9 +41,12 @@ describe('ChartLibraryComponent', () => {
     expect(text).not.toContain('Pi Cycle Top Indicator');
   });
 
-  it('navigates to chart detail path from the View Chart button', () => {
-    const buttons = fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>;
-    buttons[1].click();
+  it('navigates to chart detail path from a chart row click', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+    const sidebarItems = compiled.querySelectorAll(
+      '.chart-sidebar-item',
+    ) as NodeListOf<HTMLButtonElement>;
+    sidebarItems[1].click();
 
     expect(router.navigate).toHaveBeenCalledWith(['/charts', 'bitcoin-rainbow']);
   });
