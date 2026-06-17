@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { AuthApiClient } from '@crypto-market-analysis/data-access/api-client';
 import { DashboardPage } from './app.routes';
 
@@ -8,12 +9,16 @@ describe('DashboardPage', () => {
     getCurrentUserProfile: jest.Mock;
     getDashboardWidgets: jest.Mock;
     reorderDashboardWidgets: jest.Mock;
+    getRecentCharts: jest.Mock;
   };
 
   function setUp(): void {
     TestBed.configureTestingModule({
       imports: [DashboardPage],
-      providers: [{ provide: AuthApiClient, useValue: auth }],
+      providers: [
+        provideRouter([]),
+        { provide: AuthApiClient, useValue: auth },
+      ],
     });
 
     fixture = TestBed.createComponent(DashboardPage);
@@ -25,6 +30,7 @@ describe('DashboardPage', () => {
       getCurrentUserProfile: jest.fn().mockRejectedValue(new Error('not logged in')),
       getDashboardWidgets: jest.fn().mockResolvedValue({ widgets: [] }),
       reorderDashboardWidgets: jest.fn().mockResolvedValue(undefined),
+      getRecentCharts: jest.fn().mockResolvedValue({ recentCharts: [] }),
     };
   });
 
@@ -246,5 +252,57 @@ describe('DashboardPage', () => {
     const updated = fixture.nativeElement as HTMLElement;
     expect(updated.querySelector('.widget-modal-overlay')).toBeNull();
     expect(updated.textContent).toContain('Hash Rate');
+  });
+
+  it('shows placeholder message and Explore Charts link when there are no recent charts', async () => {
+    setUp();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('No charts viewed yet');
+    expect(compiled.querySelector('a[href="/charts"]')).not.toBeNull();
+  });
+
+  it('renders a card for each recent chart with title and relative time', async () => {
+    auth.getRecentCharts.mockResolvedValue({
+      recentCharts: [
+        {
+          chartId: 'bitcoin-rainbow',
+          title: 'Bitcoin Rainbow Price Chart',
+          url: '/charts/bitcoin-rainbow',
+          thumbnailUrl: '/assets/charts/bitcoin-rainbow-thumb.png',
+          viewedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+        },
+      ],
+    });
+    setUp();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('Bitcoin Rainbow Price Chart');
+    expect(compiled.textContent).toContain('2 hours ago');
+    expect(compiled.querySelector('.recent-chart-card')).not.toBeNull();
+  });
+
+  it('formats relative time correctly', () => {
+    setUp();
+    const instance = fixture.componentInstance;
+
+    const justNow = new Date(Date.now() - 30_000).toISOString();
+    expect(instance['formatRelativeTime'](justNow)).toBe('Just now');
+
+    const oneMinAgo = new Date(Date.now() - 60_000).toISOString();
+    expect(instance['formatRelativeTime'](oneMinAgo)).toBe('1 minute ago');
+
+    const fiveMinsAgo = new Date(Date.now() - 5 * 60_000).toISOString();
+    expect(instance['formatRelativeTime'](fiveMinsAgo)).toBe('5 minutes ago');
+
+    const oneHourAgo = new Date(Date.now() - 60 * 60_000).toISOString();
+    expect(instance['formatRelativeTime'](oneHourAgo)).toBe('1 hour ago');
+
+    const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60_000).toISOString();
+    expect(instance['formatRelativeTime'](threeDaysAgo)).toBe('3 days ago');
   });
 });

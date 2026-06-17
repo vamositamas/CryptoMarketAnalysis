@@ -34,6 +34,7 @@ describe('BitcoinRainbowChartPageComponent', () => {
         dataPoints: [],
         lastUpdated: null,
       }),
+      recordRecentChart: jest.fn().mockResolvedValue(undefined),
     };
 
     TestBed.configureTestingModule({

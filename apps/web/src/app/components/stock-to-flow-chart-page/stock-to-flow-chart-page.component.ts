@@ -191,6 +191,7 @@ export class StockToFlowChartPageComponent implements AfterViewInit {
   });
 
   constructor() {
+    void this.api.recordRecentChart('stock-to-flow').catch(() => undefined);
     this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
       const requested = params.get('timeframe');
       const timeframe = parseChartTimeframe(requested);

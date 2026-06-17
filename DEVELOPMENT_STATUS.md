@@ -6,7 +6,7 @@ This file is the quick human-readable progress tracker for the project. The deta
 
 ## Current Focus
 
-Epic 6: Personalized Dashboard & KPI Widgets
+Epic 7: Alert System & Notifications
 
 ## Overall Status
 
@@ -17,8 +17,9 @@ Epic 6: Personalized Dashboard & KPI Widgets
 | Epic 3: User Onboarding Experience | Done | i18n, onboarding carousel, completion tracking, and translations are complete. |
 | Epic 4: Bitcoin Data Pipeline & Calculation Engine | Done | Stories 4.1 through 4.8 are complete. |
 | Epic 5: Chart Visualization System | Done | Stories 5.1 through 5.10 are complete. |
-| Epic 6: Personalized Dashboard & KPI Widgets | In progress | Stories 6.1 through 6.3 are complete; Story 6.4 is next. |
-| Epics 7-9 | Backlog | Alerts, donation, and admin management work remain. |
+| Epic 6: Personalized Dashboard & KPI Widgets | Done | All stories 6.1 through 6.7 are complete. |
+| Epic 7: Alert System & Notifications | In progress | Story 7.1 (DB schema) done; Stories 7.2–7.6 remain. |
+| Epics 8-9 | Backlog | Donation and admin management work remain. |
 
 ## Epic 4 Progress
 
@@ -58,6 +59,18 @@ Epic 6: Personalized Dashboard & KPI Widgets
 | 6.4 Implement Custom Formula Widget Creation | Done |
 | 6.5 Implement Formula Parser Library | Done | Extracted `validateFormula` / `evaluateFormula` from `apps/api/src/services/formula-evaluator.ts` into the pre-scaffolded `libs/calculation-engines/formula-parser` library (`@crypto-market-analysis/calculation-engines/formula-parser`). Updated `dashboard.service.ts` to import from the library path alias. Deleted the now-redundant local `formula-evaluator.ts` and `formula-evaluator.spec.ts`; the 16 tests live in the library's spec file. |
 | 6.6 Implement Widget Drag-and-Drop Reordering | Done | Added pointer-events based drag-and-drop reordering for dashboard widgets (works on desktop mouse and mobile touch via the unified Pointer Events API). Each widget card shows a ⠿ drag handle with `touch-action: none`. `onPointerDown` captures the pointer via `setPointerCapture`; `onPointerMove` uses `document.elementFromPoint` + `closest('[data-widget-id]')` to identify the drop target; `onPointerUp` calls `performReorder` which splices the widget array in-place and calls `reorderDashboardWidgets` to persist. On API failure, the widget list is reloaded from the server. Backend: `PATCH /api/dashboard/widgets/reorder` accepts `{ orderedIds: string[] }`, validates (non-empty, all strings, no duplicates, ≤20), and calls a new `DashboardWidgetRepository.reorderWidgets()` that uses a PostgreSQL `unnest($2::text[], $3::int[])` join for an efficient single-query bulk position update. Styles: `is-dragging` (opacity 0.4) and `drag-over` (blue border highlight) classes; grab/grabbing cursor. |
+| 6.7 Implement Recent Charts Quick Access | Done | Each of the 3 chart pages (`bitcoin-rainbow`, `pi-cycle-top`, `stock-to-flow`) fires `recordRecentChart(chartId)` on load (fire-and-forget). Backend: `POST /api/users/me/recent-charts` upserts via `ON CONFLICT (user_id, chart_id) DO UPDATE SET viewed_at = NOW()` then prunes to 5 via subquery; `GET /api/users/me/recent-charts` returns up to 5 entries enriched with title/URL/thumbnail from a server-side CHART_CATALOG. `RecentChartsRepository` and `RecentChartsService` are new; `createUsersRouter` gains an optional 4th `recentChartsService` parameter. Dashboard: new "Recently Viewed Charts" section renders a horizontal scroll row of thumbnail cards (each is an `<a [routerLink]>` navigating to the chart); empty state shows "No charts viewed yet…" with an "Explore Charts" link; relative time formatter (`Just now / N minutes/hours/days ago`). Dashboard spec updated with `provideRouter([])` to satisfy `RouterLink`'s `ActivatedRoute` dependency. |
+
+## Epic 7 Progress
+
+| Story | Status | Summary |
+| --- | --- | --- |
+| 7.1 Create Alerts Database Schema | Done | Added `user_alerts` (id, user_id, chart_id, metric_name, condition, threshold_value, alert_name, status, created_at, last_evaluated_at, triggered_at) and `alert_triggers` (id, alert_id, triggered_at, metric_value, notification_sent, notification_sent_at) tables via migration `009_create_alerts_schema.sql`. `user_alerts` has CHECK constraints for `condition IN (…5 values…)` and `status IN ('active','triggered','paused')`. Two indexes: `idx_alerts_user_status(user_id, status)` for dashboard listing; `idx_alerts_evaluation(status, last_evaluated_at) WHERE status = 'active'` for the daily evaluation batch. `alert_triggers` has `idx_alert_triggers_alert(alert_id, triggered_at DESC)` for per-alert history. Both tables have RLS enabled and cascade-delete from `users`. Schema verified by 7 content-assertion tests in `alerts-schema.spec.ts` (same pattern as `dashboard-schema.spec.ts`). |
+| 7.2 Implement Alert Creation from Chart Pages | Backlog | |
+| 7.3 Implement Alerts Dashboard | Backlog | |
+| 7.4 Implement Daily Alert Evaluation Job | Backlog | |
+| 7.5 Implement Alert Notification Email | Backlog | |
+| 7.6 Implement Email Template Editor | Backlog | |
 
 ## Latest Verification
 
@@ -141,10 +154,16 @@ Epic 6: Personalized Dashboard & KPI Widgets
 - `npm exec nx -- run data-access-api-client:test --skip-nx-cache` passed with 18 tests.
 - `npm exec nx -- run-many --target=build --projects=api,web,data-access-api-client --skip-nx-cache` passed.
 - `npm exec nx -- run-many --target=eslint:lint --projects=api,data-access-api-client --skip-nx-cache` passed (web has pre-existing lint errors).
+- `npm exec nx -- run api:test --skip-nx-cache` passed with 173 tests.
+- `npm exec nx -- run web:test --skip-nx-cache` passed with 49 tests.
+- `npm exec nx -- run data-access-api-client:test --skip-nx-cache` passed with 20 tests.
+- `npm exec nx -- run-many --target=build --projects=api,web,data-access-api-client --skip-nx-cache` passed.
+- `npm exec nx -- run-many --target=eslint:lint --projects=api,data-access-api-client --skip-nx-cache` passed.
+- `npm exec nx -- run api:test --skip-nx-cache` passed with 180 tests (7 new alerts-schema spec tests).
 
 ## Next Step
 
-Begin Epic 6, Story 6.7: Implement Recent Charts Quick Access.
+Begin Epic 7, Story 7.2: Implement Alert Creation from Chart Pages.
 
 ## Notes
 

@@ -179,6 +179,7 @@ export class PiCycleTopChartPageComponent implements AfterViewInit {
   }));
 
   constructor() {
+    void this.api.recordRecentChart('pi-cycle-top').catch(() => undefined);
     this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
       const requested = params.get('timeframe');
       const timeframe = parseChartTimeframe(requested);

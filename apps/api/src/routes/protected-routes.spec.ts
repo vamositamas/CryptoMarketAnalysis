@@ -4,6 +4,7 @@ import { createAdminRouter } from './admin.route';
 import { createAlertsRouter } from './alerts.route';
 import { createDashboardRouter } from './dashboard.route';
 import { DashboardError } from '../services/dashboard.service';
+import { RecentChartsError } from '../services/recent-charts.service';
 import type { TokenInvalidationReader } from '../middleware/rbac.middleware';
 import { createUsersRouter } from './users.route';
 
@@ -201,17 +202,58 @@ describe('protected route wiring', () => {
     expect(response.body).toMatchObject({ success: true, dataPoints: 1 });
   });
 
-  it('allows authenticated users to create alerts', async () => {
+  it('allows authenticated users to create alerts and returns 201 with the alert record', async () => {
+    const alertRecord = {
+      id: 'alert-uuid',
+      userId: 'user-id',
+      chartId: 'bitcoin-rainbow',
+      metricName: 'rainbow_band',
+      condition: 'crosses_above',
+      thresholdValue: 7.5,
+      alertName: 'Rainbow alert',
+      status: 'active',
+      createdAt: '2026-06-17T12:00:00.000Z',
+      lastEvaluatedAt: null,
+      triggeredAt: null,
+    };
+    const alertsService = { createAlert: jest.fn().mockResolvedValue(alertRecord) };
     const response = createResponse();
+    const body = {
+      chartId: 'bitcoin-rainbow',
+      metricName: 'rainbow_band',
+      condition: 'crosses_above',
+      thresholdValue: 7.5,
+      alertName: 'Rainbow alert',
+    };
 
-  await runHandlers(
-      getHandler(createAlertsRouter(tokenInvalidations), '/', 'post'),
-      createRequest(createToken('free_user')),
+    await runHandlers(
+      getHandler(createAlertsRouter({ alertsService }, tokenInvalidations), '/', 'post'),
+      createRequest(createToken('free_user'), body),
       response,
     );
 
+    expect(alertsService.createAlert).toHaveBeenCalledWith('user-id', 'free_user', body);
     expect(response.statusCode).toBe(201);
-    expect(response.body).toEqual({ message: 'Alert creation will be implemented next.' });
+    expect(response.body).toEqual(alertRecord);
+  });
+
+  it('returns 403 when a free user exceeds the alert limit', async () => {
+    const { AlertsError } = await import('../services/alerts.service');
+    const alertsService = {
+      createAlert: jest.fn().mockRejectedValue(
+        new AlertsError('Free users can create maximum 5 alerts. Upgrade to Premium for unlimited alerts.', 403),
+      ),
+    };
+    const response = createResponse();
+
+    await runHandlers(
+      getHandler(createAlertsRouter({ alertsService }, tokenInvalidations), '/', 'post'),
+      createRequest(createToken('free_user'), { chartId: 'bitcoin-rainbow', metricName: 'x', condition: 'equals', thresholdValue: 1, alertName: 'x' }),
+      response,
+    );
+
+    expect(response.statusCode).toBe(403);
+    expect((response.body as { error: string }).error).toContain('Free users');
   });
 
   it('rejects unauthenticated alert creation', async () => {
@@ -223,9 +265,9 @@ describe('protected route wiring', () => {
       response,
     );
 
-  expect(response.statusCode).toBe(401);
-  expect(response.body).toEqual({ error: 'Unauthorized' });
-});
+    expect(response.statusCode).toBe(401);
+    expect(response.body).toEqual({ error: 'Unauthorized' });
+  });
 
   it('returns the authenticated user profile', async () => {
     const userProfileService = {
@@ -457,6 +499,97 @@ describe('protected route wiring', () => {
 
     expect(response.statusCode).toBe(400);
     expect(response.body).toEqual({ error: 'orderedIds must be a non-empty array' });
+  });
+
+  it('records a recent chart view for the authenticated user', async () => {
+    const recentChartsService = {
+      recordView: jest.fn().mockResolvedValue(undefined),
+      listRecent: jest.fn(),
+    };
+    const response = createResponse();
+
+    await runHandlers(
+      getHandler(
+        createUsersRouter(
+          { getProfile: jest.fn(), updateProfile: jest.fn(), changePassword: jest.fn(), completeOnboarding: jest.fn() },
+          tokenInvalidations,
+          { list: jest.fn(), create: jest.fn(), delete: jest.fn() },
+          recentChartsService,
+        ),
+        '/me/recent-charts',
+        'post',
+      ),
+      createRequest(createToken('free_user'), { chartId: 'bitcoin-rainbow' }),
+      response,
+    );
+
+    expect(recentChartsService.recordView).toHaveBeenCalledWith('user-id', 'bitcoin-rainbow');
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toEqual({ success: true });
+  });
+
+  it('returns 400 when recording an unknown chart ID', async () => {
+    const recentChartsService = {
+      recordView: jest.fn().mockRejectedValue(new RecentChartsError('Unknown chart', 400)),
+      listRecent: jest.fn(),
+    };
+    const response = createResponse();
+
+    await runHandlers(
+      getHandler(
+        createUsersRouter(
+          { getProfile: jest.fn(), updateProfile: jest.fn(), changePassword: jest.fn(), completeOnboarding: jest.fn() },
+          tokenInvalidations,
+          { list: jest.fn(), create: jest.fn(), delete: jest.fn() },
+          recentChartsService,
+        ),
+        '/me/recent-charts',
+        'post',
+      ),
+      createRequest(createToken('free_user'), { chartId: 'bad-chart' }),
+      response,
+    );
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body).toEqual({ error: 'Unknown chart' });
+  });
+
+  it('returns recent charts for the authenticated user', async () => {
+    const recentChartsService = {
+      recordView: jest.fn(),
+      listRecent: jest.fn().mockResolvedValue({
+        recentCharts: [
+          {
+            chartId: 'bitcoin-rainbow',
+            title: 'Bitcoin Rainbow Price Chart',
+            url: '/charts/bitcoin-rainbow',
+            thumbnailUrl: '/assets/charts/bitcoin-rainbow-thumb.png',
+            viewedAt: '2026-06-17T10:00:00.000Z',
+          },
+        ],
+      }),
+    };
+    const response = createResponse();
+
+    await runHandlers(
+      getHandler(
+        createUsersRouter(
+          { getProfile: jest.fn(), updateProfile: jest.fn(), changePassword: jest.fn(), completeOnboarding: jest.fn() },
+          tokenInvalidations,
+          { list: jest.fn(), create: jest.fn(), delete: jest.fn() },
+          recentChartsService,
+        ),
+        '/me/recent-charts',
+      ),
+      createRequest(createToken('free_user')),
+      response,
+    );
+
+    expect(recentChartsService.listRecent).toHaveBeenCalledWith('user-id');
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toMatchObject({
+      recentCharts: [expect.objectContaining({ chartId: 'bitcoin-rainbow' })],
+    });
   });
 
   it('marks onboarding completed for the authenticated user', async () => {

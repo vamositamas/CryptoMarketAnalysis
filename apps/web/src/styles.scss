@@ -456,6 +456,75 @@ main .dashboard-heading {
   gap: 12px;
 }
 
+main .recent-charts-section {
+  margin-top: 40px;
+}
+
+main .recent-charts-heading {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2d3b35;
+  margin-bottom: 16px;
+}
+
+main .recent-charts-loading,
+main .recent-charts-empty {
+  color: #65736f;
+  font-size: 0.9rem;
+}
+
+main .recent-charts-grid {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+main .recent-chart-card {
+  flex: 0 0 auto;
+  width: 180px;
+  display: grid;
+  gap: 8px;
+  text-decoration: none;
+  color: inherit;
+  border: 1px solid #dce2dd;
+  border-radius: 8px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.86);
+  transition: border-color 0.15s;
+
+  &:hover {
+    border-color: #1a73e8;
+  }
+}
+
+main .recent-chart-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 4px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #e8f0fe, #c5cae9);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+main .recent-chart-title {
+  font-size: 0.82rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: #2d3b35;
+}
+
+main .recent-chart-time {
+  font-size: 0.75rem;
+  color: #8a948f;
+}
+
 main .widget-modal-overlay {
   position: fixed;
   inset: 0;

@@ -392,6 +392,40 @@ describe('AuthApiClient', () => {
     await expect(createPromise).resolves.toMatchObject({ id: 'widget-99', type: 'custom' });
   });
 
+  it('records a recent chart view with a CSRF-protected POST request', async () => {
+    const recordPromise = client.recordRecentChart('bitcoin-rainbow');
+    http.expectOne('/api/csrf-token').flush({ csrfToken: 'csrf-token' });
+    await waitForRequestQueue();
+    const recordRequest = http.expectOne('/api/users/me/recent-charts');
+    expect(recordRequest.request.method).toBe('POST');
+    expect(recordRequest.request.headers.get('x-csrf-token')).toBe('csrf-token');
+    expect(recordRequest.request.body).toEqual({ chartId: 'bitcoin-rainbow' });
+    recordRequest.flush({ success: true });
+
+    await expect(recordPromise).resolves.toBeUndefined();
+  });
+
+  it('fetches recent charts with an authenticated GET request', async () => {
+    const getPromise = client.getRecentCharts();
+    const getRequest = http.expectOne('/api/users/me/recent-charts');
+    expect(getRequest.request.method).toBe('GET');
+    getRequest.flush({
+      recentCharts: [
+        {
+          chartId: 'bitcoin-rainbow',
+          title: 'Bitcoin Rainbow Price Chart',
+          url: '/charts/bitcoin-rainbow',
+          thumbnailUrl: '/assets/charts/bitcoin-rainbow-thumb.png',
+          viewedAt: '2026-06-17T10:00:00.000Z',
+        },
+      ],
+    });
+
+    const response = await getPromise;
+    expect(response.recentCharts).toHaveLength(1);
+    expect(response.recentCharts[0]).toMatchObject({ chartId: 'bitcoin-rainbow' });
+  });
+
   it('manages chart annotations with authenticated requests', async () => {
     const listPromise = client.getChartAnnotations('bitcoin-rainbow');
     const listRequest = http.expectOne('/api/users/me/annotations?chartId=bitcoin-rainbow');

@@ -18,6 +18,11 @@ import {
   type CreateChartAnnotationRequest,
 } from '../services/chart-annotation.service';
 import type { ChartAnnotationRecord } from '../repositories/chart-annotation.repository';
+import {
+  RecentChartsError,
+  RecentChartsService,
+  type RecentChartsResponse,
+} from '../services/recent-charts.service';
 
 export interface UserProfileManager {
   getProfile(userId: string): Promise<UserProfileResponse>;
@@ -38,10 +43,16 @@ export interface ChartAnnotationManager {
   delete(userId: string, annotationId: string): Promise<void>;
 }
 
+export interface RecentChartsManager {
+  recordView(userId: string, chartId: unknown): Promise<void>;
+  listRecent(userId: string): Promise<RecentChartsResponse>;
+}
+
 export function createUsersRouter(
   userProfileService: UserProfileManager = new UserProfileService(),
   tokenInvalidations?: TokenInvalidationReader,
   chartAnnotationService: ChartAnnotationManager = new ChartAnnotationService(),
+  recentChartsService: RecentChartsManager = new RecentChartsService(),
 ): Router {
   const router = Router();
 
@@ -139,6 +150,29 @@ export function createUsersRouter(
     },
   );
 
+  router.post('/me/recent-charts', requireAuth(tokenInvalidations), async (req, res, next) => {
+    try {
+      await recentChartsService.recordView(
+        (req as AuthenticatedRequest).user?.userId ?? '',
+        req.body?.chartId,
+      );
+      res.status(200).json({ success: true });
+    } catch (error) {
+      handleRecentChartsError(error, res, next);
+    }
+  });
+
+  router.get('/me/recent-charts', requireAuth(tokenInvalidations), async (req, res, next) => {
+    try {
+      const response = await recentChartsService.listRecent(
+        (req as AuthenticatedRequest).user?.userId ?? '',
+      );
+      res.status(200).json(response);
+    } catch (error) {
+      handleRecentChartsError(error, res, next);
+    }
+  });
+
   return router;
 }
 
@@ -161,6 +195,19 @@ function handleChartAnnotationError(
   next: NextFunction,
 ): void {
   if (error instanceof ChartAnnotationError) {
+    res.status(error.statusCode).json({ error: error.message });
+    return;
+  }
+
+  next(error);
+}
+
+function handleRecentChartsError(
+  error: unknown,
+  res: Response,
+  next: NextFunction,
+): void {
+  if (error instanceof RecentChartsError) {
     res.status(error.statusCode).json({ error: error.message });
     return;
   }

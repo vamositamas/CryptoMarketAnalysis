@@ -219,6 +219,41 @@ export interface CreateCustomWidgetRequest {
 
 export type CreateDashboardWidgetRequest = CreatePredefinedWidgetRequest | CreateCustomWidgetRequest;
 
+export type AlertCondition = 'crosses_above' | 'crosses_below' | 'greater_than' | 'less_than' | 'equals';
+
+export interface CreateAlertRequest {
+  chartId: string;
+  metricName: string;
+  condition: AlertCondition;
+  thresholdValue: number;
+  alertName: string;
+}
+
+export interface AlertResponse {
+  id: string;
+  chartId: string;
+  metricName: string;
+  condition: AlertCondition;
+  thresholdValue: number;
+  alertName: string;
+  status: 'active' | 'triggered' | 'paused';
+  createdAt: string;
+  lastEvaluatedAt: string | null;
+  triggeredAt: string | null;
+}
+
+export interface RecentChart {
+  chartId: string;
+  title: string;
+  url: string;
+  thumbnailUrl: string;
+  viewedAt: string;
+}
+
+export interface RecentChartsResponse {
+  recentCharts: RecentChart[];
+}
+
 interface CsrfTokenResponse {
   csrfToken: string;
 }
@@ -434,6 +469,26 @@ export class AuthApiClient {
 
   async reorderDashboardWidgets(orderedIds: string[]): Promise<void> {
     await this.patchWithCsrf<{ success: boolean }>('/api/dashboard/widgets/reorder', { orderedIds });
+  }
+
+  async createAlert(request: CreateAlertRequest): Promise<AlertResponse> {
+    return this.postWithCsrf<AlertResponse>('/api/alerts', request);
+  }
+
+  async recordRecentChart(chartId: string): Promise<void> {
+    await this.postWithCsrf<{ success: boolean }>('/api/users/me/recent-charts', { chartId });
+  }
+
+  async getRecentCharts(): Promise<RecentChartsResponse> {
+    try {
+      return await firstValueFrom(
+        this.http.get<RecentChartsResponse>('/api/users/me/recent-charts', {
+          withCredentials: true,
+        }),
+      );
+    } catch (error) {
+      throw toApiClientError(error);
+    }
   }
 
   startGoogleLogin(): void {

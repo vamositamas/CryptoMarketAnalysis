@@ -1,6 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Route, Router, RouterLink } from '@angular/router';
+import type { RecentChart } from '@crypto-market-analysis/data-access/api-client';
 import {
   ApiClientError,
   AuthApiClient,
@@ -130,7 +131,7 @@ export class LandingPage {
 
 @Component({
   selector: 'app-dashboard-page',
-  imports: [OnboardingCarouselComponent, AddWidgetModalComponent],
+  imports: [OnboardingCarouselComponent, AddWidgetModalComponent, RouterLink],
   template: `
     <section class="content-section">
       <div class="section-heading dashboard-heading">
@@ -182,6 +183,38 @@ export class LandingPage {
         </div>
       }
 
+      <div class="recent-charts-section">
+        <h3 class="recent-charts-heading" i18n="Recent charts heading@@dashboard.recentChartsHeading">
+          Recently Viewed Charts
+        </h3>
+        @if (isLoadingRecentCharts()) {
+          <p class="recent-charts-loading" i18n="Recent charts loading@@dashboard.recentChartsLoading">
+            Loading...
+          </p>
+        } @else if (recentCharts().length === 0) {
+          <p class="recent-charts-empty" i18n="No recent charts message@@dashboard.noRecentCharts">
+            No charts viewed yet. Explore the chart library to get started!
+          </p>
+          <a
+            routerLink="/charts"
+            class="secondary-button"
+            i18n="Explore charts button@@dashboard.exploreCharts"
+          >Explore Charts</a>
+        } @else {
+          <div class="recent-charts-grid">
+            @for (chart of recentCharts(); track chart.chartId) {
+              <a class="recent-chart-card" [routerLink]="chart.url">
+                <div class="recent-chart-thumb">
+                  <img [src]="chart.thumbnailUrl" [alt]="chart.title" loading="lazy" />
+                </div>
+                <span class="recent-chart-title">{{ chart.title }}</span>
+                <small class="recent-chart-time">{{ formatRelativeTime(chart.viewedAt) }}</small>
+              </a>
+            }
+          </div>
+        }
+      </div>
+
       @if (isAddWidgetOpen()) {
         <app-add-widget-modal
           [existingWidgetTypes]="widgetTypes()"
@@ -217,6 +250,8 @@ export class DashboardPage {
   protected readonly widgetTypes = computed(() => this.widgets().map((widget) => widget.type));
   protected readonly draggingId = signal<string | null>(null);
   protected readonly dragOverId = signal<string | null>(null);
+  protected readonly recentCharts = signal<RecentChart[]>([]);
+  protected readonly isLoadingRecentCharts = signal(true);
 
   private activePointerId: number | null = null;
   private pointerDragId: string | null = null;
@@ -225,6 +260,7 @@ export class DashboardPage {
   constructor() {
     void this.checkOnboardingStatus();
     void this.loadWidgets();
+    void this.loadRecentCharts();
   }
 
   protected async completeOnboarding(): Promise<void> {
@@ -316,6 +352,35 @@ export class DashboardPage {
     } catch {
       void this.loadWidgets();
     }
+  }
+
+  private async loadRecentCharts(): Promise<void> {
+    this.isLoadingRecentCharts.set(true);
+
+    try {
+      const response = await this.auth.getRecentCharts();
+      this.recentCharts.set(response.recentCharts);
+    } catch {
+      this.recentCharts.set([]);
+    } finally {
+      this.isLoadingRecentCharts.set(false);
+    }
+  }
+
+  protected formatRelativeTime(isoString: string): string {
+    const diffMs = Date.now() - new Date(isoString).getTime();
+    const diffMins = Math.floor(diffMs / 60_000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} minute${diffMins === 1 ? '' : 's'} ago`;
+
+    const diffHours = Math.floor(diffMins / 60);
+
+    if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+
+    const diffDays = Math.floor(diffHours / 24);
+
+    return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
   }
 
   protected trendIndicator(trend: DashboardWidget['trend']): string {
