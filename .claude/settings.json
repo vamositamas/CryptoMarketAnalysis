@@ -14,7 +14,14 @@
       "Bash(curl -s -m 8 \"https://bitcoin-data.com/v1/mvrv-zscore?limit=5\")",
       "Bash(curl -s -m 8 \"https://bitcoin-data.com/v1/mvrv-zscore/all\")",
       "Bash(curl -s -m 8 \"https://bitcoin-data.com/\")",
-      "Bash(node -e \"console.log\\(new Date\\(1781568000*1000\\).toISOString\\(\\)\\)\")"
+      "Bash(node -e \"console.log\\(new Date\\(1781568000*1000\\).toISOString\\(\\)\\)\")",
+      "Bash(xargs ls)",
+      "Bash(curl -s -m 8 \"https://api.blockchain.info/charts/hash-rate?timespan=5days&format=json\")",
+      "Bash(curl -s -m 8 \"https://api.blockchain.info/charts/difficulty?timespan=5days&format=json\")",
+      "Bash(curl -s -m 8 \"https://api.blockchain.info/charts/total-bitcoins?timespan=5days&format=json\")",
+      "Bash(curl -s -m 6 \"https://bitcoin-data.com/v1/realized-price/last\")",
+      "Bash(grep -v \"^$\")",
+      "Bash(git stash *)"
     ]
   }
 }

@@ -71,12 +71,12 @@ describe('daily data refresh job', () => {
         circulatingSupply: 19_700_000,
       }),
     };
-    const blockchainInfoClient = { fetchMarketPrice: jest.fn() };
+    const blockchainInfoClient = createBlockchainInfoClientStub();
     const service = new DailyDataRefreshService({
       coinGeckoClient,
       blockchainInfoClient,
       fearGreedClient: createFearGreedClientStub(),
-      mvrvZScoreClient: createMvrvZScoreClientStub(),
+      bitcoinDataClient: createBitcoinDataClientStub(),
       database,
       emailService: { sendDailyDataRefreshFailureAlert: jest.fn() },
       logger: createLogger(),
@@ -125,21 +125,21 @@ describe('daily data refresh job', () => {
         .mockResolvedValueOnce({ rows: createPriceHistoryRows('2026-06-09') })
         .mockResolvedValueOnce(undefined),
     };
-    const blockchainInfoClient = {
+    const blockchainInfoClient = createBlockchainInfoClientStub({
       fetchMarketPrice: jest.fn().mockResolvedValue([
         {
           date: '2026-06-09',
           priceUsd: 67000,
         },
       ]),
-    };
+    });
     const service = new DailyDataRefreshService({
       coinGeckoClient: {
         fetchBitcoinMarketData: jest.fn().mockRejectedValue(new Error('rate limited')),
       },
       blockchainInfoClient,
       fearGreedClient: createFearGreedClientStub(),
-      mvrvZScoreClient: createMvrvZScoreClientStub(),
+      bitcoinDataClient: createBitcoinDataClientStub(),
       database,
       emailService: { sendDailyDataRefreshFailureAlert: jest.fn() },
       logger: createLogger(),
@@ -163,6 +163,103 @@ describe('daily data refresh job', () => {
       3,
       expect.stringContaining('INSERT INTO bitcoin_metrics_daily'),
       expect.any(Array),
+    );
+  });
+
+  it('fetches and upserts Fear & Greed Index, MVRV Z-Score, Realized Price, Hash Rate, and Mining Difficulty alongside the price-derived metrics', async () => {
+    const database = {
+      query: jest
+        .fn()
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce({ rows: createPriceHistoryRows('2026-06-09') })
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce(undefined),
+    };
+    const fearGreedClient = {
+      fetchLatest: jest.fn().mockResolvedValue({ date: '2026-06-09', value: 42 }),
+    };
+    const bitcoinDataClient = {
+      fetchMvrvZScore: jest.fn().mockResolvedValue({ date: '2026-06-09', value: 1.23 }),
+      fetchRealizedPrice: jest.fn().mockResolvedValue({ date: '2026-06-09', value: 53020.27 }),
+    };
+    const blockchainInfoClient = createBlockchainInfoClientStub();
+    const service = new DailyDataRefreshService({
+      coinGeckoClient: {
+        fetchBitcoinMarketData: jest.fn().mockResolvedValue({ date: '2026-06-09', priceUsd: 1 }),
+      },
+      blockchainInfoClient,
+      fearGreedClient,
+      bitcoinDataClient,
+      database,
+      emailService: { sendDailyDataRefreshFailureAlert: jest.fn() },
+      logger: createLogger(),
+      now: () => new Date('2026-06-10T12:00:00.000Z'),
+    });
+
+    await service.run();
+
+    expect(fearGreedClient.fetchLatest).toHaveBeenCalledTimes(1);
+    expect(bitcoinDataClient.fetchMvrvZScore).toHaveBeenCalledTimes(1);
+    expect(bitcoinDataClient.fetchRealizedPrice).toHaveBeenCalledTimes(1);
+    expect(blockchainInfoClient.fetchHashRate).toHaveBeenCalledWith('2026-06-09', '2026-06-09');
+    expect(blockchainInfoClient.fetchDifficulty).toHaveBeenCalledWith('2026-06-09', '2026-06-09');
+    expect(database.query).toHaveBeenNthCalledWith(
+      4,
+      expect.stringContaining('INSERT INTO bitcoin_metrics_daily'),
+      [
+        '2026-06-09',
+        'fear_greed_index',
+        42,
+        '2026-06-09',
+        'mvrv_zscore',
+        1.23,
+        '2026-06-09',
+        'realized_price',
+        53020.27,
+        '2026-06-09',
+        'hash_rate',
+        931513615.5806334,
+        '2026-06-09',
+        'mining_difficulty',
+        138955357012247.48,
+      ],
+    );
+  });
+
+  it('skips a metric without failing the run when an external metric source errors', async () => {
+    const database = {
+      query: jest
+        .fn()
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce({ rows: createPriceHistoryRows('2026-06-09') })
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce(undefined),
+    };
+    const bitcoinDataClient = createBitcoinDataClientStub();
+    const logger = createLogger();
+    const service = new DailyDataRefreshService({
+      coinGeckoClient: {
+        fetchBitcoinMarketData: jest.fn().mockResolvedValue({ date: '2026-06-09', priceUsd: 1 }),
+      },
+      blockchainInfoClient: createBlockchainInfoClientStub(),
+      fearGreedClient: { fetchLatest: jest.fn().mockRejectedValue(new Error('service down')) },
+      bitcoinDataClient,
+      database,
+      emailService: { sendDailyDataRefreshFailureAlert: jest.fn() },
+      logger,
+      now: () => new Date('2026-06-10T12:00:00.000Z'),
+    });
+
+    await expect(service.run()).resolves.toMatchObject({ success: true });
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Failed to fetch fear_greed_index; skipping for this run',
+      expect.objectContaining({ error: 'service down' }),
+    );
+    expect(database.query).toHaveBeenNthCalledWith(
+      4,
+      expect.stringContaining('INSERT INTO bitcoin_metrics_daily'),
+      expect.arrayContaining(['2026-06-09', 'mvrv_zscore', 1.23]),
     );
   });
 
@@ -203,9 +300,9 @@ describe('daily data refresh job', () => {
           priceUsd: 1,
         }),
       },
-      blockchainInfoClient: { fetchMarketPrice: jest.fn() },
+      blockchainInfoClient: createBlockchainInfoClientStub(),
       fearGreedClient: createFearGreedClientStub(),
-      mvrvZScoreClient: createMvrvZScoreClientStub(),
+      bitcoinDataClient: createBitcoinDataClientStub(),
       database: {
         query: jest
           .fn()
@@ -285,6 +382,29 @@ function createResponse() {
   };
 
   return response as Response & typeof response;
+}
+
+function createFearGreedClientStub() {
+  return { fetchLatest: jest.fn().mockResolvedValue({ date: '2026-06-09', value: 42 }) };
+}
+
+function createBitcoinDataClientStub() {
+  return {
+    fetchMvrvZScore: jest.fn().mockResolvedValue({ date: '2026-06-09', value: 1.23 }),
+    fetchRealizedPrice: jest.fn().mockResolvedValue({ date: '2026-06-09', value: 53020.27 }),
+  };
+}
+
+function createBlockchainInfoClientStub(overrides: { fetchMarketPrice?: jest.Mock } = {}) {
+  return {
+    fetchMarketPrice: overrides.fetchMarketPrice ?? jest.fn(),
+    fetchHashRate: jest
+      .fn()
+      .mockResolvedValue([{ date: '2026-06-09', value: 931513615.5806334 }]),
+    fetchDifficulty: jest
+      .fn()
+      .mockResolvedValue([{ date: '2026-06-09', value: 138955357012247.48 }]),
+  };
 }
 
 function createLogger(): Pick<Console, 'error' | 'log' | 'warn'> {

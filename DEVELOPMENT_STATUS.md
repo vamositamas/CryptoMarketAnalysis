@@ -17,7 +17,7 @@ Epic 6: Personalized Dashboard & KPI Widgets
 | Epic 3: User Onboarding Experience | Done | i18n, onboarding carousel, completion tracking, and translations are complete. |
 | Epic 4: Bitcoin Data Pipeline & Calculation Engine | Done | Stories 4.1 through 4.8 are complete. |
 | Epic 5: Chart Visualization System | Done | Stories 5.1 through 5.10 are complete. |
-| Epic 6: Personalized Dashboard & KPI Widgets | In progress | Story 6.1 is complete; Story 6.2 is next. |
+| Epic 6: Personalized Dashboard & KPI Widgets | In progress | Stories 6.1 through 6.3 are complete; Story 6.4 is next. |
 | Epics 7-9 | Backlog | Alerts, donation, and admin management work remain. |
 
 ## Epic 4 Progress
@@ -53,6 +53,8 @@ Epic 6: Personalized Dashboard & KPI Widgets
 | Story | Status | Summary |
 | --- | --- | --- |
 | 6.1 Create Dashboard Database Schema | Done | Added `user_dashboard_widgets` (position-ordered, JSONB config, 0-19 position bound) and `user_recent_charts` (per-user unique chart, most-recent-first index) tables via migration `008_create_dashboard_schema.sql`, both cascading on user delete and RLS-enabled; also backfilled `database/schema.sql` with the previously missing `006`/`007` migration references. |
+| 6.2 Implement Default Dashboard Initialization | Done | Added `GET /api/dashboard/widgets`, which creates the 5 default widgets (BTC Price, 24h Change, MVRV Z-Score, Stock-to-Flow Ratio, Fear & Greed Index) for a user on first visit and returns each with a formatted value, up/down/flat trend, and last-updated time. Closed a real data gap found while building this: MVRV Z-Score and Fear & Greed Index had no data source anywhere in the codebase (Epic 4 only ever computed Stock-to-Flow/Rainbow/moving averages), so added `FearGreedClient` (alternative.me, free/no-key) and `BitcoinDataClient` (bitcoin-data.com, free/no-key) to `calculation-engines/data-sources` and wired both into the daily refresh job, storing `fear_greed_index`/`mvrv_zscore` rows in `bitcoin_metrics_daily`; a failure in either external source is logged and skipped rather than failing the whole refresh. The Angular dashboard page now renders a live 2-column (1-column on mobile) widget grid with a loading state and trend arrows, replacing the old static mock cards. |
+| 6.3 Implement Predefined Widget Library | Done | Added an "Add Widget" modal (3 categories: Price Metrics, On-chain Metrics, Supply Metrics; 7 widgets: Realized Price, 200-day Moving Average, Hash Rate, Mining Difficulty, Total Supply, Circulating Supply, Market Cap) with case-insensitive real-time search and an "Added" disabled state for widgets already on the dashboard. Backend: `POST /api/dashboard/widgets` validates the widget type against a server-side catalog, enforces a 20-widget-per-dashboard cap (400 `Maximum 20 widgets per dashboard`), and appends at `max(position) + 1`. Extended the daily refresh job with 3 more real, free, no-key external metrics — `BitcoinDataClient.fetchRealizedPrice()` (bitcoin-data.com) and generalized `BlockchainInfoClient` with `fetchHashRate`/`fetchDifficulty` (api.blockchain.info, the same provider already used for price fallback) — and added a `ma_200_day` indicator (reusing the existing generic `calculateMovingAverage`) computed directly from price history already in `bitcoin_price_daily`, so all 7 catalog widgets show real data once the refresh job has run. Total Supply is rendered as the fixed 21,000,000 BTC constant (no external call); Circulating Supply and Market Cap read directly from existing `bitcoin_price_daily` columns. |
 
 ## Latest Verification
 
@@ -116,10 +118,20 @@ Epic 6: Personalized Dashboard & KPI Widgets
 - `npm exec nx -- run api:test --skip-nx-cache` passed with 113 tests.
 - `npm exec nx -- run api:build:production --skip-nx-cache` passed.
 - `npm exec nx -- run api:eslint:lint --skip-nx-cache` passed.
+- `npm exec nx -- run-many --target=test --projects=api,web,data-access-api-client,data-sources --skip-nx-cache` passed (201 tests total: api 128, web 31, data-access-api-client 15, data-sources 27).
+- `npm exec nx -- run api:build:production --skip-nx-cache` passed.
+- `npm exec nx -- run api:eslint:lint --skip-nx-cache` passed.
+- `npm exec nx -- run web:build:production --skip-nx-cache` passed.
+- `npm exec nx -- run web:eslint:lint --skip-nx-cache` passed.
+- `npm exec nx -- run data-sources:build --skip-nx-cache` passed.
+- `npm exec nx -- run data-sources:eslint:lint --skip-nx-cache` passed.
+- `npm exec nx -- run-many --target=test --projects=api,web,data-access-api-client,data-sources,indicators --skip-nx-cache` passed (237 tests total: api 142, web 38, data-access-api-client 16, data-sources 30, indicators 11).
+- `npm exec nx -- run-many --target=build --projects=api,web,data-access-api-client,data-sources,indicators --skip-nx-cache` passed.
+- `npm exec nx -- run-many --target=eslint:lint --projects=api,web,data-access-api-client,data-sources,indicators --skip-nx-cache` passed.
 
 ## Next Step
 
-Begin Epic 6, Story 6.2: Implement Default Dashboard Initialization.
+Begin Epic 6, Story 6.4: Implement Custom Formula Widget Creation.
 
 ## Notes
 
@@ -127,3 +139,6 @@ Begin Epic 6, Story 6.2: Implement Default Dashboard Initialization.
 - Live external API calls are limited in the local sandbox, so network-dependent smoke tests may fail with `fetch failed` even when the code path is correct.
 - Story 5.10 was verified with component-level tests that mock `ActivatedRoute`/`Router`/`AuthApiClient` rather than a live browser run, since the app's API depends on a real remote Supabase database that should not be exercised from this sandbox.
 - Story 6.1's new migration was verified by schema-content assertions (mirroring the existing `bitcoin-metrics-schema.spec.ts` pattern) rather than against a live database, for the same reason.
+- Story 6.2's `FearGreedClient` and what is now `BitcoinDataClient` (renamed from `MvrvZScoreClient` in 6.3 once it grew a second method) real-endpoint shapes (alternative.me, bitcoin-data.com) were confirmed by live `curl` against the actual third-party APIs before writing the client code, then all subsequent tests mock `fetch` for determinism — no live calls happen during `nx test`.
+- Story 6.3's `hash-rate`/`difficulty` blockchain.info endpoints were likewise confirmed live via `curl` before implementation; `BlockchainInfoClient` was refactored to a shared `fetchChart` helper so `fetchMarketPrice`/`fetchHashRate`/`fetchDifficulty` share one retry/parsing path.
+- Historical backfill does not populate `mvrv_zscore`/`fear_greed_index`/`realized_price`/`hash_rate`/`mining_difficulty`/`ma_200_day` (or the other derived metrics) for past dates, only going forward from each daily refresh run; this mirrors the pre-existing behavior for `rainbow_band`/`ma_111_day`/`ma_350_day`/`stock_to_flow_ratio`, which also only get backfilled from whenever the refresh job starts running, not retroactively.

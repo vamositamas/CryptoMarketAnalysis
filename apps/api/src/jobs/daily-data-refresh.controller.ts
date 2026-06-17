@@ -2,10 +2,10 @@ import { createHash } from 'crypto';
 import { Router, type NextFunction, type Request, type Response } from 'express';
 import jwt, { type JwtPayload } from 'jsonwebtoken';
 import {
+  BitcoinDataClient,
   BlockchainInfoClient,
   CoinGeckoClient,
   FearGreedClient,
-  MvrvZScoreClient,
   RetryExhaustedError,
 } from '@crypto-market-analysis/calculation-engines/data-sources';
 import {
@@ -49,9 +49,12 @@ interface BitcoinMetricRecord {
 
 interface DailyDataRefreshOptions {
   coinGeckoClient?: Pick<CoinGeckoClient, 'fetchBitcoinMarketData'>;
-  blockchainInfoClient?: Pick<BlockchainInfoClient, 'fetchMarketPrice'>;
+  blockchainInfoClient?: Pick<
+    BlockchainInfoClient,
+    'fetchMarketPrice' | 'fetchHashRate' | 'fetchDifficulty'
+  >;
   fearGreedClient?: Pick<FearGreedClient, 'fetchLatest'>;
-  mvrvZScoreClient?: Pick<MvrvZScoreClient, 'fetchLatest'>;
+  bitcoinDataClient?: Pick<BitcoinDataClient, 'fetchMvrvZScore' | 'fetchRealizedPrice'>;
   database?: Parameters<typeof insertBitcoinPriceDaily>[0];
   emailService?: DailyDataRefreshFailureEmailSender;
   logger?: Pick<Console, 'error' | 'log' | 'warn'>;
@@ -97,9 +100,12 @@ export function createDailyDataRefreshRouter(
 
 export class DailyDataRefreshService {
   private readonly coinGeckoClient: Pick<CoinGeckoClient, 'fetchBitcoinMarketData'>;
-  private readonly blockchainInfoClient: Pick<BlockchainInfoClient, 'fetchMarketPrice'>;
+  private readonly blockchainInfoClient: Pick<
+    BlockchainInfoClient,
+    'fetchMarketPrice' | 'fetchHashRate' | 'fetchDifficulty'
+  >;
   private readonly fearGreedClient: Pick<FearGreedClient, 'fetchLatest'>;
-  private readonly mvrvZScoreClient: Pick<MvrvZScoreClient, 'fetchLatest'>;
+  private readonly bitcoinDataClient: Pick<BitcoinDataClient, 'fetchMvrvZScore' | 'fetchRealizedPrice'>;
   private readonly database: Parameters<typeof insertBitcoinPriceDaily>[0] | undefined;
   private readonly emailService: DailyDataRefreshFailureEmailSender;
   private readonly logger: Pick<Console, 'error' | 'log' | 'warn'>;
@@ -109,7 +115,7 @@ export class DailyDataRefreshService {
     this.coinGeckoClient = options.coinGeckoClient ?? new CoinGeckoClient();
     this.blockchainInfoClient = options.blockchainInfoClient ?? new BlockchainInfoClient();
     this.fearGreedClient = options.fearGreedClient ?? new FearGreedClient();
-    this.mvrvZScoreClient = options.mvrvZScoreClient ?? new MvrvZScoreClient();
+    this.bitcoinDataClient = options.bitcoinDataClient ?? new BitcoinDataClient();
     this.database = options.database ?? getDatabasePool();
     this.emailService = options.emailService ?? new ResendEmailService();
     this.logger = options.logger ?? console;
@@ -128,7 +134,7 @@ export class DailyDataRefreshService {
     const { record, source } = await this.fetchDailyPriceRecord(date);
     await insertBitcoinPriceDaily(database, [record]);
     const metrics = await calculateAndInsertDailyMetrics(database, date);
-    const externalMetrics = await this.fetchAndInsertExternalMetrics(database);
+    const externalMetrics = await this.fetchAndInsertExternalMetrics(database, date);
     await updateLastRefreshStatus(database, this.now(), 'success');
     this.logger.log('Daily data refresh metrics calculated', {
       date,
@@ -209,12 +215,28 @@ export class DailyDataRefreshService {
 
   private async fetchAndInsertExternalMetrics(
     database: Parameters<typeof insertBitcoinPriceDaily>[0],
+    date: string,
   ): Promise<BitcoinMetricRecord[]> {
     const records = [
       ...(await this.fetchExternalMetric('fear_greed_index', () =>
         this.fearGreedClient.fetchLatest(),
       )),
-      ...(await this.fetchExternalMetric('mvrv_zscore', () => this.mvrvZScoreClient.fetchLatest())),
+      ...(await this.fetchExternalMetric('mvrv_zscore', () =>
+        this.bitcoinDataClient.fetchMvrvZScore(),
+      )),
+      ...(await this.fetchExternalMetric('realized_price', () =>
+        this.bitcoinDataClient.fetchRealizedPrice(),
+      )),
+      ...(await this.fetchExternalMetric('hash_rate', () =>
+        this.fetchBlockchainInfoChartValue(date, () =>
+          this.blockchainInfoClient.fetchHashRate(date, date),
+        ),
+      )),
+      ...(await this.fetchExternalMetric('mining_difficulty', () =>
+        this.fetchBlockchainInfoChartValue(date, () =>
+          this.blockchainInfoClient.fetchDifficulty(date, date),
+        ),
+      )),
     ];
 
     if (records.length > 0) {
@@ -222,6 +244,20 @@ export class DailyDataRefreshService {
     }
 
     return records;
+  }
+
+  private async fetchBlockchainInfoChartValue(
+    date: string,
+    fetcher: () => Promise<{ date: string; value: number }[]>,
+  ): Promise<{ date: string; value: number }> {
+    const points = await fetcher();
+    const point = points.find((candidate) => candidate.date === date);
+
+    if (!point) {
+      throw new Error(`No data available for ${date}`);
+    }
+
+    return point;
   }
 
   private async fetchExternalMetric(
@@ -393,6 +429,14 @@ function toBitcoinMetricRecords(
       date,
       metricName: 'ma_111_day',
       metricValue: indicators.ma111Day,
+    });
+  }
+
+  if (indicators.ma200Day !== null) {
+    records.push({
+      date,
+      metricName: 'ma_200_day',
+      metricValue: indicators.ma200Day,
     });
   }
 

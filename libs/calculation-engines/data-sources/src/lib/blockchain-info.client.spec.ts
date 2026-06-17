@@ -114,6 +114,40 @@ describe('BlockchainInfoClient', () => {
     );
   });
 
+  it('fetches and normalizes hash rate values for a date range', async () => {
+    const fetchFn = jest.fn().mockResolvedValue(
+      createJsonResponse({ values: [{ x: 1780272000, y: 931513615.5806334 }] }),
+    );
+    const client = new BlockchainInfoClient({
+      baseUrl: 'https://api.blockchain.info/charts',
+      fetchFn: fetchFn as never,
+    });
+
+    await expect(client.fetchHashRate('2026-06-01', '2026-06-01')).resolves.toEqual([
+      { date: '2026-06-01', value: 931513615.5806334 },
+    ]);
+    expect(fetchFn).toHaveBeenCalledWith(
+      'https://api.blockchain.info/charts/hash-rate?start=2026-06-01&timespan=1days&format=json',
+    );
+  });
+
+  it('fetches and normalizes mining difficulty values for a date range', async () => {
+    const fetchFn = jest.fn().mockResolvedValue(
+      createJsonResponse({ values: [{ x: 1780272000, y: 138955357012247.48 }] }),
+    );
+    const client = new BlockchainInfoClient({
+      baseUrl: 'https://api.blockchain.info/charts',
+      fetchFn: fetchFn as never,
+    });
+
+    await expect(client.fetchDifficulty('2026-06-01', '2026-06-01')).resolves.toEqual([
+      { date: '2026-06-01', value: 138955357012247.48 },
+    ]);
+    expect(fetchFn).toHaveBeenCalledWith(
+      'https://api.blockchain.info/charts/difficulty?start=2026-06-01&timespan=1days&format=json',
+    );
+  });
+
   it('retries service failures with exponential backoff before succeeding', async () => {
     const sleep = jest.fn().mockResolvedValue(undefined);
     const fetchFn = jest

@@ -1,27 +1,40 @@
-import { MvrvZScoreClient, MvrvZScoreClientError } from './mvrv-zscore.client';
+import { BitcoinDataClient, BitcoinDataClientError } from './bitcoin-data.client';
 
-describe('MvrvZScoreClient', () => {
+describe('BitcoinDataClient', () => {
   it('fetches and normalizes the latest MVRV Z-Score value', async () => {
     const fetchFn = jest.fn().mockResolvedValue(
       createJsonResponse({ d: '2026-06-15', unixTs: 1781481600, mvrvZscore: 0.4178 }),
     );
-    const client = new MvrvZScoreClient({ fetchFn: fetchFn as never });
+    const client = new BitcoinDataClient({ fetchFn: fetchFn as never });
 
-    await expect(client.fetchLatest()).resolves.toEqual({
+    await expect(client.fetchMvrvZScore()).resolves.toEqual({
       date: '2026-06-15',
       value: 0.4178,
     });
     expect(fetchFn).toHaveBeenCalledWith('https://bitcoin-data.com/v1/mvrv-zscore/last');
   });
 
+  it('fetches and normalizes the latest Realized Price value', async () => {
+    const fetchFn = jest.fn().mockResolvedValue(
+      createJsonResponse({ d: '2026-06-15', unixTs: 1781481600, realizedPrice: 53020.27 }),
+    );
+    const client = new BitcoinDataClient({ fetchFn: fetchFn as never });
+
+    await expect(client.fetchRealizedPrice()).resolves.toEqual({
+      date: '2026-06-15',
+      value: 53020.27,
+    });
+    expect(fetchFn).toHaveBeenCalledWith('https://bitcoin-data.com/v1/realized-price/last');
+  });
+
   it('logs request details and throws when the API responds with an error', async () => {
     const logger = { error: jest.fn() };
     const fetchFn = jest.fn().mockResolvedValue({ ok: false, status: 503, json: jest.fn() });
-    const client = new MvrvZScoreClient({ fetchFn: fetchFn as never, logger, retryAttempts: 0 });
+    const client = new BitcoinDataClient({ fetchFn: fetchFn as never, logger, retryAttempts: 0 });
 
-    await expect(client.fetchLatest()).rejects.toMatchObject({
+    await expect(client.fetchMvrvZScore()).rejects.toMatchObject({
       statusCode: 503,
-    } satisfies Partial<MvrvZScoreClientError>);
+    } satisfies Partial<BitcoinDataClientError>);
     expect(logger.error).toHaveBeenCalledWith(
       'MVRV Z-Score request failed',
       expect.objectContaining({
@@ -31,26 +44,26 @@ describe('MvrvZScoreClient', () => {
   });
 
   it('throws when the response is missing a date', async () => {
-    const client = new MvrvZScoreClient({
+    const client = new BitcoinDataClient({
       fetchFn: jest.fn().mockResolvedValue(createJsonResponse({ mvrvZscore: 0.4 })) as never,
       logger: { error: jest.fn() },
       retryAttempts: 0,
     });
 
-    await expect(client.fetchLatest()).rejects.toThrow('MVRV Z-Score response is missing a date');
+    await expect(client.fetchMvrvZScore()).rejects.toThrow('MVRV Z-Score response is missing a date');
   });
 
   it('throws when the value is not numeric', async () => {
-    const client = new MvrvZScoreClient({
+    const client = new BitcoinDataClient({
       fetchFn: jest.fn().mockResolvedValue(
-        createJsonResponse({ d: '2026-06-15', mvrvZscore: 'n/a' }),
+        createJsonResponse({ d: '2026-06-15', realizedPrice: 'n/a' }),
       ) as never,
       logger: { error: jest.fn() },
       retryAttempts: 0,
     });
 
-    await expect(client.fetchLatest()).rejects.toThrow(
-      'MVRV Z-Score response has an invalid value',
+    await expect(client.fetchRealizedPrice()).rejects.toThrow(
+      'Realized Price response has an invalid value',
     );
   });
 
@@ -61,13 +74,13 @@ describe('MvrvZScoreClient', () => {
       .mockResolvedValueOnce({ ok: false, status: 503, json: jest.fn() })
       .mockResolvedValueOnce({ ok: false, status: 503, json: jest.fn() })
       .mockResolvedValue(createJsonResponse({ d: '2026-06-15', mvrvZscore: 0.4178 }));
-    const client = new MvrvZScoreClient({
+    const client = new BitcoinDataClient({
       fetchFn: fetchFn as never,
       logger: { error: jest.fn() },
       sleep,
     });
 
-    await expect(client.fetchLatest()).resolves.toEqual({ date: '2026-06-15', value: 0.4178 });
+    await expect(client.fetchMvrvZScore()).resolves.toEqual({ date: '2026-06-15', value: 0.4178 });
     expect(fetchFn).toHaveBeenCalledTimes(3);
     expect(sleep).toHaveBeenCalledWith(1000);
     expect(sleep).toHaveBeenCalledWith(2000);

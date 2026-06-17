@@ -1,0 +1,175 @@
+<div
+  class="widget-modal-overlay"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Add widget"
+  i18n-aria-label="Add widget dialog label@@dashboard.addWidgetDialog"
+>
+  <div class="widget-modal">
+    <header class="widget-modal-header">
+      <h2 i18n="Add widget modal title@@dashboard.addWidgetTitle">Add Widget</h2>
+      <button
+        type="button"
+        class="icon-button"
+        (click)="close()"
+        aria-label="Close"
+        i18n-aria-label="Close add widget modal@@dashboard.closeAddWidget"
+      >
+        &times;
+      </button>
+    </header>
+
+    <div class="widget-modal-tabs" role="tablist">
+      <button
+        type="button"
+        role="tab"
+        [class.active]="view() === 'library'"
+        [attr.aria-selected]="view() === 'library'"
+        (click)="switchView('library')"
+        i18n="Widget library tab@@dashboard.tabLibrary"
+      >
+        Widget Library
+      </button>
+      <button
+        type="button"
+        role="tab"
+        [class.active]="view() === 'custom'"
+        [attr.aria-selected]="view() === 'custom'"
+        (click)="switchView('custom')"
+        i18n="Custom formula tab@@dashboard.tabCustomFormula"
+      >
+        Custom Formula
+      </button>
+    </div>
+
+    @if (errorMessage()) {
+      <p class="form-message">{{ errorMessage() }}</p>
+    }
+
+    @if (view() === 'library') {
+      <input
+        type="search"
+        class="widget-modal-search"
+        placeholder="Search widgets"
+        i18n-placeholder="Widget search placeholder@@dashboard.widgetSearchPlaceholder"
+        [value]="query()"
+        (input)="setQuery($any($event.target).value)"
+      />
+
+      <div class="widget-modal-body">
+        @for (group of filteredGroups(); track group.category) {
+          <section class="widget-category">
+            <h3>{{ group.category }}</h3>
+            <ul class="widget-list">
+              @for (item of group.items; track item.type) {
+                <li class="widget-list-item">
+                  <span class="widget-icon">{{ item.icon }}</span>
+                  <div class="widget-list-copy">
+                    <strong>{{ item.name }}</strong>
+                    <small>{{ item.description }}</small>
+                  </div>
+                  <button
+                    type="button"
+                    class="secondary-button"
+                    [disabled]="isAdded(item.type) || isSaving()"
+                    (click)="addWidget(item)"
+                  >
+                    @if (isAdded(item.type)) {
+                      <ng-container i18n="Widget already added label@@dashboard.widgetAdded">
+                        Added
+                      </ng-container>
+                    } @else {
+                      <ng-container i18n="Add widget button@@dashboard.addWidgetButton">
+                        Add
+                      </ng-container>
+                    }
+                  </button>
+                </li>
+              }
+            </ul>
+          </section>
+        } @empty {
+          <p i18n="No widgets match search@@dashboard.noWidgetsFound">No widgets match your search.</p>
+        }
+      </div>
+    }
+
+    @if (view() === 'custom') {
+      <div class="widget-modal-body">
+        <p class="widget-custom-intro" i18n="Custom formula intro@@dashboard.customFormulaIntro">
+          Combine Bitcoin metrics with arithmetic operators to create your own KPI widget.
+        </p>
+
+        <div class="widget-custom-form">
+          <label class="widget-custom-label">
+            <span i18n="Custom widget name label@@dashboard.customWidgetName">Widget name</span>
+            <input
+              type="text"
+              name="customName"
+              [value]="customName()"
+              (input)="setCustomName($any($event.target).value)"
+              maxlength="100"
+              placeholder="e.g. S2F Implied Price"
+              i18n-placeholder="Custom widget name placeholder@@dashboard.customWidgetNamePlaceholder"
+            />
+          </label>
+
+          <label class="widget-custom-label">
+            <span i18n="Custom widget formula label@@dashboard.customWidgetFormula">Formula</span>
+            <input
+              type="text"
+              name="customFormula"
+              [value]="customFormula()"
+              (input)="setCustomFormula($any($event.target).value)"
+              maxlength="200"
+              [attr.placeholder]="'e.g. {{stock_to_flow}} * 1000'"
+            />
+          </label>
+
+          <label class="widget-custom-label">
+            <span>
+              <ng-container i18n="Custom widget description label@@dashboard.customWidgetDescription">Description</ng-container>
+              <small i18n="Optional label@@form.optional"> (optional)</small>
+            </span>
+            <input
+              type="text"
+              [value]="customDescription()"
+              (input)="setCustomDescription($any($event.target).value)"
+              maxlength="200"
+            />
+          </label>
+
+          <div class="widget-custom-variables">
+            <p class="widget-custom-vars-heading" i18n="Available variables heading@@dashboard.availableVariables">
+              Available variables:
+            </p>
+            <ul class="widget-vars-list">
+              @for (v of formulaVariables; track v.name) {
+                <li><code>{{ v.name }}</code> — {{ v.description }}</li>
+              }
+            </ul>
+            <p class="widget-custom-vars-hint" i18n="Formula operators hint@@dashboard.formulaOperatorsHint">
+              Supported operators: <code>+</code> <code>-</code> <code>*</code> <code>/</code> <code>( )</code>
+            </p>
+          </div>
+
+          <button
+            type="button"
+            [disabled]="!isCustomFormValid() || isSaving()"
+            (click)="saveCustomWidget()"
+          >
+            @if (isSaving()) {
+              <ng-container i18n="Saving custom widget state@@dashboard.savingCustomWidget">
+                Saving...
+              </ng-container>
+            } @else {
+              <ng-container i18n="Save custom widget button@@dashboard.saveCustomWidget">
+                Save Widget
+              </ng-container>
+            }
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</div>

@@ -2,6 +2,8 @@ import jwt from 'jsonwebtoken';
 import type { Request, Response, Router } from 'express';
 import { createAdminRouter } from './admin.route';
 import { createAlertsRouter } from './alerts.route';
+import { createDashboardRouter } from './dashboard.route';
+import { DashboardError } from '../services/dashboard.service';
 import type { TokenInvalidationReader } from '../middleware/rbac.middleware';
 import { createUsersRouter } from './users.route';
 
@@ -319,6 +321,101 @@ describe('protected route wiring', () => {
     expect(response.body).toEqual({
       message: 'Password changed successfully. Please log in again.',
     });
+  });
+
+  it('returns dashboard widgets for the authenticated user', async () => {
+    const dashboardService = {
+      getWidgets: jest.fn().mockResolvedValue({
+        widgets: [
+          {
+            id: 'widget-1',
+            type: 'btc_price',
+            title: 'Current BTC Price',
+            value: 67234.5,
+            formattedValue: '$67,234.50',
+            trend: 'up',
+            trendPercent: 1.87,
+            lastUpdated: '2026-06-10T00:00:00.000Z',
+          },
+        ],
+      }),
+      addWidget: jest.fn(),
+    };
+    const response = createResponse();
+
+    await runHandlers(
+      getHandler(createDashboardRouter({ dashboardService }, tokenInvalidations), '/widgets'),
+      createRequest(createToken('free_user')),
+      response,
+    );
+
+    expect(dashboardService.getWidgets).toHaveBeenCalledWith('user-id');
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toMatchObject({
+      widgets: [expect.objectContaining({ type: 'btc_price' })],
+    });
+  });
+
+  it('rejects unauthenticated dashboard widget requests', async () => {
+    const dashboardService = { getWidgets: jest.fn(), addWidget: jest.fn() };
+    const response = createResponse();
+
+    await runHandlers(
+      getHandler(createDashboardRouter({ dashboardService }, tokenInvalidations), '/widgets'),
+      createRequest(),
+      response,
+    );
+
+    expect(response.statusCode).toBe(401);
+    expect(dashboardService.getWidgets).not.toHaveBeenCalled();
+  });
+
+  it('adds a dashboard widget for the authenticated user', async () => {
+    const dashboardService = {
+      getWidgets: jest.fn(),
+      addWidget: jest.fn().mockResolvedValue({
+        id: 'widget-2',
+        type: 'ma_200_day',
+        title: '200-day Moving Average',
+        value: 65000.5,
+        formattedValue: '$65,000.50',
+        trend: 'flat',
+        trendPercent: null,
+        lastUpdated: '2026-06-10T00:00:00.000Z',
+      }),
+    };
+    const response = createResponse();
+    const requestBody = {
+      widgetType: 'ma_200_day',
+      widgetConfig: { title: '200-day Moving Average', decimals: 2 },
+    };
+
+    await runHandlers(
+      getHandler(createDashboardRouter({ dashboardService }, tokenInvalidations), '/widgets', 'post'),
+      createRequest(createToken('free_user'), requestBody),
+      response,
+    );
+
+    expect(dashboardService.addWidget).toHaveBeenCalledWith('user-id', requestBody);
+    expect(response.statusCode).toBe(201);
+    expect(response.body).toMatchObject({ id: 'widget-2', type: 'ma_200_day' });
+  });
+
+  it('returns 400 when adding a widget fails validation', async () => {
+    const dashboardService = {
+      getWidgets: jest.fn(),
+      addWidget: jest.fn().mockRejectedValue(new DashboardError('Maximum 20 widgets per dashboard', 400)),
+    };
+    const response = createResponse();
+
+    await runHandlers(
+      getHandler(createDashboardRouter({ dashboardService }, tokenInvalidations), '/widgets', 'post'),
+      createRequest(createToken('free_user'), { widgetType: 'hash_rate' }),
+      response,
+    );
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body).toEqual({ error: 'Maximum 20 widgets per dashboard' });
   });
 
   it('marks onboarding completed for the authenticated user', async () => {

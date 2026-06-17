@@ -302,6 +302,83 @@ describe('AuthApiClient', () => {
     });
   });
 
+  it('fetches dashboard widgets without requiring CSRF', async () => {
+    const promise = client.getDashboardWidgets();
+
+    const widgetsRequest = http.expectOne('/api/dashboard/widgets');
+    expect(widgetsRequest.request.method).toBe('GET');
+    expect(widgetsRequest.request.withCredentials).toBe(true);
+    widgetsRequest.flush({
+      widgets: [
+        {
+          id: 'widget-1',
+          type: 'btc_price',
+          title: 'Current BTC Price',
+          value: 67234.5,
+          formattedValue: '$67,234.50',
+          trend: 'up',
+          trendPercent: 1.87,
+          lastUpdated: '2026-06-10T00:00:00.000Z',
+        },
+      ],
+    });
+
+    await expect(promise).resolves.toMatchObject({
+      widgets: [{ type: 'btc_price', formattedValue: '$67,234.50' }],
+    });
+  });
+
+  it('creates a dashboard widget with a CSRF-protected request', async () => {
+    const createPromise = client.createDashboardWidget({
+      widgetType: 'ma_200_day',
+      widgetConfig: { title: '200-day Moving Average', decimals: 2 },
+    });
+    http.expectOne('/api/csrf-token').flush({ csrfToken: 'csrf-token' });
+    await waitForRequestQueue();
+    const createRequest = http.expectOne('/api/dashboard/widgets');
+    expect(createRequest.request.method).toBe('POST');
+    expect(createRequest.request.headers.get('x-csrf-token')).toBe('csrf-token');
+    createRequest.flush({
+      id: 'widget-2',
+      type: 'ma_200_day',
+      title: '200-day Moving Average',
+      value: 65000.5,
+      formattedValue: '$65,000.50',
+      trend: 'flat',
+      trendPercent: null,
+      lastUpdated: '2026-06-10T00:00:00.000Z',
+    });
+
+    await expect(createPromise).resolves.toMatchObject({ id: 'widget-2', type: 'ma_200_day' });
+  });
+
+  it('creates a custom formula widget with a CSRF-protected request', async () => {
+    const createPromise = client.createDashboardWidget({
+      widgetType: 'custom',
+      widgetConfig: { title: 'My Ratio', formula: '{{market_cap}} / {{circulating_supply}}' },
+    });
+    http.expectOne('/api/csrf-token').flush({ csrfToken: 'csrf-token' });
+    await waitForRequestQueue();
+    const createRequest = http.expectOne('/api/dashboard/widgets');
+    expect(createRequest.request.method).toBe('POST');
+    expect(createRequest.request.body).toMatchObject({
+      widgetType: 'custom',
+      widgetConfig: { title: 'My Ratio', formula: '{{market_cap}} / {{circulating_supply}}' },
+    });
+    createRequest.flush({
+      id: 'widget-99',
+      type: 'custom',
+      title: 'My Ratio',
+      value: 67005.08,
+      formattedValue: '67,005.08',
+      trend: 'flat',
+      trendPercent: null,
+      lastUpdated: null,
+    });
+
+    await expect(createPromise).resolves.toMatchObject({ id: 'widget-99', type: 'custom' });
+  });
+
   it('manages chart annotations with authenticated requests', async () => {
     const listPromise = client.getChartAnnotations('bitcoin-rainbow');
     const listRequest = http.expectOne('/api/users/me/annotations?chartId=bitcoin-rainbow');

@@ -16,6 +16,7 @@ describe('Bitcoin daily indicators', () => {
     expect(latest).toMatchObject({
       date: history[349].date,
       ma111Day: 295,
+      ma200Day: 250.5,
       ma350Day: 175.5,
       stockToFlowRatio: 119.94,
     });
@@ -33,6 +34,7 @@ describe('Bitcoin daily indicators', () => {
 
     expect(indicators[0]).toMatchObject({
       ma111Day: null,
+      ma200Day: null,
       ma350Day: null,
       stockToFlowRatio: null,
     });

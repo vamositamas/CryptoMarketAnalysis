@@ -192,6 +192,33 @@ export type CreateChartAnnotationRequest =
       color: string;
     };
 
+export interface DashboardWidget {
+  id: string;
+  type: string;
+  title: string;
+  value: number | null;
+  formattedValue: string;
+  trend: 'up' | 'down' | 'flat';
+  trendPercent: number | null;
+  lastUpdated: string | null;
+}
+
+export interface DashboardWidgetsResponse {
+  widgets: DashboardWidget[];
+}
+
+export interface CreatePredefinedWidgetRequest {
+  widgetType: string;
+  widgetConfig: { title: string; decimals: number };
+}
+
+export interface CreateCustomWidgetRequest {
+  widgetType: 'custom';
+  widgetConfig: { title: string; formula: string; description?: string };
+}
+
+export type CreateDashboardWidgetRequest = CreatePredefinedWidgetRequest | CreateCustomWidgetRequest;
+
 interface CsrfTokenResponse {
   csrfToken: string;
 }
@@ -387,6 +414,22 @@ export class AuthApiClient {
     } catch (error) {
       throw toApiClientError(error);
     }
+  }
+
+  async getDashboardWidgets(): Promise<DashboardWidgetsResponse> {
+    try {
+      return await firstValueFrom(
+        this.http.get<DashboardWidgetsResponse>('/api/dashboard/widgets', {
+          withCredentials: true,
+        }),
+      );
+    } catch (error) {
+      throw toApiClientError(error);
+    }
+  }
+
+  async createDashboardWidget(request: CreateDashboardWidgetRequest): Promise<DashboardWidget> {
+    return this.postWithCsrf<DashboardWidget>('/api/dashboard/widgets', request);
   }
 
   startGoogleLogin(): void {

@@ -1,11 +1,11 @@
 import { retryWithBackoff, type RetryWithBackoffOptions } from './retry.util';
 
-export interface MvrvZScorePoint {
+export interface BitcoinDataPoint {
   date: string;
   value: number;
 }
 
-export interface MvrvZScoreClientOptions {
+export interface BitcoinDataClientOptions {
   baseUrl?: string;
   fetchFn?: typeof fetch;
   logger?: Pick<Console, 'error'>;
@@ -14,14 +14,14 @@ export interface MvrvZScoreClientOptions {
   sleep?: RetryWithBackoffOptions['sleep'];
 }
 
-interface MvrvZScoreApiResponse {
+interface BitcoinDataApiResponse {
   d?: string;
-  mvrvZscore?: number | string;
+  [field: string]: unknown;
 }
 
 const DEFAULT_BASE_URL = 'https://bitcoin-data.com/v1';
 
-export class MvrvZScoreClient {
+export class BitcoinDataClient {
   private readonly baseUrl: string;
   private readonly fetchFn: typeof fetch;
   private readonly logger: Pick<Console, 'error'>;
@@ -29,7 +29,7 @@ export class MvrvZScoreClient {
   private readonly retryBaseDelayMs: number;
   private readonly sleep: RetryWithBackoffOptions['sleep'];
 
-  constructor(options: MvrvZScoreClientOptions = {}) {
+  constructor(options: BitcoinDataClientOptions = {}) {
     this.baseUrl = options.baseUrl ?? DEFAULT_BASE_URL;
     this.fetchFn = options.fetchFn ?? fetch;
     this.logger = options.logger ?? console;
@@ -38,36 +38,52 @@ export class MvrvZScoreClient {
     this.sleep = options.sleep;
   }
 
-  async fetchLatest(): Promise<MvrvZScorePoint> {
+  async fetchMvrvZScore(): Promise<BitcoinDataPoint> {
+    return this.fetchLatest('mvrv-zscore', 'mvrvZscore', 'MVRV Z-Score');
+  }
+
+  async fetchRealizedPrice(): Promise<BitcoinDataPoint> {
+    return this.fetchLatest('realized-price', 'realizedPrice', 'Realized Price');
+  }
+
+  private async fetchLatest(
+    endpoint: string,
+    valueField: string,
+    label: string,
+  ): Promise<BitcoinDataPoint> {
     return retryWithBackoff(
-      () => this.fetchLatestNow(),
+      () => this.fetchLatestNow(endpoint, valueField, label),
       this.retryAttempts,
       this.retryBaseDelayMs,
       {
         sleep: this.sleep,
-        shouldRetry: isRetryableMvrvZScoreError,
+        shouldRetry: isRetryableBitcoinDataError,
       },
     );
   }
 
-  private async fetchLatestNow(): Promise<MvrvZScorePoint> {
-    const url = this.createLatestUrl();
+  private async fetchLatestNow(
+    endpoint: string,
+    valueField: string,
+    label: string,
+  ): Promise<BitcoinDataPoint> {
+    const url = this.createLatestUrl(endpoint);
 
     try {
       const response = await this.fetchFn(url);
 
       if (!response.ok) {
-        throw new MvrvZScoreClientError(
-          `MVRV Z-Score request failed with status ${response.status}`,
+        throw new BitcoinDataClientError(
+          `${label} request failed with status ${response.status}`,
           response.status,
         );
       }
 
-      const payload = (await response.json()) as MvrvZScoreApiResponse;
+      const payload = (await response.json()) as BitcoinDataApiResponse;
 
-      return normalizeMvrvZScoreResponse(payload);
+      return normalizeBitcoinDataResponse(payload, valueField, label);
     } catch (error) {
-      this.logger.error('MVRV Z-Score request failed', {
+      this.logger.error(`${label} request failed`, {
         timestamp: new Date().toISOString(),
         request: { url },
         error: error instanceof Error ? error.message : String(error),
@@ -76,20 +92,20 @@ export class MvrvZScoreClient {
     }
   }
 
-  private createLatestUrl(): string {
-    return new URL('mvrv-zscore/last', ensureTrailingSlash(this.baseUrl)).toString();
+  private createLatestUrl(endpoint: string): string {
+    return new URL(`${endpoint}/last`, ensureTrailingSlash(this.baseUrl)).toString();
   }
 }
 
-function isRetryableMvrvZScoreError(error: unknown): boolean {
-  if (!(error instanceof MvrvZScoreClientError)) {
+function isRetryableBitcoinDataError(error: unknown): boolean {
+  if (!(error instanceof BitcoinDataClientError)) {
     return true;
   }
 
   return error.statusCode === undefined || error.statusCode === 429 || error.statusCode >= 500;
 }
 
-export class MvrvZScoreClientError extends Error {
+export class BitcoinDataClientError extends Error {
   constructor(
     message: string,
     public readonly statusCode?: number,
@@ -98,15 +114,19 @@ export class MvrvZScoreClientError extends Error {
   }
 }
 
-function normalizeMvrvZScoreResponse(response: MvrvZScoreApiResponse): MvrvZScorePoint {
+function normalizeBitcoinDataResponse(
+  response: BitcoinDataApiResponse,
+  valueField: string,
+  label: string,
+): BitcoinDataPoint {
   if (!response.d) {
-    throw new MvrvZScoreClientError('MVRV Z-Score response is missing a date');
+    throw new BitcoinDataClientError(`${label} response is missing a date`);
   }
 
-  const value = Number(response.mvrvZscore);
+  const value = Number(response[valueField]);
 
   if (!Number.isFinite(value)) {
-    throw new MvrvZScoreClientError('MVRV Z-Score response has an invalid value');
+    throw new BitcoinDataClientError(`${label} response has an invalid value`);
   }
 
   return {

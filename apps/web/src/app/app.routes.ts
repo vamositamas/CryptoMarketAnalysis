@@ -4,10 +4,12 @@ import { ActivatedRoute, Route, Router, RouterLink } from '@angular/router';
 import {
   ApiClientError,
   AuthApiClient,
+  type DashboardWidget,
   type DataRefreshConfigurationResponse,
   type HistoricalDepth,
   type RefreshFrequency,
 } from '@crypto-market-analysis/data-access/api-client';
+import { AddWidgetModalComponent } from './components/add-widget-modal/add-widget-modal.component';
 import { OnboardingCarouselComponent } from './components/onboarding-carousel/onboarding-carousel.component';
 import { authGuard } from './guards/auth.guard';
 import { roleGuard } from './guards/role.guard';
@@ -128,38 +130,53 @@ export class LandingPage {
 
 @Component({
   selector: 'app-dashboard-page',
-  imports: [OnboardingCarouselComponent],
+  imports: [OnboardingCarouselComponent, AddWidgetModalComponent],
   template: `
     <section class="content-section">
-      <div class="section-heading">
-        <p class="eyebrow" i18n="Dashboard eyebrow@@dashboard.eyebrow">
-          Model overview
-        </p>
-        <h2 i18n="Dashboard title@@dashboard.title">Bitcoin cycle dashboard</h2>
+      <div class="section-heading dashboard-heading">
+        <div>
+          <p class="eyebrow" i18n="Dashboard eyebrow@@dashboard.eyebrow">
+            Model overview
+          </p>
+          <h2 i18n="Dashboard title@@dashboard.title">Bitcoin cycle dashboard</h2>
+        </div>
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="openAddWidget()"
+          i18n="Add widget button@@dashboard.openAddWidget"
+        >
+          Add Widget
+        </button>
       </div>
-      <div class="model-grid">
-        <article>
-          <span>MVRV Z-Score</span>
-          <strong>1.84</strong>
-          <small i18n="MVRV summary@@dashboard.mvrvSummary">
-            Valuation stretch is below overheated territory.
-          </small>
-        </article>
-        <article>
-          <span>Bitcoin Rainbow</span>
-          <strong>Green</strong>
-          <small i18n="Rainbow summary@@dashboard.rainbowSummary">
-            Price sits in the accumulation-to-fair-value band.
-          </small>
-        </article>
-        <article>
-          <span>Pi Cycle Top</span>
-          <strong>Clear</strong>
-          <small i18n="Pi Cycle summary@@dashboard.piCycleSummary">
-            Moving averages have not produced a top signal.
-          </small>
-        </article>
-      </div>
+
+      @if (isLoadingWidgets()) {
+        <p i18n="Dashboard widgets loading@@dashboard.widgetsLoading">Loading...</p>
+      } @else {
+        <div class="dashboard-widget-grid">
+          @for (widget of widgets(); track widget.id) {
+            <article>
+              <span class="widget-title">{{ widget.title }}</span>
+              <strong class="widget-value">{{ widget.formattedValue }}</strong>
+              <small class="widget-trend" [class]="'trend-' + widget.trend">
+                {{ trendIndicator(widget.trend) }}
+                @if (widget.trendPercent !== null) {
+                  {{ formatTrendPercent(widget.trendPercent) }}
+                }
+              </small>
+              <small class="widget-updated">{{ lastUpdatedText(widget.lastUpdated) }}</small>
+            </article>
+          }
+        </div>
+      }
+
+      @if (isAddWidgetOpen()) {
+        <app-add-widget-modal
+          [existingWidgetTypes]="widgetTypes()"
+          (widgetAdded)="handleWidgetAdded($event)"
+          (closed)="closeAddWidget()"
+        ></app-add-widget-modal>
+      }
 
       @if (showOnboarding()) {
         <div
@@ -182,9 +199,14 @@ export class DashboardPage {
   private readonly auth = inject(AuthApiClient);
   private readonly authSession = inject(AuthSessionService);
   protected readonly showOnboarding = signal(false);
+  protected readonly widgets = signal<DashboardWidget[]>([]);
+  protected readonly isLoadingWidgets = signal(true);
+  protected readonly isAddWidgetOpen = signal(false);
+  protected readonly widgetTypes = computed(() => this.widgets().map((widget) => widget.type));
 
   constructor() {
     void this.checkOnboardingStatus();
+    void this.loadWidgets();
   }
 
   protected async completeOnboarding(): Promise<void> {
@@ -197,6 +219,42 @@ export class DashboardPage {
     }
   }
 
+  protected openAddWidget(): void {
+    this.isAddWidgetOpen.set(true);
+  }
+
+  protected closeAddWidget(): void {
+    this.isAddWidgetOpen.set(false);
+  }
+
+  protected handleWidgetAdded(widget: DashboardWidget): void {
+    this.widgets.update((current) => [...current, widget]);
+  }
+
+  protected trendIndicator(trend: DashboardWidget['trend']): string {
+    if (trend === 'up') {
+      return '↑';
+    }
+
+    if (trend === 'down') {
+      return '↓';
+    }
+
+    return '–';
+  }
+
+  protected formatTrendPercent(trendPercent: number): string {
+    return `${trendPercent >= 0 ? '+' : ''}${trendPercent.toFixed(1)}%`;
+  }
+
+  protected lastUpdatedText(lastUpdated: string | null): string {
+    if (!lastUpdated) {
+      return $localize`:Widget waiting for data@@dashboard.widgetWaiting:Waiting for data`;
+    }
+
+    return new Date(lastUpdated).toISOString().replace('T', ' ').replace('.000Z', ' UTC');
+  }
+
   private async checkOnboardingStatus(): Promise<void> {
     try {
       const profile = await this.auth.getCurrentUserProfile();
@@ -204,6 +262,19 @@ export class DashboardPage {
       this.showOnboarding.set(!profile.onboardingCompleted);
     } catch {
       this.showOnboarding.set(false);
+    }
+  }
+
+  private async loadWidgets(): Promise<void> {
+    this.isLoadingWidgets.set(true);
+
+    try {
+      const response = await this.auth.getDashboardWidgets();
+      this.widgets.set(response.widgets);
+    } catch {
+      this.widgets.set([]);
+    } finally {
+      this.isLoadingWidgets.set(false);
     }
   }
 }

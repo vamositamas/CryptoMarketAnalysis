@@ -5,6 +5,11 @@ export interface BlockchainInfoMarketPricePoint {
   priceUsd: number;
 }
 
+export interface BlockchainInfoChartPoint {
+  date: string;
+  value: number;
+}
+
 export interface BlockchainInfoClientOptions {
   baseUrl?: string;
   fetchFn?: typeof fetch;
@@ -23,6 +28,8 @@ interface BlockchainInfoChartResponse {
 
 const DEFAULT_BASE_URL = 'https://api.blockchain.info/charts';
 const MARKET_PRICE_CHART = 'market-price';
+const HASH_RATE_CHART = 'hash-rate';
+const DIFFICULTY_CHART = 'difficulty';
 
 export class BlockchainInfoClient {
   private readonly baseUrl: string;
@@ -45,8 +52,26 @@ export class BlockchainInfoClient {
     startDate: string,
     endDate: string,
   ): Promise<BlockchainInfoMarketPricePoint[]> {
+    const points = await this.fetchChart(MARKET_PRICE_CHART, startDate, endDate);
+
+    return points.map((point) => ({ date: point.date, priceUsd: point.value }));
+  }
+
+  async fetchHashRate(startDate: string, endDate: string): Promise<BlockchainInfoChartPoint[]> {
+    return this.fetchChart(HASH_RATE_CHART, startDate, endDate);
+  }
+
+  async fetchDifficulty(startDate: string, endDate: string): Promise<BlockchainInfoChartPoint[]> {
+    return this.fetchChart(DIFFICULTY_CHART, startDate, endDate);
+  }
+
+  private async fetchChart(
+    chartName: string,
+    startDate: string,
+    endDate: string,
+  ): Promise<BlockchainInfoChartPoint[]> {
     return retryWithBackoff(
-      () => this.fetchMarketPriceNow(startDate, endDate),
+      () => this.fetchChartNow(chartName, startDate, endDate),
       this.retryAttempts,
       this.retryBaseDelayMs,
       {
@@ -56,11 +81,12 @@ export class BlockchainInfoClient {
     );
   }
 
-  private async fetchMarketPriceNow(
+  private async fetchChartNow(
+    chartName: string,
     startDate: string,
     endDate: string,
-  ): Promise<BlockchainInfoMarketPricePoint[]> {
-    const url = this.createMarketPriceUrl(startDate, endDate);
+  ): Promise<BlockchainInfoChartPoint[]> {
+    const url = this.createChartUrl(chartName, startDate, endDate);
 
     try {
       const response = await this.fetchFn(url);
@@ -79,6 +105,7 @@ export class BlockchainInfoClient {
       this.logger.error('Blockchain.info request failed', {
         timestamp: new Date().toISOString(),
         request: {
+          chartName,
           startDate,
           endDate,
           url,
@@ -89,9 +116,9 @@ export class BlockchainInfoClient {
     }
   }
 
-  private createMarketPriceUrl(startDate: string, endDate: string): string {
+  private createChartUrl(chartName: string, startDate: string, endDate: string): string {
     const timespanDays = calculateInclusiveTimespanDays(startDate, endDate);
-    const url = new URL(`${ensureTrailingSlash(this.baseUrl)}${MARKET_PRICE_CHART}`);
+    const url = new URL(`${ensureTrailingSlash(this.baseUrl)}${chartName}`);
     url.searchParams.set('start', startDate);
     url.searchParams.set('timespan', `${timespanDays}days`);
     url.searchParams.set('format', 'json');
@@ -121,7 +148,7 @@ function normalizeChartResponse(
   startDate: string,
   endDate: string,
   response: BlockchainInfoChartResponse,
-): BlockchainInfoMarketPricePoint[] {
+): BlockchainInfoChartPoint[] {
   const values = response.values;
 
   if (!Array.isArray(values)) {
@@ -130,18 +157,18 @@ function normalizeChartResponse(
 
   return values
     .map((value) => normalizeChartValue(value))
-    .filter((value): value is BlockchainInfoMarketPricePoint => value !== undefined)
+    .filter((value): value is BlockchainInfoChartPoint => value !== undefined)
     .filter((value) => value.date >= startDate && value.date <= endDate);
 }
 
-function normalizeChartValue(value: { x?: number; y?: number }): BlockchainInfoMarketPricePoint | undefined {
+function normalizeChartValue(value: { x?: number; y?: number }): BlockchainInfoChartPoint | undefined {
   if (typeof value.x !== 'number' || typeof value.y !== 'number') {
     return undefined;
   }
 
   return {
     date: unixSecondsToIsoDate(value.x),
-    priceUsd: value.y,
+    value: value.y,
   };
 }
 
