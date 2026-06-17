@@ -4,7 +4,11 @@ import { DashboardPage } from './app.routes';
 
 describe('DashboardPage', () => {
   let fixture: ComponentFixture<DashboardPage>;
-  let auth: { getCurrentUserProfile: jest.Mock; getDashboardWidgets: jest.Mock };
+  let auth: {
+    getCurrentUserProfile: jest.Mock;
+    getDashboardWidgets: jest.Mock;
+    reorderDashboardWidgets: jest.Mock;
+  };
 
   function setUp(): void {
     TestBed.configureTestingModule({
@@ -20,6 +24,7 @@ describe('DashboardPage', () => {
     auth = {
       getCurrentUserProfile: jest.fn().mockRejectedValue(new Error('not logged in')),
       getDashboardWidgets: jest.fn().mockResolvedValue({ widgets: [] }),
+      reorderDashboardWidgets: jest.fn().mockResolvedValue(undefined),
     };
   });
 
@@ -79,6 +84,136 @@ describe('DashboardPage', () => {
     expect(compiled.querySelectorAll('.widget-updated')[0]?.textContent).toContain(
       'Waiting for data',
     );
+  });
+
+  it('renders a drag handle on each widget card', async () => {
+    auth.getDashboardWidgets.mockResolvedValue({
+      widgets: [
+        {
+          id: 'widget-1',
+          type: 'btc_price',
+          title: 'Current BTC Price',
+          value: 67234.5,
+          formattedValue: '$67,234.50',
+          trend: 'up',
+          trendPercent: 1.87,
+          lastUpdated: '2026-06-10T00:00:00.000Z',
+        },
+      ],
+    });
+    setUp();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const handle = (fixture.nativeElement as HTMLElement).querySelector('.widget-drag-handle');
+    expect(handle).not.toBeNull();
+    expect(handle?.getAttribute('aria-hidden')).toBe('true');
+  });
+
+  it('reorders widgets and calls the API when performReorder is invoked', async () => {
+    const widgetA = {
+      id: 'widget-a',
+      type: 'btc_price',
+      title: 'BTC Price',
+      value: 67234.5,
+      formattedValue: '$67,234.50',
+      trend: 'up' as const,
+      trendPercent: 1.87,
+      lastUpdated: '2026-06-10T00:00:00.000Z',
+    };
+    const widgetB = {
+      id: 'widget-b',
+      type: 'market_cap',
+      title: 'Market Cap',
+      value: 1_320_000_000_000,
+      formattedValue: '$1,320,000,000,000',
+      trend: 'flat' as const,
+      trendPercent: null,
+      lastUpdated: '2026-06-10T00:00:00.000Z',
+    };
+    auth.getDashboardWidgets.mockResolvedValue({ widgets: [widgetA, widgetB] });
+    setUp();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    fixture.componentInstance['performReorder']('widget-a', 'widget-b');
+    fixture.detectChanges();
+
+    const articles = (fixture.nativeElement as HTMLElement).querySelectorAll('[data-widget-id]');
+    expect(articles[0]?.getAttribute('data-widget-id')).toBe('widget-b');
+    expect(articles[1]?.getAttribute('data-widget-id')).toBe('widget-a');
+    expect(auth.reorderDashboardWidgets).toHaveBeenCalledWith(['widget-b', 'widget-a']);
+  });
+
+  it('reloads widgets when the reorder API call fails', async () => {
+    const widgetA = {
+      id: 'widget-a',
+      type: 'btc_price',
+      title: 'BTC Price',
+      value: 67234.5,
+      formattedValue: '$67,234.50',
+      trend: 'up' as const,
+      trendPercent: 1.87,
+      lastUpdated: '2026-06-10T00:00:00.000Z',
+    };
+    const widgetB = {
+      id: 'widget-b',
+      type: 'market_cap',
+      title: 'Market Cap',
+      value: null,
+      formattedValue: 'Waiting for data',
+      trend: 'flat' as const,
+      trendPercent: null,
+      lastUpdated: null,
+    };
+    auth.getDashboardWidgets.mockResolvedValue({ widgets: [widgetA, widgetB] });
+    auth.reorderDashboardWidgets.mockRejectedValue(new Error('network error'));
+    setUp();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    fixture.componentInstance['performReorder']('widget-a', 'widget-b');
+    await fixture.whenStable();
+
+    expect(auth.getDashboardWidgets).toHaveBeenCalledTimes(2);
+  });
+
+  it('marks the dragging widget with is-dragging class and the target with drag-over class', async () => {
+    auth.getDashboardWidgets.mockResolvedValue({
+      widgets: [
+        {
+          id: 'widget-a',
+          type: 'btc_price',
+          title: 'BTC Price',
+          value: 67234.5,
+          formattedValue: '$67,234.50',
+          trend: 'up' as const,
+          trendPercent: null,
+          lastUpdated: null,
+        },
+        {
+          id: 'widget-b',
+          type: 'market_cap',
+          title: 'Market Cap',
+          value: null,
+          formattedValue: 'Waiting for data',
+          trend: 'flat' as const,
+          trendPercent: null,
+          lastUpdated: null,
+        },
+      ],
+    });
+    setUp();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    fixture.componentInstance['draggingId'].set('widget-a');
+    fixture.componentInstance['dragOverId'].set('widget-b');
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('[data-widget-id="widget-a"]')?.classList).toContain('is-dragging');
+    expect(compiled.querySelector('[data-widget-id="widget-b"]')?.classList).toContain('drag-over');
   });
 
   it('opens the add-widget modal and appends the newly added widget to the grid', async () => {

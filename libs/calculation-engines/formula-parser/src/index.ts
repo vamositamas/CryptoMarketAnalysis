@@ -1,1 +1,7 @@
-export * from './lib/formula-parser';
+export {
+  validateFormula,
+  evaluateFormula,
+  type FormulaVariables,
+  type FormulaValidationResult,
+  type FormulaEvaluationResult,
+} from './lib/formula-parser';

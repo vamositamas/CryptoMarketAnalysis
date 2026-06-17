@@ -340,6 +340,7 @@ describe('protected route wiring', () => {
         ],
       }),
       addWidget: jest.fn(),
+      reorderWidgets: jest.fn(),
     };
     const response = createResponse();
 
@@ -357,7 +358,7 @@ describe('protected route wiring', () => {
   });
 
   it('rejects unauthenticated dashboard widget requests', async () => {
-    const dashboardService = { getWidgets: jest.fn(), addWidget: jest.fn() };
+    const dashboardService = { getWidgets: jest.fn(), addWidget: jest.fn(), reorderWidgets: jest.fn() };
     const response = createResponse();
 
     await runHandlers(
@@ -373,6 +374,7 @@ describe('protected route wiring', () => {
   it('adds a dashboard widget for the authenticated user', async () => {
     const dashboardService = {
       getWidgets: jest.fn(),
+      reorderWidgets: jest.fn(),
       addWidget: jest.fn().mockResolvedValue({
         id: 'widget-2',
         type: 'ma_200_day',
@@ -405,6 +407,7 @@ describe('protected route wiring', () => {
     const dashboardService = {
       getWidgets: jest.fn(),
       addWidget: jest.fn().mockRejectedValue(new DashboardError('Maximum 20 widgets per dashboard', 400)),
+      reorderWidgets: jest.fn(),
     };
     const response = createResponse();
 
@@ -416,6 +419,44 @@ describe('protected route wiring', () => {
 
     expect(response.statusCode).toBe(400);
     expect(response.body).toEqual({ error: 'Maximum 20 widgets per dashboard' });
+  });
+
+  it('reorders dashboard widgets for the authenticated user', async () => {
+    const dashboardService = {
+      getWidgets: jest.fn(),
+      addWidget: jest.fn(),
+      reorderWidgets: jest.fn().mockResolvedValue(undefined),
+    };
+    const response = createResponse();
+    const orderedIds = ['widget-b', 'widget-a', 'widget-c'];
+
+    await runHandlers(
+      getHandler(createDashboardRouter({ dashboardService }, tokenInvalidations), '/widgets/reorder', 'patch'),
+      createRequest(createToken('free_user'), { orderedIds }),
+      response,
+    );
+
+    expect(dashboardService.reorderWidgets).toHaveBeenCalledWith('user-id', orderedIds);
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toEqual({ success: true });
+  });
+
+  it('returns 400 when reordering fails validation', async () => {
+    const dashboardService = {
+      getWidgets: jest.fn(),
+      addWidget: jest.fn(),
+      reorderWidgets: jest.fn().mockRejectedValue(new DashboardError('orderedIds must be a non-empty array', 400)),
+    };
+    const response = createResponse();
+
+    await runHandlers(
+      getHandler(createDashboardRouter({ dashboardService }, tokenInvalidations), '/widgets/reorder', 'patch'),
+      createRequest(createToken('free_user'), { orderedIds: [] }),
+      response,
+    );
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body).toEqual({ error: 'orderedIds must be a non-empty array' });
   });
 
   it('marks onboarding completed for the authenticated user', async () => {

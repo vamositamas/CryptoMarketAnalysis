@@ -151,4 +151,25 @@ describe('DashboardWidgetRepository', () => {
 
     await expect(repository.getMaxPosition('user-1')).resolves.toBeNull();
   });
+
+  it('reorders widgets using unnest for efficient bulk position update', async () => {
+    const database = { query: jest.fn().mockResolvedValue({ rows: [] }) };
+    const repository = new DashboardWidgetRepository(database);
+
+    await repository.reorderWidgets('user-1', ['widget-b', 'widget-a', 'widget-c']);
+
+    expect(database.query).toHaveBeenCalledWith(
+      expect.stringContaining('unnest'),
+      ['user-1', ['widget-b', 'widget-a', 'widget-c'], [0, 1, 2]],
+    );
+  });
+
+  it('does not query the database when reordering an empty list', async () => {
+    const database = { query: jest.fn() };
+    const repository = new DashboardWidgetRepository(database);
+
+    await repository.reorderWidgets('user-1', []);
+
+    expect(database.query).not.toHaveBeenCalled();
+  });
 });

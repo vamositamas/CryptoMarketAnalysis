@@ -352,6 +352,19 @@ describe('AuthApiClient', () => {
     await expect(createPromise).resolves.toMatchObject({ id: 'widget-2', type: 'ma_200_day' });
   });
 
+  it('reorders dashboard widgets with a CSRF-protected PATCH request', async () => {
+    const reorderPromise = client.reorderDashboardWidgets(['widget-b', 'widget-a', 'widget-c']);
+    http.expectOne('/api/csrf-token').flush({ csrfToken: 'csrf-token' });
+    await waitForRequestQueue();
+    const reorderRequest = http.expectOne('/api/dashboard/widgets/reorder');
+    expect(reorderRequest.request.method).toBe('PATCH');
+    expect(reorderRequest.request.headers.get('x-csrf-token')).toBe('csrf-token');
+    expect(reorderRequest.request.body).toEqual({ orderedIds: ['widget-b', 'widget-a', 'widget-c'] });
+    reorderRequest.flush({ success: true });
+
+    await expect(reorderPromise).resolves.toBeUndefined();
+  });
+
   it('creates a custom formula widget with a CSRF-protected request', async () => {
     const createPromise = client.createDashboardWidget({
       widgetType: 'custom',

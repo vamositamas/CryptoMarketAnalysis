@@ -126,6 +126,23 @@ export class DashboardWidgetRepository extends BaseRepository {
 
     return maxPosition === null || maxPosition === undefined ? null : Number(maxPosition);
   }
+
+  async reorderWidgets(userId: string, orderedIds: string[]): Promise<void> {
+    if (orderedIds.length === 0) return;
+
+    const positions = orderedIds.map((_, i) => i);
+
+    await this.database.query(
+      `
+        UPDATE user_dashboard_widgets AS w
+        SET position = u.pos
+        FROM unnest($2::text[], $3::int[]) AS u(id, pos)
+        WHERE w.id::text = u.id
+          AND w.user_id = $1
+      `,
+      [userId, orderedIds, positions],
+    );
+  }
 }
 
 function toRecord(row: DashboardWidgetRow): DashboardWidgetRecord {

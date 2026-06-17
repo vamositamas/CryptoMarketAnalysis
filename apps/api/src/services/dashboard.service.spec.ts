@@ -308,6 +308,7 @@ function createWidgetRepositoryStub() {
     create: jest.fn(),
     countForUser: jest.fn().mockResolvedValue(0),
     getMaxPosition: jest.fn().mockResolvedValue(null),
+    reorderWidgets: jest.fn().mockResolvedValue(undefined),
   };
 }
 
@@ -449,5 +450,53 @@ describe('DashboardService — custom formula widgets', () => {
       value: null,
       formattedValue: 'Data unavailable — Check back soon',
     });
+  });
+});
+
+describe('DashboardService — reorderWidgets', () => {
+  it('delegates reordering to the widget repository with the validated ID array', async () => {
+    const widgetRepository = {
+      ...createWidgetRepositoryStub(),
+      reorderWidgets: jest.fn().mockResolvedValue(undefined),
+    };
+    const service = new DashboardService(widgetRepository, createMetricsRepositoryStub());
+
+    await service.reorderWidgets('user-1', ['id-b', 'id-a', 'id-c']);
+
+    expect(widgetRepository.reorderWidgets).toHaveBeenCalledWith('user-1', ['id-b', 'id-a', 'id-c']);
+  });
+
+  it('rejects a non-array input', async () => {
+    const service = new DashboardService(createWidgetRepositoryStub(), createMetricsRepositoryStub());
+
+    await expect(service.reorderWidgets('user-1', 'not-an-array')).rejects.toMatchObject({
+      statusCode: 400,
+      message: 'orderedIds must be a non-empty array',
+    });
+  });
+
+  it('rejects an empty array', async () => {
+    const service = new DashboardService(createWidgetRepositoryStub(), createMetricsRepositoryStub());
+
+    await expect(service.reorderWidgets('user-1', [])).rejects.toMatchObject({
+      statusCode: 400,
+      message: 'orderedIds must be a non-empty array',
+    });
+  });
+
+  it('rejects duplicate widget IDs', async () => {
+    const service = new DashboardService(createWidgetRepositoryStub(), createMetricsRepositoryStub());
+
+    await expect(service.reorderWidgets('user-1', ['id-a', 'id-a', 'id-b'])).rejects.toMatchObject({
+      statusCode: 400,
+      message: 'Widget IDs must be unique',
+    });
+  });
+
+  it('rejects a list that exceeds the 20-widget cap', async () => {
+    const service = new DashboardService(createWidgetRepositoryStub(), createMetricsRepositoryStub());
+    const ids = Array.from({ length: 21 }, (_, i) => `id-${i}`);
+
+    await expect(service.reorderWidgets('user-1', ids)).rejects.toMatchObject({ statusCode: 400 });
   });
 });

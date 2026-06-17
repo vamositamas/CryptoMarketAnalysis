@@ -390,6 +390,34 @@ main .dashboard-widget-grid article {
   border: 1px solid #dce2dd;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.86);
+  transition: opacity 0.15s, border-color 0.15s;
+  position: relative;
+}
+
+main .dashboard-widget-grid article.is-dragging {
+  opacity: 0.4;
+}
+
+main .dashboard-widget-grid article.drag-over {
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+}
+
+main .dashboard-widget-grid .widget-drag-handle {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  color: #c5cfc9;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 2px 4px;
+
+  &:active {
+    cursor: grabbing;
+  }
 }
 
 main .dashboard-widget-grid .widget-title {

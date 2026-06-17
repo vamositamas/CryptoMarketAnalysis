@@ -155,7 +155,19 @@ export class LandingPage {
       } @else {
         <div class="dashboard-widget-grid">
           @for (widget of widgets(); track widget.id) {
-            <article>
+            <article
+              [attr.data-widget-id]="widget.id"
+              [class.is-dragging]="draggingId() === widget.id"
+              [class.drag-over]="dragOverId() === widget.id && draggingId() !== widget.id"
+            >
+              <span
+                class="widget-drag-handle"
+                aria-hidden="true"
+                (pointerdown)="onPointerDown($event, widget.id)"
+                (pointermove)="onPointerMove($event)"
+                (pointerup)="onPointerUp($event)"
+                (pointercancel)="onPointerCancel($event)"
+              >⠿</span>
               <span class="widget-title">{{ widget.title }}</span>
               <strong class="widget-value">{{ widget.formattedValue }}</strong>
               <small class="widget-trend" [class]="'trend-' + widget.trend">
@@ -203,6 +215,12 @@ export class DashboardPage {
   protected readonly isLoadingWidgets = signal(true);
   protected readonly isAddWidgetOpen = signal(false);
   protected readonly widgetTypes = computed(() => this.widgets().map((widget) => widget.type));
+  protected readonly draggingId = signal<string | null>(null);
+  protected readonly dragOverId = signal<string | null>(null);
+
+  private activePointerId: number | null = null;
+  private pointerDragId: string | null = null;
+  private pointerOverId: string | null = null;
 
   constructor() {
     void this.checkOnboardingStatus();
@@ -229,6 +247,75 @@ export class DashboardPage {
 
   protected handleWidgetAdded(widget: DashboardWidget): void {
     this.widgets.update((current) => [...current, widget]);
+  }
+
+  protected onPointerDown(event: PointerEvent, widgetId: string): void {
+    (event.currentTarget as Element).setPointerCapture?.(event.pointerId);
+    this.activePointerId = event.pointerId;
+    this.pointerDragId = widgetId;
+    this.draggingId.set(widgetId);
+  }
+
+  protected onPointerMove(event: PointerEvent): void {
+    if (!this.pointerDragId || event.pointerId !== this.activePointerId) return;
+
+    const el = document.elementFromPoint(event.clientX, event.clientY);
+    const article = el?.closest('[data-widget-id]') as HTMLElement | null;
+    const targetId = article?.dataset['widgetId'] ?? null;
+
+    if (targetId !== this.pointerOverId) {
+      this.pointerOverId = targetId;
+      this.dragOverId.set(targetId);
+    }
+  }
+
+  protected onPointerUp(event: PointerEvent): void {
+    if (!this.pointerDragId || event.pointerId !== this.activePointerId) return;
+
+    const sourceId = this.pointerDragId;
+    const targetId = this.pointerOverId;
+
+    this.activePointerId = null;
+    this.pointerDragId = null;
+    this.pointerOverId = null;
+    this.draggingId.set(null);
+    this.dragOverId.set(null);
+
+    if (sourceId && targetId && sourceId !== targetId) {
+      this.performReorder(sourceId, targetId);
+    }
+  }
+
+  protected onPointerCancel(event: PointerEvent): void {
+    if (event.pointerId !== this.activePointerId) return;
+
+    this.activePointerId = null;
+    this.pointerDragId = null;
+    this.pointerOverId = null;
+    this.draggingId.set(null);
+    this.dragOverId.set(null);
+  }
+
+  protected performReorder(sourceId: string, targetId: string): void {
+    const current = this.widgets();
+    const sourceIndex = current.findIndex((w) => w.id === sourceId);
+    const targetIndex = current.findIndex((w) => w.id === targetId);
+
+    if (sourceIndex === -1 || targetIndex === -1) return;
+
+    const reordered = [...current];
+    const [moved] = reordered.splice(sourceIndex, 1);
+    reordered.splice(targetIndex, 0, moved);
+    this.widgets.set(reordered);
+    void this.saveWidgetOrder(reordered.map((w) => w.id));
+  }
+
+  private async saveWidgetOrder(orderedIds: string[]): Promise<void> {
+    try {
+      await this.auth.reorderDashboardWidgets(orderedIds);
+    } catch {
+      void this.loadWidgets();
+    }
   }
 
   protected trendIndicator(trend: DashboardWidget['trend']): string {

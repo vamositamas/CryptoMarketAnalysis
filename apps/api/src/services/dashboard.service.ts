@@ -7,7 +7,7 @@ import {
   DashboardMetricsRepository,
   type MetricPoint,
 } from '../repositories/dashboard-metrics.repository';
-import { evaluateFormula, validateFormula } from './formula-evaluator';
+import { evaluateFormula, validateFormula } from '@crypto-market-analysis/calculation-engines/formula-parser';
 
 export type WidgetTrend = 'up' | 'down' | 'flat';
 
@@ -94,7 +94,7 @@ export class DashboardService {
   constructor(
     private readonly widgetRepository: Pick<
       DashboardWidgetRepository,
-      'listForUser' | 'createMany' | 'create' | 'countForUser' | 'getMaxPosition'
+      'listForUser' | 'createMany' | 'create' | 'countForUser' | 'getMaxPosition' | 'reorderWidgets'
     >,
     private readonly metricsRepository: Pick<
       DashboardMetricsRepository,
@@ -151,6 +151,28 @@ export class DashboardService {
     const widget = await this.widgetRepository.create(userId, { widgetType, widgetConfig, position });
 
     return this.buildWidgetResponse(widget);
+  }
+
+  async reorderWidgets(userId: string, orderedIds: unknown): Promise<void> {
+    if (!Array.isArray(orderedIds) || orderedIds.length === 0) {
+      throw new DashboardError('orderedIds must be a non-empty array', 400);
+    }
+
+    const ids = orderedIds.filter((id): id is string => typeof id === 'string');
+
+    if (ids.length !== orderedIds.length) {
+      throw new DashboardError('All widget IDs must be strings', 400);
+    }
+
+    if (new Set(ids).size !== ids.length) {
+      throw new DashboardError('Widget IDs must be unique', 400);
+    }
+
+    if (ids.length > MAX_WIDGETS_PER_DASHBOARD) {
+      throw new DashboardError(`Maximum ${MAX_WIDGETS_PER_DASHBOARD} widgets per dashboard`, 400);
+    }
+
+    await this.widgetRepository.reorderWidgets(userId, ids);
   }
 
   private async addCustomWidget(

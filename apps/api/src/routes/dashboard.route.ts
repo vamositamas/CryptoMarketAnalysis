@@ -7,7 +7,7 @@ import { DashboardWidgetRepository } from '../repositories/dashboard-widget.repo
 import { DashboardError, DashboardService } from '../services/dashboard.service';
 
 interface DashboardRouterOptions {
-  dashboardService?: Pick<DashboardService, 'getWidgets' | 'addWidget'>;
+  dashboardService?: Pick<DashboardService, 'getWidgets' | 'addWidget' | 'reorderWidgets'>;
 }
 
 export function createDashboardRouter(
@@ -45,9 +45,26 @@ export function createDashboardRouter(
     }
   });
 
+  router.patch('/widgets/reorder', requireAuth(tokenInvalidations), async (req, res, next) => {
+    try {
+      await getDashboardService().reorderWidgets(
+        (req as AuthenticatedRequest).user?.userId ?? '',
+        req.body?.orderedIds,
+      );
+      res.status(200).json({ success: true });
+    } catch (error) {
+      if (error instanceof DashboardError) {
+        res.status(error.statusCode).json({ error: error.message });
+        return;
+      }
+
+      next(error);
+    }
+  });
+
   return router;
 
-  function getDashboardService(): Pick<DashboardService, 'getWidgets' | 'addWidget'> {
+  function getDashboardService(): Pick<DashboardService, 'getWidgets' | 'addWidget' | 'reorderWidgets'> {
     dashboardService ??= createDefaultDashboardService();
     return dashboardService;
   }

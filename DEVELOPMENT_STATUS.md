@@ -1,6 +1,6 @@
 # Development Status
 
-Last updated: 2026-06-16
+Last updated: 2026-06-17
 
 This file is the quick human-readable progress tracker for the project. The detailed story tracker lives in `_bmad-output/implementation-artifacts/sprint-status.yaml`, and detailed implementation notes live in `_bmad-output/implementation-artifacts/`.
 
@@ -55,6 +55,9 @@ Epic 6: Personalized Dashboard & KPI Widgets
 | 6.1 Create Dashboard Database Schema | Done | Added `user_dashboard_widgets` (position-ordered, JSONB config, 0-19 position bound) and `user_recent_charts` (per-user unique chart, most-recent-first index) tables via migration `008_create_dashboard_schema.sql`, both cascading on user delete and RLS-enabled; also backfilled `database/schema.sql` with the previously missing `006`/`007` migration references. |
 | 6.2 Implement Default Dashboard Initialization | Done | Added `GET /api/dashboard/widgets`, which creates the 5 default widgets (BTC Price, 24h Change, MVRV Z-Score, Stock-to-Flow Ratio, Fear & Greed Index) for a user on first visit and returns each with a formatted value, up/down/flat trend, and last-updated time. Closed a real data gap found while building this: MVRV Z-Score and Fear & Greed Index had no data source anywhere in the codebase (Epic 4 only ever computed Stock-to-Flow/Rainbow/moving averages), so added `FearGreedClient` (alternative.me, free/no-key) and `BitcoinDataClient` (bitcoin-data.com, free/no-key) to `calculation-engines/data-sources` and wired both into the daily refresh job, storing `fear_greed_index`/`mvrv_zscore` rows in `bitcoin_metrics_daily`; a failure in either external source is logged and skipped rather than failing the whole refresh. The Angular dashboard page now renders a live 2-column (1-column on mobile) widget grid with a loading state and trend arrows, replacing the old static mock cards. |
 | 6.3 Implement Predefined Widget Library | Done | Added an "Add Widget" modal (3 categories: Price Metrics, On-chain Metrics, Supply Metrics; 7 widgets: Realized Price, 200-day Moving Average, Hash Rate, Mining Difficulty, Total Supply, Circulating Supply, Market Cap) with case-insensitive real-time search and an "Added" disabled state for widgets already on the dashboard. Backend: `POST /api/dashboard/widgets` validates the widget type against a server-side catalog, enforces a 20-widget-per-dashboard cap (400 `Maximum 20 widgets per dashboard`), and appends at `max(position) + 1`. Extended the daily refresh job with 3 more real, free, no-key external metrics — `BitcoinDataClient.fetchRealizedPrice()` (bitcoin-data.com) and generalized `BlockchainInfoClient` with `fetchHashRate`/`fetchDifficulty` (api.blockchain.info, the same provider already used for price fallback) — and added a `ma_200_day` indicator (reusing the existing generic `calculateMovingAverage`) computed directly from price history already in `bitcoin_price_daily`, so all 7 catalog widgets show real data once the refresh job has run. Total Supply is rendered as the fixed 21,000,000 BTC constant (no external call); Circulating Supply and Market Cap read directly from existing `bitcoin_price_daily` columns. |
+| 6.4 Implement Custom Formula Widget Creation | Done |
+| 6.5 Implement Formula Parser Library | Done | Extracted `validateFormula` / `evaluateFormula` from `apps/api/src/services/formula-evaluator.ts` into the pre-scaffolded `libs/calculation-engines/formula-parser` library (`@crypto-market-analysis/calculation-engines/formula-parser`). Updated `dashboard.service.ts` to import from the library path alias. Deleted the now-redundant local `formula-evaluator.ts` and `formula-evaluator.spec.ts`; the 16 tests live in the library's spec file. |
+| 6.6 Implement Widget Drag-and-Drop Reordering | Done | Added pointer-events based drag-and-drop reordering for dashboard widgets (works on desktop mouse and mobile touch via the unified Pointer Events API). Each widget card shows a ⠿ drag handle with `touch-action: none`. `onPointerDown` captures the pointer via `setPointerCapture`; `onPointerMove` uses `document.elementFromPoint` + `closest('[data-widget-id]')` to identify the drop target; `onPointerUp` calls `performReorder` which splices the widget array in-place and calls `reorderDashboardWidgets` to persist. On API failure, the widget list is reloaded from the server. Backend: `PATCH /api/dashboard/widgets/reorder` accepts `{ orderedIds: string[] }`, validates (non-empty, all strings, no duplicates, ≤20), and calls a new `DashboardWidgetRepository.reorderWidgets()` that uses a PostgreSQL `unnest($2::text[], $3::int[])` join for an efficient single-query bulk position update. Styles: `is-dragging` (opacity 0.4) and `drag-over` (blue border highlight) classes; grab/grabbing cursor. |
 
 ## Latest Verification
 
@@ -128,10 +131,20 @@ Epic 6: Personalized Dashboard & KPI Widgets
 - `npm exec nx -- run-many --target=test --projects=api,web,data-access-api-client,data-sources,indicators --skip-nx-cache` passed (237 tests total: api 142, web 38, data-access-api-client 16, data-sources 30, indicators 11).
 - `npm exec nx -- run-many --target=build --projects=api,web,data-access-api-client,data-sources,indicators --skip-nx-cache` passed.
 - `npm exec nx -- run-many --target=eslint:lint --projects=api,web,data-access-api-client,data-sources,indicators --skip-nx-cache` passed.
+- `npm exec nx -- run api:test --skip-nx-cache` passed with 166 tests.
+- `npm exec nx -- run api:build:production --skip-nx-cache` passed.
+- `npm exec nx -- run-many --target=eslint:lint --projects=api,data-access-api-client,data-sources,indicators --skip-nx-cache` passed (web has pre-existing lint errors in lazy-loaded component imports not caused by this story).
+- `npm exec nx -- run web:test --skip-nx-cache` passed with 42 tests.
+- `npm exec nx -- run web:build:production --skip-nx-cache` passed.
+- `npm exec nx -- run api:test --skip-nx-cache` passed with 159 tests.
+- `npm exec nx -- run web:test --skip-nx-cache` passed with 46 tests.
+- `npm exec nx -- run data-access-api-client:test --skip-nx-cache` passed with 18 tests.
+- `npm exec nx -- run-many --target=build --projects=api,web,data-access-api-client --skip-nx-cache` passed.
+- `npm exec nx -- run-many --target=eslint:lint --projects=api,data-access-api-client --skip-nx-cache` passed (web has pre-existing lint errors).
 
 ## Next Step
 
-Begin Epic 6, Story 6.4: Implement Custom Formula Widget Creation.
+Begin Epic 6, Story 6.7: Implement Recent Charts Quick Access.
 
 ## Notes
 

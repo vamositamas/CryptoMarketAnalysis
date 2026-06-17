@@ -432,6 +432,10 @@ export class AuthApiClient {
     return this.postWithCsrf<DashboardWidget>('/api/dashboard/widgets', request);
   }
 
+  async reorderDashboardWidgets(orderedIds: string[]): Promise<void> {
+    await this.patchWithCsrf<{ success: boolean }>('/api/dashboard/widgets/reorder', { orderedIds });
+  }
+
   startGoogleLogin(): void {
     window.location.assign('/api/auth/google');
   }
