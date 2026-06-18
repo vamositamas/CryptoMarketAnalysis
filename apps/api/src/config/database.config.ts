@@ -9,11 +9,11 @@ export function getDatabasePool(): Pool | undefined {
     return undefined;
   }
 
+  const isLocal = connectionString.includes('localhost') || connectionString.includes('127.0.0.1');
+
   pool ??= new Pool({
     connectionString,
-    ssl: {
-      rejectUnauthorized: false,
-    },
+    ssl: isLocal ? false : { rejectUnauthorized: false },
     max: 1,
     idleTimeoutMillis: 5_000,
     connectionTimeoutMillis: 5_000,

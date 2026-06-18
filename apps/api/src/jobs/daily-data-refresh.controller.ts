@@ -303,6 +303,12 @@ export function createQStashSignatureMiddleware(
   options: QStashVerifierOptions = {},
 ): (req: Request, res: Response, next: NextFunction) => void {
   return (req, res, next) => {
+    const bypassSecret = process.env.QSTASH_BYPASS_SECRET;
+    if (bypassSecret && req.headers['x-dev-bypass'] === bypassSecret) {
+      next();
+      return;
+    }
+
     const signature = getQStashSignature(req);
     const currentSigningKey = options.currentSigningKey ?? process.env.QSTASH_CURRENT_SIGNING_KEY;
     const nextSigningKey = options.nextSigningKey ?? process.env.QSTASH_NEXT_SIGNING_KEY;

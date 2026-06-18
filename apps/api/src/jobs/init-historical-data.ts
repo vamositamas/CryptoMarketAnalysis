@@ -210,8 +210,8 @@ export async function insertBitcoinPriceDaily(
   const values = records.flatMap((record) => [
     record.date,
     record.priceUsd,
-    record.marketCapUsd ?? null,
-    record.circulatingSupply ?? null,
+    record.marketCapUsd != null ? Math.round(record.marketCapUsd) : null,
+    record.circulatingSupply != null ? Math.round(record.circulatingSupply) : null,
   ]);
   const placeholders = records
     .map((_, recordIndex) => {

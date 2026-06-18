@@ -177,6 +177,48 @@ export class LandingPage {
                   {{ formatTrendPercent(widget.trendPercent) }}
                 }
               </small>
+              @if (widget.type === 'fear_greed' && widget.value !== null) {
+                <div class="wi-gauge">
+                  <div class="wi-gauge-bar wi-gauge-bar--fg">
+                    <span class="wi-gauge-marker" [style.left.%]="widget.value"></span>
+                  </div>
+                  <div class="wi-gauge-labels">
+                    <span>0</span><span>25</span><span>46</span><span>54</span><span>75</span><span>100</span>
+                  </div>
+                  <div class="wi-gauge-footer">
+                    <span class="wi-gauge-label" [attr.data-zone]="fearGreedZone(widget.value)">{{ fearGreedLabel(widget.value) }}</span>
+                    <span class="wi-gauge-score">{{ widget.value }}/100</span>
+                  </div>
+                </div>
+              }
+              @if (widget.type === 'mvrv_zscore' && widget.value !== null) {
+                <div class="wi-gauge">
+                  <div class="wi-gauge-bar wi-gauge-bar--mvrv">
+                    <span class="wi-gauge-marker" [style.left.%]="mvrvPosition(widget.value)"></span>
+                  </div>
+                  <div class="wi-gauge-labels">
+                    <span>-1</span><span>0</span><span>2</span><span>5</span><span>7</span><span>10</span>
+                  </div>
+                  <div class="wi-gauge-footer">
+                    <span class="wi-gauge-label" [attr.data-zone]="mvrvZone(widget.value)">{{ mvrvLabel(widget.value) }}</span>
+                    <span class="wi-gauge-score">Z = {{ widget.formattedValue }}</span>
+                  </div>
+                </div>
+              }
+              @if (widget.type === 'stock_to_flow' && widget.value !== null) {
+                <div class="wi-gauge">
+                  <div class="wi-gauge-bar wi-gauge-bar--s2f">
+                    <span class="wi-gauge-marker" [style.left.%]="s2fPosition(widget.value)"></span>
+                  </div>
+                  <div class="wi-gauge-labels">
+                    <span>0</span><span>28</span><span>56</span><span>113</span><span>200</span>
+                  </div>
+                  <div class="wi-gauge-footer">
+                    <span class="wi-gauge-label" [attr.data-zone]="s2fZone(widget.value)">{{ s2fLabel(widget.value) }}</span>
+                    <span class="wi-gauge-score">S2F {{ widget.formattedValue }}</span>
+                  </div>
+                </div>
+              }
               <small class="widget-updated">{{ lastUpdatedText(widget.lastUpdated) }}</small>
             </article>
           }
@@ -397,6 +439,65 @@ export class DashboardPage {
 
   protected formatTrendPercent(trendPercent: number): string {
     return `${trendPercent >= 0 ? '+' : ''}${trendPercent.toFixed(1)}%`;
+  }
+
+  protected fearGreedZone(value: number): string {
+    if (value <= 25) return 'extreme-fear';
+    if (value <= 46) return 'fear';
+    if (value <= 54) return 'neutral';
+    if (value <= 75) return 'greed';
+    return 'extreme-greed';
+  }
+
+  protected fearGreedLabel(value: number): string {
+    if (value <= 25) return 'Extreme Fear';
+    if (value <= 46) return 'Fear';
+    if (value <= 54) return 'Neutral';
+    if (value <= 75) return 'Greed';
+    return 'Extreme Greed';
+  }
+
+  // MVRV Z-Score: scale -1..10 → 0..100%
+  protected mvrvPosition(value: number): number {
+    return Math.min(100, Math.max(0, (Math.min(value, 10) - (-1)) / 11 * 100));
+  }
+
+  protected mvrvZone(value: number): string {
+    if (value < 0)  return 'buy';
+    if (value < 2)  return 'undervalued';
+    if (value < 5)  return 'fair';
+    if (value < 7)  return 'overvalued';
+    return 'sell';
+  }
+
+  protected mvrvLabel(value: number): string {
+    if (value < 0)  return 'Buy Zone';
+    if (value < 2)  return 'Undervalued';
+    if (value < 5)  return 'Fair Value';
+    if (value < 7)  return 'Overvalued';
+    return 'Sell Zone';
+  }
+
+  // Stock-to-Flow: scale 0..200 → 0..100%
+  // Key levels: 28 (pre-3rd halving), 56 (pre-4th halving), 113 (post-4th halving)
+  protected s2fPosition(value: number): number {
+    return Math.min(100, Math.max(0, Math.min(value, 200) / 200 * 100));
+  }
+
+  protected s2fZone(value: number): string {
+    if (value < 28)  return 'low';
+    if (value < 56)  return 'moderate';
+    if (value < 113) return 'high';
+    if (value < 170) return 'very-high';
+    return 'extreme';
+  }
+
+  protected s2fLabel(value: number): string {
+    if (value < 28)  return 'Low Scarcity';
+    if (value < 56)  return 'Moderate Scarcity';
+    if (value < 113) return 'High Scarcity';
+    if (value < 170) return 'Very High Scarcity';
+    return 'Extreme Scarcity';
   }
 
   protected lastUpdatedText(lastUpdated: string | null): string {

@@ -448,6 +448,105 @@ main .dashboard-widget-grid .widget-updated {
   font-size: 0.75rem;
 }
 
+/* Widget indicator gauges (Fear & Greed, MVRV, S2F) */
+main .dashboard-widget-grid .wi-gauge {
+  width: 100%;
+  margin: 4px 0 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+main .dashboard-widget-grid .wi-gauge-bar {
+  position: relative;
+  height: 10px;
+  border-radius: 5px;
+}
+
+main .dashboard-widget-grid .wi-gauge-bar--fg {
+  background: linear-gradient(
+    to right,
+    #c0392b 0%, #e67e22 25%, #f1c40f 46%, #f1c40f 54%, #8bc34a 75%, #27ae60 100%
+  );
+}
+
+/* MVRV: green (buy) → lime → yellow (fair) → orange → red (sell), scale -1..10 */
+main .dashboard-widget-grid .wi-gauge-bar--mvrv {
+  background: linear-gradient(
+    to right,
+    #27ae60 0%,          /* -1 buy zone */
+    #8bc34a 9.1%,        /* 0  */
+    #f1c40f 27.3%,       /* 2  */
+    #e67e22 54.5%,       /* 5  */
+    #c0392b 72.7%,       /* 7  */
+    #8b0000 100%         /* 10 sell zone */
+  );
+}
+
+/* S2F: grey → blue → teal → green → gold, scale 0..200 */
+main .dashboard-widget-grid .wi-gauge-bar--s2f {
+  background: linear-gradient(
+    to right,
+    #aab0b8 0%,          /* 0   low */
+    #5b8dd9 14%,         /* 28  */
+    #27ae60 28%,         /* 56  */
+    #f1c40f 56.5%,       /* 113 */
+    #e67e22 85%,         /* 170 */
+    #c0392b 100%         /* 200 extreme */
+  );
+}
+
+main .dashboard-widget-grid .wi-gauge-marker {
+  position: absolute;
+  top: -3px;
+  width: 4px;
+  height: 16px;
+  background: #111;
+  border-radius: 2px;
+  transform: translateX(-50%);
+}
+
+main .dashboard-widget-grid .wi-gauge-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  color: #8a948f;
+}
+
+main .dashboard-widget-grid .wi-gauge-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Fear & Greed zone colours */
+main .dashboard-widget-grid .wi-gauge-label[data-zone='extreme-fear'] { color: #c0392b; }
+main .dashboard-widget-grid .wi-gauge-label[data-zone='fear']          { color: #e67e22; }
+main .dashboard-widget-grid .wi-gauge-label[data-zone='neutral']       { color: #c8a000; }
+main .dashboard-widget-grid .wi-gauge-label[data-zone='greed']         { color: #8bc34a; }
+main .dashboard-widget-grid .wi-gauge-label[data-zone='extreme-greed'] { color: #27ae60; }
+
+/* MVRV zone colours */
+main .dashboard-widget-grid .wi-gauge-label[data-zone='buy']        { color: #27ae60; }
+main .dashboard-widget-grid .wi-gauge-label[data-zone='undervalued']{ color: #8bc34a; }
+main .dashboard-widget-grid .wi-gauge-label[data-zone='fair']       { color: #c8a000; }
+main .dashboard-widget-grid .wi-gauge-label[data-zone='overvalued'] { color: #e67e22; }
+main .dashboard-widget-grid .wi-gauge-label[data-zone='sell']       { color: #c0392b; }
+
+/* S2F zone colours */
+main .dashboard-widget-grid .wi-gauge-label[data-zone='low']       { color: #8a948f; }
+main .dashboard-widget-grid .wi-gauge-label[data-zone='moderate']  { color: #5b8dd9; }
+main .dashboard-widget-grid .wi-gauge-label[data-zone='high']      { color: #27ae60; }
+main .dashboard-widget-grid .wi-gauge-label[data-zone='very-high'] { color: #e67e22; }
+main .dashboard-widget-grid .wi-gauge-label[data-zone='extreme']   { color: #c0392b; }
+
+main .dashboard-widget-grid .wi-gauge-score {
+  color: #444;
+  font-weight: 500;
+}
+
 main .dashboard-heading {
   display: flex;
   flex-wrap: wrap;
