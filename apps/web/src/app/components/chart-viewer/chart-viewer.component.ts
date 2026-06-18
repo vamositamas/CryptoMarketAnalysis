@@ -45,6 +45,7 @@ export class ChartViewerComponent implements AfterViewInit, OnChanges, OnDestroy
 
   private chart?: Chart;
   private lastTapTime = 0;
+  private originalYBounds: { min: number | undefined; max: number | undefined } = { min: undefined, max: undefined };
 
   ngAfterViewInit(): void {
     this.createChart();
@@ -71,8 +72,24 @@ export class ChartViewerComponent implements AfterViewInit, OnChanges, OnDestroy
     this.destroyChart();
   }
 
-  protected resetZoom(): void {
-    this.chart?.resetZoom();
+  resetZoom(): void {
+    if (!this.chart) return;
+    // Restore original Y bounds in the config source-of-truth before zoom plugin resets X
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const configScaleY = (this.chart.config.options as any)?.scales?.['y'];
+    if (configScaleY) {
+      configScaleY.min = this.originalYBounds.min;
+      configScaleY.max = this.originalYBounds.max;
+    }
+    this.chart.resetZoom();
+  }
+
+  zoomIn(): void {
+    this.chart?.zoom(1.5);
+  }
+
+  zoomOut(): void {
+    this.chart?.zoom(0.67);
   }
 
   exportImage(): string | null {
@@ -122,6 +139,52 @@ export class ChartViewerComponent implements AfterViewInit, OnChanges, OnDestroy
     this.chartPointSelected.emit({ date: label, value });
   }
 
+  private rescaleYAfterZoom(chart: Chart): void {
+    const xScale = chart.scales['x'];
+    const yScale = chart.scales['y'];
+    if (!xScale || !yScale) return;
+
+    const minIdx = Math.floor(xScale.min);
+    const maxIdx = Math.ceil(xScale.max);
+    const isLog = yScale.type === 'logarithmic';
+
+    let minY = Infinity;
+    let maxY = -Infinity;
+
+    for (const dataset of chart.data.datasets) {
+      const data = dataset.data as number[];
+      for (let i = Math.max(0, minIdx); i <= Math.min(data.length - 1, maxIdx); i++) {
+        const val = data[i];
+        if (typeof val === 'number' && isFinite(val) && (!isLog || val > 0)) {
+          if (val < minY) minY = val;
+          if (val > maxY) maxY = val;
+        }
+      }
+    }
+
+    if (!isFinite(minY) || !isFinite(maxY) || minY >= maxY) return;
+
+    // chart.options is an ephemeral resolved proxy rebuilt on every chart.update() call —
+    // writing to it is a no-op. chart.config.options is the source-of-truth the resolver reads.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const configScaleY = (chart.config.options as any)?.scales?.['y'];
+    if (!configScaleY) return;
+
+    if (isLog) {
+      const logMin = Math.log10(minY);
+      const logMax = Math.log10(maxY);
+      const pad = (logMax - logMin) * 0.08;
+      configScaleY.min = Math.pow(10, logMin - pad);
+      configScaleY.max = Math.pow(10, logMax + pad);
+    } else {
+      const pad = (maxY - minY) * 0.08;
+      configScaleY.min = minY - pad;
+      configScaleY.max = maxY + pad;
+    }
+
+    chart.update('none');
+  }
+
   private recreateChart(): void {
     this.destroyChart();
     this.createChart();
@@ -133,6 +196,11 @@ export class ChartViewerComponent implements AfterViewInit, OnChanges, OnDestroy
     if (!canvas || !this.chartData) {
       return;
     }
+
+    // Capture Y bounds from chartOptions BEFORE Chart.js merges/replaces scales config
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const origY = (this.chartOptions.scales as any)?.['y'];
+    this.originalYBounds = { min: origY?.min, max: origY?.max };
 
     this.chart = new Chart(canvas, this.getConfiguration());
   }
@@ -165,28 +233,26 @@ export class ChartViewerComponent implements AfterViewInit, OnChanges, OnDestroy
           pan: {
             enabled: true,
             mode: 'x',
-            modifierKey: 'shift',
+            modifierKey: 'ctrl',
             ...this.chartOptions.plugins?.zoom?.pan,
           },
           zoom: {
-            wheel: {
-              enabled: true,
-              ...this.chartOptions.plugins?.zoom?.zoom?.wheel,
-            },
-            pinch: {
-              enabled: true,
-              ...this.chartOptions.plugins?.zoom?.zoom?.pinch,
-            },
+            wheel: { enabled: false, ...this.chartOptions.plugins?.zoom?.zoom?.wheel },
+            pinch: { enabled: false, ...this.chartOptions.plugins?.zoom?.zoom?.pinch },
             drag: {
               enabled: true,
+              backgroundColor: 'rgba(99,147,114,0.15)',
+              borderColor: 'rgba(45,107,70,0.6)',
+              borderWidth: 1,
               ...this.chartOptions.plugins?.zoom?.zoom?.drag,
             },
             mode: 'x',
+            onZoomComplete: ({ chart }) => this.rescaleYAfterZoom(chart),
             ...this.chartOptions.plugins?.zoom?.zoom,
           },
           limits: {
             x: {
-              minRange: 24 * 60 * 60 * 1000,
+              minRange: 7,
               ...this.chartOptions.plugins?.zoom?.limits?.['x'],
             },
             ...this.chartOptions.plugins?.zoom?.limits,

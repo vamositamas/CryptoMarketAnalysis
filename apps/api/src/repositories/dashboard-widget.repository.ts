@@ -127,6 +127,19 @@ export class DashboardWidgetRepository extends BaseRepository {
     return maxPosition === null || maxPosition === undefined ? null : Number(maxPosition);
   }
 
+  async deleteForUser(userId: string, widgetId: string): Promise<boolean> {
+    const result = await this.database.query<{ id: string }>(
+      `
+        DELETE FROM user_dashboard_widgets
+        WHERE id = $1 AND user_id = $2
+        RETURNING id
+      `,
+      [widgetId, userId],
+    );
+
+    return result.rows.length > 0;
+  }
+
   async reorderWidgets(userId: string, orderedIds: string[]): Promise<void> {
     if (orderedIds.length === 0) return;
 

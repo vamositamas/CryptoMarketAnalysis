@@ -177,15 +177,6 @@ export class PiCycleTopChartPageComponent implements AfterViewInit {
           ...this.userAnnotations(),
         },
       },
-      zoom: {
-        pan: { enabled: true, mode: 'x' },
-        zoom: {
-          wheel: { enabled: true },
-          pinch: { enabled: true },
-          drag: { enabled: true },
-          mode: 'x',
-        },
-      },
     },
   }));
 
@@ -210,6 +201,18 @@ export class PiCycleTopChartPageComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     void this.chartAnnotations?.load();
+  }
+
+  protected resetZoom(): void {
+    this.chartViewer?.resetZoom();
+  }
+
+  protected zoomIn(): void {
+    this.chartViewer?.zoomIn();
+  }
+
+  protected zoomOut(): void {
+    this.chartViewer?.zoomOut();
   }
 
   protected selectTimeframe(timeframe: ChartTimeframe): void {

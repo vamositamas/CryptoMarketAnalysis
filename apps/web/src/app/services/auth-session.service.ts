@@ -23,6 +23,11 @@ export class AuthSessionService {
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(user));
   }
 
+  clearCurrentUser(): void {
+    this.currentUserSignal.set(null);
+    sessionStorage.removeItem(STORAGE_KEY);
+  }
+
   hasRole(allowedRoles: SessionUserRole[]): boolean {
     const user = this.currentUserSignal();
 

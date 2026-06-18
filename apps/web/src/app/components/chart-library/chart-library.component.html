@@ -1,109 +1,109 @@
-<section class="chart-browser-shell">
-  <aside class="chart-browser-sidebar" aria-label="Chart categories" i18n-aria-label="Chart categories aria@@charts.categoriesAria">
-    <label class="chart-sidebar-search">
+<section class="content-section chart-lib-page">
+  <header class="chart-lib-header">
+    <div>
+      <p class="eyebrow" i18n="Chart library eyebrow@@charts.eyebrow">Chart library</p>
+      <h1 i18n="Chart library title@@charts.title">Tracked Bitcoin models</h1>
+    </div>
+    <label class="chart-lib-search">
       <span aria-hidden="true">⌕</span>
       <input
         type="search"
         [value]="searchQuery()"
         (input)="updateSearch($event)"
-        placeholder="Search Metrics"
+        placeholder="Search charts"
         i18n-placeholder="Chart search placeholder@@charts.searchPlaceholder"
       />
     </label>
+  </header>
 
-    @for (group of filteredCategories(); track group.category) {
-      <section class="chart-sidebar-group">
-        <h3>{{ group.category }}</h3>
+  @if (premiumNotice()) {
+    <p class="form-message">{{ premiumNotice() }}</p>
+  }
+
+  @for (group of filteredCategories(); track group.category) {
+    <section class="chart-lib-category">
+      <h2 class="chart-lib-category-title">{{ group.category }}</h2>
+      <div class="chart-card-grid">
         @for (chart of group.charts; track chart.id) {
-          <button
-            type="button"
-            class="chart-sidebar-item"
-            [class.active]="selectedChart().id === chart.id"
-            (mouseenter)="selectChart(chart)"
-            (focus)="selectChart(chart)"
+          <article
+            class="chart-card"
+            role="button"
+            tabindex="0"
             (click)="openChart(chart)"
+            (keydown.enter)="openChart(chart)"
+            [attr.aria-label]="chart.title"
           >
-            <span>{{ chart.title }}</span>
-            <small>{{ chart.signal }}</small>
-          </button>
+            <div class="chart-card-thumb">
+              @if (chart.thumbnailClass === 'stock-to-flow') {
+                <svg viewBox="0 0 800 360" preserveAspectRatio="none">
+                  <rect width="800" height="360" fill="#fff"/>
+                  <line x1="0" y1="90"  x2="800" y2="90"  stroke="#e8eeea" stroke-width="1"/>
+                  <line x1="0" y1="180" x2="800" y2="180" stroke="#e8eeea" stroke-width="1"/>
+                  <line x1="0" y1="270" x2="800" y2="270" stroke="#e8eeea" stroke-width="1"/>
+                  <rect x="186" y="0" width="58"  height="360" fill="rgba(239,68,68,0.07)"/>
+                  <rect x="398" y="0" width="62"  height="360" fill="rgba(239,68,68,0.07)"/>
+                  <rect x="608" y="0" width="56"  height="360" fill="rgba(239,68,68,0.07)"/>
+                  <line x1="155" y1="0" x2="155" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+                  <line x1="347" y1="0" x2="347" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+                  <line x1="555" y1="0" x2="555" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+                  <line x1="763" y1="0" x2="763" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+                  <path d="M 0,358 C 120,352 200,325 280,280 C 360,230 445,165 555,72 C 648,28 730,10 800,5"
+                        stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="10,5" fill="none" opacity="0.9"/>
+                  <path d="M 0,358 C 100,356 140,350 155,345 C 168,285 196,181 213,173 C 228,278 260,260 272,243 C 305,228 338,204 347,196 C 368,162 407,66 424,63 C 440,118 468,265 477,131 C 493,103 505,87 510,87 C 528,116 541,113 555,92 C 574,56 618,14 632,12 C 648,40 677,268 685,72 C 702,50 737,25 763,17 C 775,12 792,14 800,14"
+                        stroke="#17202a" stroke-width="2.5" fill="none"/>
+                </svg>
+              } @else if (chart.thumbnailClass === 'bitcoin-rainbow') {
+                <svg viewBox="0 0 800 360" preserveAspectRatio="none">
+                  <rect x="0" y="0"   width="800" height="46"  fill="rgba(127,29,29,0.65)"/>
+                  <rect x="0" y="46"  width="800" height="37"  fill="rgba(239,68,68,0.65)"/>
+                  <rect x="0" y="83"  width="800" height="35"  fill="rgba(249,115,22,0.65)"/>
+                  <rect x="0" y="118" width="800" height="34"  fill="rgba(234,179,8,0.65)"/>
+                  <rect x="0" y="152" width="800" height="35"  fill="rgba(132,204,22,0.65)"/>
+                  <rect x="0" y="187" width="800" height="32"  fill="rgba(34,197,94,0.65)"/>
+                  <rect x="0" y="219" width="800" height="37"  fill="rgba(6,182,212,0.65)"/>
+                  <rect x="0" y="256" width="800" height="35"  fill="rgba(37,99,235,0.65)"/>
+                  <rect x="0" y="291" width="800" height="69"  fill="rgba(30,58,138,0.65)"/>
+                  <path d="M 0,322 C 80,318 130,312 155,307 C 168,228 200,76 213,70 C 228,285 260,312 272,308 C 308,294 346,264 355,254 C 372,188 408,34 424,28 C 441,90 472,247 507,242 C 522,236 542,230 555,226 C 573,186 617,93 632,96 C 649,165 678,226 685,220 C 703,210 741,198 763,195 C 776,194 792,196 800,196"
+                        stroke="#111820" stroke-width="2.5" fill="none"/>
+                </svg>
+              } @else if (chart.thumbnailClass === 'pi-cycle-top') {
+                <svg viewBox="0 0 800 360" preserveAspectRatio="none">
+                  <rect width="800" height="360" fill="#fff"/>
+                  <line x1="0" y1="90"  x2="800" y2="90"  stroke="#e8eeea" stroke-width="1"/>
+                  <line x1="0" y1="180" x2="800" y2="180" stroke="#e8eeea" stroke-width="1"/>
+                  <line x1="0" y1="270" x2="800" y2="270" stroke="#e8eeea" stroke-width="1"/>
+                  <line x1="155" y1="0" x2="155" y2="360" stroke="#e5ebe7" stroke-width="1" stroke-dasharray="6,5"/>
+                  <line x1="347" y1="0" x2="347" y2="360" stroke="#e5ebe7" stroke-width="1" stroke-dasharray="6,5"/>
+                  <line x1="555" y1="0" x2="555" y2="360" stroke="#e5ebe7" stroke-width="1" stroke-dasharray="6,5"/>
+                  <line x1="763" y1="0" x2="763" y2="360" stroke="#e5ebe7" stroke-width="1" stroke-dasharray="6,5"/>
+                  <path d="M 0,355 C 100,351 140,344 155,340 C 168,278 194,173 210,163 C 226,272 258,252 270,237 C 303,218 336,196 346,188 C 366,152 405,57 424,62 C 440,112 468,254 477,122 C 492,94 504,78 509,79 C 526,108 540,105 555,84 C 572,48 617,10 630,12 C 645,33 675,258 685,62 C 700,42 735,18 763,10 C 774,7 792,9 800,10"
+                        stroke="#2dafe6" stroke-width="2.5" fill="none"/>
+                  <path d="M 0,357 C 100,354 140,348 155,344 C 168,284 196,181 216,172 C 232,276 263,258 274,244 C 308,228 340,204 350,196 C 369,161 407,64 423,62 C 441,116 469,262 480,132 C 495,104 508,87 513,89 C 530,114 542,111 558,94 C 576,58 619,14 643,12 C 658,38 678,265 688,72 C 703,50 738,24 763,16 C 776,11 792,13 800,14"
+                        stroke="#17202a" stroke-width="2.5" fill="none"/>
+                  <circle cx="424" cy="63"  r="9" fill="rgba(245,158,11,0.22)" stroke="#f59e0b" stroke-width="2"/>
+                  <circle cx="630" cy="12"  r="9" fill="rgba(245,158,11,0.22)" stroke="#f59e0b" stroke-width="2"/>
+                </svg>
+              }
+              <div class="chart-card-thumb-cta" aria-hidden="true">
+                <span i18n="View chart button@@charts.viewChart">View Chart →</span>
+              </div>
+            </div>
+
+            <div class="chart-card-info">
+              <div class="chart-card-tags">
+                <span class="chart-card-signal">{{ chart.signal }}</span>
+                <span class="tier-badge" [class.premium]="chart.accessTier === 'premium'">
+                  {{ tierLabel(chart.accessTier) }}
+                </span>
+              </div>
+              <h3>{{ chart.title }}</h3>
+              <p>{{ chart.description }}</p>
+            </div>
+          </article>
         }
-      </section>
-    } @empty {
-      <p class="empty-state" i18n="No charts found message@@charts.empty">
-        No charts match this search.
-      </p>
-    }
-  </aside>
-
-  <div class="chart-browser-main">
-    <header class="chart-browser-header">
-      <div>
-        <p class="eyebrow" i18n="Chart library eyebrow@@charts.eyebrow">
-          Chart library
-        </p>
-        <h2 i18n="Chart library title@@charts.title">Tracked Bitcoin models</h2>
       </div>
-      <button
-        type="button"
-        [disabled]="!selectedChart()"
-        (click)="selectedChart() && openChart(selectedChart()!)"
-        i18n="Open selected chart button@@charts.openSelected"
-      >
-        Open selected chart
-      </button>
-    </header>
-
-    @if (premiumNotice()) {
-      <p class="form-message">{{ premiumNotice() }}</p>
-    }
-
-    @if (selectedChart(); as chart) {
-      <section class="chart-preview-panel">
-        <div class="chart-preview-titlebar">
-          <div>
-            <span class="chart-coin" aria-hidden="true">₿</span>
-            <h3>{{ chart.title }}</h3>
-          </div>
-          <span class="tier-badge" [class.premium]="chart.accessTier === 'premium'">
-            {{ tierLabel(chart.accessTier) }}
-          </span>
-        </div>
-
-        <div class="chart-preview-canvas {{ chart.thumbnailClass }}" aria-hidden="true">
-          <div class="chart-axis y-axis">
-            <span>$1T</span>
-            <span>$100B</span>
-            <span>$10B</span>
-            <span>$1B</span>
-            <span>$100M</span>
-          </div>
-          <div class="chart-preview-plot">
-            <span class="preview-band hot"></span>
-            <span class="preview-band cool"></span>
-            <span class="preview-line primary-line"></span>
-            <span class="preview-line secondary-line"></span>
-            <span class="preview-spike spike-one"></span>
-            <span class="preview-spike spike-two"></span>
-            <span class="preview-spike spike-three"></span>
-          </div>
-          <div class="chart-axis x-axis">
-            <span>2012</span>
-            <span>2016</span>
-            <span>2020</span>
-            <span>2024</span>
-          </div>
-        </div>
-
-        <div class="chart-preview-footer">
-          <div>
-            <strong>{{ chart.signal }}</strong>
-            <p>{{ chart.description }}</p>
-          </div>
-          <button type="button" (click)="openChart(chart)" i18n="View chart button@@charts.viewChart">
-            View Chart
-          </button>
-        </div>
-      </section>
-    }
-  </div>
+    </section>
+  } @empty {
+    <p class="empty-state" i18n="No charts found message@@charts.empty">No charts match this search.</p>
+  }
 </section>

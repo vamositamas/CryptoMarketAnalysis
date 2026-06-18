@@ -2,7 +2,7 @@ import { AfterViewInit, Component, ViewChild, computed, inject, signal } from '@
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import type { ChartData, ChartOptions } from 'chart.js';
-import type { AnnotationOptions } from 'chartjs-plugin-annotation';
+import type { AnnotationOptions } from 'chartjs-plugin-annotation'; // still used for userAnnotations
 import {
   ApiClientError,
   AuthApiClient,
@@ -41,17 +41,40 @@ const TIMEFRAMES: TimeframeOption[] = [
   { label: 'All', value: 'all' },
 ];
 
+// Mirrors rainbow-bands.ts with the corrected Math.pow10 formula
+const GENESIS_MS = Date.UTC(2009, 0, 3);
+const BAND_EXPONENT = 5.84509376;
+const BAND_INTERCEPT = -17.01593313;
+const BAND_DAYS_OFFSET = 1;
+
+// 10 boundary multipliers create 9 filled bands between them
+const BAND_BOUNDARIES = [0.10, 0.25, 0.40, 0.65, 1.00, 1.60, 2.50, 4.00, 6.50, 12.00];
+
 const RAINBOW_BANDS = [
-  { label: 'Fire Sale', color: 'rgba(47, 128, 237, 0.14)' },
-  { label: 'Buy', color: 'rgba(86, 204, 242, 0.14)' },
-  { label: 'Accumulate', color: 'rgba(39, 174, 96, 0.14)' },
-  { label: 'Still Cheap', color: 'rgba(111, 207, 151, 0.14)' },
-  { label: 'Fair Value', color: 'rgba(242, 201, 76, 0.16)' },
-  { label: 'Hold', color: 'rgba(242, 153, 74, 0.14)' },
-  { label: 'FOMO', color: 'rgba(235, 87, 87, 0.12)' },
-  { label: 'Sell', color: 'rgba(190, 60, 60, 0.12)' },
-  { label: 'Maximum Bubble', color: 'rgba(127, 29, 29, 0.12)' },
+  { label: 'Fire Sale',                color: 'rgba(30,  58, 138, 0.65)' },
+  { label: 'Buy',                      color: 'rgba(37,  99, 235, 0.65)' },
+  { label: 'Accumulate',               color: 'rgba(6,  182, 212, 0.65)' },
+  { label: 'Still Cheap',              color: 'rgba(34, 197,  94, 0.65)' },
+  { label: 'HODL',                     color: 'rgba(132,204,  22, 0.65)' },
+  { label: 'Is This A Bubble?',        color: 'rgba(234,179,   8, 0.65)' },
+  { label: 'FOMO Intensifies',         color: 'rgba(249,115,  22, 0.65)' },
+  { label: 'Sell Seriously',           color: 'rgba(239, 68,  68, 0.65)' },
+  { label: 'Maximum Bubble Territory', color: 'rgba(127, 29,  29, 0.65)' },
 ];
+
+function rainbowFairValue(dateStr: string): number {
+  const ms = new Date(`${dateStr}T00:00:00Z`).getTime();
+  const days = Math.floor((ms - GENESIS_MS) / 86_400_000) + BAND_DAYS_OFFSET;
+  return Math.pow(10, BAND_INTERCEPT + BAND_EXPONENT * Math.log10(Math.max(1, days)));
+}
+
+function rainbowBandFromPrice(priceUsd: number, fv: number): number {
+  const ratio = priceUsd / fv;
+  for (let i = 1; i < BAND_BOUNDARIES.length; i++) {
+    if (ratio <= BAND_BOUNDARIES[i]) return i;
+  }
+  return 9;
+}
 
 const RAINBOW_ALERT_METRICS: AlertMetricOption[] = [
   { value: 'rainbow_band', label: 'Rainbow Band' },
@@ -99,23 +122,45 @@ export class BitcoinRainbowChartPageComponent implements AfterViewInit {
     'On-chain Metrics: Blockchain.info',
     'Calculation: Rainbow bands calculated from logarithmic regression model fit to historical price data since 2009-01-03',
   ];
-  protected readonly chartData = computed<ChartData<'line'>>(() => ({
-    labels: this.dataPoints().map((point) => point.date),
-    datasets: [
-      {
-        label: 'Bitcoin Price',
-        data: this.dataPoints().map((point) => point.priceUsd),
-        borderColor: '#101820',
-        backgroundColor: 'transparent',
-        borderWidth: 2,
-        pointRadius: 0,
-        pointHitRadius: 12,
-        tension: 0.18,
-      },
-    ],
-  }));
+  protected readonly chartData = computed<ChartData<'line'>>(() => {
+    const dates = this.dataPoints().map((p) => p.date);
+    const fairValues = dates.map((d) => rainbowFairValue(d));
+
+    // One dataset per boundary (floor + 9 band tops), filled between adjacent datasets
+    const bandDatasets = BAND_BOUNDARIES.map((mult, idx) => ({
+      label: '',
+      data: fairValues.map((fv) => fv * mult),
+      borderWidth: 0,
+      pointRadius: 0,
+      pointHitRadius: 0,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      fill: idx === 0 ? false : ('-1' as any),
+      backgroundColor: idx === 0 ? 'transparent' : RAINBOW_BANDS[idx - 1].color,
+      tension: 0,
+    }));
+
+    return {
+      labels: dates,
+      datasets: [
+        ...bandDatasets,
+        {
+          label: 'Bitcoin Price',
+          data: this.dataPoints().map((p) => p.priceUsd),
+          borderColor: '#111820',
+          backgroundColor: 'transparent',
+          borderWidth: 2.5,
+          pointRadius: 0,
+          pointHitRadius: 12,
+          tension: 0.15,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          fill: false as any,
+        },
+      ],
+    };
+  });
   protected readonly chartOptions = computed<ChartOptions<'line'>>(() => {
     const range = getPriceRange(this.dataPoints());
+    const priceDatasetIndex = BAND_BOUNDARIES.length; // band datasets come first
 
     return {
       animation: { duration: 280 },
@@ -137,33 +182,24 @@ export class BitcoinRainbowChartPageComponent implements AfterViewInit {
       plugins: {
         legend: { display: false },
         tooltip: {
+          filter: (item) => item.datasetIndex === priceDatasetIndex,
           callbacks: {
             title: (items) => formatDate(String(items[0]?.label ?? '')),
             label: (item) => {
-              const point = this.dataPoints()[item.dataIndex];
-              const band = point?.rainbowBand ?? null;
+              const dateStr = String(item.label ?? '');
+              const price = Number(item.parsed.y);
+              const fv = rainbowFairValue(dateStr);
+              const band = rainbowBandFromPrice(price, fv);
 
               return [
-                `Price: ${formatUsd(Number(item.parsed.y))}`,
-                `Band: ${getBandLabel(band)}${band === null ? '' : ` (Band ${band})`}`,
+                `Price: ${formatUsd(price)}`,
+                `Band: ${getBandLabel(band)} (Band ${band})`,
               ];
             },
           },
         },
         annotation: {
-          annotations: {
-            ...createRainbowAnnotations(range.min, range.max),
-            ...this.userAnnotations(),
-          },
-        },
-        zoom: {
-          pan: { enabled: true, mode: 'x' },
-          zoom: {
-            wheel: { enabled: true },
-            pinch: { enabled: true },
-            drag: { enabled: true },
-            mode: 'x',
-          },
+          annotations: { ...this.userAnnotations() },
         },
       },
     };
@@ -190,6 +226,18 @@ export class BitcoinRainbowChartPageComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     void this.chartAnnotations?.load();
+  }
+
+  protected resetZoom(): void {
+    this.chartViewer?.resetZoom();
+  }
+
+  protected zoomIn(): void {
+    this.chartViewer?.zoomIn();
+  }
+
+  protected zoomOut(): void {
+    this.chartViewer?.zoomOut();
   }
 
   protected selectTimeframe(timeframe: ChartTimeframe): void {
@@ -290,16 +338,18 @@ export class BitcoinRainbowChartPageComponent implements AfterViewInit {
 }
 
 function getPriceRange(dataPoints: BitcoinRainbowChartDataPoint[]): { min: number; max: number } {
-  const prices = dataPoints.map((point) => point.priceUsd).filter((price) => price > 0);
-
-  if (prices.length === 0) {
-    return { min: 1, max: 100000 };
+  if (dataPoints.length === 0) {
+    return { min: 0.01, max: 200_000 };
   }
 
-  const min = Math.max(0.01, Math.min(...prices) * 0.55);
-  const max = Math.max(...prices) * 1.45;
+  const fairValues = dataPoints.map((p) => rainbowFairValue(p.date));
+  const minFv = Math.min(...fairValues);
+  const maxFv = Math.max(...fairValues);
 
-  return { min, max };
+  return {
+    min: Math.max(0.001, minFv * BAND_BOUNDARIES[0]),
+    max: maxFv * BAND_BOUNDARIES[BAND_BOUNDARIES.length - 1] * 1.1,
+  };
 }
 
 function getRainbowInterpretation(band: number | null): string {
@@ -322,27 +372,6 @@ function getRainbowInterpretation(band: number | null): string {
   return 'Bitcoin is in an overheated valuation zone. Upper bands have historically appeared near speculative market-cycle extremes.';
 }
 
-function createRainbowAnnotations(min: number, max: number): Record<string, AnnotationOptions<'box'>> {
-  const ratio = Math.pow(max / min, 1 / RAINBOW_BANDS.length);
-
-  return Object.fromEntries(
-    RAINBOW_BANDS.map((band, index) => {
-      const yMin = min * Math.pow(ratio, index);
-      const yMax = index === RAINBOW_BANDS.length - 1 ? max : min * Math.pow(ratio, index + 1);
-
-      return [
-        `rainbowBand${index + 1}`,
-        {
-          type: 'box',
-          yMin,
-          yMax,
-          backgroundColor: band.color,
-          borderWidth: 0,
-        },
-      ];
-    }),
-  );
-}
 
 function getBandLabel(band: number | null): string {
   if (band === null) {

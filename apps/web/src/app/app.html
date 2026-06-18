@@ -43,18 +43,48 @@
     }
 
     <div class="topbar-actions">
-      <label class="language-toggle">
-        <span i18n="Language selector label@@language.selector">Language</span>
-        <select [value]="language" (change)="switchLanguage($event)">
-          <option value="en" i18n="English language option@@language.english">English</option>
-          <option value="hu" i18n="Hungarian language option@@language.hungarian">Hungarian</option>
-        </select>
-      </label>
+      <button
+        type="button"
+        class="lang-btn"
+        (click)="toggleLanguage()"
+        [title]="language === 'en' ? 'Switch to Hungarian' : 'Switch to English'"
+      >{{ language.toUpperCase() }}</button>
+
       @if (!currentUser()) {
         <a class="ghost-link" routerLink="/login" i18n="Login link@@auth.login">Login</a>
         <a class="primary-link" routerLink="/register" i18n="Register link@@auth.register">Register</a>
       }
+
       @if (currentUser()) {
+        <div class="user-avatar-wrap">
+          <button
+            type="button"
+            class="user-avatar-btn"
+            (click)="toggleUserMenu()"
+            [attr.aria-expanded]="userMenuOpen()"
+            aria-label="User menu"
+          >{{ userInitials() }}</button>
+
+          @if (userMenuOpen()) {
+            <div class="user-menu" role="menu">
+              <div class="user-menu-identity">
+                <span class="user-menu-avatar">{{ userInitials() }}</span>
+                <div class="user-menu-info">
+                  <strong>{{ currentUser()?.fullName || currentUser()?.email }}</strong>
+                  @if (currentUser()?.fullName) {
+                    <span>{{ currentUser()?.email }}</span>
+                  }
+                  <span class="user-menu-role">{{ currentUser()?.role }}</span>
+                </div>
+              </div>
+              <div class="user-menu-divider"></div>
+              <button type="button" class="user-menu-item" role="menuitem" (click)="logout()">
+                Log out
+              </button>
+            </div>
+          }
+        </div>
+
         <button
           class="hamburger-btn"
           type="button"

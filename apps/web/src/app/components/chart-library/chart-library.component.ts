@@ -56,45 +56,23 @@ const CATEGORIES: ChartLibraryItem['category'][] = ['Valuation Models', 'Cycle I
 export class ChartLibraryComponent {
   private readonly router = inject(Router);
   private readonly query = signal('');
-  private readonly selectedChartId = signal(CHARTS[0].id);
   protected readonly searchQuery = this.query.asReadonly();
-  protected readonly categories = CATEGORIES;
-  protected readonly selectedChart = computed(
-    () => this.filteredCharts().find((chart) => chart.id === this.selectedChartId()) ?? this.filteredCharts()[0],
-  );
-  protected readonly filteredCategories = computed(() =>
-    this.categories
-      .map((category) => ({
-        category,
-        charts: this.filteredCharts().filter((chart) => chart.category === category),
-      }))
-      .filter((group) => group.charts.length > 0),
-  );
   protected readonly premiumNotice = signal('');
   private readonly filteredCharts = computed(() => {
-    const normalizedQuery = this.query().trim().toLowerCase();
-
-    if (!normalizedQuery) {
-      return CHARTS;
-    }
-
-    return CHARTS.filter(
-      (chart) =>
-        chart.title.toLowerCase().includes(normalizedQuery) ||
-        chart.description.toLowerCase().includes(normalizedQuery),
-    );
+    const q = this.query().trim().toLowerCase();
+    return q
+      ? CHARTS.filter((c) => c.title.toLowerCase().includes(q) || c.description.toLowerCase().includes(q))
+      : CHARTS;
   });
+  protected readonly filteredCategories = computed(() =>
+    CATEGORIES.map((category) => ({
+      category,
+      charts: this.filteredCharts().filter((c) => c.category === category),
+    })).filter((group) => group.charts.length > 0),
+  );
 
   protected updateSearch(event: Event): void {
     this.query.set((event.target as HTMLInputElement).value);
-    const firstMatch = this.filteredCharts()[0];
-    if (firstMatch) {
-      this.selectedChartId.set(firstMatch.id);
-    }
-  }
-
-  protected selectChart(chart: ChartLibraryItem): void {
-    this.selectedChartId.set(chart.id);
   }
 
   protected async openChart(chart: ChartLibraryItem): Promise<void> {
@@ -104,7 +82,6 @@ export class ChartLibraryComponent {
       );
       return;
     }
-
     await this.router.navigate(['/charts', chart.id]);
   }
 

@@ -611,6 +611,10 @@ export class AuthApiClient {
     await this.patchWithCsrf<{ success: boolean }>('/api/dashboard/widgets/reorder', { orderedIds });
   }
 
+  async deleteDashboardWidget(widgetId: string): Promise<void> {
+    await this.deleteWithCsrf(`/api/dashboard/widgets/${widgetId}`);
+  }
+
   async getAlerts(): Promise<AlertsListResponse> {
     try {
       return await firstValueFrom(
@@ -852,6 +856,21 @@ export class AuthApiClient {
 
       return await firstValueFrom(
         this.http.patch<TResponse>(url, body, {
+          headers: { 'x-csrf-token': csrfToken },
+          withCredentials: true,
+        }),
+      );
+    } catch (error) {
+      throw toApiClientError(error);
+    }
+  }
+
+  private async deleteWithCsrf(url: string): Promise<void> {
+    try {
+      const csrfToken = await this.getCsrfToken();
+
+      await firstValueFrom(
+        this.http.delete(url, {
           headers: { 'x-csrf-token': csrfToken },
           withCredentials: true,
         }),

@@ -133,7 +133,7 @@ export class LandingPage {
   selector: 'app-dashboard-page',
   imports: [OnboardingCarouselComponent, AddWidgetModalComponent, RouterLink],
   template: `
-    <section class="content-section">
+    <section class="content-section content-section--wide">
       <div class="section-heading dashboard-heading">
         <div>
           <p class="eyebrow" i18n="Dashboard eyebrow@@dashboard.eyebrow">
@@ -169,6 +169,12 @@ export class LandingPage {
                 (pointerup)="onPointerUp($event)"
                 (pointercancel)="onPointerCancel($event)"
               >⠿</span>
+              <button
+                type="button"
+                class="widget-remove-btn"
+                aria-label="Remove widget"
+                (click)="removeWidget(widget.id)"
+              >✕</button>
               <span class="widget-title">{{ widget.title }}</span>
               <strong class="widget-value">{{ widget.formattedValue }}</strong>
               <small class="widget-trend" [class]="'trend-' + widget.trend">
@@ -218,6 +224,27 @@ export class LandingPage {
                     <span class="wi-gauge-score">S2F {{ widget.formattedValue }}</span>
                   </div>
                 </div>
+              }
+              @if ((widget.type === 'realized_price' || widget.type === 'ma_200_day') && widget.value !== null) {
+                @let cmp = priceComparison(widget.type, widget.value);
+                @if (cmp !== null) {
+                  <div class="wi-gauge">
+                    <div class="wi-gauge-bar" [class]="'wi-gauge-bar--' + widget.type">
+                      <span class="wi-gauge-marker" [style.left.%]="cmp.position"></span>
+                    </div>
+                    <div class="wi-gauge-labels">
+                      @if (widget.type === 'realized_price') {
+                        <span>−50%</span><span>0%</span><span>+50%</span><span>+100%</span><span>+200%</span>
+                      } @else {
+                        <span>−50%</span><span>−20%</span><span>0%</span><span>+50%</span><span>+150%</span>
+                      }
+                    </div>
+                    <div class="wi-gauge-footer">
+                      <span class="wi-gauge-label" [attr.data-zone]="cmp.zone">{{ cmp.label }}</span>
+                      <span class="wi-gauge-score">BTC {{ cmp.pct >= 0 ? '+' : '' }}{{ cmp.pct.toFixed(1) }}%</span>
+                    </div>
+                  </div>
+                }
               }
               <small class="widget-updated">{{ lastUpdatedText(widget.lastUpdated) }}</small>
             </article>
@@ -325,6 +352,15 @@ export class DashboardPage {
 
   protected handleWidgetAdded(widget: DashboardWidget): void {
     this.widgets.update((current) => [...current, widget]);
+  }
+
+  protected removeWidget(widgetId: string): void {
+    const previous = this.widgets();
+    this.widgets.update((current) => current.filter((w) => w.id !== widgetId));
+
+    void this.auth.deleteDashboardWidget(widgetId).catch(() => {
+      this.widgets.set(previous);
+    });
   }
 
   protected onPointerDown(event: PointerEvent, widgetId: string): void {
@@ -455,6 +491,39 @@ export class DashboardPage {
     if (value <= 54) return 'Neutral';
     if (value <= 75) return 'Greed';
     return 'Extreme Greed';
+  }
+
+  // Realized Price & 200-day MA: BTC premium/discount vs reference price
+  protected priceComparison(
+    widgetType: string,
+    referenceValue: number,
+  ): { pct: number; position: number; zone: string; label: string } | null {
+    const btc = this.widgets().find((w) => w.type === 'btc_price')?.value ?? null;
+    if (btc === null || referenceValue === 0) return null;
+
+    const pct = ((btc - referenceValue) / referenceValue) * 100;
+
+    if (widgetType === 'ma_200_day') {
+      // Scale: -50% .. +150%
+      const position = Math.min(100, Math.max(0, (pct + 50) / 200 * 100));
+      let zone: string;
+      let label: string;
+      if (pct < -20) { zone = 'deep-discount'; label = 'Deep discount'; }
+      else if (pct < 0) { zone = 'discount'; label = 'Below 200-day MA'; }
+      else if (pct < 50) { zone = 'above-ma'; label = 'Above 200-day MA'; }
+      else { zone = 'far-above'; label = 'Far above MA'; }
+      return { pct, position, zone, label };
+    }
+
+    // realized_price — Scale: -50% .. +200%
+    const position = Math.min(100, Math.max(0, (pct + 50) / 250 * 100));
+    let zone: string;
+    let label: string;
+    if (pct < 0) { zone = 'rp-below'; label = 'Investors at loss'; }
+    else if (pct < 30) { zone = 'rp-fair'; label = 'Near fair value'; }
+    else if (pct < 80) { zone = 'rp-premium'; label = 'In profit'; }
+    else { zone = 'rp-extreme'; label = 'Overheated'; }
+    return { pct, position, zone, label };
   }
 
   // MVRV Z-Score: scale -1..10 → 0..100%

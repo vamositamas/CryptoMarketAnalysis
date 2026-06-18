@@ -94,7 +94,13 @@ export class DashboardService {
   constructor(
     private readonly widgetRepository: Pick<
       DashboardWidgetRepository,
-      'listForUser' | 'createMany' | 'create' | 'countForUser' | 'getMaxPosition' | 'reorderWidgets'
+      | 'listForUser'
+      | 'createMany'
+      | 'create'
+      | 'countForUser'
+      | 'getMaxPosition'
+      | 'reorderWidgets'
+      | 'deleteForUser'
     >,
     private readonly metricsRepository: Pick<
       DashboardMetricsRepository,
@@ -151,6 +157,14 @@ export class DashboardService {
     const widget = await this.widgetRepository.create(userId, { widgetType, widgetConfig, position });
 
     return this.buildWidgetResponse(widget);
+  }
+
+  async removeWidget(userId: string, widgetId: string): Promise<void> {
+    if (!widgetId) throw new DashboardError('Widget ID is required', 400);
+
+    const deleted = await this.widgetRepository.deleteForUser(userId, widgetId);
+
+    if (!deleted) throw new DashboardError('Widget not found', 404);
   }
 
   async reorderWidgets(userId: string, orderedIds: unknown): Promise<void> {

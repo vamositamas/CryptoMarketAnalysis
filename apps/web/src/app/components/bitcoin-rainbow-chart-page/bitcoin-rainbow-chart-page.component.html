@@ -35,9 +35,7 @@
       }
     </div>
     <div class="chart-actions">
-      <button type="button" class="secondary-button" i18n="Zoom control label@@charts.zoomControl">
-        Zoom
-      </button>
+      <button type="button" class="secondary-button" (click)="resetZoom()" i18n="Zoom reset label@@charts.zoomReset">Reset Zoom</button>
       <div class="export-menu">
         <button type="button" class="secondary-button" (click)="toggleExportMenu()" i18n="Export control label@@charts.exportControl">
           Export

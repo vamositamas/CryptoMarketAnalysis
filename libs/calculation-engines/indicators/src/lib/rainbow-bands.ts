@@ -46,7 +46,7 @@ export function calculateRainbowBands(date: Date, priceUsd: number): RainbowBand
 export function calculateRainbowFairValue(date: Date): number {
   const daysSinceGenesis = daysBetweenUtc(BITCOIN_GENESIS_DATE, date) + DAYS_OFFSET;
 
-  return Math.exp(POWER_LAW_INTERCEPT + POWER_LAW_EXPONENT * Math.log(daysSinceGenesis));
+  return Math.pow(10, POWER_LAW_INTERCEPT + POWER_LAW_EXPONENT * Math.log10(Math.max(1, daysSinceGenesis)));
 }
 
 function daysBetweenUtc(start: Date, end: Date): number {
