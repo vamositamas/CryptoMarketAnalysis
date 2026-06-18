@@ -392,6 +392,39 @@ describe('AuthApiClient', () => {
     await expect(createPromise).resolves.toMatchObject({ id: 'widget-99', type: 'custom' });
   });
 
+  it('creates an alert with a CSRF-protected POST request', async () => {
+    const alertRequest = {
+      chartId: 'bitcoin-rainbow' as const,
+      metricName: 'rainbow_band',
+      condition: 'crosses_above' as const,
+      thresholdValue: 7.5,
+      alertName: 'Rainbow alert',
+    };
+    const createPromise = client.createAlert(alertRequest);
+    http.expectOne('/api/csrf-token').flush({ csrfToken: 'csrf-token' });
+    await waitForRequestQueue();
+    const postRequest = http.expectOne('/api/alerts');
+    expect(postRequest.request.method).toBe('POST');
+    expect(postRequest.request.headers.get('x-csrf-token')).toBe('csrf-token');
+    expect(postRequest.request.body).toEqual(alertRequest);
+    postRequest.flush({
+      id: 'alert-uuid',
+      chartId: 'bitcoin-rainbow',
+      metricName: 'rainbow_band',
+      condition: 'crosses_above',
+      thresholdValue: 7.5,
+      alertName: 'Rainbow alert',
+      status: 'active',
+      createdAt: '2026-06-17T12:00:00.000Z',
+      lastEvaluatedAt: null,
+      triggeredAt: null,
+    });
+
+    const result = await createPromise;
+    expect(result.id).toBe('alert-uuid');
+    expect(result.status).toBe('active');
+  });
+
   it('records a recent chart view with a CSRF-protected POST request', async () => {
     const recordPromise = client.recordRecentChart('bitcoin-rainbow');
     http.expectOne('/api/csrf-token').flush({ csrfToken: 'csrf-token' });

@@ -22,6 +22,10 @@ import {
   type ChartInfoField,
 } from '../chart-info-panel/chart-info-panel.component';
 import { parseChartTimeframe } from '../chart-timeframe/chart-timeframe-url.util';
+import {
+  CreateAlertModalComponent,
+  type AlertMetricOption,
+} from '../create-alert-modal/create-alert-modal.component';
 
 interface TimeframeOption {
   label: string;
@@ -44,9 +48,14 @@ const HALVING_EVENTS = [
   { date: '2024-04-20', label: '2024 Halving' },
 ];
 
+const STOCK_TO_FLOW_ALERT_METRICS: AlertMetricOption[] = [
+  { value: 'stock_to_flow_ratio', label: 'Stock-to-Flow Ratio' },
+  { value: 'btc_price', label: 'BTC Price USD' },
+];
+
 @Component({
   selector: 'app-stock-to-flow-chart-page',
-  imports: [ChartViewerComponent, ChartAnnotationsComponent, ChartInfoPanelComponent, RouterLink],
+  imports: [ChartViewerComponent, ChartAnnotationsComponent, ChartInfoPanelComponent, RouterLink, CreateAlertModalComponent],
   templateUrl: './stock-to-flow-chart-page.component.html',
 })
 export class StockToFlowChartPageComponent implements AfterViewInit {
@@ -56,6 +65,8 @@ export class StockToFlowChartPageComponent implements AfterViewInit {
   @ViewChild(ChartViewerComponent) private readonly chartViewer?: ChartViewerComponent;
   @ViewChild(ChartAnnotationsComponent) protected readonly chartAnnotations?: ChartAnnotationsComponent;
   protected readonly timeframes = TIMEFRAMES;
+  protected readonly alertMetrics = STOCK_TO_FLOW_ALERT_METRICS;
+  protected readonly showAlertModal = signal(false);
   protected readonly selectedTimeframe = signal<ChartTimeframe>('all');
   protected readonly isLoading = signal(false);
   protected readonly errorMessage = signal('');
@@ -223,6 +234,14 @@ export class StockToFlowChartPageComponent implements AfterViewInit {
 
   protected toggleInfo(): void {
     this.infoOpen.update((isOpen) => !isOpen);
+  }
+
+  protected openAlertModal(): void {
+    this.showAlertModal.set(true);
+  }
+
+  protected closeAlertModal(): void {
+    this.showAlertModal.set(false);
   }
 
   protected toggleExportMenu(): void {

@@ -17,6 +17,8 @@ export interface User {
   onboardingCompleted: boolean;
   createdAt: Date;
   updatedAt: Date;
+  deletedAt?: Date | null;
+  lastLoginAt?: Date | null;
 }
 
 export interface CreateUserInput {

@@ -55,11 +55,22 @@
         chartId="pi-cycle-top"
         (annotationsChanged)="updateUserAnnotations($event)"
       ></app-chart-annotations>
+      <button type="button" class="secondary-button" (click)="openAlertModal()">
+        Create Alert
+      </button>
       <button type="button" class="secondary-button" (click)="toggleInfo()" i18n="Info control label@@charts.infoControl">
         Info
       </button>
     </div>
   </div>
+
+  @if (showAlertModal()) {
+    <app-create-alert-modal
+      chartId="pi-cycle-top"
+      [metrics]="alertMetrics"
+      (closed)="closeAlertModal()"
+    ></app-create-alert-modal>
+  }
 
   @if (errorMessage()) {
     <p class="form-message">{{ errorMessage() }}</p>

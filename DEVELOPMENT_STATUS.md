@@ -1,12 +1,12 @@
 # Development Status
 
-Last updated: 2026-06-17
+Last updated: 2026-06-18
 
 This file is the quick human-readable progress tracker for the project. The detailed story tracker lives in `_bmad-output/implementation-artifacts/sprint-status.yaml`, and detailed implementation notes live in `_bmad-output/implementation-artifacts/`.
 
 ## Current Focus
 
-Epic 7: Alert System & Notifications
+All Epics 1–9 complete. Awaiting next epic or production deployment.
 
 ## Overall Status
 
@@ -18,8 +18,9 @@ Epic 7: Alert System & Notifications
 | Epic 4: Bitcoin Data Pipeline & Calculation Engine | Done | Stories 4.1 through 4.8 are complete. |
 | Epic 5: Chart Visualization System | Done | Stories 5.1 through 5.10 are complete. |
 | Epic 6: Personalized Dashboard & KPI Widgets | Done | All stories 6.1 through 6.7 are complete. |
-| Epic 7: Alert System & Notifications | In progress | Story 7.1 (DB schema) done; Stories 7.2–7.6 remain. |
-| Epics 8-9 | Backlog | Donation and admin management work remain. |
+| Epic 7: Alert System & Notifications | Done | All stories 7.1 through 7.6 are complete. |
+| Epic 8: Donation Flow & Premium Upgrade | Done | All stories 8.1 through 8.6 are complete. |
+| Epic 9: Admin Management | Done | All stories 9.1 through 9.9 are complete. |
 
 ## Epic 4 Progress
 
@@ -66,32 +67,50 @@ Epic 7: Alert System & Notifications
 | Story | Status | Summary |
 | --- | --- | --- |
 | 7.1 Create Alerts Database Schema | Done | Added `user_alerts` (id, user_id, chart_id, metric_name, condition, threshold_value, alert_name, status, created_at, last_evaluated_at, triggered_at) and `alert_triggers` (id, alert_id, triggered_at, metric_value, notification_sent, notification_sent_at) tables via migration `009_create_alerts_schema.sql`. `user_alerts` has CHECK constraints for `condition IN (…5 values…)` and `status IN ('active','triggered','paused')`. Two indexes: `idx_alerts_user_status(user_id, status)` for dashboard listing; `idx_alerts_evaluation(status, last_evaluated_at) WHERE status = 'active'` for the daily evaluation batch. `alert_triggers` has `idx_alert_triggers_alert(alert_id, triggered_at DESC)` for per-alert history. Both tables have RLS enabled and cascade-delete from `users`. Schema verified by 7 content-assertion tests in `alerts-schema.spec.ts` (same pattern as `dashboard-schema.spec.ts`). |
-| 7.2 Implement Alert Creation from Chart Pages | Backlog | |
-| 7.3 Implement Alerts Dashboard | Backlog | |
-| 7.4 Implement Daily Alert Evaluation Job | Backlog | |
-| 7.5 Implement Alert Notification Email | Backlog | |
-| 7.6 Implement Email Template Editor | Backlog | |
+| 7.2 Implement Alert Creation from Chart Pages | Done | Backend: `AlertsRepository.create()` (INSERT returning full record) and `countActiveForUser()` (COUNT WHERE status='active'); `AlertsService.createAlert(userId, userRole, body)` validates chartId (3 allowed values), metricName (non-empty ≤100 chars), condition (5 allowed values), thresholdValue (finite number), alertName (non-empty ≤255 chars), and enforces a 5-alert cap on free_user role (403 with upgrade message); `POST /api/alerts` handler updated to use the service (replacing the stub). Frontend: added `CreateAlertRequest`, `AlertResponse`, `AlertCondition` types and `createAlert()` method to `AuthApiClient`; new standalone `CreateAlertModalComponent` with reactive form (alertName, metricName dropdown pre-selected by chart, condition dropdown with 5 options, thresholdValue number, email checkbox checked+disabled); on success navigates to `/alerts` passing a success message via router state; on error shows message inline keeping modal open. All 3 chart pages (`bitcoin-rainbow`, `pi-cycle-top`, `stock-to-flow`) gained a "Create Alert" button in the chart toolbar that toggles the modal, with chart-specific metric options. Added lazy-loaded `/alerts` route pointing to `AlertsPageComponent` (placeholder for Story 7.3) that reads and displays the router state success message. |
+| 7.3 Implement Alerts Dashboard | Done | Backend: `AlertsRepository` extended with `listForUser`, `countForUser`, `deleteForUser`, `resetForUser`; `AlertsService` extended with `listAlerts` (returns alerts+alertLimit with used/max/unlimited), `deleteAlert` (404 if not found), `resetAlert` (404 if not triggered); route extended with `GET /api/alerts`, `DELETE /api/alerts/:alertId`, `PATCH /api/alerts/:alertId/reset`. Frontend: `AuthApiClient` extended with `getAlerts`, `deleteAlert`, `resetAlert`; `AlertsPageComponent` fully implemented with header count label ("N of 5 alerts used" free / "N alerts" premium), alert table (Name/Chart linked/Condition summary/Status badge/Created relative/Actions), inline row-level delete confirmation (Confirm+Cancel), Reset button for triggered alerts, and success message from router state. Status badges: Active (green), Triggered (yellow), Paused (gray). |
+| 7.4 Implement Daily Alert Evaluation Job | Done | `AlertEvaluationService.evaluateAlerts(now)` fetches all active alerts, resolves current metric values (BTC price from `bitcoin_price_daily`; others from `bitcoin_metrics_daily` via `DISTINCT ON` latest-date; `ma_350x2_day` aliased to `ma_350_day` ×2), evaluates conditions (`crosses_above`/`greater_than` → value>threshold; `crosses_below`/`less_than` → value<threshold; `equals` → |diff|≤0.01), on trigger: UPDATEs `user_alerts` status→'triggered' and INSERTs into `alert_triggers`; on miss: updates `last_evaluated_at` only. Returns `{ evaluated, triggered, skipped }`. Exposed as `POST /api/jobs/evaluate-alerts` behind QStash signature middleware. `DailyDataRefreshService.run()` now calls `alertEvaluationService.evaluateAlerts()` after metrics are inserted. Both services accept injectable evaluation service for testability. 232 API tests pass. |
+| 7.5 Implement Alert Notification Email | Done | Added `AlertTriggeredEmailInput`/`AlertTriggeredEmailSender` interface and `ResendEmailService.sendAlertTriggeredEmail()`. Email subject: "Alert Triggered: {alertName}"; HTML body shows chart title, metric/condition/threshold, current value, triggered-at timestamp, and a link to `/alerts`. Falls back to `console.info` log when `RESEND_API_KEY`/`RESEND_FROM_EMAIL` env vars are absent. `AlertEvaluationService` extended: SELECT now JOINs `users` to fetch `user_email`; after each trigger INSERT returns the trigger `id` (`RETURNING id`), then calls `emailService.sendAlertTriggeredEmail()` and on success UPDATEs `alert_triggers SET notification_sent=true, notification_sent_at=$1`. Email failure is caught and logged via injectable logger — evaluation result is unaffected. `ResendEmailService` injected as default `emailService` in both `createAlertEvaluationRouter` and `DailyDataRefreshService`. 236 API tests pass. |
+| 7.6 Implement Email Template Editor | Done | Admin UI to view and override the two email templates (`alert_triggered_html` and `alert_triggered_subject`). Templates stored in `system_configuration` with `email_template_` prefix (no new migration). Backend: `EmailTemplateRepository` (get/set/delete/list backed by `system_configuration`); 3 new admin routes (`GET/PUT/DELETE /api/admin/email-templates/:key`) with key validation and default fallbacks; `AlertEvaluationService` loads custom templates via injectable `TemplateLoader` before the evaluation loop, passing them (or null) to `sendAlertTriggeredEmail`. Frontend: `EmailTemplateEditorComponent` at `/admin/email-templates` with template selector, monospace textarea, Custom/Default badge, Reset-to-Default button, and a variables reference panel showing all 8 `{{placeholder}}` names with descriptions. `substituteTemplateVars()` replaces `{{key}}` patterns before sending. 246 API tests, 72 web tests pass; both production builds succeed. |
 
-## Latest Verification
+## Epic 8 Progress
 
-- `npm exec nx -- test web --runInBand` passed with 20 tests.
-- `npm exec nx -- build web --configuration=production` passed.
-- `npm exec nx -- lint web` passed.
-- `npm exec nx -- run api:test --skip-nx-cache` passed with 110 tests on rerun; Nx marked the first parallel run as flaky.
+| Story | Status | Summary |
+| --- | --- | --- |
+| 8.1 Create Donations Database Schema | Done | Added `donations` table with UUID PK, user_id FK (ON DELETE SET NULL), amount/currency/status/userUpgraded columns, unique index on `paypal_order_id`, and CHECK constraints for amount > 0, status IN (…), and currency length = 3. Migration `010_create_donations_schema.sql`. |
+| 8.2 Implement PayPal REST API Integration | Done | `PayPalClient` (native `fetch`, no SDK): `getAccessToken()` (Basic auth), `createOrder()` (returns `{ id, approvalUrl }`), `captureOrder()` (returns `{ transactionId, status }`). `DonationsService.initiate()` creates PayPal order + pending DB record; `handleSuccess()` is idempotent; `handleCancel()` marks as cancelled. `DonationsRepository` with CRUD/list/export. |
+| 8.3 Implement Automatic Premium Upgrade on Donation | Done | `DonationsService.upgradeUserRole()` checks `users.role`; if `free_user` → updates to `premium_user` + calls `TokenBlacklistRepository.invalidateUserTokens(userId)` to force re-login. Thank-you page detects 401 gracefully and shows re-login link. |
+| 8.4 Implement Donation Thank-You Email | Done | `DonationThankYouEmailSender` interface + `ResendEmailService.sendDonationThankYouEmail()`. Sends amount, transaction ID, date, and premium-benefits list. Falls back to console.info when env vars absent. Sent from `DonationsService.handleSuccess()`. |
+| 8.5 Implement Admin Donation View | Done | `GET /api/admin/donations` (paginated, admin-only) and `GET /api/admin/donations/export` (CSV download with `Content-Disposition` header). `DonationsServiceContract` pick type injected via `createAdminRouter` options. |
+| 8.6 Implement Security and Encryption | Done | AES-256-GCM encryption of `paypal_transaction_id` in DB when `ENCRYPTION_KEY` env var is present (64 hex chars / 32 bytes). `crypto.utils.ts` with `encrypt()`/`decrypt()`. Idempotent `handleSuccess()` skips re-processing for already-completed donations. Angular donate modal (`DonateModalComponent`) + thank-you page (`DonateThankYouComponent`) + `/donate/thank-you` route (no authGuard since JWT may be invalidated). |
+
+## Latest Verification (Epic 9 complete)
+
+- `npm exec nx -- run api:test --skip-nx-cache` passed with 330 tests.
 - `npm exec nx -- run api:build:production --skip-nx-cache` passed.
-- `npm exec nx -- run api:eslint:lint --skip-nx-cache` passed.
-- `npm exec nx -- run web:test --skip-nx-cache` passed with 19 tests.
+- `npm exec nx -- run web:test --skip-nx-cache` passed with 83 tests.
 - `npm exec nx -- run web:build:production --skip-nx-cache` passed.
-- `npm exec nx -- run web:eslint:lint --skip-nx-cache` passed.
-- `npm exec nx -- run data-access-api-client:test --skip-nx-cache` passed with 14 tests.
-- `npm exec nx -- run data-access-api-client:build:production --skip-nx-cache` passed.
-- `npm exec nx -- run data-access-api-client:eslint:lint --skip-nx-cache` passed.
-- `npm exec nx -- run web:test --skip-nx-cache` passed with 18 tests.
+
+## Epic 9 Progress
+
+| Story | Status | Summary |
+| --- | --- | --- |
+| 9.1 User Management Dashboard | Done | `GET /api/admin/users` with search/role/showDeleted filters + pagination. `AdminUsersPageComponent` with reactive search (300ms debounce), role filter, show-deleted toggle. |
+| 9.2 User Editing and Role Management | Done | `PATCH /api/admin/users/:userId` validates role/language, pauses excess alerts when downgrading premium→free (keeps oldest 5 active), invalidates tokens on role change. Edit modal with full form. |
+| 9.3 Soft Delete and Account Restoration | Done | `DELETE /api/admin/users/:userId` (soft-delete via `deleted_at`), `PATCH /api/admin/users/:userId/restore`. Login blocked for deleted accounts (403 with message). Deleted rows highlighted in UI. |
+| 9.4 Force Password Reset | Done | `POST /api/admin/users/:userId/force-password-reset` generates 64-hex base64url token, sends reset email, invalidates sessions. |
+| 9.5 Audit Logging | Done | `audit_logs` table with JSONB changes. All mutating admin actions log admin ID, action type, target, changes, IP, user-agent. `GET /api/admin/audit-logs` with filters. `AdminAuditLogsPageComponent` with expandable JSON changes. |
+| 9.6 Email Template Preview | Done | `POST /api/admin/email-templates/:key/preview` renders template with `TEMPLATE_SAMPLE_DATA` + optional custom data override. Returns `{ html }`. |
+| 9.7 Email Template Test Send | Done | `POST /api/admin/email-templates/:key/send-test` validates `recipientEmail`, renders template with banner, sends via Resend API (or logs when no key). |
+| 9.8 Chart Configuration Management | Done | `chart_configs` table. Full CRUD: `GET /api/admin/charts`, `POST /api/admin/charts`, `PATCH /api/admin/charts/:chartId`, `DELETE /api/admin/charts/:chartId`. `AdminChartsPageComponent` with create/edit/delete modals. |
+| 9.9 Last Login Tracking | Done | `last_login_at` column on `users`, updated via `UserRepository.recordLastLogin()` (fire-and-forget after successful login). Shown in admin user table. |
+
+## Previous Verification (Epic 8 complete)
+
+- `npm exec nx -- run api:test --skip-nx-cache` passed with 266 tests.
+- `npm exec nx -- run api:build:production --skip-nx-cache` passed.
+- `npm exec nx -- run web:test --skip-nx-cache` passed with 83 tests.
 - `npm exec nx -- run web:build:production --skip-nx-cache` passed.
-- `npm exec nx -- run web:eslint:lint --skip-nx-cache` passed.
-- `npm exec nx -- run web:test --skip-nx-cache` passed with 14 tests.
-- `npm exec nx -- run web:build:production --skip-nx-cache` passed.
-- `npm exec nx -- run web:eslint:lint --skip-nx-cache` passed.
 - `npm exec nx -- run data-access-api-client:test --skip-nx-cache` passed with 13 tests.
 - `npm exec nx -- run data-access-api-client:build:production --skip-nx-cache` passed.
 - `npm exec nx -- run data-access-api-client:eslint:lint --skip-nx-cache` passed.
@@ -160,10 +179,15 @@ Epic 7: Alert System & Notifications
 - `npm exec nx -- run-many --target=build --projects=api,web,data-access-api-client --skip-nx-cache` passed.
 - `npm exec nx -- run-many --target=eslint:lint --projects=api,data-access-api-client --skip-nx-cache` passed.
 - `npm exec nx -- run api:test --skip-nx-cache` passed with 180 tests (7 new alerts-schema spec tests).
+- `npm exec nx -- run api:test --skip-nx-cache` passed with 194 tests (14 new: 4 repo, 8 service, 2 route).
+- `npm exec nx -- run data-access-api-client:test --skip-nx-cache` passed with 21 tests.
+- `npm exec nx -- run web:test --skip-nx-cache` passed with 56 tests (7 new: create-alert-modal).
+- `npm exec nx -- run-many --target=build --projects=api,web,data-access-api-client --skip-nx-cache` passed.
+- `npm exec nx -- run-many --target=eslint:lint --projects=api,data-access-api-client --skip-nx-cache` passed.
 
 ## Next Step
 
-Begin Epic 7, Story 7.2: Implement Alert Creation from Chart Pages.
+Begin Epic 9: Admin Management.
 
 ## Notes
 

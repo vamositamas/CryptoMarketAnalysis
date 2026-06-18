@@ -220,6 +220,32 @@ export interface CreateCustomWidgetRequest {
 export type CreateDashboardWidgetRequest = CreatePredefinedWidgetRequest | CreateCustomWidgetRequest;
 
 export type AlertCondition = 'crosses_above' | 'crosses_below' | 'greater_than' | 'less_than' | 'equals';
+export type AlertStatus = 'active' | 'triggered' | 'paused';
+
+export interface AlertLimit {
+  used: number;
+  max: number | null;
+  unlimited: boolean;
+}
+
+export interface AlertWithTitle {
+  id: string;
+  chartId: string;
+  chartTitle: string;
+  metricName: string;
+  condition: AlertCondition;
+  thresholdValue: number;
+  alertName: string;
+  status: AlertStatus;
+  createdAt: string;
+  lastEvaluatedAt: string | null;
+  triggeredAt: string | null;
+}
+
+export interface AlertsListResponse {
+  alerts: AlertWithTitle[];
+  alertLimit: AlertLimit;
+}
 
 export interface CreateAlertRequest {
   chartId: string;
@@ -242,6 +268,19 @@ export interface AlertResponse {
   triggeredAt: string | null;
 }
 
+export interface EmailTemplate {
+  key: string;
+  label: string;
+  value: string;
+  isCustom: boolean;
+  updatedAt: string | null;
+  variables: string[];
+}
+
+export interface EmailTemplatesResponse {
+  templates: EmailTemplate[];
+}
+
 export interface RecentChart {
   chartId: string;
   title: string;
@@ -252,6 +291,107 @@ export interface RecentChart {
 
 export interface RecentChartsResponse {
   recentCharts: RecentChart[];
+}
+
+export type DonationStatus = 'pending' | 'completed' | 'cancelled' | 'refunded';
+
+export interface InitiateDonationRequest {
+  amount: number;
+  currency?: string;
+}
+
+export interface InitiateDonationResponse {
+  donationId: string;
+  approvalUrl: string;
+}
+
+export interface DonationDetailsResponse {
+  id: string;
+  amount: number;
+  currency: string;
+  status: DonationStatus;
+  userUpgraded: boolean;
+  transactionId: string | null;
+  completedAt: string | null;
+  createdAt: string;
+}
+
+export interface AdminUserRecord {
+  id: string;
+  fullName: string | null;
+  email: string;
+  role: 'administrator' | 'premium_user' | 'free_user';
+  emailVerified: boolean;
+  onboardingCompleted: boolean;
+  languagePreference: 'en' | 'hu';
+  createdAt: string;
+  lastLoginAt: string | null;
+  deletedAt: string | null;
+}
+
+export interface AdminUsersResponse {
+  users: AdminUserRecord[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface AdminUpdateUserRequest {
+  fullName?: string | null;
+  role?: 'administrator' | 'premium_user' | 'free_user';
+  emailVerified?: boolean;
+  onboardingCompleted?: boolean;
+  languagePreference?: 'en' | 'hu';
+}
+
+export interface AuditLogRecord {
+  id: string;
+  adminUserId: string;
+  actionType: string;
+  targetType: string;
+  targetId: string | null;
+  changes: Record<string, unknown> | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+  createdAt: string;
+}
+
+export interface AdminAuditLogsResponse {
+  logs: AuditLogRecord[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface ChartConfigRecord {
+  id: string;
+  chartId: string;
+  title: string;
+  category: string;
+  accessTier: 'free' | 'premium';
+  description: string | null;
+  methodology: string | null;
+  status: 'draft' | 'active' | 'inactive';
+  createdBy: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminChartsResponse {
+  charts: ChartConfigRecord[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface AdminCreateChartRequest {
+  chartId: string;
+  title: string;
+  category: string;
+  accessTier: 'free' | 'premium';
+  description?: string | null;
+  methodology?: string | null;
+  status: 'draft' | 'active' | 'inactive';
 }
 
 interface CsrfTokenResponse {
@@ -471,8 +611,90 @@ export class AuthApiClient {
     await this.patchWithCsrf<{ success: boolean }>('/api/dashboard/widgets/reorder', { orderedIds });
   }
 
+  async getAlerts(): Promise<AlertsListResponse> {
+    try {
+      return await firstValueFrom(
+        this.http.get<AlertsListResponse>('/api/alerts', { withCredentials: true }),
+      );
+    } catch (error) {
+      throw toApiClientError(error);
+    }
+  }
+
   async createAlert(request: CreateAlertRequest): Promise<AlertResponse> {
     return this.postWithCsrf<AlertResponse>('/api/alerts', request);
+  }
+
+  async deleteAlert(alertId: string): Promise<void> {
+    try {
+      const csrfToken = await this.getCsrfToken();
+      await firstValueFrom(
+        this.http.delete<void>(`/api/alerts/${alertId}`, {
+          headers: { 'x-csrf-token': csrfToken },
+          withCredentials: true,
+        }),
+      );
+    } catch (error) {
+      throw toApiClientError(error);
+    }
+  }
+
+  async resetAlert(alertId: string): Promise<AlertWithTitle> {
+    return this.patchWithCsrf<AlertWithTitle>(`/api/alerts/${alertId}/reset`, {});
+  }
+
+  async getEmailTemplates(): Promise<EmailTemplatesResponse> {
+    try {
+      return await firstValueFrom(
+        this.http.get<EmailTemplatesResponse>('/api/admin/email-templates', { withCredentials: true }),
+      );
+    } catch (error) {
+      throw toApiClientError(error);
+    }
+  }
+
+  async updateEmailTemplate(key: string, value: string): Promise<EmailTemplate> {
+    try {
+      const csrfToken = await this.getCsrfToken();
+      return await firstValueFrom(
+        this.http.put<EmailTemplate>(`/api/admin/email-templates/${key}`, { value }, {
+          headers: { 'x-csrf-token': csrfToken },
+          withCredentials: true,
+        }),
+      );
+    } catch (error) {
+      throw toApiClientError(error);
+    }
+  }
+
+  async resetEmailTemplate(key: string): Promise<EmailTemplate> {
+    try {
+      const csrfToken = await this.getCsrfToken();
+      return await firstValueFrom(
+        this.http.delete<EmailTemplate>(`/api/admin/email-templates/${key}`, {
+          headers: { 'x-csrf-token': csrfToken },
+          withCredentials: true,
+        }),
+      );
+    } catch (error) {
+      throw toApiClientError(error);
+    }
+  }
+
+  async initiateDonation(request: InitiateDonationRequest): Promise<InitiateDonationResponse> {
+    return this.postWithCsrf<InitiateDonationResponse>('/api/donations/initiate', request);
+  }
+
+  async getDonationDetails(donationId: string): Promise<DonationDetailsResponse> {
+    try {
+      return await firstValueFrom(
+        this.http.get<DonationDetailsResponse>(`/api/donations/${donationId}`, {
+          withCredentials: true,
+        }),
+      );
+    } catch (error) {
+      throw toApiClientError(error);
+    }
   }
 
   async recordRecentChart(chartId: string): Promise<void> {
@@ -489,6 +711,114 @@ export class AuthApiClient {
     } catch (error) {
       throw toApiClientError(error);
     }
+  }
+
+  // ── Admin: User Management ──────────────────────────────────────────────────
+
+  async adminListUsers(params?: {
+    page?: number; limit?: number; search?: string; role?: string; show?: string;
+  }): Promise<AdminUsersResponse> {
+    const query = new URLSearchParams();
+    if (params?.page) query.set('page', String(params.page));
+    if (params?.limit) query.set('limit', String(params.limit));
+    if (params?.search) query.set('search', params.search);
+    if (params?.role) query.set('role', params.role);
+    if (params?.show) query.set('show', params.show);
+    const qs = query.toString();
+    try {
+      return await firstValueFrom(
+        this.http.get<AdminUsersResponse>(`/api/admin/users${qs ? `?${qs}` : ''}`, { withCredentials: true }),
+      );
+    } catch (error) { throw toApiClientError(error); }
+  }
+
+  async adminUpdateUser(userId: string, params: AdminUpdateUserRequest): Promise<AdminUserRecord> {
+    return this.patchWithCsrf<AdminUserRecord>(`/api/admin/users/${userId}`, params);
+  }
+
+  async adminDeleteUser(userId: string): Promise<{ success: boolean }> {
+    try {
+      const csrfToken = await this.getCsrfToken();
+      return await firstValueFrom(
+        this.http.delete<{ success: boolean }>(`/api/admin/users/${userId}`, {
+          headers: { 'x-csrf-token': csrfToken }, withCredentials: true,
+        }),
+      );
+    } catch (error) { throw toApiClientError(error); }
+  }
+
+  async adminRestoreUser(userId: string): Promise<AdminUserRecord> {
+    return this.patchWithCsrf<AdminUserRecord>(`/api/admin/users/${userId}/restore`, {});
+  }
+
+  async adminForcePasswordReset(userId: string): Promise<{ success: boolean; message: string }> {
+    return this.postWithCsrf<{ success: boolean; message: string }>(
+      `/api/admin/users/${userId}/force-password-reset`, {},
+    );
+  }
+
+  // ── Admin: Audit Logs ───────────────────────────────────────────────────────
+
+  async adminListAuditLogs(params?: {
+    page?: number; limit?: number; actionType?: string; targetType?: string;
+  }): Promise<AdminAuditLogsResponse> {
+    const query = new URLSearchParams();
+    if (params?.page) query.set('page', String(params.page));
+    if (params?.limit) query.set('limit', String(params.limit));
+    if (params?.actionType) query.set('actionType', params.actionType);
+    if (params?.targetType) query.set('targetType', params.targetType);
+    const qs = query.toString();
+    try {
+      return await firstValueFrom(
+        this.http.get<AdminAuditLogsResponse>(`/api/admin/audit-logs${qs ? `?${qs}` : ''}`, { withCredentials: true }),
+      );
+    } catch (error) { throw toApiClientError(error); }
+  }
+
+  // ── Admin: Chart Management ─────────────────────────────────────────────────
+
+  async adminListCharts(params?: { page?: number; limit?: number; status?: string }): Promise<AdminChartsResponse> {
+    const query = new URLSearchParams();
+    if (params?.page) query.set('page', String(params.page));
+    if (params?.limit) query.set('limit', String(params.limit));
+    if (params?.status) query.set('status', params.status);
+    const qs = query.toString();
+    try {
+      return await firstValueFrom(
+        this.http.get<AdminChartsResponse>(`/api/admin/charts${qs ? `?${qs}` : ''}`, { withCredentials: true }),
+      );
+    } catch (error) { throw toApiClientError(error); }
+  }
+
+  async adminCreateChart(data: AdminCreateChartRequest): Promise<ChartConfigRecord> {
+    return this.postWithCsrf<ChartConfigRecord>('/api/admin/charts', data);
+  }
+
+  async adminUpdateChart(chartId: string, data: Partial<AdminCreateChartRequest>): Promise<ChartConfigRecord> {
+    return this.patchWithCsrf<ChartConfigRecord>(`/api/admin/charts/${chartId}`, data);
+  }
+
+  async adminDeleteChart(chartId: string): Promise<{ success: boolean }> {
+    try {
+      const csrfToken = await this.getCsrfToken();
+      return await firstValueFrom(
+        this.http.delete<{ success: boolean }>(`/api/admin/charts/${chartId}`, {
+          headers: { 'x-csrf-token': csrfToken }, withCredentials: true,
+        }),
+      );
+    } catch (error) { throw toApiClientError(error); }
+  }
+
+  // ── Admin: Email Template Preview & Test ────────────────────────────────────
+
+  async adminPreviewEmailTemplate(key: string, sampleData?: Record<string, string>): Promise<{ html: string }> {
+    return this.postWithCsrf<{ html: string }>(`/api/admin/email-templates/${key}/preview`, { sampleData });
+  }
+
+  async adminSendTestEmail(key: string, recipientEmail: string, sampleData?: Record<string, string>): Promise<{ success: boolean; message: string }> {
+    return this.postWithCsrf<{ success: boolean; message: string }>(
+      `/api/admin/email-templates/${key}/send-test`, { recipientEmail, sampleData },
+    );
   }
 
   startGoogleLogin(): void {

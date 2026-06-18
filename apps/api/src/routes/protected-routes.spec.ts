@@ -3,6 +3,7 @@ import type { Request, Response, Router } from 'express';
 import { createAdminRouter } from './admin.route';
 import { createAlertsRouter } from './alerts.route';
 import { createDashboardRouter } from './dashboard.route';
+import { createDonationsRouter } from './donations.route';
 import { DashboardError } from '../services/dashboard.service';
 import { RecentChartsError } from '../services/recent-charts.service';
 import type { TokenInvalidationReader } from '../middleware/rbac.middleware';
@@ -94,16 +95,25 @@ describe('protected route wiring', () => {
   });
 
   it('allows administrators to list admin users', async () => {
+    const userManagementService = {
+      listUsers: jest.fn().mockResolvedValue({ users: [], total: 0, page: 1, limit: 50 }),
+      getUser: jest.fn(),
+      updateUser: jest.fn(),
+      deleteUser: jest.fn(),
+      restoreUser: jest.fn(),
+      forcePasswordReset: jest.fn(),
+    };
     const response = createResponse();
+    const req = { ...createRequest(createToken('administrator')), query: {} } as unknown as import('express').Request;
 
     await runHandlers(
-      getHandler(createAdminRouter(tokenInvalidations), '/users'),
-      createRequest(createToken('administrator')),
+      getHandler(createAdminRouter({ userManagementService, tokenInvalidations }), '/users'),
+      req,
       response,
     );
 
     expect(response.statusCode).toBe(200);
-    expect(response.body).toEqual({ users: [] });
+    expect((response.body as { users: unknown[] }).users).toEqual([]);
   });
 
   it('rejects non-admin users from admin routes', async () => {
@@ -202,6 +212,67 @@ describe('protected route wiring', () => {
     expect(response.body).toMatchObject({ success: true, dataPoints: 1 });
   });
 
+  it('allows administrators to list email templates', async () => {
+    const emailTemplateRepository = {
+      getTemplate: jest.fn(),
+      setTemplate: jest.fn(),
+      deleteTemplate: jest.fn(),
+      listTemplates: jest.fn().mockResolvedValue(new Map()),
+    };
+    const response = createResponse();
+
+    await runHandlers(
+      getHandler(createAdminRouter({ emailTemplateRepository, tokenInvalidations }), '/email-templates'),
+      createRequest(createToken('administrator')),
+      response,
+    );
+
+    expect(response.statusCode).toBe(200);
+    expect((response.body as { templates: unknown[] }).templates).toHaveLength(2);
+    expect((response.body as { templates: { key: string }[] }).templates[0].key).toBe('alert_triggered_html');
+  });
+
+  it('allows administrators to update an email template', async () => {
+    const customValue = '<p>custom</p>';
+    const emailTemplateRepository = {
+      getTemplate: jest.fn(),
+      setTemplate: jest.fn().mockResolvedValue({ key: 'alert_triggered_html', value: customValue, updatedAt: '2026-06-17T08:00:00.000Z' }),
+      deleteTemplate: jest.fn(),
+      listTemplates: jest.fn(),
+    };
+    const response = createResponse();
+
+    await runHandlers(
+      getHandler(createAdminRouter({ emailTemplateRepository, tokenInvalidations }), '/email-templates/:key', 'put'),
+      { ...createRequest(createToken('administrator'), { value: customValue }), params: { key: 'alert_triggered_html' } } as unknown as import('express').Request,
+      response,
+    );
+
+    expect(emailTemplateRepository.setTemplate).toHaveBeenCalledWith('alert_triggered_html', customValue);
+    expect(response.statusCode).toBe(200);
+    expect((response.body as { isCustom: boolean }).isCustom).toBe(true);
+  });
+
+  it('allows administrators to reset an email template to default', async () => {
+    const emailTemplateRepository = {
+      getTemplate: jest.fn(),
+      setTemplate: jest.fn(),
+      deleteTemplate: jest.fn().mockResolvedValue(true),
+      listTemplates: jest.fn(),
+    };
+    const response = createResponse();
+
+    await runHandlers(
+      getHandler(createAdminRouter({ emailTemplateRepository, tokenInvalidations }), '/email-templates/:key', 'delete'),
+      { ...createRequest(createToken('administrator')), params: { key: 'alert_triggered_html' } } as unknown as import('express').Request,
+      response,
+    );
+
+    expect(emailTemplateRepository.deleteTemplate).toHaveBeenCalledWith('alert_triggered_html');
+    expect(response.statusCode).toBe(200);
+    expect((response.body as { isCustom: boolean }).isCustom).toBe(false);
+  });
+
   it('allows authenticated users to create alerts and returns 201 with the alert record', async () => {
     const alertRecord = {
       id: 'alert-uuid',
@@ -216,7 +287,7 @@ describe('protected route wiring', () => {
       lastEvaluatedAt: null,
       triggeredAt: null,
     };
-    const alertsService = { createAlert: jest.fn().mockResolvedValue(alertRecord) };
+    const alertsService = { createAlert: jest.fn().mockResolvedValue(alertRecord), listAlerts: jest.fn(), deleteAlert: jest.fn(), resetAlert: jest.fn() };
     const response = createResponse();
     const body = {
       chartId: 'bitcoin-rainbow',
@@ -243,6 +314,9 @@ describe('protected route wiring', () => {
       createAlert: jest.fn().mockRejectedValue(
         new AlertsError('Free users can create maximum 5 alerts. Upgrade to Premium for unlimited alerts.', 403),
       ),
+      listAlerts: jest.fn(),
+      deleteAlert: jest.fn(),
+      resetAlert: jest.fn(),
     };
     const response = createResponse();
 
@@ -267,6 +341,56 @@ describe('protected route wiring', () => {
 
     expect(response.statusCode).toBe(401);
     expect(response.body).toEqual({ error: 'Unauthorized' });
+  });
+
+  it('lists alerts with limit info', async () => {
+    const listResponse = {
+      alerts: [],
+      alertLimit: { used: 0, max: 5, unlimited: false },
+    };
+    const alertsService = { listAlerts: jest.fn().mockResolvedValue(listResponse), createAlert: jest.fn(), deleteAlert: jest.fn(), resetAlert: jest.fn() };
+    const response = createResponse();
+
+    await runHandlers(
+      getHandler(createAlertsRouter({ alertsService }, tokenInvalidations), '/', 'get'),
+      createRequest(createToken('free_user')),
+      response,
+    );
+
+    expect(alertsService.listAlerts).toHaveBeenCalledWith('user-id', 'free_user');
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toEqual(listResponse);
+  });
+
+  it('deletes an alert and returns 200', async () => {
+    const alertsService = { listAlerts: jest.fn(), createAlert: jest.fn(), deleteAlert: jest.fn().mockResolvedValue(undefined), resetAlert: jest.fn() };
+    const response = createResponse();
+
+    await runHandlers(
+      getHandler(createAlertsRouter({ alertsService }, tokenInvalidations), '/:alertId', 'delete'),
+      { ...createRequest(createToken('free_user')), params: { alertId: 'alert-uuid' } } as unknown as import('express').Request,
+      response,
+    );
+
+    expect(alertsService.deleteAlert).toHaveBeenCalledWith('user-id', 'alert-uuid');
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toEqual({ success: true });
+  });
+
+  it('resets a triggered alert and returns 200 with updated record', async () => {
+    const resetResult = { id: 'alert-uuid', status: 'active', chartTitle: 'Bitcoin Rainbow Price Chart' };
+    const alertsService = { listAlerts: jest.fn(), createAlert: jest.fn(), deleteAlert: jest.fn(), resetAlert: jest.fn().mockResolvedValue(resetResult) };
+    const response = createResponse();
+
+    await runHandlers(
+      getHandler(createAlertsRouter({ alertsService }, tokenInvalidations), '/:alertId/reset', 'patch'),
+      { ...createRequest(createToken('free_user')), params: { alertId: 'alert-uuid' } } as unknown as import('express').Request,
+      response,
+    );
+
+    expect(alertsService.resetAlert).toHaveBeenCalledWith('user-id', 'alert-uuid');
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toMatchObject({ status: 'active' });
   });
 
   it('returns the authenticated user profile', async () => {
@@ -624,5 +748,362 @@ describe('protected route wiring', () => {
     expect(response.body).toMatchObject({
       onboardingCompleted: true,
     });
+  });
+
+  it('allows administrators to list donations', async () => {
+    const donationsService = {
+      listDonations: jest.fn().mockResolvedValue({
+        donations: [
+          {
+            id: 'donation-uuid',
+            userId: 'user-uuid',
+            amount: 10,
+            currency: 'USD',
+            paypalOrderId: 'ORDER-123',
+            paypalTransactionId: null,
+            status: 'completed',
+            userUpgraded: true,
+            createdAt: '2026-06-18T08:00:00.000Z',
+            completedAt: '2026-06-18T08:05:00.000Z',
+          },
+        ],
+        total: 1,
+      }),
+      exportDonations: jest.fn(),
+    };
+    const response = createResponse();
+    const req = { ...createRequest(createToken('administrator')), query: {} } as unknown as import('express').Request;
+
+    await runHandlers(
+      getHandler(createAdminRouter({ donationsService, tokenInvalidations }), '/donations'),
+      req,
+      response,
+    );
+
+    expect(donationsService.listDonations).toHaveBeenCalledWith(expect.objectContaining({ page: 1, limit: 50 }));
+    expect(response.statusCode).toBe(200);
+    expect((response.body as { donations: unknown[] }).donations).toHaveLength(1);
+  });
+
+  it('rejects non-admin from donations admin route', async () => {
+    const donationsService = { listDonations: jest.fn(), exportDonations: jest.fn() };
+    const response = createResponse();
+    const req = { ...createRequest(createToken('free_user')), query: {} } as unknown as import('express').Request;
+
+    await runHandlers(
+      getHandler(createAdminRouter({ donationsService, tokenInvalidations }), '/donations'),
+      req,
+      response,
+    );
+
+    expect(response.statusCode).toBe(403);
+  });
+
+  it('allows administrators to get a specific user by id', async () => {
+    const user = { id: 'user-1', email: 'alice@example.com', role: 'free_user' };
+    const userManagementService = {
+      listUsers: jest.fn(),
+      getUser: jest.fn().mockResolvedValue(user),
+      updateUser: jest.fn(),
+      deleteUser: jest.fn(),
+      restoreUser: jest.fn(),
+      forcePasswordReset: jest.fn(),
+    };
+    const auditLogRepository = { create: jest.fn(), list: jest.fn() };
+    const response = createResponse();
+
+    await runHandlers(
+      getHandler(createAdminRouter({ userManagementService, auditLogRepository, tokenInvalidations }), '/users/:userId'),
+      { ...createRequest(createToken('administrator')), params: { userId: 'user-1' } } as unknown as import('express').Request,
+      response,
+    );
+
+    expect(userManagementService.getUser).toHaveBeenCalledWith('user-1');
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toMatchObject({ id: 'user-1', email: 'alice@example.com' });
+  });
+
+  it('returns 404 when updating a non-existent user', async () => {
+    const { UserManagementError } = await import('../services/user-management.service');
+    const userManagementService = {
+      listUsers: jest.fn(),
+      getUser: jest.fn(),
+      updateUser: jest.fn().mockRejectedValue(new UserManagementError('User not found', 404)),
+      deleteUser: jest.fn(),
+      restoreUser: jest.fn(),
+      forcePasswordReset: jest.fn(),
+    };
+    const auditLogRepository = { create: jest.fn(), list: jest.fn() };
+    const response = createResponse();
+
+    await runHandlers(
+      getHandler(createAdminRouter({ userManagementService, auditLogRepository, tokenInvalidations }), '/users/:userId', 'patch'),
+      { ...createRequest(createToken('administrator'), { role: 'premium_user' }), params: { userId: 'missing' } } as unknown as import('express').Request,
+      response,
+    );
+
+    expect(response.statusCode).toBe(404);
+    expect((response.body as { error: string }).error).toBe('User not found');
+  });
+
+  it('allows administrators to update a user role and logs the action', async () => {
+    const updated = { id: 'user-1', role: 'premium_user' };
+    const userManagementService = {
+      listUsers: jest.fn(),
+      getUser: jest.fn(),
+      updateUser: jest.fn().mockResolvedValue(updated),
+      deleteUser: jest.fn(),
+      restoreUser: jest.fn(),
+      forcePasswordReset: jest.fn(),
+    };
+    const auditLogRepository = { create: jest.fn().mockResolvedValue(undefined), list: jest.fn() };
+    const response = createResponse();
+
+    await runHandlers(
+      getHandler(createAdminRouter({ userManagementService, auditLogRepository, tokenInvalidations }), '/users/:userId', 'patch'),
+      { ...createRequest(createToken('administrator'), { role: 'premium_user' }), params: { userId: 'user-1' } } as unknown as import('express').Request,
+      response,
+    );
+
+    expect(userManagementService.updateUser).toHaveBeenCalledWith('user-1', { role: 'premium_user' }, 'user-id');
+    expect(auditLogRepository.create).toHaveBeenCalledWith(expect.objectContaining({ actionType: 'user_edit', targetId: 'user-1' }));
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toMatchObject({ role: 'premium_user' });
+  });
+
+  it('allows administrators to delete a user and logs the action', async () => {
+    const userManagementService = {
+      listUsers: jest.fn(),
+      getUser: jest.fn(),
+      updateUser: jest.fn(),
+      deleteUser: jest.fn().mockResolvedValue(undefined),
+      restoreUser: jest.fn(),
+      forcePasswordReset: jest.fn(),
+    };
+    const auditLogRepository = { create: jest.fn().mockResolvedValue(undefined), list: jest.fn() };
+    const response = createResponse();
+
+    await runHandlers(
+      getHandler(createAdminRouter({ userManagementService, auditLogRepository, tokenInvalidations }), '/users/:userId', 'delete'),
+      { ...createRequest(createToken('administrator')), params: { userId: 'user-1' } } as unknown as import('express').Request,
+      response,
+    );
+
+    expect(userManagementService.deleteUser).toHaveBeenCalledWith('user-1', 'user-id');
+    expect(auditLogRepository.create).toHaveBeenCalledWith(expect.objectContaining({ actionType: 'user_delete', targetId: 'user-1' }));
+    expect(response.statusCode).toBe(200);
+    expect((response.body as { success: boolean }).success).toBe(true);
+  });
+
+  it('allows administrators to restore a deleted user', async () => {
+    const restored = { id: 'user-1', deletedAt: null };
+    const userManagementService = {
+      listUsers: jest.fn(),
+      getUser: jest.fn(),
+      updateUser: jest.fn(),
+      deleteUser: jest.fn(),
+      restoreUser: jest.fn().mockResolvedValue(restored),
+      forcePasswordReset: jest.fn(),
+    };
+    const auditLogRepository = { create: jest.fn().mockResolvedValue(undefined), list: jest.fn() };
+    const response = createResponse();
+
+    await runHandlers(
+      getHandler(createAdminRouter({ userManagementService, auditLogRepository, tokenInvalidations }), '/users/:userId/restore', 'patch'),
+      { ...createRequest(createToken('administrator')), params: { userId: 'user-1' } } as unknown as import('express').Request,
+      response,
+    );
+
+    expect(userManagementService.restoreUser).toHaveBeenCalledWith('user-1');
+    expect(auditLogRepository.create).toHaveBeenCalledWith(expect.objectContaining({ actionType: 'user_restore' }));
+    expect(response.statusCode).toBe(200);
+  });
+
+  it('allows administrators to force a password reset', async () => {
+    const userManagementService = {
+      listUsers: jest.fn(),
+      getUser: jest.fn(),
+      updateUser: jest.fn(),
+      deleteUser: jest.fn(),
+      restoreUser: jest.fn(),
+      forcePasswordReset: jest.fn().mockResolvedValue({ email: 'alice@example.com' }),
+    };
+    const auditLogRepository = { create: jest.fn().mockResolvedValue(undefined), list: jest.fn() };
+    const response = createResponse();
+
+    await runHandlers(
+      getHandler(createAdminRouter({ userManagementService, auditLogRepository, tokenInvalidations }), '/users/:userId/force-password-reset', 'post'),
+      { ...createRequest(createToken('administrator')), params: { userId: 'user-1' } } as unknown as import('express').Request,
+      response,
+    );
+
+    expect(userManagementService.forcePasswordReset).toHaveBeenCalledWith('user-1');
+    expect(auditLogRepository.create).toHaveBeenCalledWith(expect.objectContaining({ actionType: 'user_force_password_reset' }));
+    expect(response.statusCode).toBe(200);
+    expect((response.body as { success: boolean }).success).toBe(true);
+  });
+
+  it('allows administrators to list charts', async () => {
+    const chartConfigRepository = {
+      list: jest.fn().mockResolvedValue({ charts: [{ id: 'chart-1', chartId: 'mvrv-z-score' }], total: 1 }),
+      getById: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    };
+    const response = createResponse();
+    const req = { ...createRequest(createToken('administrator')), query: {} } as unknown as import('express').Request;
+
+    await runHandlers(
+      getHandler(createAdminRouter({ chartConfigRepository, tokenInvalidations }), '/charts'),
+      req,
+      response,
+    );
+
+    expect(chartConfigRepository.list).toHaveBeenCalledWith(expect.objectContaining({ page: 1, limit: 50 }));
+    expect(response.statusCode).toBe(200);
+    expect((response.body as { charts: unknown[] }).charts).toHaveLength(1);
+  });
+
+  it('allows administrators to create a chart and logs the action', async () => {
+    const created = { id: 'chart-1', chartId: 'mvrv-z-score', title: 'MVRV', status: 'draft', createdAt: '2024-01-01T00:00:00.000Z' };
+    const chartConfigRepository = {
+      list: jest.fn(),
+      getById: jest.fn(),
+      create: jest.fn().mockResolvedValue(created),
+      update: jest.fn(),
+      delete: jest.fn(),
+    };
+    const auditLogRepository = { create: jest.fn().mockResolvedValue(undefined), list: jest.fn() };
+    const response = createResponse();
+    const body = { chartId: 'mvrv-z-score', title: 'MVRV', category: 'Valuation', accessTier: 'free', status: 'draft' };
+
+    await runHandlers(
+      getHandler(createAdminRouter({ chartConfigRepository, auditLogRepository, tokenInvalidations }), '/charts', 'post'),
+      createRequest(createToken('administrator'), body),
+      response,
+    );
+
+    expect(chartConfigRepository.create).toHaveBeenCalledWith(expect.objectContaining({ chartId: 'mvrv-z-score' }));
+    expect(auditLogRepository.create).toHaveBeenCalledWith(expect.objectContaining({ actionType: 'chart_create' }));
+    expect(response.statusCode).toBe(201);
+  });
+
+  it('allows administrators to delete a chart and logs the action', async () => {
+    const chartConfigRepository = {
+      list: jest.fn(),
+      getById: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn().mockResolvedValue(true),
+    };
+    const auditLogRepository = { create: jest.fn().mockResolvedValue(undefined), list: jest.fn() };
+    const response = createResponse();
+
+    await runHandlers(
+      getHandler(createAdminRouter({ chartConfigRepository, auditLogRepository, tokenInvalidations }), '/charts/:chartId', 'delete'),
+      { ...createRequest(createToken('administrator')), params: { chartId: 'chart-1' } } as unknown as import('express').Request,
+      response,
+    );
+
+    expect(chartConfigRepository.delete).toHaveBeenCalledWith('chart-1');
+    expect(auditLogRepository.create).toHaveBeenCalledWith(expect.objectContaining({ actionType: 'chart_delete' }));
+    expect(response.statusCode).toBe(200);
+    expect((response.body as { success: boolean }).success).toBe(true);
+  });
+
+  it('allows administrators to list audit logs', async () => {
+    const auditLogRepository = {
+      create: jest.fn(),
+      list: jest.fn().mockResolvedValue({ logs: [{ id: 'log-1', actionType: 'user_edit', createdAt: '2024-01-01T00:00:00.000Z' }], total: 1 }),
+    };
+    const response = createResponse();
+    const req = { ...createRequest(createToken('administrator')), query: {} } as unknown as import('express').Request;
+
+    await runHandlers(
+      getHandler(createAdminRouter({ auditLogRepository, tokenInvalidations }), '/audit-logs'),
+      req,
+      response,
+    );
+
+    expect(auditLogRepository.list).toHaveBeenCalledWith(expect.objectContaining({ page: 1, limit: 50 }));
+    expect(response.statusCode).toBe(200);
+    expect((response.body as { logs: unknown[] }).logs).toHaveLength(1);
+  });
+
+  it('allows administrators to preview an email template with sample data', async () => {
+    const emailTemplateRepository = {
+      getTemplate: jest.fn().mockResolvedValue('<p>Hello {{alertName}}</p>'),
+      setTemplate: jest.fn(),
+      deleteTemplate: jest.fn(),
+      listTemplates: jest.fn(),
+    };
+    const response = createResponse();
+
+    await runHandlers(
+      getHandler(createAdminRouter({ emailTemplateRepository, tokenInvalidations }), '/email-templates/:key/preview', 'post'),
+      { ...createRequest(createToken('administrator'), {}), params: { key: 'alert_triggered_html' } } as unknown as import('express').Request,
+      response,
+    );
+
+    expect(response.statusCode).toBe(200);
+    expect((response.body as { html: string }).html).toContain('MVRV Overbought');
+  });
+
+  it('returns 404 when previewing a non-existent template key', async () => {
+    const emailTemplateRepository = { getTemplate: jest.fn(), setTemplate: jest.fn(), deleteTemplate: jest.fn(), listTemplates: jest.fn() };
+    const response = createResponse();
+
+    await runHandlers(
+      getHandler(createAdminRouter({ emailTemplateRepository, tokenInvalidations }), '/email-templates/:key/preview', 'post'),
+      { ...createRequest(createToken('administrator'), {}), params: { key: 'unknown_key' } } as unknown as import('express').Request,
+      response,
+    );
+
+    expect(response.statusCode).toBe(404);
+  });
+
+  it('validates recipientEmail when sending a test email', async () => {
+    const emailTemplateRepository = { getTemplate: jest.fn(), setTemplate: jest.fn(), deleteTemplate: jest.fn(), listTemplates: jest.fn() };
+    const response = createResponse();
+
+    await runHandlers(
+      getHandler(createAdminRouter({ emailTemplateRepository, tokenInvalidations }), '/email-templates/:key/send-test', 'post'),
+      { ...createRequest(createToken('administrator'), { recipientEmail: 'not-an-email' }), params: { key: 'alert_triggered_html' } } as unknown as import('express').Request,
+      response,
+    );
+
+    expect(response.statusCode).toBe(400);
+    expect((response.body as { error: string }).error).toContain('recipientEmail');
+  });
+
+  it('allows authenticated users to initiate a donation', async () => {
+    const donationsService = {
+      initiate: jest.fn().mockResolvedValue({ donationId: 'donation-uuid', approvalUrl: 'https://paypal.com/checkout' }),
+      handleSuccess: jest.fn(),
+      handleCancel: jest.fn(),
+      getDonation: jest.fn(),
+      listDonations: jest.fn(),
+      exportDonations: jest.fn(),
+    };
+    const response = createResponse();
+    const req = {
+      ...createRequest(createToken('free_user'), { amount: 10, currency: 'USD' }),
+      protocol: 'https',
+      headers: { authorization: `Bearer ${createToken('free_user')}` },
+      get: (h: string) => (h === 'host' ? 'localhost' : h === 'authorization' ? `Bearer ${createToken('free_user')}` : undefined),
+    } as unknown as import('express').Request;
+
+    await runHandlers(
+      getHandler(createDonationsRouter(donationsService as never, tokenInvalidations), '/initiate', 'post'),
+      req,
+      response,
+    );
+
+    expect(donationsService.initiate).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: 'user-id', amount: 10, currency: 'USD' }),
+    );
+    expect(response.statusCode).toBe(201);
+    expect((response.body as { approvalUrl: string }).approvalUrl).toBe('https://paypal.com/checkout');
   });
 });

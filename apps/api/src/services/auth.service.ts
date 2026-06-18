@@ -86,6 +86,7 @@ interface AuthUser {
   emailVerified: boolean;
   oauthProvider?: string;
   oauthProviderId?: string;
+  deletedAt?: Date | null;
 }
 
 interface UserStore {
@@ -110,6 +111,7 @@ interface UserStore {
   ): Promise<AuthUser | undefined>;
   markEmailVerified(userId: string): Promise<void>;
   updatePasswordHash?(userId: string, passwordHash: string): Promise<void>;
+  recordLastLogin?(userId: string): Promise<void>;
 }
 
 interface EmailVerificationTokenStore {
@@ -251,6 +253,10 @@ export class AuthService {
       throw error;
     }
 
+    if (user?.deletedAt) {
+      throw new LoginError(403, 'This account has been deactivated. Contact support for assistance.');
+    }
+
     if (!user?.passwordHash) {
       logFailedLogin(normalizedEmail);
       throw new LoginError(401, 'Invalid email or password');
@@ -265,6 +271,8 @@ export class AuthService {
     if (!user.emailVerified) {
       throw new LoginError(403, 'Please verify your email address before logging in');
     }
+
+    void this.users.recordLastLogin?.(user.id);
 
     return createLoginResponse(user);
   }

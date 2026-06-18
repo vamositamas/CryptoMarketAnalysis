@@ -79,6 +79,7 @@ describe('daily data refresh job', () => {
       bitcoinDataClient: createBitcoinDataClientStub(),
       database,
       emailService: { sendDailyDataRefreshFailureAlert: jest.fn() },
+      alertEvaluationService: createAlertEvaluationServiceStub(),
       logger: createLogger(),
       now: () => new Date('2026-06-10T12:00:00.000Z'),
     });
@@ -142,6 +143,7 @@ describe('daily data refresh job', () => {
       bitcoinDataClient: createBitcoinDataClientStub(),
       database,
       emailService: { sendDailyDataRefreshFailureAlert: jest.fn() },
+      alertEvaluationService: createAlertEvaluationServiceStub(),
       logger: createLogger(),
       now: () => new Date('2026-06-10T12:00:00.000Z'),
     });
@@ -192,6 +194,7 @@ describe('daily data refresh job', () => {
       bitcoinDataClient,
       database,
       emailService: { sendDailyDataRefreshFailureAlert: jest.fn() },
+      alertEvaluationService: createAlertEvaluationServiceStub(),
       logger: createLogger(),
       now: () => new Date('2026-06-10T12:00:00.000Z'),
     });
@@ -246,6 +249,7 @@ describe('daily data refresh job', () => {
       bitcoinDataClient,
       database,
       emailService: { sendDailyDataRefreshFailureAlert: jest.fn() },
+      alertEvaluationService: createAlertEvaluationServiceStub(),
       logger,
       now: () => new Date('2026-06-10T12:00:00.000Z'),
     });
@@ -311,6 +315,7 @@ describe('daily data refresh job', () => {
           .mockResolvedValueOnce(undefined),
       },
       emailService: { sendDailyDataRefreshFailureAlert: jest.fn() },
+      alertEvaluationService: createAlertEvaluationServiceStub(),
       logger: createLogger(),
       now: () => new Date('2026-06-10T12:00:00.000Z'),
     });
@@ -404,6 +409,12 @@ function createBlockchainInfoClientStub(overrides: { fetchMarketPrice?: jest.Moc
     fetchDifficulty: jest
       .fn()
       .mockResolvedValue([{ date: '2026-06-09', value: 138955357012247.48 }]),
+  };
+}
+
+function createAlertEvaluationServiceStub() {
+  return {
+    evaluateAlerts: jest.fn().mockResolvedValue({ evaluated: 0, triggered: 0, skipped: 0 }),
   };
 }
 

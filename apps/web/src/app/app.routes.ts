@@ -431,27 +431,6 @@ export class DashboardPage {
   }
 }
 
-@Component({
-  selector: 'app-admin-users-page',
-  template: `
-    <section class="content-section">
-      <div class="section-heading">
-        <p class="eyebrow" i18n="Admin eyebrow@@admin.eyebrow">Admin</p>
-        <h2 i18n="User management title@@admin.usersTitle">User management</h2>
-      </div>
-      <div class="model-grid">
-        <article>
-          <span i18n="Users label@@admin.users">Users</span>
-          <strong i18n="Ready status@@status.ready">Ready</strong>
-          <small i18n="Admin user access summary@@admin.usersSummary">
-            Administrative user list API access is role protected.
-          </small>
-        </article>
-      </div>
-    </section>
-  `,
-})
-export class AdminUsersPage {}
 
 @Component({
   selector: 'app-admin-data-configuration-page',
@@ -1154,15 +1133,53 @@ export const appRoutes: Route[] = [
   },
   {
     path: 'admin/users',
-    component: AdminUsersPage,
     canActivate: [authGuard, roleGuard],
     data: { roles: ['administrator'] },
+    loadComponent: () =>
+      import('./components/admin-users-page/admin-users-page.component').then(
+        (m) => m.AdminUsersPageComponent,
+      ),
+  },
+  {
+    path: 'admin/audit-logs',
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['administrator'] },
+    loadComponent: () =>
+      import('./components/admin-audit-logs-page/admin-audit-logs-page.component').then(
+        (m) => m.AdminAuditLogsPageComponent,
+      ),
+  },
+  {
+    path: 'admin/charts',
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['administrator'] },
+    loadComponent: () =>
+      import('./components/admin-charts-page/admin-charts-page.component').then(
+        (m) => m.AdminChartsPageComponent,
+      ),
   },
   {
     path: 'admin/data-configuration',
     component: AdminDataConfigurationPage,
     canActivate: [authGuard, roleGuard],
     data: { roles: ['administrator'] },
+  },
+  {
+    path: 'admin/email-templates',
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['administrator'] },
+    loadComponent: () =>
+      import('./components/email-template-editor/email-template-editor.component').then(
+        (m) => m.EmailTemplateEditorComponent,
+      ),
+  },
+  { path: 'alerts', canActivate: [authGuard], loadComponent: () => import('./components/alerts-page/alerts-page.component').then((m) => m.AlertsPageComponent) },
+  {
+    path: 'donate/thank-you',
+    loadComponent: () =>
+      import('./components/donate-thank-you/donate-thank-you.component').then(
+        (m) => m.DonateThankYouComponent,
+      ),
   },
   { path: 'onboarding', component: OnboardingPage, canActivate: [authGuard] },
   { path: 'login', component: LoginPage },

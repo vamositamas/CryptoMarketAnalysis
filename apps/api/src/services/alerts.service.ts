@@ -14,9 +14,34 @@ const VALID_CONDITIONS = ['crosses_above', 'crosses_below', 'greater_than', 'les
 const VALID_CHART_IDS = ['bitcoin-rainbow', 'pi-cycle-top', 'stock-to-flow'] as const;
 const MAX_ALERTS_FREE_TIER = 5;
 
+const CHART_TITLES: Record<string, string> = {
+  'bitcoin-rainbow': 'Bitcoin Rainbow Price Chart',
+  'pi-cycle-top': 'Pi Cycle Top Indicator',
+  'stock-to-flow': 'Stock-to-Flow Model',
+};
+
+export interface AlertWithTitle extends AlertRecord {
+  chartTitle: string;
+}
+
+export interface AlertLimit {
+  used: number;
+  max: number | null;
+  unlimited: boolean;
+}
+
+export interface AlertsListResponse {
+  alerts: AlertWithTitle[];
+  alertLimit: AlertLimit;
+}
+
 interface AlertsStore {
   create(userId: string, input: CreateAlertInput): Promise<AlertRecord>;
   countActiveForUser(userId: string): Promise<number>;
+  countForUser(userId: string): Promise<number>;
+  listForUser(userId: string): Promise<AlertRecord[]>;
+  deleteForUser(userId: string, alertId: string): Promise<boolean>;
+  resetForUser(userId: string, alertId: string): Promise<AlertRecord | null>;
 }
 
 export class AlertsService {
@@ -78,5 +103,52 @@ export class AlertsService {
       thresholdValue,
       alertName: alertName.trim(),
     });
+  }
+
+  async listAlerts(userId: string, userRole: string): Promise<AlertsListResponse> {
+    const [alerts, used] = await Promise.all([
+      this.repository.listForUser(userId),
+      this.repository.countForUser(userId),
+    ]);
+
+    const unlimited = userRole !== 'free_user';
+
+    return {
+      alerts: alerts.map((alert) => ({
+        ...alert,
+        chartTitle: CHART_TITLES[alert.chartId] ?? alert.chartId,
+      })),
+      alertLimit: {
+        used,
+        max: unlimited ? null : MAX_ALERTS_FREE_TIER,
+        unlimited,
+      },
+    };
+  }
+
+  async deleteAlert(userId: string, alertId: string): Promise<void> {
+    if (!alertId?.trim()) {
+      throw new AlertsError('alertId is required', 400);
+    }
+
+    const deleted = await this.repository.deleteForUser(userId, alertId);
+
+    if (!deleted) {
+      throw new AlertsError('Alert not found', 404);
+    }
+  }
+
+  async resetAlert(userId: string, alertId: string): Promise<AlertWithTitle> {
+    if (!alertId?.trim()) {
+      throw new AlertsError('alertId is required', 400);
+    }
+
+    const alert = await this.repository.resetForUser(userId, alertId);
+
+    if (!alert) {
+      throw new AlertsError('Alert not found or not in triggered state', 404);
+    }
+
+    return { ...alert, chartTitle: CHART_TITLES[alert.chartId] ?? alert.chartId };
   }
 }

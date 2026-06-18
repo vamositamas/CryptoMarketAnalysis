@@ -160,6 +160,14 @@ export class UserRepository extends BaseRepository {
     return result.rows[0] ? this.toCamelCase<User>(result.rows[0]) : undefined;
   }
 
+  async recordLastLogin(userId: string): Promise<void> {
+    const pool = this.requirePool();
+    await pool.query(
+      `UPDATE users SET last_login_at = NOW(), updated_at = NOW() WHERE id = $1`,
+      [userId],
+    );
+  }
+
   private requirePool(): Pick<Pool, 'query'> {
     if (!this.pool) {
       throw new Error('Database is not configured');

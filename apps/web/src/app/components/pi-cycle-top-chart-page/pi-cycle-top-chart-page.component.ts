@@ -22,6 +22,10 @@ import {
   type ChartInfoField,
 } from '../chart-info-panel/chart-info-panel.component';
 import { parseChartTimeframe } from '../chart-timeframe/chart-timeframe-url.util';
+import {
+  CreateAlertModalComponent,
+  type AlertMetricOption,
+} from '../create-alert-modal/create-alert-modal.component';
 
 interface TimeframeOption {
   label: string;
@@ -39,9 +43,14 @@ const TIMEFRAMES: TimeframeOption[] = [
 
 const SIGNAL_MESSAGE = 'Historically, this signal has preceded major tops within 3-7 days';
 
+const PI_CYCLE_ALERT_METRICS: AlertMetricOption[] = [
+  { value: 'ma_111_day', label: '111-Day MA' },
+  { value: 'ma_350x2_day', label: '350-Day MA × 2' },
+];
+
 @Component({
   selector: 'app-pi-cycle-top-chart-page',
-  imports: [ChartViewerComponent, ChartAnnotationsComponent, ChartInfoPanelComponent, RouterLink],
+  imports: [ChartViewerComponent, ChartAnnotationsComponent, ChartInfoPanelComponent, RouterLink, CreateAlertModalComponent],
   templateUrl: './pi-cycle-top-chart-page.component.html',
 })
 export class PiCycleTopChartPageComponent implements AfterViewInit {
@@ -51,6 +60,8 @@ export class PiCycleTopChartPageComponent implements AfterViewInit {
   @ViewChild(ChartViewerComponent) private readonly chartViewer?: ChartViewerComponent;
   @ViewChild(ChartAnnotationsComponent) protected readonly chartAnnotations?: ChartAnnotationsComponent;
   protected readonly timeframes = TIMEFRAMES;
+  protected readonly alertMetrics = PI_CYCLE_ALERT_METRICS;
+  protected readonly showAlertModal = signal(false);
   protected readonly selectedTimeframe = signal<ChartTimeframe>('all');
   protected readonly isLoading = signal(false);
   protected readonly errorMessage = signal('');
@@ -211,6 +222,14 @@ export class PiCycleTopChartPageComponent implements AfterViewInit {
 
   protected toggleInfo(): void {
     this.infoOpen.update((isOpen) => !isOpen);
+  }
+
+  protected openAlertModal(): void {
+    this.showAlertModal.set(true);
+  }
+
+  protected closeAlertModal(): void {
+    this.showAlertModal.set(false);
   }
 
   protected toggleExportMenu(): void {

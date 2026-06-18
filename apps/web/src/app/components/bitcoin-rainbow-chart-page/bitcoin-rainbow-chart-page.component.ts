@@ -22,6 +22,10 @@ import {
   type ChartInfoField,
 } from '../chart-info-panel/chart-info-panel.component';
 import { parseChartTimeframe } from '../chart-timeframe/chart-timeframe-url.util';
+import {
+  CreateAlertModalComponent,
+  type AlertMetricOption,
+} from '../create-alert-modal/create-alert-modal.component';
 
 interface TimeframeOption {
   label: string;
@@ -49,9 +53,14 @@ const RAINBOW_BANDS = [
   { label: 'Maximum Bubble', color: 'rgba(127, 29, 29, 0.12)' },
 ];
 
+const RAINBOW_ALERT_METRICS: AlertMetricOption[] = [
+  { value: 'rainbow_band', label: 'Rainbow Band' },
+  { value: 'btc_price', label: 'BTC Price USD' },
+];
+
 @Component({
   selector: 'app-bitcoin-rainbow-chart-page',
-  imports: [ChartViewerComponent, ChartAnnotationsComponent, ChartInfoPanelComponent, RouterLink],
+  imports: [ChartViewerComponent, ChartAnnotationsComponent, ChartInfoPanelComponent, RouterLink, CreateAlertModalComponent],
   templateUrl: './bitcoin-rainbow-chart-page.component.html',
 })
 export class BitcoinRainbowChartPageComponent implements AfterViewInit {
@@ -61,6 +70,8 @@ export class BitcoinRainbowChartPageComponent implements AfterViewInit {
   @ViewChild(ChartViewerComponent) private readonly chartViewer?: ChartViewerComponent;
   @ViewChild(ChartAnnotationsComponent) protected readonly chartAnnotations?: ChartAnnotationsComponent;
   protected readonly timeframes = TIMEFRAMES;
+  protected readonly alertMetrics = RAINBOW_ALERT_METRICS;
+  protected readonly showAlertModal = signal(false);
   protected readonly selectedTimeframe = signal<ChartTimeframe>('all');
   protected readonly isLoading = signal(false);
   protected readonly errorMessage = signal('');
@@ -191,6 +202,14 @@ export class BitcoinRainbowChartPageComponent implements AfterViewInit {
 
   protected toggleInfo(): void {
     this.infoOpen.update((isOpen) => !isOpen);
+  }
+
+  protected openAlertModal(): void {
+    this.showAlertModal.set(true);
+  }
+
+  protected closeAlertModal(): void {
+    this.showAlertModal.set(false);
   }
 
   protected toggleExportMenu(): void {

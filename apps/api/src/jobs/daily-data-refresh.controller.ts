@@ -15,6 +15,8 @@ import {
 import { insertBitcoinPriceDaily } from './init-historical-data';
 import { getDatabasePool } from '../config/database.config';
 import { ResendEmailService, type DailyDataRefreshFailureEmailSender } from '../services/email.service';
+import { AlertEvaluationService } from '../services/alert-evaluation.service';
+import { EmailTemplateRepository } from '../repositories/email-template.repository';
 
 interface DailyDataRefreshSummary {
   success: true;
@@ -57,6 +59,7 @@ interface DailyDataRefreshOptions {
   bitcoinDataClient?: Pick<BitcoinDataClient, 'fetchMvrvZScore' | 'fetchRealizedPrice'>;
   database?: Parameters<typeof insertBitcoinPriceDaily>[0];
   emailService?: DailyDataRefreshFailureEmailSender;
+  alertEvaluationService?: Pick<AlertEvaluationService, 'evaluateAlerts'>;
   logger?: Pick<Console, 'error' | 'log' | 'warn'>;
   now?: () => Date;
 }
@@ -108,6 +111,7 @@ export class DailyDataRefreshService {
   private readonly bitcoinDataClient: Pick<BitcoinDataClient, 'fetchMvrvZScore' | 'fetchRealizedPrice'>;
   private readonly database: Parameters<typeof insertBitcoinPriceDaily>[0] | undefined;
   private readonly emailService: DailyDataRefreshFailureEmailSender;
+  private readonly alertEvaluationService: Pick<AlertEvaluationService, 'evaluateAlerts'>;
   private readonly logger: Pick<Console, 'error' | 'log' | 'warn'>;
   private readonly now: () => Date;
 
@@ -118,6 +122,13 @@ export class DailyDataRefreshService {
     this.bitcoinDataClient = options.bitcoinDataClient ?? new BitcoinDataClient();
     this.database = options.database ?? getDatabasePool();
     this.emailService = options.emailService ?? new ResendEmailService();
+    const evalDatabase = getDatabasePool();
+    this.alertEvaluationService =
+      options.alertEvaluationService ??
+      new AlertEvaluationService(evalDatabase, {
+        emailService: new ResendEmailService(),
+        templateLoader: evalDatabase ? new EmailTemplateRepository(evalDatabase) : undefined,
+      });
     this.logger = options.logger ?? console;
     this.now = options.now ?? (() => new Date());
   }
@@ -140,7 +151,9 @@ export class DailyDataRefreshService {
       date,
       metrics: [...metrics, ...externalMetrics].map((metric) => metric.metricName),
     });
-    this.logger.log('Alert evaluation deferred to Epic 7.', { date });
+
+    const alertSummary = await this.alertEvaluationService.evaluateAlerts(this.now());
+    this.logger.log('Alert evaluation completed', { date, ...alertSummary });
 
     const summary = {
       success: true,

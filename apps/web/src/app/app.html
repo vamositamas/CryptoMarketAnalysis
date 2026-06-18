@@ -1,25 +1,43 @@
-<div class="app-shell">
+<div class="app-shell" [class.nav-open]="mobileMenuOpen()">
   <header class="topbar">
     <a class="brand" [routerLink]="currentUser() ? '/dashboard' : '/'">
       <span class="brand-mark" aria-hidden="true">₿</span>
       <span i18n="Application name@@app.name">CryptoMarketAnalysis</span>
     </a>
 
+    <!-- Desktop nav -->
     @if (currentUser()) {
-      <nav aria-label="Primary navigation">
+      <nav class="desktop-nav" aria-label="Primary navigation">
         <a routerLink="/dashboard" routerLinkActive="active">
           <ng-container i18n="Dashboard navigation label@@nav.dashboard">Dashboard</ng-container>
         </a>
         <a routerLink="/charts" routerLinkActive="active">
           <ng-container i18n="Charts navigation label@@nav.charts">Charts</ng-container>
         </a>
-        <a routerLink="/onboarding" routerLinkActive="active">
-          <ng-container i18n="Onboarding navigation label@@nav.onboarding">Onboarding</ng-container>
+        <a routerLink="/alerts" routerLinkActive="active">
+          <ng-container i18n="Alerts navigation label@@nav.alerts">Alerts</ng-container>
         </a>
         @if (currentUser()?.role === 'administrator') {
-          <a routerLink="/admin/data-configuration" routerLinkActive="active">
-            <ng-container i18n="Admin data navigation label@@nav.adminData">Data Admin</ng-container>
+          <a routerLink="/admin/users" routerLinkActive="active">
+            <ng-container i18n="Admin users navigation label@@nav.adminUsers">Users</ng-container>
           </a>
+          <a routerLink="/admin/data-configuration" routerLinkActive="active">
+            <ng-container i18n="Admin data navigation label@@nav.adminData">Data</ng-container>
+          </a>
+          <a routerLink="/admin/charts" routerLinkActive="active">
+            <ng-container i18n="Admin charts navigation label@@nav.adminCharts">Charts Admin</ng-container>
+          </a>
+          <a routerLink="/admin/audit-logs" routerLinkActive="active">
+            <ng-container i18n="Admin audit logs navigation label@@nav.adminAudit">Audit</ng-container>
+          </a>
+          <a routerLink="/admin/email-templates" routerLinkActive="active">
+            <ng-container i18n="Admin email templates navigation label@@nav.adminEmail">Email</ng-container>
+          </a>
+        }
+        @if (currentUser()?.role === 'free_user') {
+          <button type="button" class="donate-nav-btn" (click)="openDonateModal()">
+            <ng-container i18n="Donate navigation label@@nav.donate">Donate</ng-container>
+          </button>
         }
       </nav>
     }
@@ -36,10 +54,66 @@
         <a class="ghost-link" routerLink="/login" i18n="Login link@@auth.login">Login</a>
         <a class="primary-link" routerLink="/register" i18n="Register link@@auth.register">Register</a>
       }
+      @if (currentUser()) {
+        <button
+          class="hamburger-btn"
+          type="button"
+          [attr.aria-expanded]="mobileMenuOpen()"
+          aria-label="Toggle navigation menu"
+          (click)="toggleMobileMenu()"
+        >
+          <span class="hamburger-bar"></span>
+          <span class="hamburger-bar"></span>
+          <span class="hamburger-bar"></span>
+        </button>
+      }
     </div>
   </header>
+
+  <!-- Mobile slide-out drawer -->
+  @if (currentUser() && mobileMenuOpen()) {
+    <div class="mobile-nav-backdrop" (click)="closeMobileMenu()" aria-hidden="true"></div>
+    <nav class="mobile-nav" aria-label="Mobile navigation">
+      <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMobileMenu()">
+        <ng-container i18n="Dashboard navigation label@@nav.dashboard">Dashboard</ng-container>
+      </a>
+      <a routerLink="/charts" routerLinkActive="active" (click)="closeMobileMenu()">
+        <ng-container i18n="Charts navigation label@@nav.charts">Charts</ng-container>
+      </a>
+      <a routerLink="/alerts" routerLinkActive="active" (click)="closeMobileMenu()">
+        <ng-container i18n="Alerts navigation label@@nav.alerts">Alerts</ng-container>
+      </a>
+      @if (currentUser()?.role === 'administrator') {
+        <div class="mobile-nav-group-label" i18n="Admin nav group label@@nav.adminGroup">Admin</div>
+        <a routerLink="/admin/users" routerLinkActive="active" (click)="closeMobileMenu()">
+          <ng-container i18n="Admin users navigation label@@nav.adminUsers">Users</ng-container>
+        </a>
+        <a routerLink="/admin/data-configuration" routerLinkActive="active" (click)="closeMobileMenu()">
+          <ng-container i18n="Admin data navigation label@@nav.adminData">Data Config</ng-container>
+        </a>
+        <a routerLink="/admin/charts" routerLinkActive="active" (click)="closeMobileMenu()">
+          <ng-container i18n="Admin charts navigation label@@nav.adminCharts">Chart Management</ng-container>
+        </a>
+        <a routerLink="/admin/audit-logs" routerLinkActive="active" (click)="closeMobileMenu()">
+          <ng-container i18n="Admin audit logs navigation label@@nav.adminAudit">Audit Logs</ng-container>
+        </a>
+        <a routerLink="/admin/email-templates" routerLinkActive="active" (click)="closeMobileMenu()">
+          <ng-container i18n="Admin email templates navigation label@@nav.adminEmail">Email Templates</ng-container>
+        </a>
+      }
+      @if (currentUser()?.role === 'free_user') {
+        <button type="button" class="donate-nav-btn mobile-donate" (click)="openDonateModal()">
+          <ng-container i18n="Donate navigation label@@nav.donate">Donate</ng-container>
+        </button>
+      }
+    </nav>
+  }
 
   <main>
     <router-outlet></router-outlet>
   </main>
+
+  @if (showDonateModal()) {
+    <app-donate-modal (closed)="closeDonateModal()"></app-donate-modal>
+  }
 </div>

@@ -11,6 +11,8 @@ import { errorHandler } from './middleware/error.middleware';
 import { createHealthRouter } from './routes/health.route';
 import { createUsersRouter } from './routes/users.route';
 import { createDailyDataRefreshRouter } from './jobs/daily-data-refresh.controller';
+import { createAlertEvaluationRouter } from './jobs/alert-evaluation.controller';
+import { createDonationsRouter } from './routes/donations.route';
 
 export function createApp() {
   const app = express();
@@ -22,11 +24,13 @@ export function createApp() {
   app.use(express.json({ verify: captureRawBody }));
   app.get('/api/csrf-token', issueCsrfToken);
   app.use('/api/jobs', createDailyDataRefreshRouter());
+  app.use('/api/jobs', createAlertEvaluationRouter());
   app.use(csrfProtection);
   app.use('/api/auth', createAuthRouter());
   app.use('/api/users', createUsersRouter());
   app.use('/api/admin', createAdminRouter());
   app.use('/api/alerts', createAlertsRouter());
+  app.use('/api/donations', createDonationsRouter());
   app.use('/api/charts', createChartsRouter());
   app.use('/api/dashboard', createDashboardRouter());
   app.use('/api/health', createHealthRouter());
