@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360">
+  <rect x="0" y="0"   width="800" height="88"  fill="rgba(239,68,68,0.20)"/>
+  <rect x="0" y="88"  width="800" height="53"  fill="rgba(249,115,22,0.15)"/>
+  <rect x="0" y="141" width="800" height="53"  fill="rgba(234,179,8,0.13)"/>
+  <rect x="0" y="194" width="800" height="88"  fill="rgba(34,197,94,0.12)"/>
+  <rect x="0" y="282" width="800" height="78"  fill="rgba(59,130,246,0.18)"/>
+  <line x1="155" y1="0" x2="155" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+  <line x1="347" y1="0" x2="347" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+  <line x1="555" y1="0" x2="555" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+  <line x1="763" y1="0" x2="763" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+  <path d="M 0,355 C 100,352 140,346 155,342 C 168,306 198,250 212,243 C 228,295 260,308 272,303 C 308,284 345,240 355,228 C 372,175 408,68 424,62 C 440,102 468,238 477,126 C 492,98 505,84 510,85 C 528,108 542,104 555,85 C 574,50 617,12 632,10 C 648,42 677,250 685,68 C 703,46 737,22 763,14 C 776,10 792,12 800,13"
+        stroke="#17202a" stroke-width="2.5" fill="none"/>
+  <path d="M 0,300 C 50,288 90,175 108,62 C 120,240 148,310 168,298 C 210,272 268,186 300,118 C 318,280 356,312 380,302 C 415,258 448,105 462,55 C 476,188 510,308 528,292 C 548,242 584,95 605,58 C 622,175 652,300 668,286 C 696,254 745,224 778,232 C 790,236 797,240 800,242"
+        stroke="#f59e0b" stroke-width="2.5" fill="none" opacity="0.95"/>
+</svg>

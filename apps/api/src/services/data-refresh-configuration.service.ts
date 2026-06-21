@@ -80,7 +80,7 @@ class QStashScheduleService implements DataRefreshConfigurationScheduler {
       },
       body: JSON.stringify({
         destination: process.env.QSTASH_DAILY_REFRESH_URL,
-        cron: frequency === 'hourly' ? '0 * * * *' : '5 0 * * *',
+        cron: frequency === 'hourly' ? '0 * * * *' : '0 12 * * *',
       }),
     });
   }

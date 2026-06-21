@@ -51,15 +51,22 @@ const BAND_DAYS_OFFSET = 1;
 const BAND_BOUNDARIES = [0.10, 0.25, 0.40, 0.65, 1.00, 1.60, 2.50, 4.00, 6.50, 12.00];
 
 const RAINBOW_BANDS = [
-  { label: 'Fire Sale',                color: 'rgba(30,  58, 138, 0.65)' },
-  { label: 'Buy',                      color: 'rgba(37,  99, 235, 0.65)' },
-  { label: 'Accumulate',               color: 'rgba(6,  182, 212, 0.65)' },
-  { label: 'Still Cheap',              color: 'rgba(34, 197,  94, 0.65)' },
-  { label: 'HODL',                     color: 'rgba(132,204,  22, 0.65)' },
-  { label: 'Is This A Bubble?',        color: 'rgba(234,179,   8, 0.65)' },
-  { label: 'FOMO Intensifies',         color: 'rgba(249,115,  22, 0.65)' },
-  { label: 'Sell Seriously',           color: 'rgba(239, 68,  68, 0.65)' },
-  { label: 'Maximum Bubble Territory', color: 'rgba(127, 29,  29, 0.65)' },
+  { label: 'Fire sale!',                color: 'rgba(30,  58, 138, 0.65)' },
+  { label: 'BUY!',                      color: 'rgba(37,  99, 235, 0.65)' },
+  { label: 'Accumulate',                color: 'rgba(6,  182, 212, 0.65)' },
+  { label: 'Still cheap',               color: 'rgba(34, 197,  94, 0.65)' },
+  { label: 'HODL',                      color: 'rgba(132,204,  22, 0.65)' },
+  { label: 'Is this a bubble?',         color: 'rgba(234,179,   8, 0.65)' },
+  { label: 'FOMO intensifies',          color: 'rgba(249,115,  22, 0.65)' },
+  { label: 'Sell. Seriously, sell!',    color: 'rgba(239, 68,  68, 0.65)' },
+  { label: 'Maximum bubble territory',  color: 'rgba(127, 29,  29, 0.65)' },
+];
+
+const HALVING_EVENTS = [
+  { date: '2012-11-28', label: '2012 Halving' },
+  { date: '2016-07-09', label: '2016 Halving' },
+  { date: '2020-05-11', label: '2020 Halving' },
+  { date: '2024-04-19', label: '2024 Halving' },
 ];
 
 function rainbowFairValue(dateStr: string): number {
@@ -100,20 +107,24 @@ export class BitcoinRainbowChartPageComponent implements AfterViewInit {
   protected readonly errorMessage = signal('');
   protected readonly infoOpen = signal(true);
   protected readonly exportMenuOpen = signal(false);
+  protected readonly reversedBands = [...RAINBOW_BANDS].reverse();
   protected readonly userAnnotations = signal<Record<string, AnnotationOptions>>({});
   protected readonly dataPoints = signal<BitcoinRainbowChartDataPoint[]>([]);
   protected readonly lastUpdated = signal<string | null>(null);
   protected readonly infoCurrentFields = computed<ChartInfoField[]>(() => {
     const point = this.latestPoint();
+    const band = point ? rainbowBandFromPrice(point.priceUsd, rainbowFairValue(point.date)) : null;
 
     return [
-      { label: 'Current Position', value: getBandLabel(point?.rainbowBand ?? null) },
+      { label: 'Current Position', value: getBandLabel(band) },
       { label: 'Current Price', value: point ? formatUsd(point.priceUsd) : 'Waiting for data' },
     ];
   });
-  protected readonly infoInterpretation = computed(() =>
-    getRainbowInterpretation(this.latestPoint()?.rainbowBand ?? null),
-  );
+  protected readonly infoInterpretation = computed(() => {
+    const point = this.latestPoint();
+    const band = point ? rainbowBandFromPrice(point.priceUsd, rainbowFairValue(point.date)) : null;
+    return getRainbowInterpretation(band);
+  });
   protected readonly infoLastUpdated = computed(() => this.lastUpdatedText());
   protected readonly infoAbout =
     'The Bitcoin Rainbow Chart uses logarithmic growth curves to identify market cycle positions. Nine color-coded bands represent valuation levels from "Fire Sale" (deep undervaluation) to "Maximum Bubble Territory" (extreme overvaluation).';
@@ -123,8 +134,11 @@ export class BitcoinRainbowChartPageComponent implements AfterViewInit {
     'Calculation: Rainbow bands calculated from logarithmic regression model fit to historical price data since 2009-01-03',
   ];
   protected readonly chartData = computed<ChartData<'line'>>(() => {
-    const dates = this.dataPoints().map((p) => p.date);
-    const fairValues = dates.map((d) => rainbowFairValue(d));
+    const points = this.dataPoints();
+    const futureLabels = buildFutureLabels(points, this.selectedTimeframe());
+    // Bands are deterministic (log formula), so we let them project into the future
+    const allDates = [...points.map((p) => p.date), ...futureLabels];
+    const fairValues = allDates.map((d) => rainbowFairValue(d));
 
     // One dataset per boundary (floor + 9 band tops), filled between adjacent datasets
     const bandDatasets = BAND_BOUNDARIES.map((mult, idx) => ({
@@ -133,25 +147,29 @@ export class BitcoinRainbowChartPageComponent implements AfterViewInit {
       borderWidth: 0,
       pointRadius: 0,
       pointHitRadius: 0,
+      order: 1, // drawn first (behind price line)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       fill: idx === 0 ? false : ('-1' as any),
       backgroundColor: idx === 0 ? 'transparent' : RAINBOW_BANDS[idx - 1].color,
       tension: 0,
     }));
 
+    const futureNulls = futureLabels.map(() => null as number | null);
+
     return {
-      labels: dates,
+      labels: allDates,
       datasets: [
         ...bandDatasets,
         {
           label: 'Bitcoin Price',
-          data: this.dataPoints().map((p) => p.priceUsd),
-          borderColor: '#111820',
+          data: [...points.map((p) => p.priceUsd), ...futureNulls],
+          borderColor: '#000000',
           backgroundColor: 'transparent',
           borderWidth: 2.5,
           pointRadius: 0,
           pointHitRadius: 12,
           tension: 0.15,
+          order: 0, // lower order = drawn last = on top of fills
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           fill: false as any,
         },
@@ -161,6 +179,29 @@ export class BitcoinRainbowChartPageComponent implements AfterViewInit {
   protected readonly chartOptions = computed<ChartOptions<'line'>>(() => {
     const range = getPriceRange(this.dataPoints());
     const priceDatasetIndex = BAND_BOUNDARIES.length; // band datasets come first
+    const dateSet = new Set(this.dataPoints().map((p) => p.date));
+    const halvingAnnotations = Object.fromEntries(
+      HALVING_EVENTS
+        .filter((e) => dateSet.has(e.date))
+        .map((e, i) => [`halving_${i}`, {
+          type: 'line' as const,
+          xMin: e.date,
+          xMax: e.date,
+          borderColor: 'rgba(23, 32, 42, 0.45)',
+          borderWidth: 1.5,
+          borderDash: [5, 4],
+          label: {
+            display: true,
+            content: e.label,
+            position: 'start' as const,
+            backgroundColor: 'rgba(23, 32, 42, 0.75)',
+            color: '#ffffff',
+            font: { size: 11 },
+            padding: { x: 6, y: 3 },
+            borderRadius: 4,
+          },
+        }]),
+    );
 
     return {
       animation: { duration: 280 },
@@ -199,7 +240,7 @@ export class BitcoinRainbowChartPageComponent implements AfterViewInit {
           },
         },
         annotation: {
-          annotations: { ...this.userAnnotations() },
+          annotations: { ...halvingAnnotations, ...this.userAnnotations() },
         },
       },
     };
@@ -400,4 +441,16 @@ function formatDate(value: string): string {
     year: 'numeric',
     timeZone: 'UTC',
   }).format(new Date(`${value}T00:00:00.000Z`));
+}
+
+function buildFutureLabels(points: { date: string }[], timeframe: string): string[] {
+  const pad: Record<string, number> = { '1m': 5, '3m': 8, '6m': 14, '1y': 21, '2y': 45, 'all': 90 };
+  const days = pad[timeframe] ?? 30;
+  if (points.length === 0) return [];
+  const last = new Date(`${points[points.length - 1].date}T00:00:00.000Z`);
+  return Array.from({ length: days }, (_, i) => {
+    const d = new Date(last);
+    d.setUTCDate(d.getUTCDate() + i + 1);
+    return d.toISOString().split('T')[0];
+  });
 }

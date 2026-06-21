@@ -5,7 +5,7 @@ import {
   type DashboardWidget,
 } from '@crypto-market-analysis/data-access/api-client';
 
-type WidgetLibraryCategory = 'Price Metrics' | 'On-chain Metrics' | 'Supply Metrics';
+type WidgetLibraryCategory = 'Price Metrics' | 'On-chain Metrics' | 'Supply Metrics' | 'Cycle Indicators';
 type ModalView = 'library' | 'custom';
 
 interface WidgetLibraryItem {
@@ -74,9 +74,17 @@ const WIDGET_LIBRARY: WidgetLibraryItem[] = [
     category: 'Supply Metrics',
     decimals: 0,
   },
+  {
+    type: 'halving_progress',
+    icon: 'HAL',
+    name: 'Halving Progress',
+    description: 'Tracks the current Bitcoin halving cycle progress from the April 2024 halving to the estimated April 2028 halving, with a days-remaining countdown.',
+    category: 'Cycle Indicators',
+    decimals: 1,
+  },
 ];
 
-const CATEGORIES: WidgetLibraryCategory[] = ['Price Metrics', 'On-chain Metrics', 'Supply Metrics'];
+const CATEGORIES: WidgetLibraryCategory[] = ['Price Metrics', 'On-chain Metrics', 'Supply Metrics', 'Cycle Indicators'];
 
 export const FORMULA_VARIABLES = [
   { name: '{{btc_price}}', description: 'Bitcoin price (USD)' },

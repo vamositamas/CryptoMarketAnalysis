@@ -67,6 +67,7 @@ const WIDGET_CATALOG: Record<string, WidgetCatalogEntry> = {
   total_supply: { title: 'Total Supply', decimals: 0 },
   circulating_supply: { title: 'Circulating Supply', decimals: 0 },
   market_cap: { title: 'Market Cap', decimals: 0 },
+  halving_progress: { title: 'Halving Progress', decimals: 1 },
 };
 
 const DEFAULT_WIDGET_TYPES = ['btc_price', '24h_change', 'mvrv_zscore', 'stock_to_flow', 'fear_greed'];
@@ -246,6 +247,23 @@ export class DashboardService {
 
     if (widget.widgetType === 'custom') {
       return this.buildCustomWidgetResponse(widget, config);
+    }
+
+    if (widget.widgetType === 'halving_progress') {
+      const CURRENT_HALVING_MS = Date.parse('2024-04-19T00:00:00Z');
+      const NEXT_HALVING_MS = Date.parse('2028-04-21T00:00:00Z');
+      const now = Date.now();
+      const progressPct = Math.min(100, Math.max(0, ((now - CURRENT_HALVING_MS) / (NEXT_HALVING_MS - CURRENT_HALVING_MS)) * 100));
+      return {
+        id: widget.id,
+        type: widget.widgetType,
+        title: config.title,
+        value: progressPct,
+        formattedValue: `${progressPct.toFixed(1)}%`,
+        trend: 'up',
+        trendPercent: null,
+        lastUpdated: new Date().toISOString(),
+      };
     }
 
     if (widget.widgetType === 'total_supply') {

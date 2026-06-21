@@ -148,6 +148,47 @@ export interface StockToFlowChartResponse {
   lastUpdated: string | null;
 }
 
+export interface MvrvZScoreChartDataPoint {
+  date: string;
+  priceUsd: number;
+  mvrvZScore: number | null;
+}
+
+export interface MvrvZScoreChartResponse {
+  chartId: 'mvrv-z-score';
+  title: 'MVRV Z-Score';
+  timeframe: ChartTimeframe;
+  dataPoints: MvrvZScoreChartDataPoint[];
+  lastUpdated: string | null;
+}
+
+export interface PuellMultipleChartDataPoint {
+  date: string;
+  priceUsd: number;
+}
+
+export interface PuellMultipleChartResponse {
+  chartId: 'puell-multiple';
+  title: 'Puell Multiple';
+  timeframe: ChartTimeframe;
+  dataPoints: PuellMultipleChartDataPoint[];
+  lastUpdated: string | null;
+}
+
+export interface VddMultipleChartDataPoint {
+  date: string;
+  priceUsd: number;
+  vddMultiple: number | null;
+}
+
+export interface VddMultipleChartResponse {
+  chartId: 'vdd-multiple';
+  title: 'VDD Multiple';
+  timeframe: ChartTimeframe;
+  dataPoints: VddMultipleChartDataPoint[];
+  lastUpdated: string | null;
+}
+
 export type ChartAnnotation =
   | {
       id: string;
@@ -517,6 +558,10 @@ export class AuthApiClient {
     );
   }
 
+  async triggerDashboardRefresh(): Promise<ManualDataRefreshResponse> {
+    return this.postWithCsrf<ManualDataRefreshResponse>('/api/dashboard/refresh', {});
+  }
+
   async getBitcoinRainbowChartData(
     timeframe: ChartTimeframe,
   ): Promise<BitcoinRainbowChartResponse> {
@@ -549,6 +594,45 @@ export class AuthApiClient {
     try {
       return await firstValueFrom(
         this.http.get<StockToFlowChartResponse>('/api/charts/stock-to-flow', {
+          params: { timeframe },
+          withCredentials: true,
+        }),
+      );
+    } catch (error) {
+      throw toApiClientError(error);
+    }
+  }
+
+  async getMvrvZScoreChartData(timeframe: ChartTimeframe): Promise<MvrvZScoreChartResponse> {
+    try {
+      return await firstValueFrom(
+        this.http.get<MvrvZScoreChartResponse>('/api/charts/mvrv-z-score', {
+          params: { timeframe },
+          withCredentials: true,
+        }),
+      );
+    } catch (error) {
+      throw toApiClientError(error);
+    }
+  }
+
+  async getPuellMultipleChartData(timeframe: ChartTimeframe): Promise<PuellMultipleChartResponse> {
+    try {
+      return await firstValueFrom(
+        this.http.get<PuellMultipleChartResponse>('/api/charts/puell-multiple', {
+          params: { timeframe },
+          withCredentials: true,
+        }),
+      );
+    } catch (error) {
+      throw toApiClientError(error);
+    }
+  }
+
+  async getVddMultipleChartData(timeframe: ChartTimeframe): Promise<VddMultipleChartResponse> {
+    try {
+      return await firstValueFrom(
+        this.http.get<VddMultipleChartResponse>('/api/charts/vdd-multiple', {
           params: { timeframe },
           withCredentials: true,
         }),

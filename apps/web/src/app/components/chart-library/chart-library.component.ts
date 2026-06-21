@@ -44,6 +44,78 @@ const CHARTS: ChartLibraryItem[] = [
       'Compares the 111-day moving average with twice the 350-day moving average to identify potential cycle-top signals.',
     thumbnailClass: 'pi-cycle-top',
   },
+  {
+    id: 'mvrv-z-score',
+    title: 'MVRV Z-Score',
+    category: 'Valuation Models',
+    accessTier: 'free',
+    signal: 'Market value vs realized value',
+    description:
+      'Compares Bitcoin market cap to realized cap using a Z-Score to identify statistically extreme overvaluation and undervaluation periods.',
+    thumbnailClass: 'mvrv-z-score',
+  },
+  {
+    id: 'puell-multiple',
+    title: 'Puell Multiple',
+    category: 'Cycle Indicators',
+    accessTier: 'free',
+    signal: 'Miner revenue cycle',
+    description:
+      'Measures daily miner revenue relative to its 365-day moving average to spot periods of miner stress (buy) and high profitability (sell).',
+    thumbnailClass: 'puell-multiple',
+  },
+  {
+    id: 'bitcoin-power-law',
+    title: 'Bitcoin Power Law Chart',
+    category: 'Valuation Models',
+    accessTier: 'free',
+    signal: 'Long-term power law trend',
+    description:
+      'Models Bitcoin\'s price as a power function of time since genesis, with floor and ceiling bands that have historically contained price action across all market cycles.',
+    thumbnailClass: 'bitcoin-power-law',
+  },
+  {
+    id: 'bitcoin-cvdd',
+    title: 'Bitcoin CVDD',
+    category: 'Cycle Indicators',
+    accessTier: 'free',
+    signal: 'Cycle bottom signal',
+    description:
+      'Cumulative Value Coin Days Destroyed tracks the accumulated value-time of coin movements relative to market age. Historically it has accurately forecast Bitcoin\'s major price lows.',
+    thumbnailClass: 'bitcoin-cvdd',
+  },
+  {
+    id: 'halving-spiral',
+    title: 'Bitcoin Halving Spiral',
+    category: 'Cycle Indicators',
+    accessTier: 'free',
+    signal: 'Cycle position & momentum',
+    description:
+      'Plots Bitcoin price on a polar chart where each full revolution equals one halving cycle (~4 years). The logarithmic radial axis lets all four cycles be overlaid, revealing how each bull and bear phase compares to historical patterns.',
+    thumbnailClass: 'halving-spiral',
+  },
+  {
+    id: 'vdd-multiple',
+    title: 'VDD Multiple',
+    category: 'Cycle Indicators',
+    accessTier: 'free',
+    signal: 'Spending velocity vs. annual average',
+    description:
+      'Compares the 30-day moving average of Value Days Destroyed (CDD × price) to its 365-day average. ' +
+      'Peaks above 2.9 mark cycle tops where long-term holders sell heavily; ' +
+      'values below 0.75 signal bear-market accumulation phases.',
+    thumbnailClass: 'vdd-multiple',
+  },
+  {
+    id: 'halving-progress',
+    title: 'Bitcoin Halving Progress',
+    category: 'Cycle Indicators',
+    accessTier: 'free',
+    signal: 'Cycle-over-cycle comparison',
+    description:
+      'Shows Bitcoin\'s full price history across all halving cycles on a logarithmic scale. Cycle backgrounds, vertical halving markers, and a progress indicator reveal where the current cycle stands relative to the same stage in past cycles.',
+    thumbnailClass: 'halving-progress',
+  },
 ];
 
 const CATEGORIES: ChartLibraryItem['category'][] = ['Valuation Models', 'Cycle Indicators'];

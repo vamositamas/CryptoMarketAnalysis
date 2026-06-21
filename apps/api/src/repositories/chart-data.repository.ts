@@ -9,6 +9,9 @@ export interface ChartDataRow {
   ma111: number | null;
   ma350: number | null;
   stockToFlowRatio: number | null;
+  mvrvZScore: number | null;
+  coinDaysDestroyed: number | null;
+  vddMultiple: number | null;
   lastUpdated: string | null;
 }
 
@@ -19,6 +22,9 @@ interface ChartDataDbRow {
   ma_111_day: string | number | null;
   ma_350_day: string | number | null;
   stock_to_flow_ratio: string | number | null;
+  mvrv_zscore: string | number | null;
+  coin_days_destroyed: string | number | null;
+  vdd_multiple: string | number | null;
   last_updated: string | Date | null;
 }
 
@@ -50,12 +56,18 @@ export class ChartDataRepository extends BaseRepository {
           ma111.metric_value AS ma_111_day,
           ma350.metric_value AS ma_350_day,
           stock_to_flow.metric_value AS stock_to_flow_ratio,
+          mvrv.metric_value AS mvrv_zscore,
+          cdd.metric_value AS coin_days_destroyed,
+          vdd.metric_value AS vdd_multiple,
           GREATEST(
             price.created_at,
             COALESCE(rainbow.created_at, price.created_at),
             COALESCE(ma111.created_at, price.created_at),
             COALESCE(ma350.created_at, price.created_at),
-            COALESCE(stock_to_flow.created_at, price.created_at)
+            COALESCE(stock_to_flow.created_at, price.created_at),
+            COALESCE(mvrv.created_at, price.created_at),
+            COALESCE(cdd.created_at, price.created_at),
+            COALESCE(vdd.created_at, price.created_at)
           ) AS last_updated
         FROM bitcoin_price_daily price
         LEFT JOIN bitcoin_metrics_daily rainbow
@@ -70,6 +82,15 @@ export class ChartDataRepository extends BaseRepository {
         LEFT JOIN bitcoin_metrics_daily stock_to_flow
           ON stock_to_flow.date = price.date
           AND stock_to_flow.metric_name = 'stock_to_flow_ratio'
+        LEFT JOIN bitcoin_metrics_daily mvrv
+          ON mvrv.date = price.date
+          AND mvrv.metric_name = 'mvrv_zscore'
+        LEFT JOIN bitcoin_metrics_daily cdd
+          ON cdd.date = price.date
+          AND cdd.metric_name = 'coin_days_destroyed'
+        LEFT JOIN bitcoin_metrics_daily vdd
+          ON vdd.date = price.date
+          AND vdd.metric_name = 'vdd_multiple'
         WHERE price.date >= $1::date
         ORDER BY price.date ASC
       `,
@@ -95,6 +116,9 @@ function toChartDataRow(row: ChartDataDbRow): ChartDataRow {
     ma111: nullableNumber(row.ma_111_day),
     ma350: nullableNumber(row.ma_350_day),
     stockToFlowRatio: nullableNumber(row.stock_to_flow_ratio),
+    mvrvZScore: nullableNumber(row.mvrv_zscore),
+    coinDaysDestroyed: nullableNumber(row.coin_days_destroyed),
+    vddMultiple: nullableNumber(row.vdd_multiple),
     lastUpdated: row.last_updated === null ? null : formatTimestamp(row.last_updated),
   };
 }

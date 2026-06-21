@@ -34,6 +34,13 @@ interface CoinGeckoHistoryResponse {
   };
 }
 
+interface CoinGeckoSimplePriceResponse {
+  bitcoin?: {
+    usd?: number;
+    usd_market_cap?: number;
+  };
+}
+
 const DEFAULT_BASE_URL = 'https://api.coingecko.com/api/v3';
 
 export class CoinGeckoClient {
@@ -67,6 +74,17 @@ export class CoinGeckoClient {
     return marketData.priceUsd;
   }
 
+  async fetchCurrentBitcoinMarketData(date: string): Promise<CoinGeckoBitcoinMarketData> {
+    return this.queue.add(() =>
+      retryWithBackoff(
+        () => this.fetchCurrentBitcoinMarketDataNow(date),
+        this.retryAttempts,
+        this.retryBaseDelayMs,
+        { sleep: this.sleep, shouldRetry: isRetryableCoinGeckoError },
+      ),
+    );
+  }
+
   async fetchBitcoinMarketData(date: string): Promise<CoinGeckoBitcoinMarketData> {
     return this.queue.add(() =>
       retryWithBackoff(
@@ -79,6 +97,36 @@ export class CoinGeckoClient {
         },
       ),
     );
+  }
+
+  private async fetchCurrentBitcoinMarketDataNow(date: string): Promise<CoinGeckoBitcoinMarketData> {
+    const url = new URL('/api/v3/simple/price', ensureTrailingSlash(this.baseUrl));
+    url.searchParams.set('ids', 'bitcoin');
+    url.searchParams.set('vs_currencies', 'usd');
+    url.searchParams.set('include_market_cap', 'true');
+    const urlStr = url.toString();
+
+    try {
+      const response = await this.fetchFn(urlStr);
+
+      if (!response.ok) {
+        throw new CoinGeckoClientError(
+          `CoinGecko simple price request failed with status ${response.status}`,
+          response.status,
+        );
+      }
+
+      const payload = (await response.json()) as CoinGeckoSimplePriceResponse;
+
+      return normalizeSimplePriceResponse(date, payload);
+    } catch (error) {
+      this.logger.error('CoinGecko simple price request failed', {
+        timestamp: new Date().toISOString(),
+        request: { date, url: urlStr },
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
   }
 
   private async fetchBitcoinMarketDataNow(
@@ -135,6 +183,25 @@ export class CoinGeckoClientError extends Error {
   ) {
     super(message);
   }
+}
+
+function normalizeSimplePriceResponse(
+  date: string,
+  response: CoinGeckoSimplePriceResponse,
+): CoinGeckoBitcoinMarketData {
+  const priceUsd = response.bitcoin?.usd;
+  const marketCapUsd = response.bitcoin?.usd_market_cap;
+
+  if (typeof priceUsd !== 'number') {
+    throw new CoinGeckoClientError('CoinGecko simple price response is missing USD price');
+  }
+
+  const circulatingSupply =
+    typeof marketCapUsd === 'number' && priceUsd > 0
+      ? Math.round(marketCapUsd / priceUsd)
+      : undefined;
+
+  return { date, priceUsd, marketCapUsd, circulatingSupply };
 }
 
 function normalizeHistoryResponse(

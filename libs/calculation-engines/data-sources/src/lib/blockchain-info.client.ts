@@ -65,6 +65,10 @@ export class BlockchainInfoClient {
     return this.fetchChart(DIFFICULTY_CHART, startDate, endDate);
   }
 
+  async fetchCoinDaysDestroyed(startDate: string, endDate: string): Promise<BlockchainInfoChartPoint[]> {
+    return this.fetchChart('bitcoin-days-destroyed', startDate, endDate);
+  }
+
   private async fetchChart(
     chartName: string,
     startDate: string,

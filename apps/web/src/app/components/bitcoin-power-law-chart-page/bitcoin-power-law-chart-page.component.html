@@ -4,12 +4,12 @@
       <a class="form-link" routerLink="/charts" i18n="Back to chart library@@charts.backToLibrary">
         Back to chart library
       </a>
-      <p class="eyebrow" i18n="Pi Cycle eyebrow@@charts.piCycleEyebrow">
-        Cycle indicator
+      <p class="eyebrow" i18n="Power Law eyebrow@@charts.powerLawEyebrow">
+        Valuation model
       </p>
-      <h2 i18n="Pi Cycle title@@charts.piCycleTitle">Pi Cycle Top Indicator</h2>
-      <p i18n="Pi Cycle subtitle@@charts.piCycleSubtitle">
-        Moving-average crossover signal for potential Bitcoin cycle tops
+      <h2 i18n="Power Law title@@charts.powerLawTitle">Bitcoin Power Law Chart</h2>
+      <p i18n="Power Law subtitle@@charts.powerLawSubtitle">
+        Long-term price model based on power law regression since Bitcoin genesis
       </p>
     </div>
     <div class="chart-status">
@@ -50,7 +50,7 @@
         }
       </div>
       <app-chart-annotations
-        chartId="pi-cycle-top"
+        chartId="bitcoin-power-law"
         (annotationsChanged)="updateUserAnnotations($event)"
       ></app-chart-annotations>
       <button type="button" class="secondary-button" (click)="openAlertModal()">
@@ -84,7 +84,7 @@
 
   @if (showAlertModal()) {
     <app-create-alert-modal
-      chartId="pi-cycle-top"
+      chartId="bitcoin-power-law"
       [metrics]="alertMetrics"
       (closed)="closeAlertModal()"
     ></app-create-alert-modal>
@@ -92,10 +92,6 @@
 
   @if (errorMessage()) {
     <p class="form-message">{{ errorMessage() }}</p>
-  }
-
-  @if (signalNotice()) {
-    <p class="form-message success">{{ signalNotice() }}</p>
   }
 
   <div class="chart-workspace info-collapsed">
@@ -115,22 +111,21 @@
         ></app-chart-viewer>
       } @else if (!isLoading() && !errorMessage()) {
         <p class="empty-state" i18n="No chart data message@@charts.noData">
-          No Pi Cycle Top chart data is available yet.
+          No Power Law chart data is available yet.
         </p>
       }
     </div>
-
   </div>
 
   @if (infoOpen()) {
     <app-chart-info-panel
-      title="Pi Cycle Top Indicator"
+      title="Bitcoin Power Law Chart"
       [about]="infoAbout"
       [currentFields]="infoCurrentFields()"
       [interpretation]="infoInterpretation()"
       [dataSources]="infoDataSources"
       [lastUpdated]="infoLastUpdated()"
-      learnMoreHref="/assets/docs/specificaton/PiCycleTopIndicator.md"
+      learnMoreHref="/assets/docs/specificaton/BitcoinPowerLaw.md"
     ></app-chart-info-panel>
   }
 </section>

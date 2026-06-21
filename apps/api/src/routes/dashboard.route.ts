@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { getDatabasePool } from '../config/database.config';
+import { DailyDataRefreshService } from '../jobs/daily-data-refresh.controller';
 import { requireAuth } from '../middleware/rbac.middleware';
 import type { AuthenticatedRequest, TokenInvalidationReader } from '../middleware/rbac.middleware';
 import { DashboardMetricsRepository } from '../repositories/dashboard-metrics.repository';
@@ -8,6 +9,7 @@ import { DashboardError, DashboardService } from '../services/dashboard.service'
 
 interface DashboardRouterOptions {
   dashboardService?: Pick<DashboardService, 'getWidgets' | 'addWidget' | 'reorderWidgets' | 'removeWidget'>;
+  dailyDataRefreshService?: Pick<DailyDataRefreshService, 'run'>;
 }
 
 export function createDashboardRouter(
@@ -16,6 +18,7 @@ export function createDashboardRouter(
 ): Router {
   const router = Router();
   let dashboardService = options.dashboardService;
+  const refreshService = options.dailyDataRefreshService ?? new DailyDataRefreshService();
 
   router.get('/widgets', requireAuth(tokenInvalidations), async (req, res, next) => {
     try {
@@ -75,6 +78,14 @@ export function createDashboardRouter(
         return;
       }
 
+      next(error);
+    }
+  });
+
+  router.post('/refresh', requireAuth(tokenInvalidations), async (_req, res, next) => {
+    try {
+      res.status(200).json(await refreshService.run());
+    } catch (error) {
       next(error);
     }
   });

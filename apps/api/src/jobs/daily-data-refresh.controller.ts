@@ -50,13 +50,13 @@ interface BitcoinMetricRecord {
 }
 
 interface DailyDataRefreshOptions {
-  coinGeckoClient?: Pick<CoinGeckoClient, 'fetchBitcoinMarketData'>;
+  coinGeckoClient?: Pick<CoinGeckoClient, 'fetchBitcoinMarketData' | 'fetchCurrentBitcoinMarketData'>;
   blockchainInfoClient?: Pick<
     BlockchainInfoClient,
-    'fetchMarketPrice' | 'fetchHashRate' | 'fetchDifficulty'
+    'fetchMarketPrice' | 'fetchHashRate' | 'fetchDifficulty' | 'fetchCoinDaysDestroyed'
   >;
   fearGreedClient?: Pick<FearGreedClient, 'fetchLatest'>;
-  bitcoinDataClient?: Pick<BitcoinDataClient, 'fetchMvrvZScore' | 'fetchRealizedPrice'>;
+  bitcoinDataClient?: Pick<BitcoinDataClient, 'fetchMvrvZScore' | 'fetchRealizedPrice' | 'fetchVddMultiple'>;
   database?: Parameters<typeof insertBitcoinPriceDaily>[0];
   emailService?: DailyDataRefreshFailureEmailSender;
   alertEvaluationService?: Pick<AlertEvaluationService, 'evaluateAlerts'>;
@@ -102,13 +102,13 @@ export function createDailyDataRefreshRouter(
 }
 
 export class DailyDataRefreshService {
-  private readonly coinGeckoClient: Pick<CoinGeckoClient, 'fetchBitcoinMarketData'>;
+  private readonly coinGeckoClient: Pick<CoinGeckoClient, 'fetchBitcoinMarketData' | 'fetchCurrentBitcoinMarketData'>;
   private readonly blockchainInfoClient: Pick<
     BlockchainInfoClient,
-    'fetchMarketPrice' | 'fetchHashRate' | 'fetchDifficulty'
+    'fetchMarketPrice' | 'fetchHashRate' | 'fetchDifficulty' | 'fetchCoinDaysDestroyed'
   >;
   private readonly fearGreedClient: Pick<FearGreedClient, 'fetchLatest'>;
-  private readonly bitcoinDataClient: Pick<BitcoinDataClient, 'fetchMvrvZScore' | 'fetchRealizedPrice'>;
+  private readonly bitcoinDataClient: Pick<BitcoinDataClient, 'fetchMvrvZScore' | 'fetchRealizedPrice' | 'fetchVddMultiple'>;
   private readonly database: Parameters<typeof insertBitcoinPriceDaily>[0] | undefined;
   private readonly emailService: DailyDataRefreshFailureEmailSender;
   private readonly alertEvaluationService: Pick<AlertEvaluationService, 'evaluateAlerts'>;
@@ -135,7 +135,7 @@ export class DailyDataRefreshService {
 
   async run(): Promise<DailyDataRefreshSummary> {
     const startedAt = Date.now();
-    const date = getYesterdayUtcIsoDate(this.now());
+    const date = getTodayUtcIsoDate(this.now());
     const database = this.database;
 
     if (!database) {
@@ -175,7 +175,7 @@ export class DailyDataRefreshService {
 
     if (retryCount !== undefined && retryCount >= FINAL_QSTASH_ATTEMPT_INDEX) {
       await this.emailService.sendDailyDataRefreshFailureAlert({
-        date: getYesterdayUtcIsoDate(this.now()),
+        date: getTodayUtcIsoDate(this.now()),
         attempts: retryCount + 1,
         error: error instanceof Error ? error.message : String(error),
       });
@@ -185,6 +185,22 @@ export class DailyDataRefreshService {
   private async fetchDailyPriceRecord(
     date: string,
   ): Promise<{ record: BitcoinPriceRecord; source: 'coingecko' | 'blockchain-info' }> {
+    // For today's date use the live /simple/price endpoint — the historical endpoint
+    // only returns data for completed past days and returns nothing for the current day.
+    if (date === getTodayUtcIsoDate(this.now())) {
+      try {
+        return {
+          record: await this.coinGeckoClient.fetchCurrentBitcoinMarketData(date),
+          source: 'coingecko',
+        };
+      } catch (liveError) {
+        this.logger.warn('CoinGecko live price failed; falling back to historical endpoint', {
+          date,
+          error: liveError instanceof Error ? liveError.message : String(liveError),
+        });
+      }
+    }
+
     try {
       return {
         record: await this.coinGeckoClient.fetchBitcoinMarketData(date),
@@ -240,6 +256,9 @@ export class DailyDataRefreshService {
       ...(await this.fetchExternalMetric('realized_price', () =>
         this.bitcoinDataClient.fetchRealizedPrice(),
       )),
+      ...(await this.fetchExternalMetric('vdd_multiple', () =>
+        this.bitcoinDataClient.fetchVddMultiple(),
+      )),
       ...(await this.fetchExternalMetric('hash_rate', () =>
         this.fetchBlockchainInfoChartValue(date, () =>
           this.blockchainInfoClient.fetchHashRate(date, date),
@@ -248,6 +267,11 @@ export class DailyDataRefreshService {
       ...(await this.fetchExternalMetric('mining_difficulty', () =>
         this.fetchBlockchainInfoChartValue(date, () =>
           this.blockchainInfoClient.fetchDifficulty(date, date),
+        ),
+      )),
+      ...(await this.fetchExternalMetric('coin_days_destroyed', () =>
+        this.fetchBlockchainInfoChartValue(date, () =>
+          this.blockchainInfoClient.fetchCoinDaysDestroyed(date, date),
         ),
       )),
     ];
@@ -552,9 +576,6 @@ function getRequestUrl(req: Request): string {
   return `${protocol}://${host}${req.originalUrl}`;
 }
 
-function getYesterdayUtcIsoDate(now: Date): string {
-  const yesterday = new Date(now);
-  yesterday.setUTCDate(yesterday.getUTCDate() - 1);
-
-  return yesterday.toISOString().slice(0, 10);
+function getTodayUtcIsoDate(now: Date): string {
+  return now.toISOString().slice(0, 10);
 }

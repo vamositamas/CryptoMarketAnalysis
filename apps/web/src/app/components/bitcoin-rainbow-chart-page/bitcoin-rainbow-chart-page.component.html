@@ -64,6 +64,26 @@
     </div>
   </div>
 
+  @if (chartAnnotations && chartAnnotations.noteAnnotations().length > 0) {
+    <div class="annotation-panel">
+      <span class="annotation-panel-label">Annotations</span>
+      <div class="annotation-panel-list">
+        @for (annotation of chartAnnotations.noteAnnotations(); track annotation.id) {
+          <div class="annotation-panel-item">
+            <span class="annotation-color-dot" [style.background]="annotation.color"></span>
+            <span class="annotation-panel-text">{{ annotation.date }} &mdash; {{ annotation.text }}</span>
+            <button
+              type="button"
+              class="annotation-delete-button"
+              aria-label="Delete annotation"
+              (click)="chartAnnotations.deleteAnnotation(annotation.id)"
+            >&times;</button>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
   @if (showAlertModal()) {
     <app-create-alert-modal
       chartId="bitcoin-rainbow"
@@ -86,6 +106,18 @@
       }
 
       @if (dataPoints().length > 0) {
+        <div class="rainbow-legend">
+          <span class="rainbow-legend-item">
+            <span class="rainbow-legend-price"></span>
+            <span class="rainbow-legend-text">BTC Price</span>
+          </span>
+          @for (band of reversedBands; track band.label) {
+            <span class="rainbow-legend-item">
+              <span class="rainbow-legend-band" [style.background]="band.color"></span>
+              <span class="rainbow-legend-text">{{ band.label }}</span>
+            </span>
+          }
+        </div>
         <app-chart-viewer
           [chartData]="chartData()"
           [chartOptions]="chartOptions()"

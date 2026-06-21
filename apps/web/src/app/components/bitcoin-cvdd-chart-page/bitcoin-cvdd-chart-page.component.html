@@ -4,12 +4,12 @@
       <a class="form-link" routerLink="/charts" i18n="Back to chart library@@charts.backToLibrary">
         Back to chart library
       </a>
-      <p class="eyebrow" i18n="Pi Cycle eyebrow@@charts.piCycleEyebrow">
+      <p class="eyebrow" i18n="CVDD eyebrow@@charts.cvddEyebrow">
         Cycle indicator
       </p>
-      <h2 i18n="Pi Cycle title@@charts.piCycleTitle">Pi Cycle Top Indicator</h2>
-      <p i18n="Pi Cycle subtitle@@charts.piCycleSubtitle">
-        Moving-average crossover signal for potential Bitcoin cycle tops
+      <h2 i18n="CVDD title@@charts.cvddTitle">Bitcoin CVDD</h2>
+      <p i18n="CVDD subtitle@@charts.cvddSubtitle">
+        Cumulative Value Coin Days Destroyed — a historically accurate bottom indicator
       </p>
     </div>
     <div class="chart-status">
@@ -50,7 +50,7 @@
         }
       </div>
       <app-chart-annotations
-        chartId="pi-cycle-top"
+        chartId="bitcoin-cvdd"
         (annotationsChanged)="updateUserAnnotations($event)"
       ></app-chart-annotations>
       <button type="button" class="secondary-button" (click)="openAlertModal()">
@@ -84,7 +84,7 @@
 
   @if (showAlertModal()) {
     <app-create-alert-modal
-      chartId="pi-cycle-top"
+      chartId="bitcoin-cvdd"
       [metrics]="alertMetrics"
       (closed)="closeAlertModal()"
     ></app-create-alert-modal>
@@ -92,10 +92,6 @@
 
   @if (errorMessage()) {
     <p class="form-message">{{ errorMessage() }}</p>
-  }
-
-  @if (signalNotice()) {
-    <p class="form-message success">{{ signalNotice() }}</p>
   }
 
   <div class="chart-workspace info-collapsed">
@@ -115,22 +111,21 @@
         ></app-chart-viewer>
       } @else if (!isLoading() && !errorMessage()) {
         <p class="empty-state" i18n="No chart data message@@charts.noData">
-          No Pi Cycle Top chart data is available yet.
+          No CVDD chart data is available yet.
         </p>
       }
     </div>
-
   </div>
 
   @if (infoOpen()) {
     <app-chart-info-panel
-      title="Pi Cycle Top Indicator"
+      title="Bitcoin CVDD"
       [about]="infoAbout"
       [currentFields]="infoCurrentFields()"
       [interpretation]="infoInterpretation()"
       [dataSources]="infoDataSources"
       [lastUpdated]="infoLastUpdated()"
-      learnMoreHref="/assets/docs/specificaton/PiCycleTopIndicator.md"
+      learnMoreHref="/assets/docs/specificaton/BitcoinCVDD.md"
     ></app-chart-info-panel>
   }
 </section>

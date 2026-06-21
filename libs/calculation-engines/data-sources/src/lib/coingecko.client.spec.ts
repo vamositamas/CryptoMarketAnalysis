@@ -113,6 +113,43 @@ describe('CoinGeckoClient', () => {
     );
   });
 
+  it('fetches and normalizes live Bitcoin market data for today', async () => {
+    const fetchFn = jest.fn().mockResolvedValue(
+      createJsonResponse({
+        bitcoin: {
+          usd: 64428.91,
+          usd_market_cap: 1_274_781_494_836,
+        },
+      }),
+    );
+    const client = new CoinGeckoClient({
+      baseUrl: 'https://api.coingecko.com/api/v3',
+      fetchFn: fetchFn as never,
+    });
+
+    await expect(client.fetchCurrentBitcoinMarketData('2026-06-10')).resolves.toEqual({
+      date: '2026-06-10',
+      priceUsd: 64428.91,
+      marketCapUsd: 1_274_781_494_836,
+      circulatingSupply: Math.round(1_274_781_494_836 / 64428.91),
+    });
+    expect(fetchFn).toHaveBeenCalledWith(
+      'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_market_cap=true',
+    );
+  });
+
+  it('throws when the live price response is missing a USD price', async () => {
+    const client = new CoinGeckoClient({
+      fetchFn: jest.fn().mockResolvedValue(createJsonResponse({ bitcoin: {} })) as never,
+      logger: { error: jest.fn() },
+      retryAttempts: 0,
+    });
+
+    await expect(client.fetchCurrentBitcoinMarketData('2026-06-10')).rejects.toThrow(
+      'CoinGecko simple price response is missing USD price',
+    );
+  });
+
   it('retries 429 responses with exponential backoff before succeeding', async () => {
     const sleep = jest.fn().mockResolvedValue(undefined);
     const fetchFn = jest

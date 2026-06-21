@@ -55,21 +55,22 @@ describe('daily data refresh job', () => {
     expect(next).toHaveBeenCalledTimes(1);
   });
 
-  it('fetches yesterday from CoinGecko and upserts one data point', async () => {
+  it('fetches today from CoinGecko live price and upserts one data point', async () => {
     const database = {
       query: jest
         .fn()
         .mockResolvedValueOnce(undefined)
-        .mockResolvedValueOnce({ rows: createPriceHistoryRows('2026-06-09') })
+        .mockResolvedValueOnce({ rows: createPriceHistoryRows('2026-06-10') })
         .mockResolvedValueOnce(undefined),
     };
     const coinGeckoClient = {
-      fetchBitcoinMarketData: jest.fn().mockResolvedValue({
-        date: '2026-06-09',
+      fetchCurrentBitcoinMarketData: jest.fn().mockResolvedValue({
+        date: '2026-06-10',
         priceUsd: 67234.5,
         marketCapUsd: 1_320_000_000_000,
         circulatingSupply: 19_700_000,
       }),
+      fetchBitcoinMarketData: jest.fn(),
     };
     const blockchainInfoClient = createBlockchainInfoClientStub();
     const service = new DailyDataRefreshService({
@@ -86,56 +87,58 @@ describe('daily data refresh job', () => {
 
     await expect(service.run()).resolves.toMatchObject({
       success: true,
-      date: '2026-06-09',
+      date: '2026-06-10',
       dataPoints: 1,
       source: 'coingecko',
     });
-    expect(coinGeckoClient.fetchBitcoinMarketData).toHaveBeenCalledWith('2026-06-09');
+    expect(coinGeckoClient.fetchCurrentBitcoinMarketData).toHaveBeenCalledWith('2026-06-10');
+    expect(coinGeckoClient.fetchBitcoinMarketData).not.toHaveBeenCalled();
     expect(blockchainInfoClient.fetchMarketPrice).not.toHaveBeenCalled();
     expect(database.query).toHaveBeenNthCalledWith(
       1,
       expect.stringContaining('INSERT INTO bitcoin_price_daily'),
-      ['2026-06-09', 67234.5, 1_320_000_000_000, 19_700_000],
+      ['2026-06-10', 67234.5, 1_320_000_000_000, 19_700_000],
     );
     expect(database.query).toHaveBeenNthCalledWith(
       2,
       expect.stringContaining('FROM bitcoin_price_daily'),
-      ['2026-06-09'],
+      ['2026-06-10'],
     );
     expect(database.query).toHaveBeenNthCalledWith(
       3,
       expect.stringContaining('INSERT INTO bitcoin_metrics_daily'),
       expect.arrayContaining([
-        '2026-06-09',
+        '2026-06-10',
         'ma_111_day',
-        '2026-06-09',
+        '2026-06-10',
         'ma_350_day',
-        '2026-06-09',
+        '2026-06-10',
         'stock_to_flow_ratio',
-        '2026-06-09',
+        '2026-06-10',
         'rainbow_band',
       ]),
     );
   });
 
-  it('uses Blockchain.info fallback when CoinGecko fails', async () => {
+  it('uses Blockchain.info fallback when all CoinGecko endpoints fail', async () => {
     const database = {
       query: jest
         .fn()
         .mockResolvedValueOnce(undefined)
-        .mockResolvedValueOnce({ rows: createPriceHistoryRows('2026-06-09') })
+        .mockResolvedValueOnce({ rows: createPriceHistoryRows('2026-06-10') })
         .mockResolvedValueOnce(undefined),
     };
     const blockchainInfoClient = createBlockchainInfoClientStub({
       fetchMarketPrice: jest.fn().mockResolvedValue([
         {
-          date: '2026-06-09',
+          date: '2026-06-10',
           priceUsd: 67000,
         },
       ]),
     });
     const service = new DailyDataRefreshService({
       coinGeckoClient: {
+        fetchCurrentBitcoinMarketData: jest.fn().mockRejectedValue(new Error('rate limited')),
         fetchBitcoinMarketData: jest.fn().mockRejectedValue(new Error('rate limited')),
       },
       blockchainInfoClient,
@@ -149,17 +152,17 @@ describe('daily data refresh job', () => {
     });
 
     await expect(service.run()).resolves.toMatchObject({
-      date: '2026-06-09',
+      date: '2026-06-10',
       source: 'blockchain-info',
     });
     expect(blockchainInfoClient.fetchMarketPrice).toHaveBeenCalledWith(
-      '2026-06-09',
-      '2026-06-09',
+      '2026-06-10',
+      '2026-06-10',
     );
     expect(database.query).toHaveBeenNthCalledWith(
       1,
       expect.stringContaining('INSERT INTO bitcoin_price_daily'),
-      ['2026-06-09', 67000, null, null],
+      ['2026-06-10', 67000, null, null],
     );
     expect(database.query).toHaveBeenNthCalledWith(
       3,
@@ -173,7 +176,7 @@ describe('daily data refresh job', () => {
       query: jest
         .fn()
         .mockResolvedValueOnce(undefined)
-        .mockResolvedValueOnce({ rows: createPriceHistoryRows('2026-06-09') })
+        .mockResolvedValueOnce({ rows: createPriceHistoryRows('2026-06-10') })
         .mockResolvedValueOnce(undefined)
         .mockResolvedValueOnce(undefined),
     };
@@ -187,7 +190,8 @@ describe('daily data refresh job', () => {
     const blockchainInfoClient = createBlockchainInfoClientStub();
     const service = new DailyDataRefreshService({
       coinGeckoClient: {
-        fetchBitcoinMarketData: jest.fn().mockResolvedValue({ date: '2026-06-09', priceUsd: 1 }),
+        fetchCurrentBitcoinMarketData: jest.fn().mockResolvedValue({ date: '2026-06-10', priceUsd: 1 }),
+        fetchBitcoinMarketData: jest.fn(),
       },
       blockchainInfoClient,
       fearGreedClient,
@@ -204,8 +208,8 @@ describe('daily data refresh job', () => {
     expect(fearGreedClient.fetchLatest).toHaveBeenCalledTimes(1);
     expect(bitcoinDataClient.fetchMvrvZScore).toHaveBeenCalledTimes(1);
     expect(bitcoinDataClient.fetchRealizedPrice).toHaveBeenCalledTimes(1);
-    expect(blockchainInfoClient.fetchHashRate).toHaveBeenCalledWith('2026-06-09', '2026-06-09');
-    expect(blockchainInfoClient.fetchDifficulty).toHaveBeenCalledWith('2026-06-09', '2026-06-09');
+    expect(blockchainInfoClient.fetchHashRate).toHaveBeenCalledWith('2026-06-10', '2026-06-10');
+    expect(blockchainInfoClient.fetchDifficulty).toHaveBeenCalledWith('2026-06-10', '2026-06-10');
     expect(database.query).toHaveBeenNthCalledWith(
       4,
       expect.stringContaining('INSERT INTO bitcoin_metrics_daily'),
@@ -219,10 +223,10 @@ describe('daily data refresh job', () => {
         '2026-06-09',
         'realized_price',
         53020.27,
-        '2026-06-09',
+        '2026-06-10',
         'hash_rate',
         931513615.5806334,
-        '2026-06-09',
+        '2026-06-10',
         'mining_difficulty',
         138955357012247.48,
       ],
@@ -234,7 +238,7 @@ describe('daily data refresh job', () => {
       query: jest
         .fn()
         .mockResolvedValueOnce(undefined)
-        .mockResolvedValueOnce({ rows: createPriceHistoryRows('2026-06-09') })
+        .mockResolvedValueOnce({ rows: createPriceHistoryRows('2026-06-10') })
         .mockResolvedValueOnce(undefined)
         .mockResolvedValueOnce(undefined),
     };
@@ -242,7 +246,8 @@ describe('daily data refresh job', () => {
     const logger = createLogger();
     const service = new DailyDataRefreshService({
       coinGeckoClient: {
-        fetchBitcoinMarketData: jest.fn().mockResolvedValue({ date: '2026-06-09', priceUsd: 1 }),
+        fetchCurrentBitcoinMarketData: jest.fn().mockResolvedValue({ date: '2026-06-10', priceUsd: 1 }),
+        fetchBitcoinMarketData: jest.fn(),
       },
       blockchainInfoClient: createBlockchainInfoClientStub(),
       fearGreedClient: { fetchLatest: jest.fn().mockRejectedValue(new Error('service down')) },
@@ -265,6 +270,7 @@ describe('daily data refresh job', () => {
       expect.stringContaining('INSERT INTO bitcoin_metrics_daily'),
       expect.arrayContaining(['2026-06-09', 'mvrv_zscore', 1.23]),
     );
+
   });
 
   it('sends an administrator alert on the final QStash retry failure', async () => {
@@ -279,7 +285,7 @@ describe('daily data refresh job', () => {
     await service.handleFailure(new Error('database offline'), 2);
 
     expect(emailService.sendDailyDataRefreshFailureAlert).toHaveBeenCalledWith({
-      date: '2026-06-09',
+      date: '2026-06-10',
       attempts: 3,
       error: 'database offline',
     });
@@ -299,10 +305,11 @@ describe('daily data refresh job', () => {
         expectedUrl: 'https://example.com/api/jobs/daily-data-refresh',
       },
       coinGeckoClient: {
-        fetchBitcoinMarketData: jest.fn().mockResolvedValue({
-          date: '2026-06-09',
+        fetchCurrentBitcoinMarketData: jest.fn().mockResolvedValue({
+          date: '2026-06-10',
           priceUsd: 1,
         }),
+        fetchBitcoinMarketData: jest.fn(),
       },
       blockchainInfoClient: createBlockchainInfoClientStub(),
       fearGreedClient: createFearGreedClientStub(),
@@ -311,7 +318,7 @@ describe('daily data refresh job', () => {
         query: jest
           .fn()
           .mockResolvedValueOnce(undefined)
-          .mockResolvedValueOnce({ rows: createPriceHistoryRows('2026-06-09') })
+          .mockResolvedValueOnce({ rows: createPriceHistoryRows('2026-06-10') })
           .mockResolvedValueOnce(undefined),
       },
       emailService: { sendDailyDataRefreshFailureAlert: jest.fn() },
@@ -336,7 +343,7 @@ describe('daily data refresh job', () => {
     expect(response.statusCode).toBe(200);
     expect(response.body).toMatchObject({
       success: true,
-      date: '2026-06-09',
+      date: '2026-06-10',
       dataPoints: 1,
     });
   });
@@ -405,10 +412,10 @@ function createBlockchainInfoClientStub(overrides: { fetchMarketPrice?: jest.Moc
     fetchMarketPrice: overrides.fetchMarketPrice ?? jest.fn(),
     fetchHashRate: jest
       .fn()
-      .mockResolvedValue([{ date: '2026-06-09', value: 931513615.5806334 }]),
+      .mockResolvedValue([{ date: '2026-06-10', value: 931513615.5806334 }]),
     fetchDifficulty: jest
       .fn()
-      .mockResolvedValue([{ date: '2026-06-09', value: 138955357012247.48 }]),
+      .mockResolvedValue([{ date: '2026-06-10', value: 138955357012247.48 }]),
   };
 }
 

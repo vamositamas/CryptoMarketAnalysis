@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360">
+  <rect x="0" y="0"   width="800" height="46"  fill="rgba(127,29,29,0.65)"/>
+  <rect x="0" y="46"  width="800" height="37"  fill="rgba(239,68,68,0.65)"/>
+  <rect x="0" y="83"  width="800" height="35"  fill="rgba(249,115,22,0.65)"/>
+  <rect x="0" y="118" width="800" height="34"  fill="rgba(234,179,8,0.65)"/>
+  <rect x="0" y="152" width="800" height="35"  fill="rgba(132,204,22,0.65)"/>
+  <rect x="0" y="187" width="800" height="32"  fill="rgba(34,197,94,0.65)"/>
+  <rect x="0" y="219" width="800" height="37"  fill="rgba(6,182,212,0.65)"/>
+  <rect x="0" y="256" width="800" height="35"  fill="rgba(37,99,235,0.65)"/>
+  <rect x="0" y="291" width="800" height="69"  fill="rgba(30,58,138,0.65)"/>
+  <path d="M 0,322 C 80,318 130,312 155,307 C 168,228 200,76 213,70 C 228,285 260,312 272,308 C 308,294 346,264 355,254 C 372,188 408,34 424,28 C 441,90 472,247 507,242 C 522,236 542,230 555,226 C 573,186 617,93 632,96 C 649,165 678,226 685,220 C 703,210 741,198 763,195 C 776,194 792,196 800,196"
+        stroke="#111820" stroke-width="2.5" fill="none"/>
+</svg>

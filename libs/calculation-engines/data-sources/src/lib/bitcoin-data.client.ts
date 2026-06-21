@@ -46,6 +46,54 @@ export class BitcoinDataClient {
     return this.fetchLatest('realized-price', 'realizedPrice', 'Realized Price');
   }
 
+  async fetchVddMultiple(): Promise<BitcoinDataPoint> {
+    return this.fetchLatest('vdd-multiple', 'vddMultiple', 'VDD Multiple');
+  }
+
+  async fetchMvrvZScoreHistory(): Promise<BitcoinDataPoint[]> {
+    return retryWithBackoff(
+      async () => {
+        const url = new URL('mvrv-zscore', ensureTrailingSlash(this.baseUrl)).toString();
+        const response = await this.fetchFn(url);
+        if (!response.ok) {
+          throw new BitcoinDataClientError(
+            `MVRV Z-Score history request failed with status ${response.status}`,
+            response.status,
+          );
+        }
+        const rows = (await response.json()) as { d: string; mvrvZscore: number }[];
+        return rows
+          .filter((r) => typeof r.d === 'string' && Number.isFinite(r.mvrvZscore))
+          .map((r) => ({ date: r.d, value: r.mvrvZscore }));
+      },
+      this.retryAttempts,
+      this.retryBaseDelayMs,
+      { sleep: this.sleep, shouldRetry: isRetryableBitcoinDataError },
+    );
+  }
+
+  async fetchVddMultipleHistory(): Promise<BitcoinDataPoint[]> {
+    return retryWithBackoff(
+      async () => {
+        const url = new URL('vdd-multiple', ensureTrailingSlash(this.baseUrl)).toString();
+        const response = await this.fetchFn(url);
+        if (!response.ok) {
+          throw new BitcoinDataClientError(
+            `VDD Multiple history request failed with status ${response.status}`,
+            response.status,
+          );
+        }
+        const rows = (await response.json()) as { d: string; vddMultiple: number }[];
+        return rows
+          .filter((r) => typeof r.d === 'string' && Number.isFinite(r.vddMultiple))
+          .map((r) => ({ date: r.d, value: r.vddMultiple }));
+      },
+      this.retryAttempts,
+      this.retryBaseDelayMs,
+      { sleep: this.sleep, shouldRetry: isRetryableBitcoinDataError },
+    );
+  }
+
   private async fetchLatest(
     endpoint: string,
     valueField: string,

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360">
+  <rect width="800" height="360" fill="#fff"/>
+  <line x1="0" y1="90"  x2="800" y2="90"  stroke="#e8eeea" stroke-width="1"/>
+  <line x1="0" y1="180" x2="800" y2="180" stroke="#e8eeea" stroke-width="1"/>
+  <line x1="0" y1="270" x2="800" y2="270" stroke="#e8eeea" stroke-width="1"/>
+  <line x1="155" y1="0" x2="155" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+  <line x1="347" y1="0" x2="347" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+  <line x1="555" y1="0" x2="555" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+  <line x1="763" y1="0" x2="763" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+  <path d="M 0,358 C 80,354 140,346 200,330 C 280,310 360,280 440,245 C 520,210 620,175 700,155 C 740,145 770,138 800,132"
+        stroke="#22c55e" stroke-width="2.5" fill="none" opacity="0.9"/>
+  <path d="M 0,355 C 60,352 100,348 115,345 C 130,308 158,254 172,247 C 188,295 220,310 232,305 C 268,288 305,246 315,232 C 334,180 368,72 384,66 C 400,106 428,240 437,128 C 452,100 465,86 470,87 C 488,110 502,107 515,89 C 534,54 575,16 590,14 C 606,44 633,252 641,72 C 657,50 693,26 717,18 C 728,14 745,16 752,17 C 768,15 782,16 800,100"
+        stroke="#17202a" stroke-width="2.5" fill="none"/>
+</svg>

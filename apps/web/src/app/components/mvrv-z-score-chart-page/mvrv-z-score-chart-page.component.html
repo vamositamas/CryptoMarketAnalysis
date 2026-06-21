@@ -4,12 +4,12 @@
       <a class="form-link" routerLink="/charts" i18n="Back to chart library@@charts.backToLibrary">
         Back to chart library
       </a>
-      <p class="eyebrow" i18n="Pi Cycle eyebrow@@charts.piCycleEyebrow">
-        Cycle indicator
+      <p class="eyebrow" i18n="MVRV Z-Score eyebrow@@charts.mvrvEyebrow">
+        Valuation model
       </p>
-      <h2 i18n="Pi Cycle title@@charts.piCycleTitle">Pi Cycle Top Indicator</h2>
-      <p i18n="Pi Cycle subtitle@@charts.piCycleSubtitle">
-        Moving-average crossover signal for potential Bitcoin cycle tops
+      <h2 i18n="MVRV Z-Score title@@charts.mvrvTitle">MVRV Z-Score</h2>
+      <p i18n="MVRV Z-Score subtitle@@charts.mvrvSubtitle">
+        Market value vs realized value to identify statistically extreme cycle positions
       </p>
     </div>
     <div class="chart-status">
@@ -50,7 +50,7 @@
         }
       </div>
       <app-chart-annotations
-        chartId="pi-cycle-top"
+        chartId="mvrv-z-score"
         (annotationsChanged)="updateUserAnnotations($event)"
       ></app-chart-annotations>
       <button type="button" class="secondary-button" (click)="openAlertModal()">
@@ -62,29 +62,9 @@
     </div>
   </div>
 
-  @if (chartAnnotations && chartAnnotations.noteAnnotations().length > 0) {
-    <div class="annotation-panel">
-      <span class="annotation-panel-label">Annotations</span>
-      <div class="annotation-panel-list">
-        @for (annotation of chartAnnotations.noteAnnotations(); track annotation.id) {
-          <div class="annotation-panel-item">
-            <span class="annotation-color-dot" [style.background]="annotation.color"></span>
-            <span class="annotation-panel-text">{{ annotation.date }} &mdash; {{ annotation.text }}</span>
-            <button
-              type="button"
-              class="annotation-delete-button"
-              aria-label="Delete annotation"
-              (click)="chartAnnotations.deleteAnnotation(annotation.id)"
-            >&times;</button>
-          </div>
-        }
-      </div>
-    </div>
-  }
-
   @if (showAlertModal()) {
     <app-create-alert-modal
-      chartId="pi-cycle-top"
+      chartId="mvrv-z-score"
       [metrics]="alertMetrics"
       (closed)="closeAlertModal()"
     ></app-create-alert-modal>
@@ -92,10 +72,6 @@
 
   @if (errorMessage()) {
     <p class="form-message">{{ errorMessage() }}</p>
-  }
-
-  @if (signalNotice()) {
-    <p class="form-message success">{{ signalNotice() }}</p>
   }
 
   <div class="chart-workspace info-collapsed">
@@ -115,7 +91,7 @@
         ></app-chart-viewer>
       } @else if (!isLoading() && !errorMessage()) {
         <p class="empty-state" i18n="No chart data message@@charts.noData">
-          No Pi Cycle Top chart data is available yet.
+          No MVRV Z-Score chart data is available yet.
         </p>
       }
     </div>
@@ -124,13 +100,12 @@
 
   @if (infoOpen()) {
     <app-chart-info-panel
-      title="Pi Cycle Top Indicator"
+      title="MVRV Z-Score"
       [about]="infoAbout"
       [currentFields]="infoCurrentFields()"
       [interpretation]="infoInterpretation()"
       [dataSources]="infoDataSources"
       [lastUpdated]="infoLastUpdated()"
-      learnMoreHref="/assets/docs/specificaton/PiCycleTopIndicator.md"
     ></app-chart-info-panel>
   }
 </section>

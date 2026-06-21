@@ -523,6 +523,7 @@ main .dashboard-widget-grid article {
 
 main .dashboard-widget-grid article.is-dragging {
   opacity: 0.4;
+  pointer-events: none;
 }
 
 main .dashboard-widget-grid article.drag-over {
@@ -738,12 +739,101 @@ main .dashboard-widget-grid .wi-gauge-score {
   font-weight: 500;
 }
 
+main .dashboard-widget-grid .wi-halving {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 2px;
+}
+
+main .dashboard-widget-grid .wi-halving-ring-wrap {
+  position: relative;
+  width: 86px;
+  height: 86px;
+}
+
+main .dashboard-widget-grid .wi-halving-ring-wrap svg {
+  width: 100%;
+  height: 100%;
+}
+
+main .dashboard-widget-grid .wi-halving-center-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+}
+
+main .dashboard-widget-grid .wi-halving-pct {
+  font-size: 15px;
+  font-weight: 700;
+  color: #16a34a;
+  line-height: 1;
+}
+
+main .dashboard-widget-grid .wi-halving-of {
+  font-size: 9px;
+  color: #9ca3af;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+}
+
+main .dashboard-widget-grid .wi-halving-stats {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  width: 100%;
+}
+
+main .dashboard-widget-grid .wi-halving-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+main .dashboard-widget-grid .wi-halving-stat span {
+  font-size: 9px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+main .dashboard-widget-grid .wi-halving-stat strong {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
 main .dashboard-heading {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
+}
+
+main .dashboard-heading-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+main .dashboard-refresh-message {
+  flex-basis: 100%;
+  font-size: 0.85rem;
+  color: #2d7a4f;
+  margin: 0;
+  padding: 4px 0;
+
+  &.dashboard-refresh-message--error {
+    color: #b91c1c;
+  }
 }
 
 main .recent-charts-section {
@@ -795,10 +885,9 @@ main .recent-chart-thumb {
   overflow: hidden;
   background: linear-gradient(135deg, #e8f0fe, #c5cae9);
 
-  img {
+  img, svg {
     width: 100%;
     height: 100%;
-    object-fit: cover;
     display: block;
   }
 }
@@ -1296,6 +1385,54 @@ main .rainbow-chart-page {
   gap: 18px;
 }
 
+main .rainbow-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  padding: 4px 2px 8px;
+}
+
+main .rainbow-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+main .rainbow-legend-text {
+  font-size: 11px;
+  color: #17202a;
+  white-space: nowrap;
+}
+
+main .rainbow-legend-halving {
+  display: inline-block;
+  width: 20px;
+  height: 2px;
+  background-image: repeating-linear-gradient(
+    to right,
+    rgba(23, 32, 42, 0.55) 0,
+    rgba(23, 32, 42, 0.55) 5px,
+    transparent 5px,
+    transparent 9px
+  );
+}
+
+main .rainbow-legend-price {
+  display: inline-block;
+  width: 20px;
+  height: 2.5px;
+  background: #111820;
+  border-radius: 1px;
+}
+
+main .rainbow-legend-band {
+  display: inline-block;
+  width: 20px;
+  height: 10px;
+  border-radius: 2px;
+}
+
 main .chart-page-header,
 main .chart-toolbar,
 main .chart-workspace {
@@ -1411,6 +1548,132 @@ main .annotation-dialog {
 
 main .annotation-dialog h3 {
   margin: 0;
+}
+
+main .annotation-panel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 1px solid #dce2dd;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.82);
+  flex-wrap: wrap;
+}
+
+main .annotation-panel-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #5a7a6e;
+  white-space: nowrap;
+}
+
+main .annotation-panel-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+main .annotation-panel-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 5px 3px 8px;
+  border: 1px solid #dce2dd;
+  border-radius: 20px;
+  background: #f5f8f6;
+}
+
+main .annotation-color-dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+main .annotation-panel-text {
+  font-size: 12px;
+  color: #17202a;
+  white-space: nowrap;
+}
+
+main .annotation-delete-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #8a9e98;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    color: #e57373;
+  }
+}
+
+/* Stock-to-Flow chart color scale sidebar */
+main .s2f-chart-container {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  width: 100%;
+  height: 100%;
+}
+
+main .s2f-chart-container app-chart-viewer {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+}
+
+main .s2f-halving-scale {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: stretch;
+  padding: 28px 0 40px;
+  width: 36px;
+  flex-shrink: 0;
+  gap: 4px;
+}
+
+main .s2f-scale-bar {
+  flex: 1;
+  width: 14px;
+  border-radius: 7px;
+  background: linear-gradient(
+    to bottom,
+    hsl(0,   100%, 45%),
+    hsl(45,  100%, 45%),
+    hsl(90,  100%, 38%),
+    hsl(135, 100%, 40%),
+    hsl(180, 100%, 40%),
+    hsl(225, 100%, 45%),
+    hsl(270, 100%, 45%)
+  );
+}
+
+main .s2f-scale-label {
+  font-size: 10px;
+  color: #6b7280;
+  line-height: 1;
+}
+
+main .s2f-scale-title {
+  font-size: 10px;
+  color: #6b7280;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  white-space: nowrap;
+  margin-top: 6px;
 }
 
 main .timeframe-button {
@@ -1817,6 +2080,61 @@ main .form-message.success {
 
   main .chart-thumbnail {
     min-height: 132px;
+  }
+}
+
+/* ── Halving Spiral Chart ────────────────────────────────── */
+main .halving-spiral-chart-page {
+  .chart-stage {
+    height: auto;
+    min-height: 460px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  // position: relative + aspect-ratio: 1 define the square box.
+  // The canvas uses position: absolute; inset: 0 to fill it — avoids the
+  // height: 100% cascade failure that occurs when an ancestor has height: auto.
+  .spiral-canvas-wrapper {
+    position: relative;
+    width: min(460px, 100%);
+    aspect-ratio: 1;
+    flex-shrink: 0;
+
+    canvas {
+      position: absolute;
+      inset: 0;
+    }
+
+    &.spiral-hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+  }
+
+  .spiral-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .spiral-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: #555;
+  }
+
+  .spiral-legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
   }
 }
 
@@ -2648,5 +2966,28 @@ main .form-message.success {
     text-align: center;
     margin-top: 8px;
     min-height: 44px;
+  }
+}
+
+.vdd-pending-notice {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  color: #6b7280;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  white-space: nowrap;
+
+  .vdd-pending-icon {
+    font-size: 15px;
   }
 }

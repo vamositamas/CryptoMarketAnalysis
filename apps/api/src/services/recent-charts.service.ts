@@ -35,17 +35,37 @@ const CHART_CATALOG: Record<string, ChartCatalogEntry> = {
   'bitcoin-rainbow': {
     title: 'Bitcoin Rainbow Price Chart',
     url: '/charts/bitcoin-rainbow',
-    thumbnailUrl: '/assets/charts/bitcoin-rainbow-thumb.png',
+    thumbnailUrl: '/assets/charts/bitcoin-rainbow-thumb.svg',
   },
   'pi-cycle-top': {
     title: 'Pi Cycle Top Indicator',
     url: '/charts/pi-cycle-top',
-    thumbnailUrl: '/assets/charts/pi-cycle-top-thumb.png',
+    thumbnailUrl: '/assets/charts/pi-cycle-top-thumb.svg',
   },
   'stock-to-flow': {
     title: 'Stock-to-Flow Model',
     url: '/charts/stock-to-flow',
-    thumbnailUrl: '/assets/charts/stock-to-flow-thumb.png',
+    thumbnailUrl: '/assets/charts/stock-to-flow-thumb.svg',
+  },
+  'mvrv-z-score': {
+    title: 'MVRV Z-Score',
+    url: '/charts/mvrv-z-score',
+    thumbnailUrl: '/assets/charts/mvrv-z-score-thumb.svg',
+  },
+  'puell-multiple': {
+    title: 'Puell Multiple',
+    url: '/charts/puell-multiple',
+    thumbnailUrl: '/assets/charts/puell-multiple-thumb.svg',
+  },
+  'bitcoin-power-law': {
+    title: 'Bitcoin Power Law Chart',
+    url: '/charts/bitcoin-power-law',
+    thumbnailUrl: '/assets/charts/bitcoin-power-law-thumb.svg',
+  },
+  'bitcoin-cvdd': {
+    title: 'Bitcoin CVDD',
+    url: '/charts/bitcoin-cvdd',
+    thumbnailUrl: '/assets/charts/bitcoin-cvdd-thumb.svg',
   },
 };
 

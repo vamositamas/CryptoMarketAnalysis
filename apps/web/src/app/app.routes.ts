@@ -141,14 +141,33 @@ export class LandingPage {
           </p>
           <h2 i18n="Dashboard title@@dashboard.title">Bitcoin cycle dashboard</h2>
         </div>
-        <button
-          type="button"
-          class="secondary-button"
-          (click)="openAddWidget()"
-          i18n="Add widget button@@dashboard.openAddWidget"
-        >
-          Add Widget
-        </button>
+        <div class="dashboard-heading-actions">
+          <button
+            type="button"
+            class="secondary-button"
+            [disabled]="isRefreshing()"
+            (click)="refreshData()"
+          >
+            @if (isRefreshing()) {
+              Refreshing...
+            } @else {
+              Refresh Data
+            }
+          </button>
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="openAddWidget()"
+            i18n="Add widget button@@dashboard.openAddWidget"
+          >
+            Add Widget
+          </button>
+        </div>
+        @if (refreshMessage()) {
+          <p class="dashboard-refresh-message" [class.dashboard-refresh-message--error]="refreshError()">
+            {{ refreshMessage() }}
+          </p>
+        }
       </div>
 
       @if (isLoadingWidgets()) {
@@ -165,9 +184,6 @@ export class LandingPage {
                 class="widget-drag-handle"
                 aria-hidden="true"
                 (pointerdown)="onPointerDown($event, widget.id)"
-                (pointermove)="onPointerMove($event)"
-                (pointerup)="onPointerUp($event)"
-                (pointercancel)="onPointerCancel($event)"
               >⠿</span>
               <button
                 type="button"
@@ -176,13 +192,15 @@ export class LandingPage {
                 (click)="removeWidget(widget.id)"
               >✕</button>
               <span class="widget-title">{{ widget.title }}</span>
-              <strong class="widget-value">{{ widget.formattedValue }}</strong>
-              <small class="widget-trend" [class]="'trend-' + widget.trend">
-                {{ trendIndicator(widget.trend) }}
-                @if (widget.trendPercent !== null) {
-                  {{ formatTrendPercent(widget.trendPercent) }}
-                }
-              </small>
+              @if (widget.type !== 'halving_progress') {
+                <strong class="widget-value">{{ widget.formattedValue }}</strong>
+                <small class="widget-trend" [class]="'trend-' + widget.trend">
+                  {{ trendIndicator(widget.trend) }}
+                  @if (widget.trendPercent !== null) {
+                    {{ formatTrendPercent(widget.trendPercent) }}
+                  }
+                </small>
+              }
               @if (widget.type === 'fear_greed' && widget.value !== null) {
                 <div class="wi-gauge">
                   <div class="wi-gauge-bar wi-gauge-bar--fg">
@@ -225,6 +243,38 @@ export class LandingPage {
                   </div>
                 </div>
               }
+              @if (widget.type === 'halving_progress') {
+                <div class="wi-halving">
+                  <div class="wi-halving-ring-wrap">
+                    <svg viewBox="0 0 80 80" aria-hidden="true">
+                      <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(156,163,175,0.2)" stroke-width="8"/>
+                      <circle cx="40" cy="40" r="34" fill="none"
+                        stroke="#22c55e" stroke-width="8" stroke-linecap="round"
+                        transform="rotate(-90 40 40)"
+                        [attr.stroke-dasharray]="halvingData.circumference"
+                        [attr.stroke-dashoffset]="halvingData.offset"/>
+                    </svg>
+                    <div class="wi-halving-center-text">
+                      <span class="wi-halving-pct">{{ halvingData.pct }}</span>
+                      <span class="wi-halving-of">of cycle</span>
+                    </div>
+                  </div>
+                  <div class="wi-halving-stats">
+                    <div class="wi-halving-stat">
+                      <span>Days left</span>
+                      <strong>{{ halvingData.daysRemaining }}</strong>
+                    </div>
+                    <div class="wi-halving-stat">
+                      <span>Est. next</span>
+                      <strong>Apr '28</strong>
+                    </div>
+                    <div class="wi-halving-stat">
+                      <span>Cycle</span>
+                      <strong>5 / 2024</strong>
+                    </div>
+                  </div>
+                </div>
+              }
               @if ((widget.type === 'realized_price' || widget.type === 'ma_200_day') && widget.value !== null) {
                 @let cmp = priceComparison(widget.type, widget.value);
                 @if (cmp !== null) {
@@ -246,7 +296,9 @@ export class LandingPage {
                   </div>
                 }
               }
-              <small class="widget-updated">{{ lastUpdatedText(widget.lastUpdated) }}</small>
+              @if (widget.type !== 'halving_progress') {
+                <small class="widget-updated">{{ lastUpdatedText(widget.lastUpdated) }}</small>
+              }
             </article>
           }
         </div>
@@ -274,7 +326,96 @@ export class LandingPage {
             @for (chart of recentCharts(); track chart.chartId) {
               <a class="recent-chart-card" [routerLink]="chart.url">
                 <div class="recent-chart-thumb">
-                  <img [src]="chart.thumbnailUrl" [alt]="chart.title" loading="lazy" />
+                  @if (chart.chartId === 'bitcoin-rainbow') {
+                    <svg viewBox='0 0 800 360' preserveAspectRatio='none' aria-hidden='true'>
+                      <rect x='0' y='0'   width='800' height='46'  fill='rgba(127,29,29,0.65)'/>
+                      <rect x='0' y='46'  width='800' height='37'  fill='rgba(239,68,68,0.65)'/>
+                      <rect x='0' y='83'  width='800' height='35'  fill='rgba(249,115,22,0.65)'/>
+                      <rect x='0' y='118' width='800' height='34'  fill='rgba(234,179,8,0.65)'/>
+                      <rect x='0' y='152' width='800' height='35'  fill='rgba(132,204,22,0.65)'/>
+                      <rect x='0' y='187' width='800' height='32'  fill='rgba(34,197,94,0.65)'/>
+                      <rect x='0' y='219' width='800' height='37'  fill='rgba(6,182,212,0.65)'/>
+                      <rect x='0' y='256' width='800' height='35'  fill='rgba(37,99,235,0.65)'/>
+                      <rect x='0' y='291' width='800' height='69'  fill='rgba(30,58,138,0.65)'/>
+                      <path d='M 0,322 C 80,318 130,312 155,307 C 168,228 200,76 213,70 C 228,285 260,312 272,308 C 308,294 346,264 355,254 C 372,188 408,34 424,28 C 441,90 472,247 507,242 C 522,236 542,230 555,226 C 573,186 617,93 632,96 C 649,165 678,226 685,220 C 703,210 741,198 763,195 C 776,194 792,196 800,196' stroke='#111820' stroke-width='2.5' fill='none'/>
+                    </svg>
+                  } @else if (chart.chartId === 'stock-to-flow') {
+                    <svg viewBox='0 0 800 360' preserveAspectRatio='none' aria-hidden='true'>
+                      <rect width='800' height='360' fill='#fff'/>
+                      <line x1='0' y1='90'  x2='800' y2='90'  stroke='#e8eeea' stroke-width='1'/>
+                      <line x1='0' y1='180' x2='800' y2='180' stroke='#e8eeea' stroke-width='1'/>
+                      <line x1='0' y1='270' x2='800' y2='270' stroke='#e8eeea' stroke-width='1'/>
+                      <rect x='186' y='0' width='58'  height='360' fill='rgba(239,68,68,0.07)'/>
+                      <rect x='398' y='0' width='62'  height='360' fill='rgba(239,68,68,0.07)'/>
+                      <rect x='608' y='0' width='56'  height='360' fill='rgba(239,68,68,0.07)'/>
+                      <line x1='155' y1='0' x2='155' y2='360' stroke='#9ca3af' stroke-width='1.5' stroke-dasharray='6,5'/>
+                      <line x1='347' y1='0' x2='347' y2='360' stroke='#9ca3af' stroke-width='1.5' stroke-dasharray='6,5'/>
+                      <line x1='555' y1='0' x2='555' y2='360' stroke='#9ca3af' stroke-width='1.5' stroke-dasharray='6,5'/>
+                      <line x1='763' y1='0' x2='763' y2='360' stroke='#9ca3af' stroke-width='1.5' stroke-dasharray='6,5'/>
+                      <path d='M 0,358 C 120,352 200,325 280,280 C 360,230 445,165 555,72 C 648,28 730,10 800,5' stroke='#f59e0b' stroke-width='2.5' stroke-dasharray='10,5' fill='none' opacity='0.9'/>
+                      <path d='M 0,358 C 100,356 140,350 155,345 C 168,285 196,181 213,173 C 228,278 260,260 272,243 C 305,228 338,204 347,196 C 368,162 407,66 424,63 C 440,118 468,265 477,131 C 493,103 505,87 510,87 C 528,116 541,113 555,92 C 574,56 618,14 632,12 C 648,40 677,268 685,72 C 702,50 737,25 763,17 C 775,12 792,14 800,14' stroke='#17202a' stroke-width='2.5' fill='none'/>
+                    </svg>
+                  } @else if (chart.chartId === 'pi-cycle-top') {
+                    <svg viewBox='0 0 800 360' preserveAspectRatio='none' aria-hidden='true'>
+                      <rect width='800' height='360' fill='#fff'/>
+                      <line x1='155' y1='0' x2='155' y2='360' stroke='#e5ebe7' stroke-width='1' stroke-dasharray='6,5'/>
+                      <line x1='347' y1='0' x2='347' y2='360' stroke='#e5ebe7' stroke-width='1' stroke-dasharray='6,5'/>
+                      <line x1='555' y1='0' x2='555' y2='360' stroke='#e5ebe7' stroke-width='1' stroke-dasharray='6,5'/>
+                      <line x1='763' y1='0' x2='763' y2='360' stroke='#e5ebe7' stroke-width='1' stroke-dasharray='6,5'/>
+                      <path d='M 0,355 C 100,351 140,344 155,340 C 168,278 194,173 210,163 C 226,272 258,252 270,237 C 303,218 336,196 346,188 C 366,152 405,57 424,62 C 440,112 468,254 477,122 C 492,94 504,78 509,79 C 526,108 540,105 555,84 C 572,48 617,10 630,12 C 645,33 675,258 685,62 C 700,42 735,18 763,10 C 774,7 792,9 800,10' stroke='#2dafe6' stroke-width='2.5' fill='none'/>
+                      <path d='M 0,357 C 100,354 140,348 155,344 C 168,284 196,181 216,172 C 232,276 263,258 274,244 C 308,228 340,204 350,196 C 369,161 407,64 423,62 C 441,116 469,262 480,132 C 495,104 508,87 513,89 C 530,114 542,111 558,94 C 576,58 619,14 643,12 C 658,38 678,265 688,72 C 703,50 738,24 763,16 C 776,11 792,13 800,14' stroke='#17202a' stroke-width='2.5' fill='none'/>
+                      <circle cx='424' cy='63' r='9' fill='rgba(245,158,11,0.22)' stroke='#f59e0b' stroke-width='2'/>
+                      <circle cx='630' cy='12' r='9' fill='rgba(245,158,11,0.22)' stroke='#f59e0b' stroke-width='2'/>
+                    </svg>
+                  } @else if (chart.chartId === 'mvrv-z-score') {
+                    <svg viewBox='0 0 800 360' preserveAspectRatio='none' aria-hidden='true'>
+                      <rect x='0' y='0'   width='800' height='88'  fill='rgba(239,68,68,0.20)'/>
+                      <rect x='0' y='88'  width='800' height='53'  fill='rgba(249,115,22,0.15)'/>
+                      <rect x='0' y='141' width='800' height='53'  fill='rgba(234,179,8,0.13)'/>
+                      <rect x='0' y='194' width='800' height='88'  fill='rgba(34,197,94,0.12)'/>
+                      <rect x='0' y='282' width='800' height='78'  fill='rgba(59,130,246,0.18)'/>
+                      <line x1='155' y1='0' x2='155' y2='360' stroke='#9ca3af' stroke-width='1.5' stroke-dasharray='6,5'/>
+                      <line x1='347' y1='0' x2='347' y2='360' stroke='#9ca3af' stroke-width='1.5' stroke-dasharray='6,5'/>
+                      <line x1='555' y1='0' x2='555' y2='360' stroke='#9ca3af' stroke-width='1.5' stroke-dasharray='6,5'/>
+                      <line x1='763' y1='0' x2='763' y2='360' stroke='#9ca3af' stroke-width='1.5' stroke-dasharray='6,5'/>
+                      <path d='M 0,355 C 100,352 140,346 155,342 C 168,306 198,250 212,243 C 228,295 260,308 272,303 C 308,284 345,240 355,228 C 372,175 408,68 424,62 C 440,102 468,238 477,126 C 492,98 505,84 510,85 C 528,108 542,104 555,85 C 574,50 617,12 632,10 C 648,42 677,250 685,68 C 703,46 737,22 763,14 C 776,10 792,12 800,13' stroke='#17202a' stroke-width='2.5' fill='none'/>
+                      <path d='M 0,300 C 50,288 90,175 108,62 C 120,240 148,310 168,298 C 210,272 268,186 300,118 C 318,280 356,312 380,302 C 415,258 448,105 462,55 C 476,188 510,308 528,292 C 548,242 584,95 605,58 C 622,175 652,300 668,286 C 696,254 745,224 778,232 C 790,236 797,240 800,242' stroke='#f59e0b' stroke-width='2.5' fill='none' opacity='0.95'/>
+                    </svg>
+                  } @else if (chart.chartId === 'puell-multiple') {
+                    <svg viewBox='0 0 800 360' preserveAspectRatio='none' aria-hidden='true'>
+                      <rect x='0' y='0'   width='800' height='90'  fill='rgba(239,68,68,0.18)'/>
+                      <rect x='0' y='90'  width='800' height='180' fill='rgba(234,179,8,0.07)'/>
+                      <rect x='0' y='270' width='800' height='90'  fill='rgba(34,197,94,0.18)'/>
+                      <line x1='155' y1='0' x2='155' y2='360' stroke='#9ca3af' stroke-width='1.5' stroke-dasharray='6,5'/>
+                      <line x1='347' y1='0' x2='347' y2='360' stroke='#9ca3af' stroke-width='1.5' stroke-dasharray='6,5'/>
+                      <line x1='555' y1='0' x2='555' y2='360' stroke='#9ca3af' stroke-width='1.5' stroke-dasharray='6,5'/>
+                      <line x1='763' y1='0' x2='763' y2='360' stroke='#9ca3af' stroke-width='1.5' stroke-dasharray='6,5'/>
+                      <path d='M 0,355 C 100,352 140,346 155,342 C 168,306 198,250 212,243 C 228,295 260,308 272,303 C 308,284 345,240 355,228 C 372,175 408,68 424,62 C 440,102 468,238 477,126 C 492,98 505,84 510,85 C 528,108 542,104 555,85 C 574,50 617,12 632,10 C 648,42 677,250 685,68 C 703,46 737,22 763,14 C 776,10 792,12 800,13' stroke='#17202a' stroke-width='2.5' fill='none'/>
+                      <path d='M 0,320 C 40,305 80,285 105,38 C 118,230 148,308 165,318 C 200,295 265,240 298,185 C 315,58 338,38 350,32 C 362,180 390,305 408,315 C 445,290 490,225 510,52 C 524,195 545,305 560,315 C 598,280 648,235 668,210 C 690,60 720,35 735,28 C 748,150 768,290 780,305 C 790,312 797,316 800,318' stroke='#6366f1' stroke-width='2.5' fill='none' opacity='0.95'/>
+                    </svg>
+                  } @else if (chart.chartId === 'bitcoin-power-law') {
+                    <svg viewBox='0 0 800 360' preserveAspectRatio='none' aria-hidden='true'>
+                      <rect width='800' height='360' fill='#fff'/>
+                      <line x1='155' y1='0' x2='155' y2='360' stroke='#9ca3af' stroke-width='1.5' stroke-dasharray='6,5'/>
+                      <line x1='347' y1='0' x2='347' y2='360' stroke='#9ca3af' stroke-width='1.5' stroke-dasharray='6,5'/>
+                      <line x1='555' y1='0' x2='555' y2='360' stroke='#9ca3af' stroke-width='1.5' stroke-dasharray='6,5'/>
+                      <line x1='763' y1='0' x2='763' y2='360' stroke='#9ca3af' stroke-width='1.5' stroke-dasharray='6,5'/>
+                      <path d='M 0,290 L 800,30' stroke='#ef4444' stroke-width='2' fill='none' opacity='0.85'/>
+                      <path d='M 0,330 L 800,110' stroke='#f97316' stroke-width='2' fill='none' opacity='0.85'/>
+                      <path d='M 0,352 L 800,195' stroke='#60a5fa' stroke-width='2' fill='none' opacity='0.85'/>
+                      <path d='M 0,354 C 60,352 100,348 115,345 C 130,328 148,295 158,282 C 175,312 200,330 218,325 C 255,305 300,270 315,255 C 335,212 365,150 380,145 C 394,175 415,238 430,210 C 445,185 460,165 468,166 C 482,184 492,182 504,168 C 518,140 545,102 558,104 C 570,124 588,228 596,148 C 608,128 630,108 645,104 C 670,110 720,92 745,80 C 762,74 785,68 800,65' stroke='#17202a' stroke-width='2.5' fill='none'/>
+                    </svg>
+                  } @else if (chart.chartId === 'bitcoin-cvdd') {
+                    <svg viewBox='0 0 800 360' preserveAspectRatio='none' aria-hidden='true'>
+                      <rect width='800' height='360' fill='#fff'/>
+                      <line x1='155' y1='0' x2='155' y2='360' stroke='#9ca3af' stroke-width='1.5' stroke-dasharray='6,5'/>
+                      <line x1='347' y1='0' x2='347' y2='360' stroke='#9ca3af' stroke-width='1.5' stroke-dasharray='6,5'/>
+                      <line x1='555' y1='0' x2='555' y2='360' stroke='#9ca3af' stroke-width='1.5' stroke-dasharray='6,5'/>
+                      <line x1='763' y1='0' x2='763' y2='360' stroke='#9ca3af' stroke-width='1.5' stroke-dasharray='6,5'/>
+                      <path d='M 0,358 C 80,354 140,346 200,330 C 280,310 360,280 440,245 C 520,210 620,175 700,155 C 740,145 770,138 800,132' stroke='#22c55e' stroke-width='2.5' fill='none' opacity='0.9'/>
+                      <path d='M 0,355 C 60,352 100,348 115,345 C 130,308 158,254 172,247 C 188,295 220,310 232,305 C 268,288 305,246 315,232 C 334,180 368,72 384,66 C 400,106 428,240 437,128 C 452,100 465,86 470,87 C 488,110 502,107 515,89 C 534,54 575,16 590,14 C 606,44 633,252 641,72 C 657,50 693,26 717,18 C 768,15 800,100' stroke='#17202a' stroke-width='2.5' fill='none'/>
+                    </svg>
+                  }
                 </div>
                 <span class="recent-chart-title">{{ chart.title }}</span>
                 <small class="recent-chart-time">{{ formatRelativeTime(chart.viewedAt) }}</small>
@@ -321,10 +462,16 @@ export class DashboardPage {
   protected readonly dragOverId = signal<string | null>(null);
   protected readonly recentCharts = signal<RecentChart[]>([]);
   protected readonly isLoadingRecentCharts = signal(true);
+  protected readonly isRefreshing = signal(false);
+  protected readonly refreshMessage = signal('');
+  protected readonly refreshError = signal(false);
 
   private activePointerId: number | null = null;
   private pointerDragId: string | null = null;
   private pointerOverId: string | null = null;
+  private readonly boundPointerMove = (e: PointerEvent) => this.onPointerMove(e);
+  private readonly boundPointerUp = (e: PointerEvent) => this.onPointerUp(e);
+  private readonly boundPointerCancel = (e: PointerEvent) => this.onPointerCancel(e);
 
   constructor() {
     void this.checkOnboardingStatus();
@@ -350,6 +497,23 @@ export class DashboardPage {
     this.isAddWidgetOpen.set(false);
   }
 
+  protected async refreshData(): Promise<void> {
+    this.isRefreshing.set(true);
+    this.refreshMessage.set('');
+    this.refreshError.set(false);
+
+    try {
+      const result = await this.auth.triggerDashboardRefresh();
+      await this.loadWidgets();
+      this.refreshMessage.set(`Data updated for ${result.date} (${result.dataPoints} data points)`);
+    } catch {
+      this.refreshError.set(true);
+      this.refreshMessage.set('Refresh failed. Please try again.');
+    } finally {
+      this.isRefreshing.set(false);
+    }
+  }
+
   protected handleWidgetAdded(widget: DashboardWidget): void {
     this.widgets.update((current) => [...current, widget]);
   }
@@ -364,13 +528,16 @@ export class DashboardPage {
   }
 
   protected onPointerDown(event: PointerEvent, widgetId: string): void {
-    (event.currentTarget as Element).setPointerCapture?.(event.pointerId);
+    event.preventDefault();
     this.activePointerId = event.pointerId;
     this.pointerDragId = widgetId;
     this.draggingId.set(widgetId);
+    document.addEventListener('pointermove', this.boundPointerMove);
+    document.addEventListener('pointerup', this.boundPointerUp);
+    document.addEventListener('pointercancel', this.boundPointerCancel);
   }
 
-  protected onPointerMove(event: PointerEvent): void {
+  private onPointerMove(event: PointerEvent): void {
     if (!this.pointerDragId || event.pointerId !== this.activePointerId) return;
 
     const el = document.elementFromPoint(event.clientX, event.clientY);
@@ -383,12 +550,13 @@ export class DashboardPage {
     }
   }
 
-  protected onPointerUp(event: PointerEvent): void {
-    if (!this.pointerDragId || event.pointerId !== this.activePointerId) return;
+  private onPointerUp(event: PointerEvent): void {
+    if (event.pointerId !== this.activePointerId) return;
 
     const sourceId = this.pointerDragId;
     const targetId = this.pointerOverId;
 
+    this.removeDragListeners();
     this.activePointerId = null;
     this.pointerDragId = null;
     this.pointerOverId = null;
@@ -400,14 +568,21 @@ export class DashboardPage {
     }
   }
 
-  protected onPointerCancel(event: PointerEvent): void {
+  private onPointerCancel(event: PointerEvent): void {
     if (event.pointerId !== this.activePointerId) return;
 
+    this.removeDragListeners();
     this.activePointerId = null;
     this.pointerDragId = null;
     this.pointerOverId = null;
     this.draggingId.set(null);
     this.dragOverId.set(null);
+  }
+
+  private removeDragListeners(): void {
+    document.removeEventListener('pointermove', this.boundPointerMove);
+    document.removeEventListener('pointerup', this.boundPointerUp);
+    document.removeEventListener('pointercancel', this.boundPointerCancel);
   }
 
   protected performReorder(sourceId: string, targetId: string): void {
@@ -476,6 +651,18 @@ export class DashboardPage {
   protected formatTrendPercent(trendPercent: number): string {
     return `${trendPercent >= 0 ? '+' : ''}${trendPercent.toFixed(1)}%`;
   }
+
+  protected readonly halvingData = (() => {
+    const CURRENT_HALVING_MS = Date.parse('2024-04-19T00:00:00Z');
+    const NEXT_HALVING_MS = Date.parse('2028-04-21T00:00:00Z');
+    const now = Date.now();
+    const pct = Math.min(100, Math.max(0, (now - CURRENT_HALVING_MS) / (NEXT_HALVING_MS - CURRENT_HALVING_MS) * 100));
+    const daysRemaining = Math.max(0, Math.round((NEXT_HALVING_MS - now) / 86_400_000));
+    const r = 34;
+    const circumference = 2 * Math.PI * r;
+    const offset = circumference * (1 - pct / 100);
+    return { pct: `${pct.toFixed(1)}%`, daysRemaining, circumference, offset };
+  })();
 
   protected fearGreedZone(value: number): string {
     if (value <= 25) return 'extreme-fear';
@@ -1291,6 +1478,62 @@ export const appRoutes: Route[] = [
     loadComponent: () =>
       import('./components/stock-to-flow-chart-page/stock-to-flow-chart-page.component').then(
         (module) => module.StockToFlowChartPageComponent,
+      ),
+  },
+  {
+    path: 'charts/mvrv-z-score',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/mvrv-z-score-chart-page/mvrv-z-score-chart-page.component').then(
+        (m) => m.MvrvZScoreChartPageComponent,
+      ),
+  },
+  {
+    path: 'charts/puell-multiple',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/puell-multiple-chart-page/puell-multiple-chart-page.component').then(
+        (m) => m.PuellMultipleChartPageComponent,
+      ),
+  },
+  {
+    path: 'charts/vdd-multiple',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/vdd-multiple-chart-page/vdd-multiple-chart-page.component').then(
+        (m) => m.VddMultipleChartPageComponent,
+      ),
+  },
+  {
+    path: 'charts/bitcoin-power-law',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/bitcoin-power-law-chart-page/bitcoin-power-law-chart-page.component').then(
+        (m) => m.BitcoinPowerLawChartPageComponent,
+      ),
+  },
+  {
+    path: 'charts/bitcoin-cvdd',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/bitcoin-cvdd-chart-page/bitcoin-cvdd-chart-page.component').then(
+        (m) => m.BitcoinCvddChartPageComponent,
+      ),
+  },
+  {
+    path: 'charts/halving-spiral',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/halving-spiral-chart-page/halving-spiral-chart-page.component').then(
+        (m) => m.HavingSpiralChartPageComponent,
+      ),
+  },
+  {
+    path: 'charts/halving-progress',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/bitcoin-halving-progress-chart-page/bitcoin-halving-progress-chart-page.component').then(
+        (m) => m.BitcoinHalvingProgressChartPageComponent,
       ),
   },
   {

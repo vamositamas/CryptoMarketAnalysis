@@ -1,7 +1,8 @@
 import type { Request } from 'express';
 import { Router } from 'express';
+import { BitcoinDataClient } from '@crypto-market-analysis/calculation-engines/data-sources';
 import { getDatabasePool } from '../config/database.config';
-import { DailyDataRefreshService } from '../jobs/daily-data-refresh.controller';
+import { DailyDataRefreshService, insertBitcoinMetricsDaily } from '../jobs/daily-data-refresh.controller';
 import { requireAuth, requireRole } from '../middleware/rbac.middleware';
 import type { TokenInvalidationReader, AuthenticatedRequest } from '../middleware/rbac.middleware';
 import { AuditLogRepository } from '../repositories/audit-log.repository';
@@ -312,6 +313,23 @@ export function createAdminRouter(
   router.post('/data-configuration/refresh-now', ...adminOnly, async (_req, res, next) => {
     try {
       res.status(200).json(await dailyDataRefreshService.run());
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post('/data-configuration/backfill-vdd', ...adminOnly, async (_req, res, next) => {
+    try {
+      const database = getDatabasePool();
+      if (!database) {
+        res.status(503).json({ error: 'Database unavailable' });
+        return;
+      }
+      const client = new BitcoinDataClient();
+      const points = await client.fetchVddMultipleHistory();
+      const records = points.map((p) => ({ date: p.date, metricName: 'vdd_multiple', metricValue: p.value }));
+      await insertBitcoinMetricsDaily(database, records);
+      res.status(200).json({ inserted: records.length, firstDate: records[0]?.date, lastDate: records[records.length - 1]?.date });
     } catch (error) {
       next(error);
     }

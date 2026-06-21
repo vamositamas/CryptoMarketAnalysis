@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360">
+  <rect width="800" height="360" fill="#fff"/>
+  <line x1="0" y1="90"  x2="800" y2="90"  stroke="#e8eeea" stroke-width="1"/>
+  <line x1="0" y1="180" x2="800" y2="180" stroke="#e8eeea" stroke-width="1"/>
+  <line x1="0" y1="270" x2="800" y2="270" stroke="#e8eeea" stroke-width="1"/>
+  <rect x="186" y="0" width="58"  height="360" fill="rgba(239,68,68,0.07)"/>
+  <rect x="398" y="0" width="62"  height="360" fill="rgba(239,68,68,0.07)"/>
+  <rect x="608" y="0" width="56"  height="360" fill="rgba(239,68,68,0.07)"/>
+  <line x1="155" y1="0" x2="155" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+  <line x1="347" y1="0" x2="347" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+  <line x1="555" y1="0" x2="555" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+  <line x1="763" y1="0" x2="763" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+  <path d="M 0,358 C 120,352 200,325 280,280 C 360,230 445,165 555,72 C 648,28 730,10 800,5"
+        stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="10,5" fill="none" opacity="0.9"/>
+  <path d="M 0,358 C 100,356 140,350 155,345 C 168,285 196,181 213,173 C 228,278 260,260 272,243 C 305,228 338,204 347,196 C 368,162 407,66 424,63 C 440,118 468,265 477,131 C 493,103 505,87 510,87 C 528,116 541,113 555,92 C 574,56 618,14 632,12 C 648,40 677,268 685,72 C 702,50 737,25 763,17 C 775,12 792,14 800,14"
+        stroke="#17202a" stroke-width="2.5" fill="none"/>
+</svg>

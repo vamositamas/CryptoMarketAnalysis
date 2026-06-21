@@ -62,6 +62,26 @@
     </div>
   </div>
 
+  @if (chartAnnotations && chartAnnotations.noteAnnotations().length > 0) {
+    <div class="annotation-panel">
+      <span class="annotation-panel-label">Annotations</span>
+      <div class="annotation-panel-list">
+        @for (annotation of chartAnnotations.noteAnnotations(); track annotation.id) {
+          <div class="annotation-panel-item">
+            <span class="annotation-color-dot" [style.background]="annotation.color"></span>
+            <span class="annotation-panel-text">{{ annotation.date }} &mdash; {{ annotation.text }}</span>
+            <button
+              type="button"
+              class="annotation-delete-button"
+              aria-label="Delete annotation"
+              (click)="chartAnnotations.deleteAnnotation(annotation.id)"
+            >&times;</button>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
   @if (showAlertModal()) {
     <app-create-alert-modal
       chartId="stock-to-flow"
@@ -84,11 +104,19 @@
       }
 
       @if (dataPoints().length > 0) {
-        <app-chart-viewer
-          [chartData]="chartData()"
-          [chartOptions]="chartOptions()"
-          (chartPointSelected)="handleChartPoint($event)"
-        ></app-chart-viewer>
+        <div class="s2f-chart-container">
+          <app-chart-viewer
+            [chartData]="chartData()"
+            [chartOptions]="chartOptions()"
+            (chartPointSelected)="handleChartPoint($event)"
+          ></app-chart-viewer>
+          <div class="s2f-halving-scale">
+            <span class="s2f-scale-label">1400</span>
+            <div class="s2f-scale-bar"></div>
+            <span class="s2f-scale-label">0</span>
+            <span class="s2f-scale-title">Days until next halving</span>
+          </div>
+        </div>
       } @else if (!isLoading() && !errorMessage()) {
         <p class="empty-state" i18n="No chart data message@@charts.noData">
           No Stock-to-Flow chart data is available yet.

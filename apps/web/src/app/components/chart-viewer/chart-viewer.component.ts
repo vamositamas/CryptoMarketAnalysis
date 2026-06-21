@@ -45,6 +45,7 @@ export class ChartViewerComponent implements AfterViewInit, OnChanges, OnDestroy
 
   private chart?: Chart;
   private lastTapTime = 0;
+  private isResettingZoom = false;
   private originalYBounds: { min: number | undefined; max: number | undefined } = { min: undefined, max: undefined };
 
   ngAfterViewInit(): void {
@@ -74,14 +75,21 @@ export class ChartViewerComponent implements AfterViewInit, OnChanges, OnDestroy
 
   resetZoom(): void {
     if (!this.chart) return;
-    // Restore original Y bounds in the config source-of-truth before zoom plugin resets X
+    // Skip rescaleYAfterZoom during reset — it would compute a wildly wide Y range
+    // from the tiny early-dataset values (e.g. 2009 band values ~10⁻¹⁶) that the
+    // onZoomComplete callback sees when X is fully zoomed out. We restore the
+    // original bounds ourselves afterward instead.
+    this.isResettingZoom = true;
+    this.chart.resetZoom('none');
+    this.isResettingZoom = false;
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const configScaleY = (this.chart.config.options as any)?.scales?.['y'];
     if (configScaleY) {
       configScaleY.min = this.originalYBounds.min;
       configScaleY.max = this.originalYBounds.max;
     }
-    this.chart.resetZoom();
+    this.chart.update('none');
   }
 
   zoomIn(): void {
@@ -140,6 +148,7 @@ export class ChartViewerComponent implements AfterViewInit, OnChanges, OnDestroy
   }
 
   private rescaleYAfterZoom(chart: Chart): void {
+    if (this.isResettingZoom) return;
     const xScale = chart.scales['x'];
     const yScale = chart.scales['y'];
     if (!xScale || !yScale) return;
@@ -152,6 +161,10 @@ export class ChartViewerComponent implements AfterViewInit, OnChanges, OnDestroy
     let maxY = -Infinity;
 
     for (const dataset of chart.data.datasets) {
+      // Skip datasets assigned to a secondary axis — their values are in a different scale
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const axisId = (dataset as any).yAxisID;
+      if (axisId && axisId !== 'y') continue;
       const data = dataset.data as number[];
       for (let i = Math.max(0, minIdx); i <= Math.min(data.length - 1, maxIdx); i++) {
         const val = data[i];

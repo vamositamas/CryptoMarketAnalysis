@@ -48,6 +48,31 @@ const HALVING_EVENTS = [
   { date: '2024-04-20', label: '2024 Halving' },
 ];
 
+// Includes a projected 2028 halving so color can be computed for current data
+const ALL_HALVINGS_FOR_COLOR = [
+  '2012-11-28',
+  '2016-07-09',
+  '2020-05-11',
+  '2024-04-20',
+  '2028-04-15',
+];
+
+function daysUntilNextHalving(date: string): number {
+  const ms = new Date(`${date}T00:00:00.000Z`).getTime();
+  for (const h of ALL_HALVINGS_FOR_COLOR) {
+    const hMs = new Date(`${h}T00:00:00.000Z`).getTime();
+    if (hMs > ms) return Math.ceil((hMs - ms) / 86_400_000);
+  }
+  return 0;
+}
+
+// 0 days until next halving → blue/purple (hue 270); 1400 days → red (hue 0)
+function halvingDaysToColor(days: number): string {
+  const ratio = Math.min(Math.max(days, 0) / 1400, 1);
+  const hue = Math.round(270 * (1 - ratio));
+  return `hsl(${hue}, 100%, 45%)`;
+}
+
 const STOCK_TO_FLOW_ALERT_METRICS: AlertMetricOption[] = [
   { value: 'stock_to_flow_ratio', label: 'Stock-to-Flow Ratio' },
   { value: 'btc_price', label: 'BTC Price USD' },
@@ -111,34 +136,56 @@ export class StockToFlowChartPageComponent implements AfterViewInit {
     'Supply schedule: Bitcoin issuance and halving schedule',
     'Calculation: Stock-to-Flow ratio and model price calculated from Bitcoin supply and issuance flow',
   ];
-  protected readonly chartData = computed<ChartData<'line'>>(() => ({
-    labels: this.dataPoints().map((point) => point.date),
-    datasets: [
-      {
-        label: 'Bitcoin Price',
-        data: this.dataPoints().map((point) => point.priceUsd),
-        borderColor: '#000000',
-        backgroundColor: 'transparent',
-        borderWidth: 2,
-        pointRadius: 0,
-        pointHitRadius: 12,
-        tension: 0.16,
-      },
-      {
-        label: 'S2F Model Price',
-        data: this.dataPoints().map((point) => point.modelPrice),
-        borderColor: '#F59E0B',
-        backgroundColor: 'transparent',
-        borderDash: [8, 6],
-        borderWidth: 2,
-        pointRadius: 0,
-        pointHitRadius: 12,
-        tension: 0.16,
-      },
-    ],
-  }));
+  // 365-day trailing average in log space — shared by chartData (line) and chartOptions (Y range)
+  private readonly smoothedModelPrices = computed(() => {
+    const points = this.dataPoints();
+    return points.map((_, idx) => {
+      const start = Math.max(0, idx - 364);
+      const window = points.slice(start, idx + 1)
+        .map((p) => p.modelPrice)
+        .filter((v): v is number => v !== null && v > 0);
+      if (window.length === 0) return null;
+      const logAvg = window.reduce((s, v) => s + Math.log(v), 0) / window.length;
+      return Math.exp(logAvg);
+    });
+  });
+
+  protected readonly chartData = computed<ChartData<'line'>>(() => {
+    const points = this.dataPoints();
+    const halvingColors = points.map((p) => halvingDaysToColor(daysUntilNextHalving(p.date)));
+    const futureLabels = buildFutureLabels(points, this.selectedTimeframe());
+    const futureNulls = futureLabels.map(() => null as number | null);
+
+    return {
+      labels: [...points.map((p) => p.date), ...futureLabels],
+      datasets: [
+        {
+          label: 'BTC Price',
+          data: [...points.map((p) => p.priceUsd), ...futureNulls],
+          borderColor: '#22c55e',
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          pointRadius: 0,
+          pointHitRadius: 12,
+          tension: 0,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          segment: { borderColor: (ctx: any) => halvingColors[ctx.p0DataIndex] ?? '#888' },
+        },
+        {
+          label: 'Stock/Flow (365d avg)',
+          data: [...this.smoothedModelPrices(), ...futureNulls],
+          borderColor: '#7f1d1d',
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          pointRadius: 0,
+          pointHitRadius: 12,
+          tension: 0.1,
+        },
+      ],
+    };
+  });
   protected readonly chartOptions = computed<ChartOptions<'line'>>(() => {
-    const range = getPriceRange(this.dataPoints());
+    const range = getPriceRange(this.dataPoints(), this.smoothedModelPrices());
 
     return {
       animation: { duration: 280 },
@@ -151,29 +198,34 @@ export class StockToFlowChartPageComponent implements AfterViewInit {
           type: 'logarithmic',
           min: range.min,
           max: range.max,
-          ticks: {
-            callback: (value) => formatUsd(Number(value)),
-          },
+          ticks: { callback: (value) => formatUsd(Number(value)) },
           grid: { color: 'rgba(23, 32, 42, 0.08)' },
         },
       },
       plugins: {
         legend: {
           display: true,
-          position: 'top',
-          labels: { usePointStyle: true },
+          position: 'bottom',
+          labels: {
+            usePointStyle: true,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            generateLabels: (): any[] => [
+              { text: 'BTC Price',             pointStyle: 'circle', fillStyle: '#22c55e', strokeStyle: '#22c55e', lineWidth: 0, hidden: false, datasetIndex: 0 },
+              { text: 'Stock/Flow (365d avg)', pointStyle: 'line',   strokeStyle: '#7f1d1d', lineWidth: 2,         hidden: false, datasetIndex: 1 },
+              { text: 'Halving Dates',         pointStyle: 'dash',   strokeStyle: 'rgba(107,114,128,0.7)', lineWidth: 1, hidden: false, datasetIndex: -1 },
+            ],
+          },
         },
         tooltip: {
           callbacks: {
             title: (items) => formatDate(String(items[0]?.label ?? '')),
-            label: (item) => `${item.dataset.label}: ${formatUsd(Number(item.parsed.y))}`,
+            label: (item) => {
+              const label = item.dataset.label ?? '';
+              return `${label}: ${formatUsd(Number(item.parsed.y))}`;
+            },
             afterBody: (items) => {
               const point = this.dataPoints()[items[0]?.dataIndex ?? -1];
-
-              if (!point) {
-                return '';
-              }
-
+              if (!point) return '';
               return [
                 `S2F Ratio: ${formatRatio(point.stockToFlowRatio)}`,
                 `Premium to Model: ${formatPremium(point)}`,
@@ -184,7 +236,6 @@ export class StockToFlowChartPageComponent implements AfterViewInit {
         annotation: {
           annotations: {
             ...createHalvingAnnotations(),
-            ...createDivergenceAnnotations(this.dataPoints(), range.min, range.max),
             ...this.userAnnotations(),
           },
         },
@@ -333,83 +384,12 @@ function createHalvingAnnotations(): Record<string, AnnotationOptions<'line'>> {
         type: 'line',
         xMin: event.date,
         xMax: event.date,
-        borderColor: '#6B7280',
+        borderColor: 'rgba(107, 114, 128, 0.5)',
         borderDash: [4, 5],
         borderWidth: 1,
-        label: {
-          display: true,
-          content: event.label,
-          position: 'start',
-          backgroundColor: 'rgba(55, 65, 81, 0.88)',
-        },
       },
     ]),
   );
-}
-
-function createDivergenceAnnotations(
-  dataPoints: StockToFlowChartDataPoint[],
-  min: number,
-  max: number,
-): Record<string, AnnotationOptions<'box'>> {
-  return Object.fromEntries(
-    getDivergenceRanges(dataPoints).map((range, index) => [
-      `divergence${index + 1}`,
-      {
-        type: 'box',
-        xMin: range.start,
-        xMax: range.end,
-        yMin: min,
-        yMax: max,
-        backgroundColor:
-          range.kind === 'overvalued' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(34, 197, 94, 0.1)',
-        borderWidth: 0,
-        label: {
-          display: true,
-          content: range.kind === 'overvalued' ? 'Overvalued' : 'Undervalued',
-          position: 'center',
-          backgroundColor:
-            range.kind === 'overvalued' ? 'rgba(239, 68, 68, 0.82)' : 'rgba(34, 197, 94, 0.82)',
-        },
-      },
-    ]),
-  );
-}
-
-function getDivergenceRanges(
-  dataPoints: StockToFlowChartDataPoint[],
-): { start: string; end: string; kind: 'overvalued' | 'undervalued' }[] {
-  const ranges: { start: string; end: string; kind: 'overvalued' | 'undervalued' }[] = [];
-  let currentRange: { start: string; end: string; kind: 'overvalued' | 'undervalued' } | undefined;
-
-  for (const point of dataPoints) {
-    const kind = getDivergenceKind(point);
-
-    if (!kind) {
-      if (currentRange) {
-        ranges.push(currentRange);
-        currentRange = undefined;
-      }
-      continue;
-    }
-
-    if (currentRange?.kind === kind) {
-      currentRange.end = point.date;
-      continue;
-    }
-
-    if (currentRange) {
-      ranges.push(currentRange);
-    }
-
-    currentRange = { start: point.date, end: point.date, kind };
-  }
-
-  if (currentRange) {
-    ranges.push(currentRange);
-  }
-
-  return ranges;
 }
 
 function getDivergenceKind(point: StockToFlowChartDataPoint): 'overvalued' | 'undervalued' | undefined {
@@ -430,18 +410,20 @@ function getDivergenceKind(point: StockToFlowChartDataPoint): 'overvalued' | 'un
   return undefined;
 }
 
-function getPriceRange(dataPoints: StockToFlowChartDataPoint[]): { min: number; max: number } {
-  const prices = dataPoints
-    .flatMap((point) => [point.priceUsd, point.modelPrice])
-    .filter((price): price is number => typeof price === 'number' && price > 0);
+function getPriceRange(
+  dataPoints: StockToFlowChartDataPoint[],
+  smoothedModel: (number | null)[],
+): { min: number; max: number } {
+  const btcPrices = dataPoints.map((p) => p.priceUsd).filter((p): p is number => p > 0);
+  if (btcPrices.length === 0) return { min: 1, max: 100000 };
 
-  if (prices.length === 0) {
-    return { min: 1, max: 100000 };
-  }
+  const modelMax = smoothedModel
+    .filter((v): v is number => v !== null && v > 0)
+    .reduce((m, v) => Math.max(m, v), 0);
 
   return {
-    min: Math.max(0.01, Math.min(...prices) * 0.55),
-    max: Math.max(...prices) * 1.45,
+    min: Math.max(0.01, Math.min(...btcPrices) * 0.55),
+    max: Math.max(Math.max(...btcPrices), modelMax) * 1.25,
   };
 }
 
@@ -482,4 +464,16 @@ function formatDate(value: string): string {
     year: 'numeric',
     timeZone: 'UTC',
   }).format(new Date(`${value}T00:00:00.000Z`));
+}
+
+function buildFutureLabels(points: { date: string }[], timeframe: string): string[] {
+  const pad: Record<string, number> = { '1m': 5, '3m': 8, '6m': 14, '1y': 21, '2y': 45, 'all': 90 };
+  const days = pad[timeframe] ?? 30;
+  if (points.length === 0) return [];
+  const last = new Date(`${points[points.length - 1].date}T00:00:00.000Z`);
+  return Array.from({ length: days }, (_, i) => {
+    const d = new Date(last);
+    d.setUTCDate(d.getUTCDate() + i + 1);
+    return d.toISOString().split('T')[0];
+  });
 }

@@ -7,7 +7,7 @@ import {
   ApiClientError,
   AuthApiClient,
   type ChartTimeframe,
-  type PiCycleTopChartDataPoint,
+  type PuellMultipleChartDataPoint,
 } from '@crypto-market-analysis/data-access/api-client';
 import { ChartViewerComponent } from '../chart-viewer/chart-viewer.component';
 import { ChartAnnotationsComponent } from '../chart-annotations/chart-annotations.component';
@@ -41,26 +41,39 @@ const TIMEFRAMES: TimeframeOption[] = [
   { label: 'All', value: 'all' },
 ];
 
-const SIGNAL_MESSAGE = 'Historically, this signal has preceded major tops within 3-7 days';
+const HALVING_EVENTS = [
+  { date: '2012-11-28', label: '2012 Halving' },
+  { date: '2016-07-09', label: '2016 Halving' },
+  { date: '2020-05-11', label: '2020 Halving' },
+  { date: '2024-04-20', label: '2024 Halving' },
+];
 
-const PI_CYCLE_ALERT_METRICS: AlertMetricOption[] = [
-  { value: 'ma_111_day', label: '111-Day MA' },
-  { value: 'ma_350x2_day', label: '350-Day MA × 2' },
+const HALVINGS_SCHEDULE = [
+  { date: '2009-01-03', blockReward: 50 },
+  { date: '2012-11-28', blockReward: 25 },
+  { date: '2016-07-09', blockReward: 12.5 },
+  { date: '2020-05-11', blockReward: 6.25 },
+  { date: '2024-04-19', blockReward: 3.125 },
+];
+
+const PUELL_ALERT_METRICS: AlertMetricOption[] = [
+  { value: 'puell_multiple', label: 'Puell Multiple' },
+  { value: 'btc_price', label: 'BTC Price USD' },
 ];
 
 @Component({
-  selector: 'app-pi-cycle-top-chart-page',
+  selector: 'app-puell-multiple-chart-page',
   imports: [ChartViewerComponent, ChartAnnotationsComponent, ChartInfoPanelComponent, RouterLink, CreateAlertModalComponent],
-  templateUrl: './pi-cycle-top-chart-page.component.html',
+  templateUrl: './puell-multiple-chart-page.component.html',
 })
-export class PiCycleTopChartPageComponent implements AfterViewInit {
+export class PuellMultipleChartPageComponent implements AfterViewInit {
   private readonly api = inject(AuthApiClient);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   @ViewChild(ChartViewerComponent) private readonly chartViewer?: ChartViewerComponent;
   @ViewChild(ChartAnnotationsComponent) protected readonly chartAnnotations?: ChartAnnotationsComponent;
   protected readonly timeframes = TIMEFRAMES;
-  protected readonly alertMetrics = PI_CYCLE_ALERT_METRICS;
+  protected readonly alertMetrics = PUELL_ALERT_METRICS;
   protected readonly showAlertModal = signal(false);
   protected readonly selectedTimeframe = signal<ChartTimeframe>('all');
   protected readonly isLoading = signal(false);
@@ -68,103 +81,86 @@ export class PiCycleTopChartPageComponent implements AfterViewInit {
   protected readonly infoOpen = signal(true);
   protected readonly exportMenuOpen = signal(false);
   protected readonly userAnnotations = signal<Record<string, AnnotationOptions>>({});
-  protected readonly signalNotice = signal('');
-  protected readonly dataPoints = signal<PiCycleTopChartDataPoint[]>([]);
+  protected readonly dataPoints = signal<PuellMultipleChartDataPoint[]>([]);
   protected readonly lastUpdated = signal<string | null>(null);
+
+  private readonly puellValues = computed<(number | null)[]>(() => computePuellMultiple(this.dataPoints()));
+
   protected readonly infoCurrentFields = computed<ChartInfoField[]>(() => {
-    const point = this.latestPoint();
-    const lastIdx = this.dataPoints().length - 1;
-    const ma = lastIdx >= 0 ? this.maAt(lastIdx) : { ma111: null, ma350x2: null };
+    const points = this.dataPoints();
+    const puell = this.puellValues();
+    const lastIndex = points.length - 1;
+    const point = points[lastIndex];
+    const puellValue = puell[lastIndex] ?? null;
 
     return [
-      { label: 'Current Price',   value: point ? formatUsd(point.priceUsd) : 'Waiting for data' },
-      { label: '111-day MA',      value: ma.ma111   ? formatUsd(ma.ma111)   : 'Waiting for history' },
-      { label: '350-day MA x 2',  value: ma.ma350x2 ? formatUsd(ma.ma350x2) : 'Waiting for history' },
-      { label: 'Signal',          value: point ? getStatusText({ ...point, ...ma }) : 'Waiting for data' },
+      { label: 'Current Price', value: point ? formatUsd(point.priceUsd) : 'Waiting for data' },
+      { label: 'Current Puell Multiple', value: puellValue !== null ? puellValue.toFixed(3) : 'Waiting for data' },
+      { label: 'Signal', value: puellValue !== null ? getPuellSignal(puellValue) : 'Waiting for data' },
     ];
   });
   protected readonly infoInterpretation = computed(() => {
-    const point = this.latestPoint();
-    if (!point) return 'Waiting for the latest moving-average calculation.';
-    const lastIdx = this.dataPoints().length - 1;
-    const { ma111, ma350x2 } = lastIdx >= 0 ? this.maAt(lastIdx) : { ma111: null, ma350x2: null };
+    const puell = this.puellValues();
+    const puellValue = puell[puell.length - 1] ?? null;
 
-    return ma111 !== null && ma350x2 !== null && ma111 > ma350x2
-      ? 'The 111-day moving average is above the 350-day moving average x 2. Historically, this crossover has appeared near major Bitcoin cycle highs.'
-      : 'No Pi Cycle Top crossover is active. The indicator is not currently flagging a historical cycle-top condition.';
+    if (puellValue === null) {
+      return 'Waiting for enough price history to compute the Puell Multiple (requires 365 days of data).';
+    }
+
+    if (puellValue > 4) {
+      return 'The Puell Multiple is in the sell zone (above 4). Miner revenue is extremely elevated relative to the annual average, historically associated with cycle tops and peak profitability.';
+    }
+
+    if (puellValue < 0.5) {
+      return 'The Puell Multiple is in the buy zone (below 0.5). Miner revenue is depressed relative to the annual average, historically a strong long-term accumulation signal.';
+    }
+
+    return 'The Puell Multiple is in the neutral zone (0.5–4). Miner revenue is within normal historical range relative to the 365-day average.';
   });
   protected readonly infoLastUpdated = computed(() => this.lastUpdatedText());
   protected readonly infoAbout =
-    'The Pi Cycle Top Indicator compares the 111-day moving average with twice the 350-day moving average. Historically, when the 111-day average crosses above the 350-day average x 2, the signal has appeared near major Bitcoin cycle highs.';
+    'The Puell Multiple divides daily miner issuance revenue in USD by its 365-day moving average. It measures whether miners are earning unusually high or low revenue, which historically correlates with cycle tops (high) and cycle bottoms (low).';
   protected readonly infoDataSources = [
     'Bitcoin Price: CoinGecko API',
-    'Moving averages: 111-day daily close and 350-day daily close x 2',
-    'Calculation: Moving-average crossover calculated from historical Bitcoin price data',
+    'Block reward schedule: Bitcoin halving schedule (hardcoded)',
+    'Calculation: (Daily issuance USD) / (365-day SMA of daily issuance USD)',
   ];
-  protected readonly signalDates = computed(() => findSignalDates(this.dataPoints()));
-
-  // Compute MAs client-side from price data when the API returns nulls
-  private readonly computedMAs = computed(() => {
-    const points = this.dataPoints();
-    return points.map((_, idx) => {
-      const prices = points.map((p) => p.priceUsd);
-      const ma111 = sma(prices, idx, 111);
-      const ma350 = sma(prices, idx, 350);
-      return { ma111, ma350x2: ma350 !== null ? ma350 * 2 : null };
-    });
-  });
-
-  private maAt(idx: number): { ma111: number | null; ma350x2: number | null } {
-    const point = this.dataPoints()[idx];
-    const computed = this.computedMAs()[idx];
-    return {
-      ma111:   point?.ma111   ?? computed?.ma111   ?? null,
-      ma350x2: point?.ma350x2 ?? computed?.ma350x2 ?? null,
-    };
-  }
 
   protected readonly chartData = computed<ChartData<'line'>>(() => {
     const points = this.dataPoints();
-    const mas = this.computedMAs();
+    const puell = this.puellValues();
     const futureLabels = buildFutureLabels(points, this.selectedTimeframe());
     const futureNulls = futureLabels.map(() => null as number | null);
 
     return {
-      labels: [...points.map((p) => p.date), ...futureLabels],
+      labels: [...points.map((point) => point.date), ...futureLabels],
       datasets: [
         {
           label: 'Bitcoin Price',
-          data: [...points.map((p) => p.priceUsd), ...futureNulls],
+          data: [...points.map((point) => point.priceUsd), ...futureNulls],
           borderColor: '#000000',
           backgroundColor: 'transparent',
           borderWidth: 2,
           pointRadius: 0,
           pointHitRadius: 12,
           tension: 0.16,
+          yAxisID: 'y',
         },
         {
-          label: '111-day MA',
-          data: [...mas.map((m) => m.ma111), ...futureNulls],
-          borderColor: '#3B82F6',
+          label: 'Puell Multiple',
+          data: [...puell, ...futureNulls],
+          borderColor: '#8B5CF6',
           backgroundColor: 'transparent',
           borderWidth: 2,
           pointRadius: 0,
           pointHitRadius: 12,
           tension: 0.16,
-        },
-        {
-          label: '350-day MA x 2',
-          data: [...mas.map((m) => m.ma350x2), ...futureNulls],
-          borderColor: '#EF4444',
-          backgroundColor: 'transparent',
-          borderWidth: 2,
-          pointRadius: 0,
-          pointHitRadius: 12,
-          tension: 0.16,
+          yAxisID: 'y2',
         },
       ],
     };
   });
+
   protected readonly chartOptions = computed<ChartOptions<'line'>>(() => ({
     animation: { duration: 280 },
     scales: {
@@ -173,12 +169,22 @@ export class PiCycleTopChartPageComponent implements AfterViewInit {
         grid: { color: 'rgba(23, 32, 42, 0.08)' },
       },
       y: {
-        type: 'linear',
-        beginAtZero: false,
+        type: 'logarithmic',
+        position: 'left',
         ticks: {
           callback: (value) => formatUsd(Number(value)),
         },
         grid: { color: 'rgba(23, 32, 42, 0.08)' },
+      },
+      y2: {
+        type: 'logarithmic',
+        position: 'right',
+        min: 0.05,
+        max: 10,
+        ticks: {
+          callback: (value) => Number(value).toFixed(2),
+        },
+        grid: { drawOnChartArea: false },
       },
     },
     plugins: {
@@ -190,19 +196,18 @@ export class PiCycleTopChartPageComponent implements AfterViewInit {
       tooltip: {
         callbacks: {
           title: (items) => formatDate(String(items[0]?.label ?? '')),
-          label: (item) => `${item.dataset.label}: ${formatUsd(Number(item.parsed.y))}`,
-          afterBody: (items) => {
-            const point = this.dataPoints()[items[0]?.dataIndex ?? -1];
-
-            return point ? `Status: ${getStatusText(point)}` : '';
+          label: (item) => {
+            if (item.dataset.yAxisID === 'y2') {
+              return `Puell Multiple: ${Number(item.parsed.y).toFixed(3)}`;
+            }
+            return `${item.dataset.label}: ${formatUsd(Number(item.parsed.y))}`;
           },
         },
       },
       annotation: {
         annotations: {
-          ...createSignalAnnotations(this.signalDates(), () => {
-            this.signalNotice.set(SIGNAL_MESSAGE);
-          }),
+          ...createPuellZoneAnnotations(),
+          ...createHalvingAnnotations(),
           ...this.userAnnotations(),
         },
       },
@@ -210,7 +215,7 @@ export class PiCycleTopChartPageComponent implements AfterViewInit {
   }));
 
   constructor() {
-    void this.api.recordRecentChart('pi-cycle-top').catch(() => undefined);
+    void this.api.recordRecentChart('puell-multiple').catch(() => undefined);
     this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
       const requested = params.get('timeframe');
       const timeframe = parseChartTimeframe(requested);
@@ -286,21 +291,21 @@ export class PiCycleTopChartPageComponent implements AfterViewInit {
     this.exportMenuOpen.set(false);
     await exportChartPng({
       chartImageDataUrl,
-      chartTitle: 'Pi Cycle Top Indicator',
-      fileName: `pi-cycle-top_${getExportDateStamp()}.png`,
+      chartTitle: 'Puell Multiple',
+      fileName: `puell-multiple_${getExportDateStamp()}.png`,
     });
   }
 
   protected exportCsv(): void {
+    const puell = this.puellValues();
     this.exportMenuOpen.set(false);
     exportChartCsv({
-      rows: this.dataPoints(),
-      fileName: `pi-cycle-top_${getExportDateStamp()}.csv`,
+      rows: this.dataPoints().map((row, i) => ({ ...row, puellMultiple: puell[i] ?? null })),
+      fileName: `puell-multiple_${getExportDateStamp()}.csv`,
       columns: [
         { header: 'Date', value: (row) => row.date },
         { header: 'Price USD', value: (row) => formatCsvNumber(row.priceUsd) },
-        { header: '111-day MA', value: (row) => formatCsvNumber(row.ma111) },
-        { header: '350-day MA x2', value: (row) => formatCsvNumber(row.ma350x2) },
+        { header: 'Puell Multiple', value: (row) => formatCsvNumber(row.puellMultiple) },
       ],
     });
   }
@@ -315,27 +320,21 @@ export class PiCycleTopChartPageComponent implements AfterViewInit {
     return new Date(timestamp).toISOString().replace('T', ' ').replace('.000Z', ' UTC');
   }
 
-  private latestPoint(): PiCycleTopChartDataPoint | undefined {
-    const dataPoints = this.dataPoints();
-
-    return dataPoints[dataPoints.length - 1];
-  }
-
   private async loadChartData(timeframe: ChartTimeframe): Promise<void> {
     this.selectedTimeframe.set(timeframe);
     this.isLoading.set(true);
     this.errorMessage.set('');
-    this.signalNotice.set('');
 
     try {
-      const response = await this.api.getPiCycleTopChartData(timeframe);
-      this.dataPoints.set(response.dataPoints);
+      // Reuse the rainbow endpoint (returns price data) — no dedicated Puell endpoint needed
+      const response = await this.api.getBitcoinRainbowChartData(timeframe);
+      this.dataPoints.set(response.dataPoints.map((p) => ({ date: p.date, priceUsd: p.priceUsd })));
       this.lastUpdated.set(response.lastUpdated);
     } catch (error) {
       this.errorMessage.set(
         error instanceof ApiClientError
           ? error.message
-          : $localize`:Pi Cycle chart load failure@@charts.piCycleLoadFailed:Chart data could not be loaded. Please try again.`,
+          : $localize`:Puell Multiple chart load failure@@charts.puellLoadFailed:Chart data could not be loaded. Please try again.`,
       );
     } finally {
       this.isLoading.set(false);
@@ -343,73 +342,127 @@ export class PiCycleTopChartPageComponent implements AfterViewInit {
   }
 }
 
-function findSignalDates(dataPoints: PiCycleTopChartDataPoint[]): string[] {
-  const signalDates: string[] = [];
+function getBlockReward(date: string): number {
+  let reward = HALVINGS_SCHEDULE[0].blockReward;
 
-  for (let index = 1; index < dataPoints.length; index += 1) {
-    const previous = dataPoints[index - 1];
-    const current = dataPoints[index];
-
-    if (
-      previous.ma111 !== null &&
-      previous.ma350x2 !== null &&
-      current.ma111 !== null &&
-      current.ma350x2 !== null &&
-      previous.ma111 <= previous.ma350x2 &&
-      current.ma111 > current.ma350x2
-    ) {
-      signalDates.push(current.date);
+  for (const halving of HALVINGS_SCHEDULE) {
+    if (date >= halving.date) {
+      reward = halving.blockReward;
+    } else {
+      break;
     }
   }
 
-  return signalDates;
+  return reward;
 }
 
-function createSignalAnnotations(
-  signalDates: string[],
-  onClick: () => void,
-): Record<string, AnnotationOptions<'line'>> {
+function computePuellMultiple(dataPoints: PuellMultipleChartDataPoint[]): (number | null)[] {
+  const dailyIssuance: number[] = dataPoints.map((point) => {
+    const reward = getBlockReward(point.date);
+    return reward * 144 * point.priceUsd;
+  });
+
+  const result: (number | null)[] = [];
+
+  for (let i = 0; i < dailyIssuance.length; i += 1) {
+    if (i < 364) {
+      result.push(null);
+      continue;
+    }
+
+    let sum = 0;
+
+    for (let j = i - 364; j <= i; j += 1) {
+      sum += dailyIssuance[j];
+    }
+
+    const sma365 = sum / 365;
+
+    result.push(sma365 > 0 ? dailyIssuance[i] / sma365 : null);
+  }
+
+  return result;
+}
+
+function getPuellSignal(value: number): string {
+  if (value > 4) return 'Sell zone';
+  if (value < 0.5) return 'Buy zone';
+  return 'Neutral';
+}
+
+function createPuellZoneAnnotations(): Record<string, AnnotationOptions<'box'>> {
+  return {
+    zoneSell: {
+      type: 'box',
+      xScaleID: 'x',
+      yScaleID: 'y2',
+      yMin: 4,
+      yMax: 10,
+      backgroundColor: 'rgba(239,68,68,0.15)',
+      borderWidth: 0,
+      label: {
+        display: true,
+        content: 'Sell zone',
+        position: { x: 'end', y: 'start' },
+        color: 'rgba(239,68,68,0.7)',
+        font: { size: 11 },
+      },
+    },
+    zoneNeutral: {
+      type: 'box',
+      xScaleID: 'x',
+      yScaleID: 'y2',
+      yMin: 0.5,
+      yMax: 4,
+      backgroundColor: 'rgba(234,179,8,0.05)',
+      borderWidth: 0,
+      label: {
+        display: true,
+        content: 'Neutral',
+        position: { x: 'end', y: 'start' },
+        color: 'rgba(234,179,8,0.7)',
+        font: { size: 11 },
+      },
+    },
+    zoneBuy: {
+      type: 'box',
+      xScaleID: 'x',
+      yScaleID: 'y2',
+      yMin: 0.05,
+      yMax: 0.5,
+      backgroundColor: 'rgba(34,197,94,0.15)',
+      borderWidth: 0,
+      label: {
+        display: true,
+        content: 'Buy zone',
+        position: { x: 'end', y: 'start' },
+        color: 'rgba(34,197,94,0.7)',
+        font: { size: 11 },
+      },
+    },
+  };
+}
+
+function createHalvingAnnotations(): Record<string, AnnotationOptions<'line'>> {
   return Object.fromEntries(
-    signalDates.map((date, index) => [
-      `piCycleSignal${index + 1}`,
+    HALVING_EVENTS.map((event) => [
+      `halving${event.date}`,
       {
         type: 'line',
-        xMin: date,
-        xMax: date,
-        borderColor: '#EF4444',
-        borderDash: [6, 6],
-        borderWidth: 2,
+        xMin: event.date,
+        xMax: event.date,
+        borderColor: '#6B7280',
+        borderDash: [4, 5],
+        borderWidth: 1,
         label: {
           display: true,
-          content: 'Pi Cycle Top Signal',
+          content: event.label,
           position: 'start',
-          backgroundColor: 'rgba(239, 68, 68, 0.9)',
-        },
-        enter({ element }) {
-          element.options.borderWidth = 3;
-          return true;
-        },
-        leave({ element }) {
-          element.options.borderWidth = 2;
-          return true;
-        },
-        click: () => {
-          onClick();
-          return true;
+          backgroundColor: 'rgba(55, 65, 81, 0.88)',
         },
       },
     ]),
   );
-}
-
-function getStatusText(point: PiCycleTopChartDataPoint): string {
-  if (point.ma111 === null || point.ma350x2 === null) {
-    return 'Waiting for enough moving-average history';
-  }
-
-  return point.ma111 > point.ma350x2
-    ? 'Pi Cycle Top signal (111-day MA above 350-day MA x 2)'
-    : 'No signal (111-day MA below 350-day MA x 2)';
 }
 
 function formatUsd(value: number): string {
@@ -435,14 +488,6 @@ function formatDate(value: string): string {
     year: 'numeric',
     timeZone: 'UTC',
   }).format(new Date(`${value}T00:00:00.000Z`));
-}
-
-// Simple moving average: returns null until enough data points are available
-function sma(prices: number[], idx: number, period: number): number | null {
-  if (idx < period - 1) return null;
-  let sum = 0;
-  for (let i = idx - period + 1; i <= idx; i++) sum += prices[i];
-  return sum / period;
 }
 
 function buildFutureLabels(points: { date: string }[], timeframe: string): string[] {

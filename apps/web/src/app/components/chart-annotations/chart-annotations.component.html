@@ -4,18 +4,12 @@
       Annotate
     </button>
   } @else {
-    <button type="button" class="secondary-button" (click)="selectNoteMode()">
-      Add Note
-    </button>
-    <button type="button" class="secondary-button" (click)="selectTrendlineMode()">
-      Draw Trend Line
-    </button>
     <button type="button" class="secondary-button" (click)="done()">Done</button>
   }
 </div>
 
 @if (message()) {
-  <p class="form-message" [class.success]="isSuccess()">{{ message() }}</p>
+  <p class="form-message">{{ message() }}</p>
 }
 
 @if (noteDraft()) {

@@ -83,6 +83,237 @@
                   <circle cx="424" cy="63"  r="9" fill="rgba(245,158,11,0.22)" stroke="#f59e0b" stroke-width="2"/>
                   <circle cx="630" cy="12"  r="9" fill="rgba(245,158,11,0.22)" stroke="#f59e0b" stroke-width="2"/>
                 </svg>
+              } @else if (chart.thumbnailClass === 'mvrv-z-score') {
+                <svg viewBox="0 0 800 360" preserveAspectRatio="none">
+                  <!-- Overheated zone (Z > 7) -->
+                  <rect x="0" y="0"   width="800" height="88"  fill="rgba(239,68,68,0.20)"/>
+                  <!-- Elevated zone (5–7) -->
+                  <rect x="0" y="88"  width="800" height="53"  fill="rgba(249,115,22,0.15)"/>
+                  <!-- Caution zone (3–5) -->
+                  <rect x="0" y="141" width="800" height="53"  fill="rgba(234,179,8,0.13)"/>
+                  <!-- Fair value zone (0–3) -->
+                  <rect x="0" y="194" width="800" height="88"  fill="rgba(34,197,94,0.12)"/>
+                  <!-- Undervalued zone (< 0) -->
+                  <rect x="0" y="282" width="800" height="78"  fill="rgba(59,130,246,0.18)"/>
+                  <!-- Halving dashed lines -->
+                  <line x1="155" y1="0" x2="155" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+                  <line x1="347" y1="0" x2="347" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+                  <line x1="555" y1="0" x2="555" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+                  <line x1="763" y1="0" x2="763" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+                  <!-- BTC price (log scale, black, left axis) -->
+                  <path d="M 0,355 C 100,352 140,346 155,342 C 168,306 198,250 212,243 C 228,295 260,308 272,303 C 308,284 345,240 355,228 C 372,175 408,68 424,62 C 440,102 468,238 477,126 C 492,98 505,84 510,85 C 528,108 542,104 555,85 C 574,50 617,12 632,10 C 648,42 677,250 685,68 C 703,46 737,22 763,14 C 776,10 792,12 800,13"
+                        stroke="#17202a" stroke-width="2.5" fill="none"/>
+                  <!-- MVRV Z-Score line (orange, oscillates between zones) -->
+                  <path d="M 0,300 C 50,288 90,175 108,62 C 120,240 148,310 168,298 C 210,272 268,186 300,118 C 318,280 356,312 380,302 C 415,258 448,105 462,55 C 476,188 510,308 528,292 C 548,242 584,95 605,58 C 622,175 652,300 668,286 C 696,254 745,224 778,232 C 790,236 797,240 800,242"
+                        stroke="#f59e0b" stroke-width="2.5" fill="none" opacity="0.95"/>
+                </svg>
+              } @else if (chart.thumbnailClass === 'puell-multiple') {
+                <svg viewBox="0 0 800 360" preserveAspectRatio="none">
+                  <!-- Sell zone (Puell > 4) -->
+                  <rect x="0" y="0"   width="800" height="90"  fill="rgba(239,68,68,0.18)"/>
+                  <!-- Neutral zone (0.5–4) -->
+                  <rect x="0" y="90"  width="800" height="180" fill="rgba(234,179,8,0.07)"/>
+                  <!-- Buy zone (Puell < 0.5) -->
+                  <rect x="0" y="270" width="800" height="90"  fill="rgba(34,197,94,0.18)"/>
+                  <!-- Zone dividers -->
+                  <line x1="0" y1="90"  x2="800" y2="90"  stroke="#e8eeea" stroke-width="1"/>
+                  <line x1="0" y1="270" x2="800" y2="270" stroke="#e8eeea" stroke-width="1"/>
+                  <!-- Halving dashed lines -->
+                  <line x1="155" y1="0" x2="155" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+                  <line x1="347" y1="0" x2="347" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+                  <line x1="555" y1="0" x2="555" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+                  <line x1="763" y1="0" x2="763" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+                  <!-- BTC price (log scale, black, left axis) -->
+                  <path d="M 0,355 C 100,352 140,346 155,342 C 168,306 198,250 212,243 C 228,295 260,308 272,303 C 308,284 345,240 355,228 C 372,175 408,68 424,62 C 440,102 468,238 477,126 C 492,98 505,84 510,85 C 528,108 542,104 555,85 C 574,50 617,12 632,10 C 648,42 677,250 685,68 C 703,46 737,22 763,14 C 776,10 792,12 800,13"
+                        stroke="#17202a" stroke-width="2.5" fill="none"/>
+                  <!-- Puell Multiple (purple, spikes at peaks, drops at halvings) -->
+                  <path d="M 0,320 C 40,305 80,285 105,38 C 118,230 148,308 165,318 C 155,345 158,350 165,318 C 200,295 265,240 298,185 C 315,58 338,38 350,32 C 362,180 390,305 408,315 C 350,340 348,345 408,315 C 445,290 490,225 510,52 C 524,195 545,305 560,315 C 548,342 548,345 560,315 C 598,280 648,235 668,210 C 690,60 720,35 735,28 C 748,150 768,290 780,305 C 790,312 797,316 800,318"
+                        stroke="#6366f1" stroke-width="2.5" fill="none" opacity="0.95"/>
+                </svg>
+              } @else if (chart.thumbnailClass === 'bitcoin-power-law') {
+                <svg viewBox="0 0 800 360" preserveAspectRatio="none">
+                  <rect width="800" height="360" fill="#fff"/>
+                  <line x1="0" y1="90"  x2="800" y2="90"  stroke="#e8eeea" stroke-width="1"/>
+                  <line x1="0" y1="180" x2="800" y2="180" stroke="#e8eeea" stroke-width="1"/>
+                  <line x1="0" y1="270" x2="800" y2="270" stroke="#e8eeea" stroke-width="1"/>
+                  <!-- Halving dashed lines -->
+                  <line x1="155" y1="0" x2="155" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+                  <line x1="347" y1="0" x2="347" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+                  <line x1="555" y1="0" x2="555" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+                  <line x1="763" y1="0" x2="763" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+                  <!-- Ceiling (red) — top diagonal band -->
+                  <path d="M 0,290 L 800,30" stroke="#ef4444" stroke-width="2" fill="none" opacity="0.85"/>
+                  <!-- Model (orange) — middle diagonal band -->
+                  <path d="M 0,330 L 800,110" stroke="#f97316" stroke-width="2" fill="none" opacity="0.85"/>
+                  <!-- Floor (blue) — lower diagonal band -->
+                  <path d="M 0,352 L 800,195" stroke="#60a5fa" stroke-width="2" fill="none" opacity="0.85"/>
+                  <!-- BTC price (black) — oscillates around model -->
+                  <path d="M 0,354 C 60,352 100,348 115,345 C 130,328 148,295 158,282 C 175,312 200,330 218,325 C 255,305 300,270 315,255 C 335,212 365,150 380,145 C 394,175 415,238 430,210 C 445,185 460,165 468,166 C 482,184 492,182 504,168 C 518,140 545,102 558,104 C 570,124 588,228 596,148 C 608,128 630,108 645,104 C 654,103 664,108 670,110 C 682,108 720,92 745,80 C 762,74 785,68 800,65"
+                        stroke="#17202a" stroke-width="2.5" fill="none"/>
+                </svg>
+              } @else if (chart.thumbnailClass === 'bitcoin-cvdd') {
+                <svg viewBox="0 0 800 360" preserveAspectRatio="none">
+                  <rect width="800" height="360" fill="#fff"/>
+                  <line x1="0" y1="90"  x2="800" y2="90"  stroke="#e8eeea" stroke-width="1"/>
+                  <line x1="0" y1="180" x2="800" y2="180" stroke="#e8eeea" stroke-width="1"/>
+                  <line x1="0" y1="270" x2="800" y2="270" stroke="#e8eeea" stroke-width="1"/>
+                  <!-- Halving dashed lines -->
+                  <line x1="155" y1="0" x2="155" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+                  <line x1="347" y1="0" x2="347" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+                  <line x1="555" y1="0" x2="555" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+                  <line x1="763" y1="0" x2="763" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
+                  <!-- CVDD (green) — smooth rising curve, bottom indicator -->
+                  <path d="M 0,358 C 80,354 140,346 200,330 C 280,310 360,280 440,245 C 520,210 620,175 700,155 C 740,145 770,138 800,132"
+                        stroke="#22c55e" stroke-width="2.5" fill="none" opacity="0.9"/>
+                  <!-- BTC price (black) — volatile, above CVDD, converges at cycle lows -->
+                  <path d="M 0,355 C 60,352 100,348 115,345 C 130,308 158,254 172,247 C 188,295 220,310 232,305 C 268,288 305,246 315,232 C 334,180 368,72 384,66 C 400,106 428,240 437,128 C 452,100 465,86 470,87 C 488,110 502,107 515,89 C 534,54 575,16 590,14 C 606,44 633,252 641,72 C 657,50 693,26 717,18 C 728,14 745,16 752,17 C 768,15 782,16 800,100"
+                        stroke="#17202a" stroke-width="2.5" fill="none"/>
+                </svg>
+              } @else if (chart.thumbnailClass === 'halving-spiral') {
+                <!-- Halving Spiral thumbnail — polar chart with 4 concentric arcs -->
+                <svg viewBox="0 0 360 360" preserveAspectRatio="xMidYMid meet">
+                  <rect width="360" height="360" fill="#fff"/>
+                  <!-- Price grid circles (centre = 180,180; radii approx log-scaled) -->
+                  <circle cx="180" cy="180" r="30"  stroke="#e5e7eb" stroke-width="1" fill="none"/>
+                  <circle cx="180" cy="180" r="60"  stroke="#e5e7eb" stroke-width="1" fill="none"/>
+                  <circle cx="180" cy="180" r="90"  stroke="#e5e7eb" stroke-width="1" fill="none"/>
+                  <circle cx="180" cy="180" r="120" stroke="#e5e7eb" stroke-width="1" fill="none"/>
+                  <circle cx="180" cy="180" r="150" stroke="#e5e7eb" stroke-width="1" fill="none"/>
+                  <!-- Radial guide lines (N/E/S/W) -->
+                  <line x1="180" y1="30"  x2="180" y2="180" stroke="#d1d5db" stroke-width="1" stroke-dasharray="4,4"/>
+                  <line x1="330" y1="180" x2="180" y2="180" stroke="#d1d5db" stroke-width="1" stroke-dasharray="4,4"/>
+                  <line x1="180" y1="330" x2="180" y2="180" stroke="#d1d5db" stroke-width="1" stroke-dasharray="4,4"/>
+                  <line x1="30"  y1="180" x2="180" y2="180" stroke="#d1d5db" stroke-width="1" stroke-dasharray="4,4"/>
+                  <!-- Cycle 1 (slate) — tiny inner spiral -->
+                  <path d="M 180,155 C 196,148 210,154 215,168 C 220,183 214,198 200,206 C 185,214 168,210 158,197 C 148,183 152,165 165,157 C 174,152 182,153 186,160"
+                        stroke="#94a3b8" stroke-width="1.5" fill="none"/>
+                  <!-- Cycle 2 (blue) — medium spiral -->
+                  <path d="M 180,120 C 220,108 255,126 264,162 C 273,198 252,232 219,244 C 185,256 149,241 132,210 C 115,178 128,141 158,126 C 170,120 182,120 188,128"
+                        stroke="#60a5fa" stroke-width="1.5" fill="none"/>
+                  <!-- Cycle 3 (cyan) — larger spiral -->
+                  <path d="M 180,80 C 240,62 294,94 310,152 C 326,210 295,268 240,286 C 184,304 126,276 100,222 C 74,168 96,108 148,86 C 160,81 174,80 182,88"
+                        stroke="#22d3ee" stroke-width="1.5" fill="none"/>
+                  <!-- Cycle 4 (amber) — outer spiral -->
+                  <path d="M 180,46 C 264,24 336,72 352,156 C 368,240 320,318 240,338 C 158,358 80,308 52,228 C 24,148 68,72 144,50 C 155,47 170,45 178,52"
+                        stroke="#f59e0b" stroke-width="1.5" fill="none"/>
+                  <!-- Current cycle (rose) — partial arc, upper-right sector -->
+                  <path d="M 180,46 C 216,38 252,50 276,76 C 300,102 308,138 298,168"
+                        stroke="#f43f5e" stroke-width="2" fill="none"/>
+                </svg>
+              } @else if (chart.thumbnailClass === 'vdd-multiple') {
+                <!-- VDD Multiple thumbnail — colored bars (green/orange/red) + price line -->
+                <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
+                  <rect width="800" height="360" fill="#fff"/>
+                  <!-- Horizontal grid lines -->
+                  <line x1="0" y1="72"  x2="800" y2="72"  stroke="#e5e7eb" stroke-width="1"/>
+                  <line x1="0" y1="144" x2="800" y2="144" stroke="#e5e7eb" stroke-width="1"/>
+                  <line x1="0" y1="216" x2="800" y2="216" stroke="#e5e7eb" stroke-width="1"/>
+                  <line x1="0" y1="288" x2="800" y2="288" stroke="#e5e7eb" stroke-width="1"/>
+                  <!-- 2.9 sell threshold (red dashed) -->
+                  <line x1="0" y1="100" x2="800" y2="100" stroke="rgba(239,68,68,0.55)" stroke-width="1.5" stroke-dasharray="8,5"/>
+                  <!-- 0.75 buy threshold (green dashed) -->
+                  <line x1="0" y1="282" x2="800" y2="282" stroke="rgba(34,197,94,0.55)" stroke-width="1.5" stroke-dasharray="8,5"/>
+                  <!-- VDD bars — green (accumulation) -->
+                  <rect x="0"   y="310" width="6" height="50" fill="rgba(34,197,94,0.82)"/>
+                  <rect x="8"   y="295" width="6" height="65" fill="rgba(34,197,94,0.82)"/>
+                  <rect x="16"  y="305" width="6" height="55" fill="rgba(34,197,94,0.82)"/>
+                  <rect x="24"  y="300" width="6" height="60" fill="rgba(34,197,94,0.82)"/>
+                  <rect x="32"  y="290" width="6" height="70" fill="rgba(34,197,94,0.82)"/>
+                  <!-- orange bars -->
+                  <rect x="48"  y="240" width="6" height="120" fill="rgba(249,115,22,0.85)"/>
+                  <rect x="56"  y="220" width="6" height="140" fill="rgba(249,115,22,0.85)"/>
+                  <rect x="64"  y="200" width="6" height="160" fill="rgba(249,115,22,0.85)"/>
+                  <rect x="72"  y="180" width="6" height="180" fill="rgba(249,115,22,0.85)"/>
+                  <!-- red spike -->
+                  <rect x="88"  y="55"  width="6" height="305" fill="rgba(239,68,68,0.88)"/>
+                  <rect x="96"  y="80"  width="6" height="280" fill="rgba(239,68,68,0.88)"/>
+                  <!-- back to green -->
+                  <rect x="112" y="310" width="6" height="50" fill="rgba(34,197,94,0.82)"/>
+                  <rect x="120" y="305" width="6" height="55" fill="rgba(34,197,94,0.82)"/>
+                  <rect x="128" y="295" width="6" height="65" fill="rgba(34,197,94,0.82)"/>
+                  <!-- orange -->
+                  <rect x="144" y="240" width="6" height="120" fill="rgba(249,115,22,0.85)"/>
+                  <rect x="152" y="215" width="6" height="145" fill="rgba(249,115,22,0.85)"/>
+                  <rect x="160" y="195" width="6" height="165" fill="rgba(249,115,22,0.85)"/>
+                  <rect x="168" y="185" width="6" height="175" fill="rgba(249,115,22,0.85)"/>
+                  <!-- red spike 2 -->
+                  <rect x="184" y="50"  width="6" height="310" fill="rgba(239,68,68,0.88)"/>
+                  <rect x="192" y="70"  width="6" height="290" fill="rgba(239,68,68,0.88)"/>
+                  <!-- green -->
+                  <rect x="208" y="308" width="6" height="52" fill="rgba(34,197,94,0.82)"/>
+                  <rect x="216" y="300" width="6" height="60" fill="rgba(34,197,94,0.82)"/>
+                  <rect x="224" y="295" width="6" height="65" fill="rgba(34,197,94,0.82)"/>
+                  <!-- orange blocks -->
+                  <rect x="240" y="245" width="6" height="115" fill="rgba(249,115,22,0.85)"/>
+                  <rect x="248" y="220" width="6" height="140" fill="rgba(249,115,22,0.85)"/>
+                  <rect x="256" y="200" width="6" height="160" fill="rgba(249,115,22,0.85)"/>
+                  <rect x="264" y="185" width="6" height="175" fill="rgba(249,115,22,0.85)"/>
+                  <rect x="272" y="175" width="6" height="185" fill="rgba(249,115,22,0.85)"/>
+                  <!-- red spike 3 -->
+                  <rect x="288" y="45"  width="6" height="315" fill="rgba(239,68,68,0.88)"/>
+                  <rect x="296" y="62"  width="6" height="298" fill="rgba(239,68,68,0.88)"/>
+                  <!-- green recovery -->
+                  <rect x="312" y="312" width="6" height="48" fill="rgba(34,197,94,0.82)"/>
+                  <rect x="320" y="305" width="6" height="55" fill="rgba(34,197,94,0.82)"/>
+                  <rect x="328" y="298" width="6" height="62" fill="rgba(34,197,94,0.82)"/>
+                  <!-- orange 4th cycle -->
+                  <rect x="344" y="250" width="6" height="110" fill="rgba(249,115,22,0.85)"/>
+                  <rect x="352" y="228" width="6" height="132" fill="rgba(249,115,22,0.85)"/>
+                  <rect x="360" y="208" width="6" height="152" fill="rgba(249,115,22,0.85)"/>
+                  <rect x="368" y="192" width="6" height="168" fill="rgba(249,115,22,0.85)"/>
+                  <!-- red spike 4 (2024) -->
+                  <rect x="384" y="58"  width="6" height="302" fill="rgba(239,68,68,0.88)"/>
+                  <rect x="392" y="75"  width="6" height="285" fill="rgba(239,68,68,0.88)"/>
+                  <!-- current cycle — orange moderate activity -->
+                  <rect x="416" y="265" width="6" height="95"  fill="rgba(249,115,22,0.85)"/>
+                  <rect x="424" y="255" width="6" height="105" fill="rgba(249,115,22,0.85)"/>
+                  <rect x="432" y="248" width="6" height="112" fill="rgba(249,115,22,0.85)"/>
+                  <rect x="440" y="240" width="6" height="120" fill="rgba(249,115,22,0.85)"/>
+                  <rect x="448" y="250" width="6" height="110" fill="rgba(249,115,22,0.85)"/>
+                  <!-- BTC price line — logarithmic growth -->
+                  <path d="M 0,355 C 30,354 55,350 80,342 C 110,328 130,310 160,288
+                           C 185,272 205,262 220,248 C 240,228 255,210 285,185
+                           C 310,165 330,155 350,140 C 375,122 395,108 410,95
+                           C 425,84 440,78 455,72"
+                        stroke="#000000" stroke-width="2" fill="none"/>
+                </svg>
+              } @else if (chart.thumbnailClass === 'halving-progress') {
+                <!-- Halving Progress thumbnail — price line with cycle shading and halving markers -->
+                <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
+                  <rect width="800" height="360" fill="#fff"/>
+                  <!-- Cycle bands: alternating green / white / green / white / blue -->
+                  <rect x="0"   y="0" width="160" height="360" fill="rgba(220,252,231,0.5)"/>
+                  <rect x="320" y="0" width="160" height="360" fill="rgba(220,252,231,0.5)"/>
+                  <rect x="640" y="0" width="160" height="360" fill="rgba(219,234,254,0.6)"/>
+                  <!-- Horizontal grid lines -->
+                  <line x1="0" y1="60"  x2="800" y2="60"  stroke="#e5e7eb" stroke-width="1"/>
+                  <line x1="0" y1="140" x2="800" y2="140" stroke="#e5e7eb" stroke-width="1"/>
+                  <line x1="0" y1="220" x2="800" y2="220" stroke="#e5e7eb" stroke-width="1"/>
+                  <line x1="0" y1="300" x2="800" y2="300" stroke="#e5e7eb" stroke-width="1"/>
+                  <!-- Halving vertical lines -->
+                  <line x1="160" y1="0" x2="160" y2="360" stroke="rgba(107,114,128,0.5)" stroke-width="1.5" stroke-dasharray="6,4"/>
+                  <line x1="320" y1="0" x2="320" y2="360" stroke="rgba(107,114,128,0.5)" stroke-width="1.5" stroke-dasharray="6,4"/>
+                  <line x1="480" y1="0" x2="480" y2="360" stroke="rgba(107,114,128,0.5)" stroke-width="1.5" stroke-dasharray="6,4"/>
+                  <line x1="640" y1="0" x2="640" y2="360" stroke="rgba(107,114,128,0.5)" stroke-width="1.5" stroke-dasharray="6,4"/>
+                  <!-- Progress dashed lines (blue) in past cycles -->
+                  <line x1="85"  y1="0" x2="85"  y2="360" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.7"/>
+                  <line x1="245" y1="0" x2="245" y2="360" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.7"/>
+                  <line x1="405" y1="0" x2="405" y2="360" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.7"/>
+                  <line x1="565" y1="0" x2="565" y2="360" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.7"/>
+                  <!-- Now marker (amber) -->
+                  <line x1="727" y1="0" x2="727" y2="360" stroke="#f59e0b" stroke-width="2" opacity="0.9"/>
+                  <!-- BTC price line — log-scaled S-curve per cycle -->
+                  <path d="M 0,355 C 20,354 40,353 55,349 C 70,342 80,330 90,300 C 100,260 110,240 130,210 C 145,188 155,172 160,165
+                           C 175,156 205,153 220,150 C 245,145 270,140 290,120 C 310,90 320,62 340,48 C 355,38 370,34 385,32 C 400,31 430,34 450,40
+                           C 468,48 480,58 495,80 C 510,105 520,120 530,105 C 540,88 555,65 570,56 C 585,46 600,42 615,38 C 625,35 635,34 640,34
+                           C 656,35 670,38 685,50 C 700,64 710,80 720,90 C 728,98 735,102 745,104"
+                        stroke="#16a34a" stroke-width="2.5" fill="none"/>
+                  <!-- ATH red dots (cycle peaks) -->
+                  <circle cx="90"  cy="300" r="3.5" fill="#dc2626"/>
+                  <circle cx="340" cy="48"  r="3.5" fill="#dc2626"/>
+                  <circle cx="570" cy="56"  r="3.5" fill="#dc2626"/>
+                  <circle cx="745" cy="104" r="3.5" fill="#dc2626"/>
+                </svg>
               }
               <div class="chart-card-thumb-cta" aria-hidden="true">
                 <span i18n="View chart button@@charts.viewChart">View Chart →</span>
