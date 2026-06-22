@@ -40,6 +40,46 @@ export class FearGreedClient {
     this.sleep = options.sleep;
   }
 
+  async fetchHistory(): Promise<FearGreedIndexPoint[]> {
+    return retryWithBackoff(
+      () => this.fetchHistoryNow(),
+      this.retryAttempts,
+      this.retryBaseDelayMs,
+      { sleep: this.sleep, shouldRetry: isRetryableFearGreedError },
+    );
+  }
+
+  private async fetchHistoryNow(): Promise<FearGreedIndexPoint[]> {
+    const url = new URL(this.baseUrl);
+    url.searchParams.set('limit', '0');
+    url.searchParams.set('format', 'json');
+    const urlStr = url.toString();
+
+    try {
+      const response = await this.fetchFn(urlStr);
+      if (!response.ok) {
+        throw new FearGreedClientError(
+          `Fear & Greed Index history request failed with status ${response.status}`,
+          response.status,
+        );
+      }
+      const payload = (await response.json()) as FearGreedApiResponse;
+      if (!Array.isArray(payload.data)) {
+        throw new FearGreedClientError('Fear & Greed Index history response is missing data');
+      }
+      return payload.data
+        .filter((p) => p.value && p.timestamp)
+        .map((p) => ({ date: unixSecondsToIsoDate(Number(p.timestamp)), value: Number(p.value) }))
+        .filter((p) => Number.isFinite(p.value));
+    } catch (error) {
+      this.logger.error('Fear & Greed Index history request failed', {
+        timestamp: new Date().toISOString(),
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
+  }
+
   async fetchLatest(): Promise<FearGreedIndexPoint> {
     return retryWithBackoff(
       () => this.fetchLatestNow(),

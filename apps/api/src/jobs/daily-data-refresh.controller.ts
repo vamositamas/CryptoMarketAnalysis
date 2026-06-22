@@ -53,7 +53,7 @@ interface DailyDataRefreshOptions {
   coinGeckoClient?: Pick<CoinGeckoClient, 'fetchBitcoinMarketData' | 'fetchCurrentBitcoinMarketData'>;
   blockchainInfoClient?: Pick<
     BlockchainInfoClient,
-    'fetchMarketPrice' | 'fetchHashRate' | 'fetchDifficulty' | 'fetchCoinDaysDestroyed' | 'fetchTransactionFees'
+    'fetchMarketPrice' | 'fetchHashRate' | 'fetchDifficulty' | 'fetchCoinDaysDestroyed' | 'fetchTransactionFees' | 'fetchTransactionVolumeUsd' | 'fetchMinersRevenueUsd'
   >;
   fearGreedClient?: Pick<FearGreedClient, 'fetchLatest'>;
   bitcoinDataClient?: Pick<BitcoinDataClient, 'fetchMvrvZScore' | 'fetchRealizedPrice' | 'fetchVddMultiple' | 'fetchCvdd' | 'fetchBalancedPrice' | 'fetchTerminalPrice'>;
@@ -105,7 +105,7 @@ export class DailyDataRefreshService {
   private readonly coinGeckoClient: Pick<CoinGeckoClient, 'fetchBitcoinMarketData' | 'fetchCurrentBitcoinMarketData'>;
   private readonly blockchainInfoClient: Pick<
     BlockchainInfoClient,
-    'fetchMarketPrice' | 'fetchHashRate' | 'fetchDifficulty' | 'fetchCoinDaysDestroyed' | 'fetchTransactionFees'
+    'fetchMarketPrice' | 'fetchHashRate' | 'fetchDifficulty' | 'fetchCoinDaysDestroyed' | 'fetchTransactionFees' | 'fetchTransactionVolumeUsd' | 'fetchMinersRevenueUsd'
   >;
   private readonly fearGreedClient: Pick<FearGreedClient, 'fetchLatest'>;
   private readonly bitcoinDataClient: Pick<BitcoinDataClient, 'fetchMvrvZScore' | 'fetchRealizedPrice' | 'fetchVddMultiple' | 'fetchCvdd' | 'fetchBalancedPrice' | 'fetchTerminalPrice'>;
@@ -286,6 +286,16 @@ export class DailyDataRefreshService {
       ...(await this.fetchExternalMetric('miner_fees', () =>
         this.fetchBlockchainInfoChartValue(date, () =>
           this.blockchainInfoClient.fetchTransactionFees(date, date),
+        ),
+      )),
+      ...(await this.fetchExternalMetric('transaction_volume_usd', () =>
+        this.fetchBlockchainInfoChartValue(date, () =>
+          this.blockchainInfoClient.fetchTransactionVolumeUsd(date, date),
+        ),
+      )),
+      ...(await this.fetchExternalMetric('miners_revenue_usd', () =>
+        this.fetchBlockchainInfoChartValue(date, () =>
+          this.blockchainInfoClient.fetchMinersRevenueUsd(date, date),
         ),
       )),
     ];

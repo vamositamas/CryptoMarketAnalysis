@@ -138,6 +138,76 @@ const CHARTS: ChartLibraryItem[] = [
       'Combines on-chain models to identify historically reliable price targets for Bitcoin cycle tops and bear market floors.',
     thumbnailClass: 'price-forecast-tools',
   },
+  {
+    id: 'mayer-multiple',
+    title: 'Mayer Multiple',
+    category: 'Moving Averages',
+    accessTier: 'free',
+    signal: 'Overbought / oversold vs 200d MA',
+    description:
+      'Ratio of Bitcoin price to its 200-day moving average. Values above 2.4 historically signal overheating; values below 1.0 signal undervaluation and long-term accumulation opportunities.',
+    thumbnailClass: 'mayer-multiple',
+  },
+  {
+    id: '200-week-ma-heatmap',
+    title: '200-Week MA Heatmap',
+    category: 'Moving Averages',
+    accessTier: 'free',
+    signal: 'Long-term cycle floor & ceiling',
+    description:
+      'Price coloured by the ratio to its 200-week moving average. The 200-week MA has historically acted as the ultimate bear-market floor; colours above it reveal the degree of bull-market extension.',
+    thumbnailClass: '200-week-ma-heatmap',
+  },
+  {
+    id: 'fear-greed-index',
+    title: 'Fear & Greed Index',
+    category: 'Cycle Indicators',
+    accessTier: 'free',
+    signal: 'Market sentiment extremes',
+    description:
+      'Composite sentiment score (0–100) from volatility, volume, social media, and surveys. Extreme Fear has historically been a reliable long-term buy signal; Extreme Greed signals caution.',
+    thumbnailClass: 'fear-greed-index',
+  },
+  {
+    id: 'hash-ribbons',
+    title: 'Hash Ribbons',
+    category: 'Cycle Indicators',
+    accessTier: 'free',
+    signal: 'Miner capitulation & recovery',
+    description:
+      'Compares the 30-day and 60-day moving averages of Bitcoin hash rate. When the 30d crosses back above the 60d after a period of miner capitulation, it has historically produced reliable long-term buy signals.',
+    thumbnailClass: 'hash-ribbons',
+  },
+  {
+    id: 'difficulty-ribbon',
+    title: 'Difficulty Ribbon',
+    category: 'Cycle Indicators',
+    accessTier: 'free',
+    signal: 'Miner stress via difficulty compression',
+    description:
+      'Multiple moving averages (9–200 day) of mining difficulty layered as a ribbon. When short-term MAs fall below longer-term ones the ribbon compresses, signalling miner capitulation and historically cheap BTC.',
+    thumbnailClass: 'difficulty-ribbon',
+  },
+  {
+    id: 'nvt-ratio',
+    title: 'NVT Ratio',
+    category: 'Valuation Models',
+    accessTier: 'free',
+    signal: "Bitcoin's P/E ratio",
+    description:
+      "Network Value to Transactions ratio: Bitcoin's market cap divided by daily on-chain transaction volume. High NVT signals the network is overvalued relative to usage; low NVT suggests undervaluation.",
+    thumbnailClass: 'nvt-ratio',
+  },
+  {
+    id: 'thermocap-multiple',
+    title: 'Thermocap Multiple',
+    category: 'Valuation Models',
+    accessTier: 'free',
+    signal: 'Market cap vs cumulative miner spend',
+    description:
+      'Market cap divided by cumulative total miner revenue (Thermocap). Measures how expensive Bitcoin is relative to all security spend ever made. Historically high multiples coincide with cycle tops.',
+    thumbnailClass: 'thermocap-multiple',
+  },
 ];
 
 const CATEGORIES: ChartLibraryItem['category'][] = ['Valuation Models', 'Cycle Indicators', 'Moving Averages'];

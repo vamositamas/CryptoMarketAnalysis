@@ -31,6 +31,8 @@ const MARKET_PRICE_CHART = 'market-price';
 const HASH_RATE_CHART = 'hash-rate';
 const DIFFICULTY_CHART = 'difficulty';
 const TRANSACTION_FEES_CHART = 'transaction-fees';
+const TRANSACTION_VOLUME_USD_CHART = 'estimated-transaction-volume-usd';
+const MINERS_REVENUE_CHART = 'miners-revenue';
 
 export class BlockchainInfoClient {
   private readonly baseUrl: string;
@@ -74,20 +76,45 @@ export class BlockchainInfoClient {
     return this.fetchChart(TRANSACTION_FEES_CHART, startDate, endDate);
   }
 
+  async fetchTransactionVolumeUsd(startDate: string, endDate: string): Promise<BlockchainInfoChartPoint[]> {
+    return this.fetchChart(TRANSACTION_VOLUME_USD_CHART, startDate, endDate);
+  }
+
+  async fetchMinersRevenueUsd(startDate: string, endDate: string): Promise<BlockchainInfoChartPoint[]> {
+    return this.fetchChart(MINERS_REVENUE_CHART, startDate, endDate);
+  }
+
   async fetchTransactionFeesAll(): Promise<BlockchainInfoChartPoint[]> {
+    return this.fetchChartAll(TRANSACTION_FEES_CHART);
+  }
+
+  async fetchHashRateAll(): Promise<BlockchainInfoChartPoint[]> {
+    return this.fetchChartAll(HASH_RATE_CHART);
+  }
+
+  async fetchDifficultyAll(): Promise<BlockchainInfoChartPoint[]> {
+    return this.fetchChartAll(DIFFICULTY_CHART);
+  }
+
+  async fetchTransactionVolumeUsdAll(): Promise<BlockchainInfoChartPoint[]> {
+    return this.fetchChartAll(TRANSACTION_VOLUME_USD_CHART);
+  }
+
+  async fetchMinersRevenueUsdAll(): Promise<BlockchainInfoChartPoint[]> {
+    return this.fetchChartAll(MINERS_REVENUE_CHART);
+  }
+
+  private async fetchChartAll(chartName: string): Promise<BlockchainInfoChartPoint[]> {
     return retryWithBackoff(
-      () => this.fetchTransactionFeesAllNow(),
+      () => this.fetchChartAllNow(chartName),
       this.retryAttempts,
       this.retryBaseDelayMs,
-      {
-        sleep: this.sleep,
-        shouldRetry: isRetryableBlockchainInfoError,
-      },
+      { sleep: this.sleep, shouldRetry: isRetryableBlockchainInfoError },
     );
   }
 
-  private async fetchTransactionFeesAllNow(): Promise<BlockchainInfoChartPoint[]> {
-    const url = new URL(`${ensureTrailingSlash(this.baseUrl)}${TRANSACTION_FEES_CHART}`);
+  private async fetchChartAllNow(chartName: string): Promise<BlockchainInfoChartPoint[]> {
+    const url = new URL(`${ensureTrailingSlash(this.baseUrl)}${chartName}`);
     url.searchParams.set('timespan', 'all');
     url.searchParams.set('format', 'json');
     url.searchParams.set('sampled', 'false');
@@ -114,7 +141,7 @@ export class BlockchainInfoClient {
         .map((value) => normalizeChartValue(value))
         .filter((value): value is BlockchainInfoChartPoint => value !== undefined);
     } catch (error) {
-      this.logger.error('Blockchain.info fetchTransactionFeesAll failed', {
+      this.logger.error(`Blockchain.info fetchChartAll(${chartName}) failed`, {
         timestamp: new Date().toISOString(),
         url: urlStr,
         error: error instanceof Error ? error.message : String(error),

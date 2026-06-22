@@ -5,7 +5,7 @@ import {
   type ChartTimeframe,
 } from '../repositories/chart-data.repository';
 
-export type ChartId = 'bitcoin-rainbow' | 'pi-cycle-top' | 'stock-to-flow' | 'mvrv-z-score' | 'puell-multiple' | 'vdd-multiple' | 'realized-price' | 'stock-to-income' | '2yr-ma-multiplier' | 'price-forecast-tools';
+export type ChartId = 'bitcoin-rainbow' | 'pi-cycle-top' | 'stock-to-flow' | 'mvrv-z-score' | 'puell-multiple' | 'vdd-multiple' | 'realized-price' | 'stock-to-income' | '2yr-ma-multiplier' | 'price-forecast-tools' | 'mayer-multiple' | '200-week-ma-heatmap' | 'fear-greed-index' | 'hash-ribbons' | 'difficulty-ribbon' | 'nvt-ratio' | 'thermocap-multiple';
 
 export interface BitcoinRainbowChartResponse {
   chartId: 'bitcoin-rainbow';
@@ -143,6 +143,62 @@ export interface PriceForecastToolsChartResponse {
   lastUpdated: string | null;
 }
 
+export interface MayerMultipleChartResponse {
+  chartId: 'mayer-multiple';
+  title: 'Mayer Multiple';
+  timeframe: ChartTimeframe;
+  dataPoints: { date: string; priceUsd: number; ma200: number | null; mayerMultiple: number | null; }[];
+  lastUpdated: string | null;
+}
+
+export interface TwoHundredWeekMAHeatmapChartResponse {
+  chartId: '200-week-ma-heatmap';
+  title: '200-Week Moving Average Heatmap';
+  timeframe: ChartTimeframe;
+  dataPoints: { date: string; priceUsd: number; ma200w: number | null; multiplier: number | null; }[];
+  lastUpdated: string | null;
+}
+
+export interface FearGreedIndexChartResponse {
+  chartId: 'fear-greed-index';
+  title: 'Fear & Greed Index';
+  timeframe: ChartTimeframe;
+  dataPoints: { date: string; priceUsd: number; fearGreedValue: number | null; }[];
+  lastUpdated: string | null;
+}
+
+export interface HashRibbonsChartResponse {
+  chartId: 'hash-ribbons';
+  title: 'Hash Ribbons';
+  timeframe: ChartTimeframe;
+  dataPoints: { date: string; priceUsd: number; ma30: number | null; ma60: number | null; isBuySignal: boolean; }[];
+  lastUpdated: string | null;
+}
+
+export interface DifficultyRibbonChartResponse {
+  chartId: 'difficulty-ribbon';
+  title: 'Difficulty Ribbon';
+  timeframe: ChartTimeframe;
+  dataPoints: { date: string; priceUsd: number; ma9: number | null; ma14: number | null; ma25: number | null; ma40: number | null; ma60: number | null; ma90: number | null; ma128: number | null; ma200: number | null; }[];
+  lastUpdated: string | null;
+}
+
+export interface NvtRatioChartResponse {
+  chartId: 'nvt-ratio';
+  title: 'NVT Ratio';
+  timeframe: ChartTimeframe;
+  dataPoints: { date: string; priceUsd: number; nvtRatio: number | null; nvtSignal: number | null; }[];
+  lastUpdated: string | null;
+}
+
+export interface ThermocapMultipleChartResponse {
+  chartId: 'thermocap-multiple';
+  title: 'Thermocap Multiple';
+  timeframe: ChartTimeframe;
+  dataPoints: { date: string; priceUsd: number; thermocapMultiple: number | null; }[];
+  lastUpdated: string | null;
+}
+
 export type ChartDataResponse =
   | BitcoinRainbowChartResponse
   | PiCycleTopChartResponse
@@ -153,7 +209,14 @@ export type ChartDataResponse =
   | RealizePriceChartResponse
   | StockToIncomeChartResponse
   | TwoYrMaMultiplierChartResponse
-  | PriceForecastToolsChartResponse;
+  | PriceForecastToolsChartResponse
+  | MayerMultipleChartResponse
+  | TwoHundredWeekMAHeatmapChartResponse
+  | FearGreedIndexChartResponse
+  | HashRibbonsChartResponse
+  | DifficultyRibbonChartResponse
+  | NvtRatioChartResponse
+  | ThermocapMultipleChartResponse;
 
 export class ChartDataRequestError extends Error {
   constructor(
@@ -173,6 +236,102 @@ export class ChartDataService {
 
   async getChartData(chartId: ChartId, timeframeInput: unknown): Promise<ChartDataResponse> {
     const timeframe = parseTimeframe(timeframeInput);
+
+    if (chartId === 'mayer-multiple') {
+      const allRows = await this.repository.findBitcoinChartData('all', this.now());
+      const prices = allRows.map((r) => r.priceUsd);
+      const ma200: (number | null)[] = prices.map((_, i) => {
+        if (i < 199) return null;
+        let sum = 0;
+        for (let j = i - 199; j <= i; j++) sum += prices[j]!;
+        return sum / 200;
+      });
+      const allPoints = allRows.map((r, i) => {
+        const ma = ma200[i] ?? null;
+        return { date: r.date, priceUsd: r.priceUsd, ma200: ma, mayerMultiple: ma !== null && ma > 0 ? r.priceUsd / ma : null };
+      });
+      const startDate = timeframe === 'all' ? null : getTimeframeStartDate(timeframe, this.now());
+      return { chartId: 'mayer-multiple', title: 'Mayer Multiple', timeframe, dataPoints: startDate ? allPoints.filter((p) => p.date >= startDate) : allPoints, lastUpdated: getLastUpdated(allRows) };
+    }
+
+    if (chartId === '200-week-ma-heatmap') {
+      const allRows = await this.repository.findBitcoinChartData('all', this.now());
+      const prices = allRows.map((r) => r.priceUsd);
+      const ma1400: (number | null)[] = prices.map((_, i) => {
+        if (i < 1399) return null;
+        let sum = 0;
+        for (let j = i - 1399; j <= i; j++) sum += prices[j]!;
+        return sum / 1400;
+      });
+      const allPoints = allRows.map((r, i) => {
+        const ma = ma1400[i] ?? null;
+        return { date: r.date, priceUsd: r.priceUsd, ma200w: ma, multiplier: ma !== null && ma > 0 ? r.priceUsd / ma : null };
+      });
+      const startDate = timeframe === 'all' ? null : getTimeframeStartDate(timeframe, this.now());
+      return { chartId: '200-week-ma-heatmap', title: '200-Week Moving Average Heatmap', timeframe, dataPoints: startDate ? allPoints.filter((p) => p.date >= startDate) : allPoints, lastUpdated: getLastUpdated(allRows) };
+    }
+
+    if (chartId === 'fear-greed-index') {
+      const allRows = await this.repository.findBitcoinChartData('all', this.now());
+      const firstFgDate = allRows.find((r) => r.fearGreedIndex !== null)?.date ?? '2018-02-01';
+      const startDate = timeframe === 'all' ? firstFgDate : getTimeframeStartDate(timeframe, this.now());
+      return { chartId: 'fear-greed-index', title: 'Fear & Greed Index', timeframe, dataPoints: allRows.filter((r) => r.date >= startDate).map((r) => ({ date: r.date, priceUsd: r.priceUsd, fearGreedValue: r.fearGreedIndex })), lastUpdated: getLastUpdated(allRows) };
+    }
+
+    if (chartId === 'hash-ribbons') {
+      const allRows = await this.repository.findBitcoinChartData('all', this.now());
+      const hr = allRows.map((r) => r.hashRate);
+      const rollingMA = (data: (number | null)[], w: number): (number | null)[] =>
+        data.map((_, i) => { const s = data.slice(Math.max(0, i - w + 1), i + 1).filter((v): v is number => v !== null); return s.length >= w ? s.reduce((a, b) => a + b, 0) / s.length : null; });
+      const ma30 = rollingMA(hr, 30);
+      const ma60 = rollingMA(hr, 60);
+      const allPoints = allRows.map((r, i) => {
+        const c30 = ma30[i] ?? null, c60 = ma60[i] ?? null, p30 = ma30[i - 1] ?? null, p60 = ma60[i - 1] ?? null;
+        const isBuySignal = i > 0 && c30 !== null && c60 !== null && p30 !== null && p60 !== null && p30 <= p60 && c30 > c60;
+        return { date: r.date, priceUsd: r.priceUsd, ma30: c30, ma60: c60, isBuySignal };
+      });
+      const firstDate = allRows.find((r) => r.hashRate !== null)?.date ?? '2009-01-03';
+      const startDate = timeframe === 'all' ? firstDate : getTimeframeStartDate(timeframe, this.now());
+      return { chartId: 'hash-ribbons', title: 'Hash Ribbons', timeframe, dataPoints: allPoints.filter((p) => p.date >= startDate), lastUpdated: getLastUpdated(allRows) };
+    }
+
+    if (chartId === 'difficulty-ribbon') {
+      const allRows = await this.repository.findBitcoinChartData('all', this.now());
+      const diff = allRows.map((r) => r.miningDifficulty);
+      const rollingMA = (data: (number | null)[], w: number): (number | null)[] =>
+        data.map((_, i) => { const s = data.slice(Math.max(0, i - w + 1), i + 1).filter((v): v is number => v !== null); return s.length >= w ? s.reduce((a, b) => a + b, 0) / s.length : null; });
+      const [ma9, ma14, ma25, ma40, ma60, ma90, ma128, ma200] = [9, 14, 25, 40, 60, 90, 128, 200].map((w) => rollingMA(diff, w));
+      const allPoints = allRows.map((r, i) => ({ date: r.date, priceUsd: r.priceUsd, ma9: ma9![i] ?? null, ma14: ma14![i] ?? null, ma25: ma25![i] ?? null, ma40: ma40![i] ?? null, ma60: ma60![i] ?? null, ma90: ma90![i] ?? null, ma128: ma128![i] ?? null, ma200: ma200![i] ?? null }));
+      const firstDate = allRows.find((r) => r.miningDifficulty !== null)?.date ?? '2009-01-03';
+      const startDate = timeframe === 'all' ? firstDate : getTimeframeStartDate(timeframe, this.now());
+      return { chartId: 'difficulty-ribbon', title: 'Difficulty Ribbon', timeframe, dataPoints: allPoints.filter((p) => p.date >= startDate), lastUpdated: getLastUpdated(allRows) };
+    }
+
+    if (chartId === 'nvt-ratio') {
+      const allRows = await this.repository.findBitcoinChartData('all', this.now());
+      const nvtRaw = allRows.map((r) => {
+        const supply = r.circulatingSupply ?? estimateSupplyFromHalvings(r.date);
+        return r.transactionVolumeUsd && r.transactionVolumeUsd > 0 ? (r.priceUsd * supply) / r.transactionVolumeUsd : null;
+      });
+      const nvtSignal = nvtRaw.map((_, i) => { const s = nvtRaw.slice(Math.max(0, i - 89), i + 1).filter((v): v is number => v !== null); return s.length >= 90 ? s.reduce((a, b) => a + b, 0) / s.length : null; });
+      const allPoints = allRows.map((r, i) => ({ date: r.date, priceUsd: r.priceUsd, nvtRatio: nvtRaw[i] ?? null, nvtSignal: nvtSignal[i] ?? null }));
+      const firstDate = allRows.find((r) => r.transactionVolumeUsd !== null)?.date ?? '2010-08-28';
+      const startDate = timeframe === 'all' ? firstDate : getTimeframeStartDate(timeframe, this.now());
+      return { chartId: 'nvt-ratio', title: 'NVT Ratio', timeframe, dataPoints: allPoints.filter((p) => p.date >= startDate), lastUpdated: getLastUpdated(allRows) };
+    }
+
+    if (chartId === 'thermocap-multiple') {
+      const allRows = await this.repository.findBitcoinChartData('all', this.now());
+      let thermocap = 0;
+      const allPoints = allRows.map((r) => {
+        if (r.minersRevenueUsd !== null) thermocap += r.minersRevenueUsd;
+        const supply = r.circulatingSupply ?? estimateSupplyFromHalvings(r.date);
+        return { date: r.date, priceUsd: r.priceUsd, thermocapMultiple: thermocap > 0 ? (r.priceUsd * supply) / thermocap : null };
+      });
+      const firstDate = allRows.find((r) => r.minersRevenueUsd !== null)?.date ?? '2009-01-17';
+      const startDate = timeframe === 'all' ? firstDate : getTimeframeStartDate(timeframe, this.now());
+      return { chartId: 'thermocap-multiple', title: 'Thermocap Multiple', timeframe, dataPoints: allPoints.filter((p) => p.date >= startDate), lastUpdated: getLastUpdated(allRows) };
+    }
 
     if (chartId === 'price-forecast-tools') {
       const allRows = await this.repository.findBitcoinChartData('all', this.now());

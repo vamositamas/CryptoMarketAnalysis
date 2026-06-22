@@ -1,6 +1,6 @@
 import type { Request } from 'express';
 import { Router } from 'express';
-import { BitcoinDataClient, BlockchainInfoClient } from '@crypto-market-analysis/calculation-engines/data-sources';
+import { BitcoinDataClient, BlockchainInfoClient, FearGreedClient } from '@crypto-market-analysis/calculation-engines/data-sources';
 import { getDatabasePool } from '../config/database.config';
 import { DailyDataRefreshService, insertBitcoinMetricsDaily } from '../jobs/daily-data-refresh.controller';
 import { requireAuth, requireRole } from '../middleware/rbac.middleware';
@@ -370,6 +370,61 @@ export function createAdminRouter(
       await insertBitcoinMetricsDaily(database, records);
       const allDates = [...cvddPoints, ...balancedPoints, ...terminalPoints].map((p) => p.date).sort();
       res.status(200).json({ inserted: records.length, firstDate: allDates[0] ?? null, lastDate: allDates[allDates.length - 1] ?? null });
+    } catch (error) { next(error); }
+  });
+
+  router.post('/data-configuration/backfill-fear-greed', ...adminOnly, async (_req, res, next) => {
+    try {
+      const database = getDatabasePool();
+      if (!database) { res.status(503).json({ error: 'Database unavailable' }); return; }
+      const points = await new FearGreedClient().fetchHistory();
+      const records = points.map((p) => ({ date: p.date, metricName: 'fear_greed_index', metricValue: p.value }));
+      await insertBitcoinMetricsDaily(database, records);
+      res.status(200).json({ inserted: records.length, firstDate: records[records.length - 1]?.date, lastDate: records[0]?.date });
+    } catch (error) { next(error); }
+  });
+
+  router.post('/data-configuration/backfill-hash-rate', ...adminOnly, async (_req, res, next) => {
+    try {
+      const database = getDatabasePool();
+      if (!database) { res.status(503).json({ error: 'Database unavailable' }); return; }
+      const points = await new BlockchainInfoClient().fetchHashRateAll();
+      const records = points.map((p) => ({ date: p.date, metricName: 'hash_rate', metricValue: p.value }));
+      await insertBitcoinMetricsDaily(database, records);
+      res.status(200).json({ inserted: records.length, firstDate: records[0]?.date, lastDate: records[records.length - 1]?.date });
+    } catch (error) { next(error); }
+  });
+
+  router.post('/data-configuration/backfill-difficulty', ...adminOnly, async (_req, res, next) => {
+    try {
+      const database = getDatabasePool();
+      if (!database) { res.status(503).json({ error: 'Database unavailable' }); return; }
+      const points = await new BlockchainInfoClient().fetchDifficultyAll();
+      const records = points.map((p) => ({ date: p.date, metricName: 'mining_difficulty', metricValue: p.value }));
+      await insertBitcoinMetricsDaily(database, records);
+      res.status(200).json({ inserted: records.length, firstDate: records[0]?.date, lastDate: records[records.length - 1]?.date });
+    } catch (error) { next(error); }
+  });
+
+  router.post('/data-configuration/backfill-transaction-volume', ...adminOnly, async (_req, res, next) => {
+    try {
+      const database = getDatabasePool();
+      if (!database) { res.status(503).json({ error: 'Database unavailable' }); return; }
+      const points = await new BlockchainInfoClient().fetchTransactionVolumeUsdAll();
+      const records = points.map((p) => ({ date: p.date, metricName: 'transaction_volume_usd', metricValue: p.value }));
+      await insertBitcoinMetricsDaily(database, records);
+      res.status(200).json({ inserted: records.length, firstDate: records[0]?.date, lastDate: records[records.length - 1]?.date });
+    } catch (error) { next(error); }
+  });
+
+  router.post('/data-configuration/backfill-miners-revenue', ...adminOnly, async (_req, res, next) => {
+    try {
+      const database = getDatabasePool();
+      if (!database) { res.status(503).json({ error: 'Database unavailable' }); return; }
+      const points = await new BlockchainInfoClient().fetchMinersRevenueUsdAll();
+      const records = points.map((p) => ({ date: p.date, metricName: 'miners_revenue_usd', metricValue: p.value }));
+      await insertBitcoinMetricsDaily(database, records);
+      res.status(200).json({ inserted: records.length, firstDate: records[0]?.date, lastDate: records[records.length - 1]?.date });
     } catch (error) { next(error); }
   });
 

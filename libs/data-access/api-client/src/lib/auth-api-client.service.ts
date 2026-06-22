@@ -260,6 +260,62 @@ export interface PriceForecastChartResponse {
   lastUpdated: string | null;
 }
 
+export interface MayerMultipleChartResponse {
+  chartId: 'mayer-multiple';
+  title: string;
+  timeframe: string;
+  dataPoints: { date: string; priceUsd: number; ma200: number | null; mayerMultiple: number | null; }[];
+  lastUpdated: string | null;
+}
+
+export interface TwoHundredWeekMAHeatmapChartResponse {
+  chartId: '200-week-ma-heatmap';
+  title: string;
+  timeframe: string;
+  dataPoints: { date: string; priceUsd: number; ma200w: number | null; multiplier: number | null; }[];
+  lastUpdated: string | null;
+}
+
+export interface FearGreedIndexChartResponse {
+  chartId: 'fear-greed-index';
+  title: string;
+  timeframe: string;
+  dataPoints: { date: string; priceUsd: number; fearGreedValue: number | null; }[];
+  lastUpdated: string | null;
+}
+
+export interface HashRibbonsChartResponse {
+  chartId: 'hash-ribbons';
+  title: string;
+  timeframe: string;
+  dataPoints: { date: string; priceUsd: number; ma30: number | null; ma60: number | null; isBuySignal: boolean; }[];
+  lastUpdated: string | null;
+}
+
+export interface DifficultyRibbonChartResponse {
+  chartId: 'difficulty-ribbon';
+  title: string;
+  timeframe: string;
+  dataPoints: { date: string; priceUsd: number; ma9: number | null; ma14: number | null; ma25: number | null; ma40: number | null; ma60: number | null; ma90: number | null; ma128: number | null; ma200: number | null; }[];
+  lastUpdated: string | null;
+}
+
+export interface NvtRatioChartResponse {
+  chartId: 'nvt-ratio';
+  title: string;
+  timeframe: string;
+  dataPoints: { date: string; priceUsd: number; nvtRatio: number | null; nvtSignal: number | null; }[];
+  lastUpdated: string | null;
+}
+
+export interface ThermocapMultipleChartResponse {
+  chartId: 'thermocap-multiple';
+  title: string;
+  timeframe: string;
+  dataPoints: { date: string; priceUsd: number; thermocapMultiple: number | null; }[];
+  lastUpdated: string | null;
+}
+
 export type ChartAnnotation =
   | {
       id: string;
@@ -763,6 +819,48 @@ export class AuthApiClient {
     } catch (error) {
       throw toApiClientError(error);
     }
+  }
+
+  async getMayerMultipleChartData(timeframe: ChartTimeframe): Promise<MayerMultipleChartResponse> {
+    try {
+      return await firstValueFrom(this.http.get<MayerMultipleChartResponse>('/api/charts/mayer-multiple', { params: { timeframe }, withCredentials: true }));
+    } catch (error) { throw toApiClientError(error); }
+  }
+
+  async get200WeekMAHeatmapChartData(timeframe: ChartTimeframe): Promise<TwoHundredWeekMAHeatmapChartResponse> {
+    try {
+      return await firstValueFrom(this.http.get<TwoHundredWeekMAHeatmapChartResponse>('/api/charts/200-week-ma-heatmap', { params: { timeframe }, withCredentials: true }));
+    } catch (error) { throw toApiClientError(error); }
+  }
+
+  async getFearGreedIndexChartData(timeframe: ChartTimeframe): Promise<FearGreedIndexChartResponse> {
+    try {
+      return await firstValueFrom(this.http.get<FearGreedIndexChartResponse>('/api/charts/fear-greed-index', { params: { timeframe }, withCredentials: true }));
+    } catch (error) { throw toApiClientError(error); }
+  }
+
+  async getHashRibbonsChartData(timeframe: ChartTimeframe): Promise<HashRibbonsChartResponse> {
+    try {
+      return await firstValueFrom(this.http.get<HashRibbonsChartResponse>('/api/charts/hash-ribbons', { params: { timeframe }, withCredentials: true }));
+    } catch (error) { throw toApiClientError(error); }
+  }
+
+  async getDifficultyRibbonChartData(timeframe: ChartTimeframe): Promise<DifficultyRibbonChartResponse> {
+    try {
+      return await firstValueFrom(this.http.get<DifficultyRibbonChartResponse>('/api/charts/difficulty-ribbon', { params: { timeframe }, withCredentials: true }));
+    } catch (error) { throw toApiClientError(error); }
+  }
+
+  async getNvtRatioChartData(timeframe: ChartTimeframe): Promise<NvtRatioChartResponse> {
+    try {
+      return await firstValueFrom(this.http.get<NvtRatioChartResponse>('/api/charts/nvt-ratio', { params: { timeframe }, withCredentials: true }));
+    } catch (error) { throw toApiClientError(error); }
+  }
+
+  async getThermocapMultipleChartData(timeframe: ChartTimeframe): Promise<ThermocapMultipleChartResponse> {
+    try {
+      return await firstValueFrom(this.http.get<ThermocapMultipleChartResponse>('/api/charts/thermocap-multiple', { params: { timeframe }, withCredentials: true }));
+    } catch (error) { throw toApiClientError(error); }
   }
 
   async getChartAnnotations(chartId: string): Promise<ChartAnnotation[]> {

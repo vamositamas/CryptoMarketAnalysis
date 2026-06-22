@@ -18,6 +18,11 @@ export interface ChartDataRow {
   cvdd: number | null;
   balancedPrice: number | null;
   terminalPrice: number | null;
+  fearGreedIndex: number | null;
+  hashRate: number | null;
+  miningDifficulty: number | null;
+  transactionVolumeUsd: number | null;
+  minersRevenueUsd: number | null;
   lastUpdated: string | null;
 }
 
@@ -37,6 +42,11 @@ interface ChartDataDbRow {
   cvdd: string | number | null;
   balanced_price: string | number | null;
   terminal_price: string | number | null;
+  fear_greed_index: string | number | null;
+  hash_rate: string | number | null;
+  mining_difficulty: string | number | null;
+  transaction_volume_usd: string | number | null;
+  miners_revenue_usd: string | number | null;
   last_updated: string | Date | null;
 }
 
@@ -77,6 +87,11 @@ export class ChartDataRepository extends BaseRepository {
           cvdd_m.metric_value AS cvdd,
           bp_m.metric_value AS balanced_price,
           tp_m.metric_value AS terminal_price,
+          fg_m.metric_value AS fear_greed_index,
+          hr_m.metric_value AS hash_rate,
+          diff_m.metric_value AS mining_difficulty,
+          txvol_m.metric_value AS transaction_volume_usd,
+          minrev_m.metric_value AS miners_revenue_usd,
           GREATEST(
             price.created_at,
             COALESCE(rainbow.created_at, price.created_at),
@@ -90,7 +105,12 @@ export class ChartDataRepository extends BaseRepository {
             COALESCE(mf.created_at, price.created_at),
             COALESCE(cvdd_m.created_at, price.created_at),
             COALESCE(bp_m.created_at, price.created_at),
-            COALESCE(tp_m.created_at, price.created_at)
+            COALESCE(tp_m.created_at, price.created_at),
+            COALESCE(fg_m.created_at, price.created_at),
+            COALESCE(hr_m.created_at, price.created_at),
+            COALESCE(diff_m.created_at, price.created_at),
+            COALESCE(txvol_m.created_at, price.created_at),
+            COALESCE(minrev_m.created_at, price.created_at)
           ) AS last_updated
         FROM bitcoin_price_daily price
         LEFT JOIN bitcoin_metrics_daily rainbow
@@ -129,6 +149,21 @@ export class ChartDataRepository extends BaseRepository {
         LEFT JOIN bitcoin_metrics_daily tp_m
           ON tp_m.date = price.date
           AND tp_m.metric_name = 'terminal_price'
+        LEFT JOIN bitcoin_metrics_daily fg_m
+          ON fg_m.date = price.date
+          AND fg_m.metric_name = 'fear_greed_index'
+        LEFT JOIN bitcoin_metrics_daily hr_m
+          ON hr_m.date = price.date
+          AND hr_m.metric_name = 'hash_rate'
+        LEFT JOIN bitcoin_metrics_daily diff_m
+          ON diff_m.date = price.date
+          AND diff_m.metric_name = 'mining_difficulty'
+        LEFT JOIN bitcoin_metrics_daily txvol_m
+          ON txvol_m.date = price.date
+          AND txvol_m.metric_name = 'transaction_volume_usd'
+        LEFT JOIN bitcoin_metrics_daily minrev_m
+          ON minrev_m.date = price.date
+          AND minrev_m.metric_name = 'miners_revenue_usd'
         WHERE price.date >= $1::date
         ORDER BY price.date ASC
       `,
@@ -163,6 +198,11 @@ function toChartDataRow(row: ChartDataDbRow): ChartDataRow {
     cvdd: nullableNumber(row.cvdd),
     balancedPrice: nullableNumber(row.balanced_price),
     terminalPrice: nullableNumber(row.terminal_price),
+    fearGreedIndex: nullableNumber(row.fear_greed_index),
+    hashRate: nullableNumber(row.hash_rate),
+    miningDifficulty: nullableNumber(row.mining_difficulty),
+    transactionVolumeUsd: nullableNumber(row.transaction_volume_usd),
+    minersRevenueUsd: nullableNumber(row.miners_revenue_usd),
     lastUpdated: row.last_updated === null ? null : formatTimestamp(row.last_updated),
   };
 }

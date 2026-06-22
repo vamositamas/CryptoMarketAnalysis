@@ -1553,6 +1553,62 @@ export const appRoutes: Route[] = [
       ),
   },
   {
+    path: 'charts/mayer-multiple',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/mayer-multiple-chart-page/mayer-multiple-chart-page.component').then(
+        (m) => m.MayerMultipleChartPageComponent,
+      ),
+  },
+  {
+    path: 'charts/200-week-ma-heatmap',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/two-hundred-week-ma-heatmap-chart-page/two-hundred-week-ma-heatmap-chart-page.component').then(
+        (m) => m.TwoHundredWeekMAHeatmapChartPageComponent,
+      ),
+  },
+  {
+    path: 'charts/fear-greed-index',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/fear-greed-index-chart-page/fear-greed-index-chart-page.component').then(
+        (m) => m.FearGreedIndexChartPageComponent,
+      ),
+  },
+  {
+    path: 'charts/hash-ribbons',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/hash-ribbons-chart-page/hash-ribbons-chart-page.component').then(
+        (m) => m.HashRibbonsChartPageComponent,
+      ),
+  },
+  {
+    path: 'charts/difficulty-ribbon',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/difficulty-ribbon-chart-page/difficulty-ribbon-chart-page.component').then(
+        (m) => m.DifficultyRibbonChartPageComponent,
+      ),
+  },
+  {
+    path: 'charts/nvt-ratio',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/nvt-ratio-chart-page/nvt-ratio-chart-page.component').then(
+        (m) => m.NvtRatioChartPageComponent,
+      ),
+  },
+  {
+    path: 'charts/thermocap-multiple',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/thermocap-multiple-chart-page/thermocap-multiple-chart-page.component').then(
+        (m) => m.ThermocapMultipleChartPageComponent,
+      ),
+  },
+  {
     path: 'charts/:chartId',
     canActivate: [authGuard],
     loadComponent: () =>

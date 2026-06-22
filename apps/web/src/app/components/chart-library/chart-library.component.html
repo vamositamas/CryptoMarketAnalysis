@@ -376,6 +376,84 @@
                   <path d="M 0,358 C 80,356 130,350 155,340 C 170,295 195,200 215,195 C 230,295 262,320 275,305 C 310,280 345,235 358,220 C 375,168 410,60 426,52 C 442,110 470,255 480,140 C 494,108 508,90 513,91 C 530,115 545,110 557,92 C 576,55 618,14 634,10 C 650,44 678,255 687,72 C 704,50 738,24 763,16 C 777,11 792,13 800,14"
                         stroke="#1f2937" stroke-width="1.5" fill="none"/>
                 </svg>
+              } @else if (chart.thumbnailClass === 'mayer-multiple') {
+                <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
+                  <rect width="800" height="360" fill="#fff"/>
+                  <line x1="0" y1="80" x2="800" y2="80" stroke="rgba(239,68,68,0.5)" stroke-width="1" stroke-dasharray="6,4"/>
+                  <line x1="0" y1="270" x2="800" y2="270" stroke="rgba(34,197,94,0.5)" stroke-width="1" stroke-dasharray="6,4"/>
+                  <path d="M 0,200 C 60,190 100,240 150,220 C 200,200 230,100 280,80 C 320,65 360,160 400,170 C 440,180 480,90 530,70 C 570,55 620,160 680,140 C 720,130 760,120 800,125" stroke="#0d9488" stroke-width="2" fill="none"/>
+                  <path d="M 0,355 C 80,340 150,290 220,240 C 290,190 360,150 430,120 C 500,95 570,85 640,75 C 700,68 760,65 800,63" stroke="#1f2937" stroke-width="1.5" fill="none" opacity="0.6"/>
+                </svg>
+              } @else if (chart.thumbnailClass === '200-week-ma-heatmap') {
+                <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
+                  <rect width="800" height="360" fill="#fff"/>
+                  <path d="M 0,340 C 100,320 200,280 300,230 C 380,190 450,150 540,110 C 620,78 700,65 800,58" stroke="#ef4444" stroke-width="2" fill="none"/>
+                  <path d="M 0,355 C 60,350 110,335 160,305 C 220,268 270,228 340,195 C 410,163 460,135 530,108 C 600,82 680,62 740,50 C 765,45 785,42 800,40" stroke="#1f2937" stroke-width="1.5" fill="none"/>
+                  <circle cx="200" cy="290" r="5" fill="#22c55e" opacity="0.8"/>
+                  <circle cx="340" cy="205" r="5" fill="#86efac" opacity="0.8"/>
+                  <circle cx="480" cy="140" r="5" fill="#fbbf24" opacity="0.8"/>
+                  <circle cx="620" cy="82" r="5" fill="#f97316" opacity="0.8"/>
+                  <circle cx="760" cy="48" r="5" fill="#ef4444" opacity="0.8"/>
+                </svg>
+              } @else if (chart.thumbnailClass === 'fear-greed-index') {
+                <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
+                  <rect width="800" height="360" fill="#fff"/>
+                  <rect x="0" y="260" width="800" height="100" fill="rgba(239,68,68,0.08)"/>
+                  <rect x="0" y="0" width="800" height="80" fill="rgba(34,197,94,0.08)"/>
+                  <rect x="0" y="280" width="60" height="80" fill="rgba(239,68,68,0.7)" rx="2"/>
+                  <rect x="65" y="240" width="60" height="120" fill="rgba(239,68,68,0.55)" rx="2"/>
+                  <rect x="130" y="200" width="60" height="160" fill="rgba(239,68,68,0.4)" rx="2"/>
+                  <rect x="195" y="160" width="60" height="200" fill="rgba(239,68,68,0.25)" rx="2"/>
+                  <rect x="260" y="120" width="60" height="240" fill="rgba(250,204,21,0.5)" rx="2"/>
+                  <rect x="325" y="100" width="60" height="260" fill="rgba(250,204,21,0.5)" rx="2"/>
+                  <rect x="390" y="60" width="60" height="300" fill="rgba(34,197,94,0.4)" rx="2"/>
+                  <rect x="455" y="20" width="60" height="340" fill="rgba(34,197,94,0.6)" rx="2"/>
+                  <rect x="520" y="80" width="60" height="280" fill="rgba(34,197,94,0.45)" rx="2"/>
+                  <rect x="585" y="130" width="60" height="230" fill="rgba(250,204,21,0.5)" rx="2"/>
+                  <rect x="650" y="90" width="60" height="270" fill="rgba(34,197,94,0.5)" rx="2"/>
+                  <rect x="715" y="110" width="85" height="250" fill="rgba(250,204,21,0.5)" rx="2"/>
+                  <path d="M 0,355 C 80,340 150,300 220,265 C 290,230 360,195 430,160 C 500,125 560,100 620,90 C 680,80 740,85 800,82" stroke="#1f2937" stroke-width="1.5" fill="none" opacity="0.7"/>
+                </svg>
+              } @else if (chart.thumbnailClass === 'hash-ribbons') {
+                <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
+                  <rect width="800" height="360" fill="#fff"/>
+                  <path d="M 0,300 C 60,280 100,240 150,220 C 200,200 240,210 290,200 C 340,190 380,170 430,160 C 480,150 520,155 570,145 C 620,135 680,125 800,115" stroke="#3b82f6" stroke-width="2" fill="none"/>
+                  <path d="M 0,320 C 60,305 100,270 150,255 C 200,240 240,245 290,238 C 340,231 380,218 430,210 C 480,202 520,204 570,196 C 620,188 680,178 800,168" stroke="#f97316" stroke-width="2" fill="none"/>
+                  <circle cx="180" cy="218" r="7" fill="#22c55e" opacity="0.9"/>
+                  <circle cx="520" cy="153" r="7" fill="#22c55e" opacity="0.9"/>
+                  <path d="M 0,358 C 80,350 150,320 220,280 C 290,240 360,200 430,175 C 500,150 570,135 640,118 C 700,105 760,98 800,95" stroke="#1f2937" stroke-width="1.5" fill="none" opacity="0.6"/>
+                </svg>
+              } @else if (chart.thumbnailClass === 'difficulty-ribbon') {
+                <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
+                  <rect width="800" height="360" fill="#fff"/>
+                  <path d="M 200,340 C 280,310 360,255 440,210 C 520,168 620,130 800,105" stroke="#ef4444" stroke-width="1.5" fill="none"/>
+                  <path d="M 180,342 C 260,314 340,260 420,216 C 500,174 600,138 800,114" stroke="#f97316" stroke-width="1.5" fill="none"/>
+                  <path d="M 160,344 C 240,318 320,266 400,223 C 480,181 580,147 800,123" stroke="#eab308" stroke-width="1.5" fill="none"/>
+                  <path d="M 140,346 C 220,322 300,272 380,231 C 460,190 560,158 800,132" stroke="#84cc16" stroke-width="1.5" fill="none"/>
+                  <path d="M 120,348 C 200,326 280,278 360,239 C 440,200 540,169 800,141" stroke="#22c55e" stroke-width="1.5" fill="none"/>
+                  <path d="M 100,350 C 180,330 260,284 340,247 C 420,210 520,180 800,150" stroke="#06b6d4" stroke-width="1.5" fill="none"/>
+                  <path d="M 80,352 C 160,334 240,290 320,255 C 400,220 500,191 800,159" stroke="#6366f1" stroke-width="1.5" fill="none"/>
+                  <path d="M 60,354 C 140,338 220,296 300,263 C 380,230 480,202 800,168" stroke="#a855f7" stroke-width="1.5" fill="none"/>
+                </svg>
+              } @else if (chart.thumbnailClass === 'nvt-ratio') {
+                <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
+                  <rect width="800" height="360" fill="#fff"/>
+                  <line x1="0" y1="100" x2="800" y2="100" stroke="rgba(239,68,68,0.3)" stroke-width="1" stroke-dasharray="6,4"/>
+                  <line x1="0" y1="280" x2="800" y2="280" stroke="rgba(34,197,94,0.3)" stroke-width="1" stroke-dasharray="6,4"/>
+                  <path d="M 0,200 C 60,180 100,120 150,80 C 190,50 220,130 270,160 C 310,185 350,120 400,100 C 440,82 480,160 530,200 C 570,230 620,160 680,130 C 720,110 760,150 800,145" stroke="#f97316" stroke-width="2" fill="none"/>
+                  <path d="M 0,220 C 60,205 100,175 150,148 C 200,122 250,145 300,158 C 350,170 400,140 450,132 C 500,124 550,155 600,170 C 650,183 720,155 800,150" stroke="#ef4444" stroke-width="1.5" fill="none" stroke-dasharray="5,3"/>
+                  <path d="M 0,355 C 80,340 150,305 220,268 C 290,232 360,196 430,165 C 500,135 570,118 640,105 C 700,95 760,90 800,88" stroke="#1f2937" stroke-width="1.5" fill="none" opacity="0.6"/>
+                </svg>
+              } @else if (chart.thumbnailClass === 'thermocap-multiple') {
+                <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
+                  <rect width="800" height="360" fill="#fff"/>
+                  <rect x="0" y="0" width="800" height="80" fill="rgba(239,68,68,0.08)"/>
+                  <rect x="0" y="270" width="800" height="90" fill="rgba(34,197,94,0.08)"/>
+                  <line x1="0" y1="80" x2="800" y2="80" stroke="rgba(239,68,68,0.4)" stroke-width="1" stroke-dasharray="6,4"/>
+                  <line x1="0" y1="270" x2="800" y2="270" stroke="rgba(34,197,94,0.4)" stroke-width="1" stroke-dasharray="6,4"/>
+                  <path d="M 0,310 C 60,295 100,240 140,180 C 175,128 200,60 240,52 C 275,115 310,300 345,310 C 380,305 410,250 445,200 C 475,158 500,65 535,55 C 565,120 595,295 625,308 C 655,305 680,265 720,230 C 750,203 775,175 800,165" stroke="#0d9488" stroke-width="2" fill="none"/>
+                  <path d="M 0,355 C 80,340 150,305 220,268 C 290,232 360,196 430,165 C 500,135 570,118 640,105 C 700,95 760,90 800,88" stroke="#1f2937" stroke-width="1.5" fill="none" opacity="0.6"/>
+                </svg>
               }
               <div class="chart-card-thumb-cta" aria-hidden="true">
                 <span i18n="View chart button@@charts.viewChart">View Chart →</span>
