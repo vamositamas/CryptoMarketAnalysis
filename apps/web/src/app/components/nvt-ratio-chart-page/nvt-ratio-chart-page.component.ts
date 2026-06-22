@@ -87,9 +87,10 @@ export class NvtRatioChartPageComponent implements AfterViewInit {
 
   protected readonly infoCurrentFields = computed<ChartInfoField[]>(() => {
     const points = this.dataPoints();
-    const last = points[points.length - 1];
-    if (!last) return [];
-    const price = last.priceUsd;
+    const priceLast = points[points.length - 1];
+    if (!priceLast) return [];
+    const last = [...points].reverse().find((p) => p.nvtRatio !== null) ?? priceLast;
+    const price = priceLast.priceUsd;
     const nvtRatio = last.nvtRatio;
     const nvtSignal = last.nvtSignal;
     const signalValue =
@@ -108,8 +109,8 @@ export class NvtRatioChartPageComponent implements AfterViewInit {
 
   protected readonly infoInterpretation = computed(() => {
     const points = this.dataPoints();
-    const last = points[points.length - 1];
-    if (!last) return 'Waiting for data.';
+    if (!points.length) return 'Waiting for data.';
+    const last = [...points].reverse().find((p) => p.nvtRatio !== null) ?? points[points.length - 1];
     const nvtSignal = last.nvtSignal;
     if (nvtSignal === null) return 'NVT Signal not yet available (requires sufficient transaction volume history).';
     if (nvtSignal > 150) {

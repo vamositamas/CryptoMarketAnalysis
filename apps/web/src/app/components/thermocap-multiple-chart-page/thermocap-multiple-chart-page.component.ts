@@ -87,9 +87,10 @@ export class ThermocapMultipleChartPageComponent implements AfterViewInit {
 
   protected readonly infoCurrentFields = computed<ChartInfoField[]>(() => {
     const points = this.dataPoints();
-    const last = points[points.length - 1];
-    if (!last) return [];
-    const price = last.priceUsd;
+    const priceLast = points[points.length - 1];
+    if (!priceLast) return [];
+    const last = [...points].reverse().find((p) => p.thermocapMultiple !== null) ?? priceLast;
+    const price = priceLast.priceUsd;
     const multiple = last.thermocapMultiple;
     const signal =
       multiple !== null && multiple > 33
@@ -108,8 +109,8 @@ export class ThermocapMultipleChartPageComponent implements AfterViewInit {
 
   protected readonly infoInterpretation = computed(() => {
     const points = this.dataPoints();
-    const last = points[points.length - 1];
-    if (!last) return 'Waiting for data.';
+    if (!points.length) return 'Waiting for data.';
+    const last = [...points].reverse().find((p) => p.thermocapMultiple !== null) ?? points[points.length - 1];
     const multiple = last.thermocapMultiple;
     if (multiple === null) return 'Thermocap Multiple not yet available.';
     if (multiple > 33) {

@@ -87,9 +87,11 @@ export class HashRibbonsChartPageComponent implements AfterViewInit {
 
   protected readonly infoCurrentFields = computed<ChartInfoField[]>(() => {
     const points = this.dataPoints();
-    const last = points[points.length - 1];
-    if (!last) return [];
-    const { priceUsd, ma30, ma60, isBuySignal } = last;
+    const priceLast = points[points.length - 1];
+    if (!priceLast) return [];
+    const last = [...points].reverse().find((p) => p.ma30 !== null) ?? priceLast;
+    const { ma30, ma60, isBuySignal } = last;
+    const priceUsd = priceLast.priceUsd;
     const status =
       ma30 !== null && ma60 !== null && ma30 > ma60
         ? 'Recovery (30d > 60d)'
@@ -106,8 +108,8 @@ export class HashRibbonsChartPageComponent implements AfterViewInit {
 
   protected readonly infoInterpretation = computed(() => {
     const points = this.dataPoints();
-    const last = points[points.length - 1];
-    if (!last) return 'Waiting for data.';
+    if (!points.length) return 'Waiting for data.';
+    const last = [...points].reverse().find((p) => p.ma30 !== null) ?? points[points.length - 1];
     const { ma30, ma60, isBuySignal } = last;
     if (ma30 === null || ma60 === null) {
       return 'Hash rate moving averages are not yet available.';

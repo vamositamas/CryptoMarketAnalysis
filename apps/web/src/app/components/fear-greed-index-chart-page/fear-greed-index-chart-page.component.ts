@@ -80,8 +80,9 @@ export class FearGreedIndexChartPageComponent implements AfterViewInit {
 
   protected readonly infoCurrentFields = computed<ChartInfoField[]>(() => {
     const points = this.dataPoints();
-    const last = points[points.length - 1];
-    if (!last) return [];
+    const priceLast = points[points.length - 1];
+    if (!priceLast) return [];
+    const last = [...points].reverse().find((p) => p.fearGreedValue !== null) ?? priceLast;
     const score = last.fearGreedValue;
     const sentiment = score !== null ? getFearGreedSentiment(score) : 'N/A';
     return [
@@ -93,8 +94,8 @@ export class FearGreedIndexChartPageComponent implements AfterViewInit {
 
   protected readonly infoInterpretation = computed(() => {
     const points = this.dataPoints();
-    const last = points[points.length - 1];
-    if (!last) return 'Waiting for data.';
+    if (!points.length) return 'Waiting for data.';
+    const last = [...points].reverse().find((p) => p.fearGreedValue !== null) ?? points[points.length - 1];
     const score = last.fearGreedValue;
     if (score === null) return 'Fear & Greed score not available for the latest data point.';
     const sentiment = getFearGreedSentiment(score);
