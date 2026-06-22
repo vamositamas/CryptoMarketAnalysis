@@ -394,7 +394,7 @@ export class PriceForecastToolsChartPageComponent implements AfterViewInit {
   protected lastUpdatedText(): string {
     const ts = this.lastUpdated();
     if (!ts) return 'Waiting for data';
-    return new Date(ts).toISOString().replace('T', ' ').replace('.000Z', ' UTC');
+    return new Date(ts).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
   }
 
   private async loadChartData(timeframe: ChartTimeframe): Promise<void> {

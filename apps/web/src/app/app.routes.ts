@@ -761,7 +761,7 @@ export class DashboardPage {
       return $localize`:Widget waiting for data@@dashboard.widgetWaiting:Waiting for data`;
     }
 
-    return new Date(lastUpdated).toISOString().replace('T', ' ').replace('.000Z', ' UTC');
+    return new Date(lastUpdated).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
   }
 
   private async checkOnboardingStatus(): Promise<void> {
@@ -903,7 +903,7 @@ export class AdminDataConfigurationPage {
       return $localize`:Never refreshed status@@adminDataConfig.never:Never`;
     }
 
-    return `${new Date(lastRefresh.timestamp).toISOString().replace('T', ' ').replace('.000Z', ' UTC')} (${lastRefresh.status})`;
+    return `${new Date(lastRefresh.timestamp).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false })} UTC (${lastRefresh.status})`;
   }
 
   protected async save(): Promise<void> {

@@ -118,7 +118,7 @@ export class BitcoinHalvingProgressChartPageComponent {
   protected readonly infoLastUpdated = computed(() => {
     const ts = this.lastUpdated();
     if (!ts) return 'Waiting for data';
-    return new Date(ts).toISOString().replace('T', ' ').replace('.000Z', ' UTC');
+    return new Date(ts).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
   });
 
   private readonly allDates = computed<string[]>(() => {
