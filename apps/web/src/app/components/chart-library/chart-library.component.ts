@@ -6,7 +6,7 @@ type ChartAccessTier = 'free' | 'premium';
 interface ChartLibraryItem {
   id: string;
   title: string;
-  category: 'Valuation Models' | 'Cycle Indicators';
+  category: 'Valuation Models' | 'Cycle Indicators' | 'Moving Averages';
   accessTier: ChartAccessTier;
   description: string;
   signal: string;
@@ -116,9 +116,31 @@ const CHARTS: ChartLibraryItem[] = [
       'Shows Bitcoin\'s full price history across all halving cycles on a logarithmic scale. Cycle backgrounds, vertical halving markers, and a progress indicator reveal where the current cycle stands relative to the same stage in past cycles.',
     thumbnailClass: 'halving-progress',
   },
+  {
+    id: '2yr-ma-multiplier',
+    title: '2-Year MA Multiplier',
+    category: 'Moving Averages',
+    accessTier: 'free',
+    signal: 'Buy/sell zone via 2yr MA bands',
+    description:
+      'Bitcoin investor tool: buy below the 2-year moving average (green), sell above the 2yr MA × 5 (red). ' +
+      'Intermediate multiplier bands (×2, ×3, ×4) show the degree of overheating. Computed daily from full price history.',
+    thumbnailClass: '2yr-ma-multiplier',
+  },
+  {
+    id: 'price-forecast-tools',
+    title: 'Price Forecast Tools',
+    category: 'Valuation Models',
+    accessTier: 'free',
+    signal: 'Cycle top & bottom targets',
+    description:
+      '6-model price forecast: Top Cap, Delta Top, CVDD, Terminal Price, Balanced Price. ' +
+      'Combines on-chain models to identify historically reliable price targets for Bitcoin cycle tops and bear market floors.',
+    thumbnailClass: 'price-forecast-tools',
+  },
 ];
 
-const CATEGORIES: ChartLibraryItem['category'][] = ['Valuation Models', 'Cycle Indicators'];
+const CATEGORIES: ChartLibraryItem['category'][] = ['Valuation Models', 'Cycle Indicators', 'Moving Averages'];
 
 @Component({
   selector: 'app-chart-library',

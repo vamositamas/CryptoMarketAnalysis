@@ -7,7 +7,7 @@ interface ChartsRouterOptions {
   chartDataService?: Pick<ChartDataService, 'getChartData'>;
 }
 
-const CHART_IDS: ChartId[] = ['bitcoin-rainbow', 'pi-cycle-top', 'stock-to-flow', 'mvrv-z-score', 'puell-multiple', 'vdd-multiple'];
+const CHART_IDS: ChartId[] = ['bitcoin-rainbow', 'pi-cycle-top', 'stock-to-flow', 'mvrv-z-score', 'puell-multiple', 'vdd-multiple', 'realized-price', 'stock-to-income', '2yr-ma-multiplier', 'price-forecast-tools'];
 
 export function createChartsRouter(options: ChartsRouterOptions = {}): Router {
   const router = Router();

@@ -50,6 +50,18 @@ export class BitcoinDataClient {
     return this.fetchLatest('vdd-multiple', 'vddMultiple', 'VDD Multiple');
   }
 
+  async fetchCvdd(): Promise<BitcoinDataPoint> {
+    return this.fetchLatest('cvdd', 'cvdd', 'CVDD');
+  }
+
+  async fetchBalancedPrice(): Promise<BitcoinDataPoint> {
+    return this.fetchLatest('balanced-price', 'balancedPrice', 'Balanced Price');
+  }
+
+  async fetchTerminalPrice(): Promise<BitcoinDataPoint> {
+    return this.fetchLatest('terminal-price', 'terminalPrice', 'Terminal Price');
+  }
+
   async fetchMvrvZScoreHistory(): Promise<BitcoinDataPoint[]> {
     return retryWithBackoff(
       async () => {
@@ -87,6 +99,79 @@ export class BitcoinDataClient {
         return rows
           .filter((r) => typeof r.d === 'string' && Number.isFinite(r.vddMultiple))
           .map((r) => ({ date: r.d, value: r.vddMultiple }));
+      },
+      this.retryAttempts,
+      this.retryBaseDelayMs,
+      { sleep: this.sleep, shouldRetry: isRetryableBitcoinDataError },
+    );
+  }
+
+  async fetchRealizedPriceHistory(): Promise<BitcoinDataPoint[]> {
+    return retryWithBackoff(
+      async () => {
+        const url = new URL('realized-price', ensureTrailingSlash(this.baseUrl)).toString();
+        const response = await this.fetchFn(url);
+        if (!response.ok) {
+          throw new BitcoinDataClientError(
+            `Realized Price history request failed with status ${response.status}`,
+            response.status,
+          );
+        }
+        const rows = (await response.json()) as { d: string; realizedPrice: number }[];
+        return rows
+          .filter((r) => typeof r.d === 'string' && Number.isFinite(r.realizedPrice))
+          .map((r) => ({ date: r.d, value: r.realizedPrice }));
+      },
+      this.retryAttempts,
+      this.retryBaseDelayMs,
+      { sleep: this.sleep, shouldRetry: isRetryableBitcoinDataError },
+    );
+  }
+
+  async fetchCvddHistory(): Promise<BitcoinDataPoint[]> {
+    return retryWithBackoff(
+      async () => {
+        const url = new URL('cvdd', ensureTrailingSlash(this.baseUrl)).toString();
+        const response = await this.fetchFn(url);
+        if (!response.ok) {
+          throw new BitcoinDataClientError(`CVDD history request failed with status ${response.status}`, response.status);
+        }
+        const rows = (await response.json()) as { d: string; cvdd: number }[];
+        return rows.filter((r) => typeof r.d === 'string' && Number.isFinite(r.cvdd)).map((r) => ({ date: r.d, value: r.cvdd }));
+      },
+      this.retryAttempts,
+      this.retryBaseDelayMs,
+      { sleep: this.sleep, shouldRetry: isRetryableBitcoinDataError },
+    );
+  }
+
+  async fetchBalancedPriceHistory(): Promise<BitcoinDataPoint[]> {
+    return retryWithBackoff(
+      async () => {
+        const url = new URL('balanced-price', ensureTrailingSlash(this.baseUrl)).toString();
+        const response = await this.fetchFn(url);
+        if (!response.ok) {
+          throw new BitcoinDataClientError(`Balanced Price history request failed with status ${response.status}`, response.status);
+        }
+        const rows = (await response.json()) as { d: string; balancedPrice: number }[];
+        return rows.filter((r) => typeof r.d === 'string' && Number.isFinite(r.balancedPrice)).map((r) => ({ date: r.d, value: r.balancedPrice }));
+      },
+      this.retryAttempts,
+      this.retryBaseDelayMs,
+      { sleep: this.sleep, shouldRetry: isRetryableBitcoinDataError },
+    );
+  }
+
+  async fetchTerminalPriceHistory(): Promise<BitcoinDataPoint[]> {
+    return retryWithBackoff(
+      async () => {
+        const url = new URL('terminal-price', ensureTrailingSlash(this.baseUrl)).toString();
+        const response = await this.fetchFn(url);
+        if (!response.ok) {
+          throw new BitcoinDataClientError(`Terminal Price history request failed with status ${response.status}`, response.status);
+        }
+        const rows = (await response.json()) as { d: string; terminalPrice: number }[];
+        return rows.filter((r) => typeof r.d === 'string' && Number.isFinite(r.terminalPrice)).map((r) => ({ date: r.d, value: r.terminalPrice }));
       },
       this.retryAttempts,
       this.retryBaseDelayMs,

@@ -189,6 +189,77 @@ export interface VddMultipleChartResponse {
   lastUpdated: string | null;
 }
 
+export interface TwoYrMaMultiplierDataPoint {
+  date: string;
+  priceUsd: number;
+  ma730: number | null;
+  ma730x2: number | null;
+  ma730x3: number | null;
+  ma730x4: number | null;
+  ma730x5: number | null;
+}
+
+export interface TwoYrMaMultiplierChartResponse {
+  chartId: '2yr-ma-multiplier';
+  title: string;
+  timeframe: string;
+  dataPoints: TwoYrMaMultiplierDataPoint[];
+  lastUpdated: string | null;
+}
+
+export interface RealizePriceChartDataPoint {
+  date: string;
+  priceUsd: number;
+  realizedPrice: number | null;
+  mvrvRatio: number | null;
+}
+
+export interface RealizePriceChartResponse {
+  chartId: 'realized-price';
+  title: string;
+  timeframe: string;
+  dataPoints: RealizePriceChartDataPoint[];
+  lastUpdated: string | null;
+}
+
+export interface StockToIncomeDataPoint {
+  date: string;
+  priceUsd: number | null;
+  modelPrice: number | null;
+  upperBand: number | null;
+  lowerBand: number | null;
+  s2iRatio: number | null;
+}
+
+export interface StockToIncomeChartResponse {
+  chartId: 'stock-to-income';
+  title: string;
+  timeframe: string;
+  dataPoints: StockToIncomeDataPoint[];
+  regressionA: number;
+  regressionB: number;
+  sigma: number;
+  lastUpdated: string | null;
+}
+
+export interface PriceForecastDataPoint {
+  date: string;
+  priceUsd: number;
+  topCap: number | null;
+  deltaTop: number | null;
+  cvdd: number | null;
+  balancedPrice: number | null;
+  terminalPrice: number | null;
+}
+
+export interface PriceForecastChartResponse {
+  chartId: 'price-forecast-tools';
+  title: string;
+  timeframe: string;
+  dataPoints: PriceForecastDataPoint[];
+  lastUpdated: string | null;
+}
+
 export type ChartAnnotation =
   | {
       id: string;
@@ -633,6 +704,58 @@ export class AuthApiClient {
     try {
       return await firstValueFrom(
         this.http.get<VddMultipleChartResponse>('/api/charts/vdd-multiple', {
+          params: { timeframe },
+          withCredentials: true,
+        }),
+      );
+    } catch (error) {
+      throw toApiClientError(error);
+    }
+  }
+
+  async getTwoYrMaMultiplierChartData(timeframe: ChartTimeframe): Promise<TwoYrMaMultiplierChartResponse> {
+    try {
+      return await firstValueFrom(
+        this.http.get<TwoYrMaMultiplierChartResponse>('/api/charts/2yr-ma-multiplier', {
+          params: { timeframe },
+          withCredentials: true,
+        }),
+      );
+    } catch (error) {
+      throw toApiClientError(error);
+    }
+  }
+
+  async getRealizePriceChartData(timeframe: ChartTimeframe): Promise<RealizePriceChartResponse> {
+    try {
+      return await firstValueFrom(
+        this.http.get<RealizePriceChartResponse>('/api/charts/realized-price', {
+          params: { timeframe },
+          withCredentials: true,
+        }),
+      );
+    } catch (error) {
+      throw toApiClientError(error);
+    }
+  }
+
+  async getStockToIncomeChartData(timeframe: ChartTimeframe): Promise<StockToIncomeChartResponse> {
+    try {
+      return await firstValueFrom(
+        this.http.get<StockToIncomeChartResponse>('/api/charts/stock-to-income', {
+          params: { timeframe },
+          withCredentials: true,
+        }),
+      );
+    } catch (error) {
+      throw toApiClientError(error);
+    }
+  }
+
+  async getPriceForecastChartData(timeframe: ChartTimeframe): Promise<PriceForecastChartResponse> {
+    try {
+      return await firstValueFrom(
+        this.http.get<PriceForecastChartResponse>('/api/charts/price-forecast-tools', {
           params: { timeframe },
           withCredentials: true,
         }),

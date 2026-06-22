@@ -1,6 +1,6 @@
 import type { Request } from 'express';
 import { Router } from 'express';
-import { BitcoinDataClient } from '@crypto-market-analysis/calculation-engines/data-sources';
+import { BitcoinDataClient, BlockchainInfoClient } from '@crypto-market-analysis/calculation-engines/data-sources';
 import { getDatabasePool } from '../config/database.config';
 import { DailyDataRefreshService, insertBitcoinMetricsDaily } from '../jobs/daily-data-refresh.controller';
 import { requireAuth, requireRole } from '../middleware/rbac.middleware';
@@ -333,6 +333,44 @@ export function createAdminRouter(
     } catch (error) {
       next(error);
     }
+  });
+
+  router.post('/data-configuration/backfill-miner-fees', ...adminOnly, async (_req, res, next) => {
+    try {
+      const database = getDatabasePool();
+      if (!database) {
+        res.status(503).json({ error: 'Database unavailable' });
+        return;
+      }
+      const client = new BlockchainInfoClient();
+      const points = await client.fetchTransactionFeesAll();
+      const records = points.map((p) => ({ date: p.date, metricName: 'miner_fees', metricValue: p.value }));
+      await insertBitcoinMetricsDaily(database, records);
+      res.status(200).json({ inserted: records.length, firstDate: records[0]?.date, lastDate: records[records.length - 1]?.date });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post('/data-configuration/backfill-price-forecast', ...adminOnly, async (_req, res, next) => {
+    try {
+      const database = getDatabasePool();
+      if (!database) { res.status(503).json({ error: 'Database unavailable' }); return; }
+      const client = new BitcoinDataClient();
+      const [cvddPoints, balancedPoints, terminalPoints] = await Promise.all([
+        client.fetchCvddHistory(),
+        client.fetchBalancedPriceHistory(),
+        client.fetchTerminalPriceHistory(),
+      ]);
+      const records = [
+        ...cvddPoints.map((p) => ({ date: p.date, metricName: 'cvdd', metricValue: p.value })),
+        ...balancedPoints.map((p) => ({ date: p.date, metricName: 'balanced_price', metricValue: p.value })),
+        ...terminalPoints.map((p) => ({ date: p.date, metricName: 'terminal_price', metricValue: p.value })),
+      ];
+      await insertBitcoinMetricsDaily(database, records);
+      const allDates = [...cvddPoints, ...balancedPoints, ...terminalPoints].map((p) => p.date).sort();
+      res.status(200).json({ inserted: records.length, firstDate: allDates[0] ?? null, lastDate: allDates[allDates.length - 1] ?? null });
+    } catch (error) { next(error); }
   });
 
   // ── Email Templates ─────────────────────────────────────────────────────────

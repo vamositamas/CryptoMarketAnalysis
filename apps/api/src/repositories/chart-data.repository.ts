@@ -12,6 +12,12 @@ export interface ChartDataRow {
   mvrvZScore: number | null;
   coinDaysDestroyed: number | null;
   vddMultiple: number | null;
+  realizedPrice: number | null;
+  circulatingSupply: number | null;
+  minerFees: number | null;
+  cvdd: number | null;
+  balancedPrice: number | null;
+  terminalPrice: number | null;
   lastUpdated: string | null;
 }
 
@@ -25,6 +31,12 @@ interface ChartDataDbRow {
   mvrv_zscore: string | number | null;
   coin_days_destroyed: string | number | null;
   vdd_multiple: string | number | null;
+  realized_price: string | number | null;
+  circulating_supply: string | number | null;
+  miner_fees: string | number | null;
+  cvdd: string | number | null;
+  balanced_price: string | number | null;
+  terminal_price: string | number | null;
   last_updated: string | Date | null;
 }
 
@@ -52,6 +64,7 @@ export class ChartDataRepository extends BaseRepository {
         SELECT
           price.date,
           price.price_usd,
+          price.circulating_supply,
           rainbow.metric_value AS rainbow_band,
           ma111.metric_value AS ma_111_day,
           ma350.metric_value AS ma_350_day,
@@ -59,6 +72,11 @@ export class ChartDataRepository extends BaseRepository {
           mvrv.metric_value AS mvrv_zscore,
           cdd.metric_value AS coin_days_destroyed,
           vdd.metric_value AS vdd_multiple,
+          rp.metric_value AS realized_price,
+          mf.metric_value AS miner_fees,
+          cvdd_m.metric_value AS cvdd,
+          bp_m.metric_value AS balanced_price,
+          tp_m.metric_value AS terminal_price,
           GREATEST(
             price.created_at,
             COALESCE(rainbow.created_at, price.created_at),
@@ -67,7 +85,12 @@ export class ChartDataRepository extends BaseRepository {
             COALESCE(stock_to_flow.created_at, price.created_at),
             COALESCE(mvrv.created_at, price.created_at),
             COALESCE(cdd.created_at, price.created_at),
-            COALESCE(vdd.created_at, price.created_at)
+            COALESCE(vdd.created_at, price.created_at),
+            COALESCE(rp.created_at, price.created_at),
+            COALESCE(mf.created_at, price.created_at),
+            COALESCE(cvdd_m.created_at, price.created_at),
+            COALESCE(bp_m.created_at, price.created_at),
+            COALESCE(tp_m.created_at, price.created_at)
           ) AS last_updated
         FROM bitcoin_price_daily price
         LEFT JOIN bitcoin_metrics_daily rainbow
@@ -91,6 +114,21 @@ export class ChartDataRepository extends BaseRepository {
         LEFT JOIN bitcoin_metrics_daily vdd
           ON vdd.date = price.date
           AND vdd.metric_name = 'vdd_multiple'
+        LEFT JOIN bitcoin_metrics_daily rp
+          ON rp.date = price.date
+          AND rp.metric_name = 'realized_price'
+        LEFT JOIN bitcoin_metrics_daily mf
+          ON mf.date = price.date
+          AND mf.metric_name = 'miner_fees'
+        LEFT JOIN bitcoin_metrics_daily cvdd_m
+          ON cvdd_m.date = price.date
+          AND cvdd_m.metric_name = 'cvdd'
+        LEFT JOIN bitcoin_metrics_daily bp_m
+          ON bp_m.date = price.date
+          AND bp_m.metric_name = 'balanced_price'
+        LEFT JOIN bitcoin_metrics_daily tp_m
+          ON tp_m.date = price.date
+          AND tp_m.metric_name = 'terminal_price'
         WHERE price.date >= $1::date
         ORDER BY price.date ASC
       `,
@@ -119,6 +157,12 @@ function toChartDataRow(row: ChartDataDbRow): ChartDataRow {
     mvrvZScore: nullableNumber(row.mvrv_zscore),
     coinDaysDestroyed: nullableNumber(row.coin_days_destroyed),
     vddMultiple: nullableNumber(row.vdd_multiple),
+    realizedPrice: nullableNumber(row.realized_price),
+    circulatingSupply: nullableNumber(row.circulating_supply),
+    minerFees: nullableNumber(row.miner_fees),
+    cvdd: nullableNumber(row.cvdd),
+    balancedPrice: nullableNumber(row.balanced_price),
+    terminalPrice: nullableNumber(row.terminal_price),
     lastUpdated: row.last_updated === null ? null : formatTimestamp(row.last_updated),
   };
 }

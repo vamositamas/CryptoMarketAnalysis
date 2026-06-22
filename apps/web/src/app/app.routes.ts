@@ -1537,6 +1537,22 @@ export const appRoutes: Route[] = [
       ),
   },
   {
+    path: 'charts/2yr-ma-multiplier',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/two-yr-ma-multiplier-chart-page/two-yr-ma-multiplier-chart-page.component').then(
+        (m) => m.TwoYrMaMultiplierChartPageComponent,
+      ),
+  },
+  {
+    path: 'charts/price-forecast-tools',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/price-forecast-tools-chart-page/price-forecast-tools-chart-page.component').then(
+        (m) => m.PriceForecastToolsChartPageComponent,
+      ),
+  },
+  {
     path: 'charts/:chartId',
     canActivate: [authGuard],
     loadComponent: () =>

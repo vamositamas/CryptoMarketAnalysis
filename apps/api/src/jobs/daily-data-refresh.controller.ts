@@ -53,10 +53,10 @@ interface DailyDataRefreshOptions {
   coinGeckoClient?: Pick<CoinGeckoClient, 'fetchBitcoinMarketData' | 'fetchCurrentBitcoinMarketData'>;
   blockchainInfoClient?: Pick<
     BlockchainInfoClient,
-    'fetchMarketPrice' | 'fetchHashRate' | 'fetchDifficulty' | 'fetchCoinDaysDestroyed'
+    'fetchMarketPrice' | 'fetchHashRate' | 'fetchDifficulty' | 'fetchCoinDaysDestroyed' | 'fetchTransactionFees'
   >;
   fearGreedClient?: Pick<FearGreedClient, 'fetchLatest'>;
-  bitcoinDataClient?: Pick<BitcoinDataClient, 'fetchMvrvZScore' | 'fetchRealizedPrice' | 'fetchVddMultiple'>;
+  bitcoinDataClient?: Pick<BitcoinDataClient, 'fetchMvrvZScore' | 'fetchRealizedPrice' | 'fetchVddMultiple' | 'fetchCvdd' | 'fetchBalancedPrice' | 'fetchTerminalPrice'>;
   database?: Parameters<typeof insertBitcoinPriceDaily>[0];
   emailService?: DailyDataRefreshFailureEmailSender;
   alertEvaluationService?: Pick<AlertEvaluationService, 'evaluateAlerts'>;
@@ -105,10 +105,10 @@ export class DailyDataRefreshService {
   private readonly coinGeckoClient: Pick<CoinGeckoClient, 'fetchBitcoinMarketData' | 'fetchCurrentBitcoinMarketData'>;
   private readonly blockchainInfoClient: Pick<
     BlockchainInfoClient,
-    'fetchMarketPrice' | 'fetchHashRate' | 'fetchDifficulty' | 'fetchCoinDaysDestroyed'
+    'fetchMarketPrice' | 'fetchHashRate' | 'fetchDifficulty' | 'fetchCoinDaysDestroyed' | 'fetchTransactionFees'
   >;
   private readonly fearGreedClient: Pick<FearGreedClient, 'fetchLatest'>;
-  private readonly bitcoinDataClient: Pick<BitcoinDataClient, 'fetchMvrvZScore' | 'fetchRealizedPrice' | 'fetchVddMultiple'>;
+  private readonly bitcoinDataClient: Pick<BitcoinDataClient, 'fetchMvrvZScore' | 'fetchRealizedPrice' | 'fetchVddMultiple' | 'fetchCvdd' | 'fetchBalancedPrice' | 'fetchTerminalPrice'>;
   private readonly database: Parameters<typeof insertBitcoinPriceDaily>[0] | undefined;
   private readonly emailService: DailyDataRefreshFailureEmailSender;
   private readonly alertEvaluationService: Pick<AlertEvaluationService, 'evaluateAlerts'>;
@@ -259,6 +259,15 @@ export class DailyDataRefreshService {
       ...(await this.fetchExternalMetric('vdd_multiple', () =>
         this.bitcoinDataClient.fetchVddMultiple(),
       )),
+      ...(await this.fetchExternalMetric('cvdd', () =>
+        this.bitcoinDataClient.fetchCvdd(),
+      )),
+      ...(await this.fetchExternalMetric('balanced_price', () =>
+        this.bitcoinDataClient.fetchBalancedPrice(),
+      )),
+      ...(await this.fetchExternalMetric('terminal_price', () =>
+        this.bitcoinDataClient.fetchTerminalPrice(),
+      )),
       ...(await this.fetchExternalMetric('hash_rate', () =>
         this.fetchBlockchainInfoChartValue(date, () =>
           this.blockchainInfoClient.fetchHashRate(date, date),
@@ -272,6 +281,11 @@ export class DailyDataRefreshService {
       ...(await this.fetchExternalMetric('coin_days_destroyed', () =>
         this.fetchBlockchainInfoChartValue(date, () =>
           this.blockchainInfoClient.fetchCoinDaysDestroyed(date, date),
+        ),
+      )),
+      ...(await this.fetchExternalMetric('miner_fees', () =>
+        this.fetchBlockchainInfoChartValue(date, () =>
+          this.blockchainInfoClient.fetchTransactionFees(date, date),
         ),
       )),
     ];

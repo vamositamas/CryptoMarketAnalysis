@@ -320,7 +320,7 @@ export class HavingSpiralChartPageComponent implements AfterViewInit, OnDestroy 
     const canvas = this.canvasRef?.nativeElement;
     if (!canvas) return;
 
-    const config: ChartConfiguration<'scatter'> = {
+    const config: ChartConfiguration = {
       type: 'scatter',
       data: { datasets: [] },
       options: {

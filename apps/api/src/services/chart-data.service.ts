@@ -5,7 +5,7 @@ import {
   type ChartTimeframe,
 } from '../repositories/chart-data.repository';
 
-export type ChartId = 'bitcoin-rainbow' | 'pi-cycle-top' | 'stock-to-flow' | 'mvrv-z-score' | 'puell-multiple' | 'vdd-multiple';
+export type ChartId = 'bitcoin-rainbow' | 'pi-cycle-top' | 'stock-to-flow' | 'mvrv-z-score' | 'puell-multiple' | 'vdd-multiple' | 'realized-price' | 'stock-to-income' | '2yr-ma-multiplier' | 'price-forecast-tools';
 
 export interface BitcoinRainbowChartResponse {
   chartId: 'bitcoin-rainbow';
@@ -80,13 +80,80 @@ export interface VddMultipleChartResponse {
   lastUpdated: string | null;
 }
 
+export interface TwoYrMaMultiplierChartResponse {
+  chartId: '2yr-ma-multiplier';
+  title: '2-Year MA Multiplier';
+  timeframe: ChartTimeframe;
+  dataPoints: {
+    date: string;
+    priceUsd: number;
+    ma730: number | null;
+    ma730x2: number | null;
+    ma730x3: number | null;
+    ma730x4: number | null;
+    ma730x5: number | null;
+  }[];
+  lastUpdated: string | null;
+}
+
+export interface RealizePriceChartResponse {
+  chartId: 'realized-price';
+  title: 'Bitcoin Realized Price';
+  timeframe: ChartTimeframe;
+  dataPoints: {
+    date: string;
+    priceUsd: number;
+    realizedPrice: number | null;
+    mvrvRatio: number | null;
+  }[];
+  lastUpdated: string | null;
+}
+
+export interface StockToIncomeChartResponse {
+  chartId: 'stock-to-income';
+  title: 'Stock to Income Model';
+  timeframe: ChartTimeframe;
+  dataPoints: {
+    date: string;
+    priceUsd: number | null;
+    modelPrice: number | null;
+    upperBand: number | null;
+    lowerBand: number | null;
+    s2iRatio: number | null;
+  }[];
+  regressionA: number;
+  regressionB: number;
+  sigma: number;
+  lastUpdated: string | null;
+}
+
+export interface PriceForecastToolsChartResponse {
+  chartId: 'price-forecast-tools';
+  title: 'Price Forecast Tools';
+  timeframe: ChartTimeframe;
+  dataPoints: {
+    date: string;
+    priceUsd: number;
+    topCap: number | null;
+    deltaTop: number | null;
+    cvdd: number | null;
+    balancedPrice: number | null;
+    terminalPrice: number | null;
+  }[];
+  lastUpdated: string | null;
+}
+
 export type ChartDataResponse =
   | BitcoinRainbowChartResponse
   | PiCycleTopChartResponse
   | StockToFlowChartResponse
   | MvrvZScoreChartResponse
   | PuellMultipleChartResponse
-  | VddMultipleChartResponse;
+  | VddMultipleChartResponse
+  | RealizePriceChartResponse
+  | StockToIncomeChartResponse
+  | TwoYrMaMultiplierChartResponse
+  | PriceForecastToolsChartResponse;
 
 export class ChartDataRequestError extends Error {
   constructor(
@@ -106,6 +173,86 @@ export class ChartDataService {
 
   async getChartData(chartId: ChartId, timeframeInput: unknown): Promise<ChartDataResponse> {
     const timeframe = parseTimeframe(timeframeInput);
+
+    if (chartId === 'price-forecast-tools') {
+      const allRows = await this.repository.findBitcoinChartData('all', this.now());
+      const GENESIS_MS = new Date('2009-01-03T00:00:00Z').getTime();
+      let cumulativeMarketCap = 0;
+      const allPoints = allRows.map((r) => {
+        const ageDays = Math.max(1, (new Date(`${r.date}T00:00:00Z`).getTime() - GENESIS_MS) / 86_400_000);
+        const supply = r.circulatingSupply !== null ? r.circulatingSupply : estimateSupplyFromHalvings(r.date);
+        cumulativeMarketCap += r.priceUsd * supply;
+        const averageCap = cumulativeMarketCap / ageDays;
+        const topCap = supply > 0 ? (averageCap * 35) / supply : null;
+        let deltaTop: number | null = null;
+        if (r.realizedPrice !== null && supply > 0) {
+          const deltaCap = r.realizedPrice * supply - averageCap;
+          deltaTop = deltaCap > 0 ? (deltaCap * 7) / supply : null;
+        }
+        return {
+          date: r.date,
+          priceUsd: r.priceUsd,
+          topCap,
+          deltaTop,
+          cvdd: r.cvdd,
+          balancedPrice: r.balancedPrice,
+          terminalPrice: r.terminalPrice,
+        };
+      });
+      const startDate = timeframe === 'all' ? null : getTimeframeStartDate(timeframe, this.now());
+      return {
+        chartId: 'price-forecast-tools',
+        title: 'Price Forecast Tools',
+        timeframe,
+        dataPoints: startDate ? allPoints.filter((p) => p.date >= startDate) : allPoints,
+        lastUpdated: getLastUpdated(allRows),
+      };
+    }
+
+    if (chartId === '2yr-ma-multiplier') {
+      // Always load all historical data for MA computation regardless of requested timeframe
+      const allRows = await this.repository.findBitcoinChartData('all', this.now());
+
+      // Compute 730-day rolling average
+      const prices = allRows.map((r) => r.priceUsd);
+      const ma730: (number | null)[] = prices.map((_, i) => {
+        if (i < 729) return null;
+        let sum = 0;
+        for (let j = i - 729; j <= i; j++) sum += prices[j]!;
+        return sum / 730;
+      });
+
+      const lastUpdated = getLastUpdated(allRows);
+
+      // Build all data points
+      const allPoints = allRows.map((r, i) => {
+        const ma = ma730[i];
+        return {
+          date: r.date,
+          priceUsd: r.priceUsd,
+          ma730: ma,
+          ma730x2: ma !== null ? ma * 2 : null,
+          ma730x3: ma !== null ? ma * 3 : null,
+          ma730x4: ma !== null ? ma * 4 : null,
+          ma730x5: ma !== null ? ma * 5 : null,
+        };
+      });
+
+      // Apply timeframe filter
+      const startDate = timeframe === 'all' ? null : getTimeframeStartDate(timeframe, this.now());
+      const dataPoints = startDate
+        ? allPoints.filter((p) => p.date >= startDate)
+        : allPoints;
+
+      return {
+        chartId: '2yr-ma-multiplier',
+        title: '2-Year MA Multiplier',
+        timeframe,
+        dataPoints,
+        lastUpdated,
+      };
+    }
+
     const rows = await this.repository.findBitcoinChartData(timeframe, this.now());
     const lastUpdated = getLastUpdated(rows);
 
@@ -170,6 +317,31 @@ export class ChartDataService {
       };
     }
 
+    if (chartId === 'realized-price') {
+      const firstRpDate = rows.find((r) => r.realizedPrice !== null)?.date ?? '2010-07-18';
+      const startDate = timeframe === 'all' ? firstRpDate : getTimeframeStartDate(timeframe, this.now());
+      return {
+        chartId: 'realized-price',
+        title: 'Bitcoin Realized Price',
+        timeframe,
+        dataPoints: rows
+          .filter((r) => r.date >= startDate)
+          .map((r) => ({
+            date: r.date,
+            priceUsd: r.priceUsd,
+            realizedPrice: r.realizedPrice,
+            mvrvRatio: r.realizedPrice !== null && r.realizedPrice > 0
+              ? r.priceUsd / r.realizedPrice
+              : null,
+          })),
+        lastUpdated,
+      };
+    }
+
+    if (chartId === 'stock-to-income') {
+      return buildStockToIncomeResponse(rows, timeframe, this.now);
+    }
+
     if (chartId === 'vdd-multiple') {
       const lastUpdated = getLastUpdated(rows);
 
@@ -221,6 +393,177 @@ export class ChartDataService {
       lastUpdated,
     };
   }
+}
+
+// ── Stock-to-Income ────────────────────────────────────────────────────────────
+
+interface S2IHalvingEntry { date: string; reward: number }
+
+const S2I_HALVINGS: S2IHalvingEntry[] = [
+  { date: '2009-01-03', reward: 50 },
+  { date: '2012-11-28', reward: 25 },
+  { date: '2016-07-09', reward: 12.5 },
+  { date: '2020-05-11', reward: 6.25 },
+  { date: '2024-04-19', reward: 3.125 },
+  { date: '2028-04-21', reward: 1.5625 },
+  { date: '2032-04-01', reward: 0.78125 },
+  { date: '2036-04-01', reward: 0.390625 },
+  { date: '2040-04-01', reward: 0.1953125 },
+  { date: '2044-04-01', reward: 0.09765625 },
+  { date: '2048-04-01', reward: 0.048828125 },
+];
+
+function blockRewardForDate(date: string): number {
+  let reward = S2I_HALVINGS[0]!.reward;
+  for (const h of S2I_HALVINGS) {
+    if (date >= h.date) reward = h.reward;
+    else break;
+  }
+  return reward;
+}
+
+function estimateSupplyFromHalvings(date: string): number {
+  const genesis = new Date(`${S2I_HALVINGS[0]!.date}T00:00:00Z`).getTime();
+  const target = new Date(`${date}T00:00:00Z`).getTime();
+  let supply = 0;
+  let prevMs = genesis;
+  for (let i = 0; i < S2I_HALVINGS.length; i++) {
+    const entry = S2I_HALVINGS[i]!;
+    const nextEntry = S2I_HALVINGS[i + 1];
+    const eraEndMs = nextEntry ? Math.min(target, new Date(`${nextEntry.date}T00:00:00Z`).getTime()) : target;
+    if (eraEndMs <= prevMs) break;
+    supply += ((eraEndMs - prevMs) / 86_400_000) * 144 * entry.reward;
+    prevMs = eraEndMs;
+    if (eraEndMs >= target) break;
+  }
+  return Math.min(supply, 21_000_000);
+}
+
+function buildStockToIncomeResponse(
+  rows: ChartDataRow[],
+  timeframe: ChartTimeframe,
+  now: () => Date,
+): StockToIncomeChartResponse {
+  // 1. Attach supply (use DB value or estimate)
+  const rowsWithSupply = rows.map((r) => ({
+    ...r,
+    supply: r.circulatingSupply !== null ? r.circulatingSupply : estimateSupplyFromHalvings(r.date),
+  }));
+
+  // 2. Compute 365-day rolling average of miner fees
+  const feeValues = rowsWithSupply.map((r) => r.minerFees ?? 0);
+  const fees365ma: (number | null)[] = feeValues.map((_, i) => {
+    const window = feeValues.slice(Math.max(0, i - 364), i + 1);
+    if (window.length < 30) return null;
+    return window.reduce((s, v) => s + v, 0) / window.length;
+  });
+
+  // 3. Compute S2I ratio
+  const rowsWithS2I = rowsWithSupply.map((r, i) => {
+    const subsidy = 144 * blockRewardForDate(r.date);
+    const ma = fees365ma[i];
+    const flow = ma !== null ? subsidy + ma : null;
+    const s2i = flow !== null && flow > 0 ? r.supply / (flow * 365) : null;
+    return { ...r, fees365ma: ma, flow, s2i };
+  });
+
+  // 4. OLS regression ln(price) ~ ln(s2i) from 2012-01-01
+  const regrRows = rowsWithS2I.filter(
+    (r) => r.date >= '2012-01-01' && r.priceUsd > 0 && r.s2i !== null && r.s2i > 0,
+  );
+  let regrA = 0;
+  let regrB = 1;
+  let sigma = 0;
+  if (regrRows.length >= 2) {
+    const n = regrRows.length;
+    let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+    for (const r of regrRows) {
+      const x = Math.log(r.s2i!);
+      const y = Math.log(r.priceUsd);
+      sumX += x; sumY += y; sumXY += x * y; sumX2 += x * x;
+    }
+    regrB = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+    regrA = (sumY - regrB * sumX) / n;
+    let sumResiduals2 = 0;
+    for (const r of regrRows) {
+      const predicted = regrA + regrB * Math.log(r.s2i!);
+      const resid = Math.log(r.priceUsd) - predicted;
+      sumResiduals2 += resid * resid;
+    }
+    sigma = Math.sqrt(sumResiduals2 / n);
+  }
+
+  // 5. Historical data points
+  const historicalPoints: StockToIncomeChartResponse['dataPoints'] = rowsWithS2I
+    .map((r) => {
+      const priceUsd = r.priceUsd > 0 ? r.priceUsd : null;
+      if (r.s2i === null || r.s2i <= 0) {
+        return priceUsd !== null
+          ? { date: r.date, priceUsd, modelPrice: null, upperBand: null, lowerBand: null, s2iRatio: null }
+          : null;
+      }
+      const modelPrice = Math.exp(regrA + regrB * Math.log(r.s2i));
+      return {
+        date: r.date,
+        priceUsd,
+        modelPrice,
+        upperBand: modelPrice * Math.exp(sigma),
+        lowerBand: modelPrice * Math.exp(-sigma),
+        s2iRatio: r.s2i,
+      };
+    })
+    .filter((p): p is NonNullable<typeof p> => p !== null);
+
+  // 6. Future projection to 2050
+  const todayStr = now().toISOString().slice(0, 10);
+  const lastRow = rowsWithS2I[rowsWithS2I.length - 1];
+  let cumulativeSupply = lastRow?.supply ?? estimateSupplyFromHalvings(todayStr);
+  const lastFeesMA = fees365ma[fees365ma.length - 1] ?? 0;
+  const lastHistDate = lastRow?.date ?? todayStr;
+  const futurePoints: StockToIncomeChartResponse['dataPoints'] = [];
+  const endMs = new Date('2050-12-31T00:00:00Z').getTime();
+  for (
+    let ms = new Date(`${lastHistDate}T00:00:00Z`).getTime() + 86_400_000;
+    ms <= endMs;
+    ms += 86_400_000
+  ) {
+    const date = new Date(ms).toISOString().slice(0, 10);
+    const subsidy = 144 * blockRewardForDate(date);
+    cumulativeSupply = Math.min(cumulativeSupply + subsidy, 21_000_000);
+    const flow = subsidy + lastFeesMA;
+    const s2i = flow > 0 ? cumulativeSupply / (flow * 365) : null;
+    if (s2i === null || s2i <= 0) {
+      futurePoints.push({ date, priceUsd: null, modelPrice: null, upperBand: null, lowerBand: null, s2iRatio: null });
+      continue;
+    }
+    const modelPrice = Math.exp(regrA + regrB * Math.log(s2i));
+    futurePoints.push({
+      date,
+      priceUsd: null,
+      modelPrice,
+      upperBand: modelPrice * Math.exp(sigma),
+      lowerBand: modelPrice * Math.exp(-sigma),
+      s2iRatio: s2i,
+    });
+  }
+
+  // 7. Combine and filter
+  const allPoints = [...historicalPoints, ...futurePoints];
+  const startDate = timeframe === 'all' ? null : getTimeframeStartDate(timeframe, now());
+  const dataPoints = startDate
+    ? allPoints.filter((p) => p.date >= startDate || p.priceUsd === null)
+    : allPoints;
+
+  return {
+    chartId: 'stock-to-income',
+    title: 'Stock to Income Model',
+    timeframe,
+    dataPoints,
+    regressionA: regrA,
+    regressionB: regrB,
+    sigma,
+    lastUpdated: getLastUpdated(rows),
+  };
 }
 
 export function parseTimeframe(value: unknown): ChartTimeframe {

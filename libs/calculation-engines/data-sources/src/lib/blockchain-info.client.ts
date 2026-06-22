@@ -30,6 +30,7 @@ const DEFAULT_BASE_URL = 'https://api.blockchain.info/charts';
 const MARKET_PRICE_CHART = 'market-price';
 const HASH_RATE_CHART = 'hash-rate';
 const DIFFICULTY_CHART = 'difficulty';
+const TRANSACTION_FEES_CHART = 'transaction-fees';
 
 export class BlockchainInfoClient {
   private readonly baseUrl: string;
@@ -67,6 +68,59 @@ export class BlockchainInfoClient {
 
   async fetchCoinDaysDestroyed(startDate: string, endDate: string): Promise<BlockchainInfoChartPoint[]> {
     return this.fetchChart('bitcoin-days-destroyed', startDate, endDate);
+  }
+
+  async fetchTransactionFees(startDate: string, endDate: string): Promise<BlockchainInfoChartPoint[]> {
+    return this.fetchChart(TRANSACTION_FEES_CHART, startDate, endDate);
+  }
+
+  async fetchTransactionFeesAll(): Promise<BlockchainInfoChartPoint[]> {
+    return retryWithBackoff(
+      () => this.fetchTransactionFeesAllNow(),
+      this.retryAttempts,
+      this.retryBaseDelayMs,
+      {
+        sleep: this.sleep,
+        shouldRetry: isRetryableBlockchainInfoError,
+      },
+    );
+  }
+
+  private async fetchTransactionFeesAllNow(): Promise<BlockchainInfoChartPoint[]> {
+    const url = new URL(`${ensureTrailingSlash(this.baseUrl)}${TRANSACTION_FEES_CHART}`);
+    url.searchParams.set('timespan', 'all');
+    url.searchParams.set('format', 'json');
+    url.searchParams.set('sampled', 'false');
+    const urlStr = url.toString();
+
+    try {
+      const response = await this.fetchFn(urlStr);
+
+      if (!response.ok) {
+        throw new BlockchainInfoClientError(
+          `Blockchain.info request failed with status ${response.status}`,
+          response.status,
+        );
+      }
+
+      const payload = (await response.json()) as BlockchainInfoChartResponse;
+      const values = payload.values;
+
+      if (!Array.isArray(values)) {
+        throw new BlockchainInfoClientError('Blockchain.info response is missing chart values');
+      }
+
+      return values
+        .map((value) => normalizeChartValue(value))
+        .filter((value): value is BlockchainInfoChartPoint => value !== undefined);
+    } catch (error) {
+      this.logger.error('Blockchain.info fetchTransactionFeesAll failed', {
+        timestamp: new Date().toISOString(),
+        url: urlStr,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
   }
 
   private async fetchChart(
