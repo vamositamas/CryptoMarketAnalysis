@@ -1,0 +1,93 @@
+<section class="content-section rainbow-chart-page">
+  <div class="chart-page-header">
+    <div>
+      <a class="form-link" routerLink="/charts">Back to chart library</a>
+      <p class="eyebrow">Moving Averages</p>
+      <h2>Mayer Multiple</h2>
+      <p>Bitcoin price relative to its 200-day moving average</p>
+    </div>
+    <div class="chart-status">
+      <span>Last updated</span>
+      <strong>{{ lastUpdatedText() }}</strong>
+    </div>
+  </div>
+
+  <div class="chart-toolbar" aria-label="Chart controls">
+    <div class="timeframe-selector" role="group">
+      @for (timeframe of timeframes; track timeframe.value) {
+        <button
+          type="button"
+          class="timeframe-button"
+          [class.active]="selectedTimeframe() === timeframe.value"
+          [disabled]="isLoading()"
+          (click)="selectTimeframe(timeframe.value)"
+        >
+          {{ timeframe.label }}
+        </button>
+      }
+    </div>
+    <div class="chart-actions">
+      <button type="button" class="secondary-button" (click)="resetZoom()">Reset Zoom</button>
+      <div class="export-menu">
+        <button type="button" class="secondary-button" (click)="toggleExportMenu()">Export</button>
+        @if (exportMenuOpen()) {
+          <div class="export-options">
+            <button type="button" (click)="exportPng()">Export as PNG</button>
+            <button type="button" (click)="exportCsv()">Export as CSV</button>
+          </div>
+        }
+      </div>
+      <app-chart-annotations
+        chartId="mayer-multiple"
+        (annotationsChanged)="updateUserAnnotations($event)"
+      ></app-chart-annotations>
+      <button type="button" class="secondary-button" (click)="openAlertModal()">Create Alert</button>
+      <button type="button" class="secondary-button" (click)="toggleInfo()">Info</button>
+    </div>
+  </div>
+
+  @if (showAlertModal()) {
+    <app-create-alert-modal
+      chartId="mayer-multiple"
+      [metrics]="alertMetrics"
+      (closed)="closeAlertModal()"
+    ></app-create-alert-modal>
+  }
+
+  @if (errorMessage()) {
+    <p class="form-message">{{ errorMessage() }}</p>
+  }
+
+  <div class="chart-workspace info-collapsed">
+    <div class="chart-stage">
+      @if (isLoading()) {
+        <div class="loading-state" role="status">
+          <span class="loading-spinner" aria-hidden="true"></span>
+          <span>Loading chart data...</span>
+        </div>
+      }
+
+      @if (dataPoints().length > 0) {
+        <app-chart-viewer
+          chartType="line"
+          [chartData]="chartData()"
+          [chartOptions]="chartOptions()"
+          (chartPointSelected)="handleChartPoint($event)"
+        ></app-chart-viewer>
+      } @else if (!isLoading() && !errorMessage()) {
+        <p class="empty-state">No Mayer Multiple data is available yet.</p>
+      }
+    </div>
+  </div>
+
+  @if (infoOpen()) {
+    <app-chart-info-panel
+      title="Mayer Multiple"
+      [about]="infoAbout"
+      [currentFields]="infoCurrentFields()"
+      [interpretation]="infoInterpretation()"
+      [dataSources]="infoDataSources"
+      [lastUpdated]="infoLastUpdated()"
+    ></app-chart-info-panel>
+  }
+</section>
