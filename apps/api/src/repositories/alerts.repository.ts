@@ -38,6 +38,13 @@ export interface CreateAlertInput {
   alertName: string;
 }
 
+export interface UpdateAlertInput {
+  alertName?: string;
+  condition?: string;
+  thresholdValue?: number;
+  status?: string;
+}
+
 export class AlertsRepository {
   constructor(private readonly database: Queryable | undefined) {}
 
@@ -80,6 +87,27 @@ export class AlertsRepository {
     );
 
     return result.rows.map(toAlertRecord);
+  }
+
+  async updateForUser(userId: string, alertId: string, input: UpdateAlertInput): Promise<AlertRecord | null> {
+    const sets: string[] = [];
+    const values: unknown[] = [alertId, userId];
+
+    if (input.alertName !== undefined) { sets.push(`alert_name = $${values.push(input.alertName)}`); }
+    if (input.condition !== undefined) { sets.push(`condition = $${values.push(input.condition)}`); }
+    if (input.thresholdValue !== undefined) { sets.push(`threshold_value = $${values.push(input.thresholdValue)}`); }
+    if (input.status !== undefined) { sets.push(`status = $${values.push(input.status)}`); }
+
+    if (sets.length === 0) return null;
+
+    const result = await this.requireDatabase().query<AlertRow>(
+      `UPDATE user_alerts SET ${sets.join(', ')}
+       WHERE id = $1::uuid AND user_id = $2
+       RETURNING id, user_id, chart_id, metric_name, condition, threshold_value, alert_name, status, created_at, last_evaluated_at, triggered_at`,
+      values,
+    );
+
+    return result.rows.length > 0 ? toAlertRecord(result.rows[0]) : null;
   }
 
   async deleteForUser(userId: string, alertId: string): Promise<boolean> {

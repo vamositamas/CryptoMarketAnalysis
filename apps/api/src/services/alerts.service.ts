@@ -1,4 +1,4 @@
-import { AlertsRepository, type AlertRecord, type CreateAlertInput } from '../repositories/alerts.repository';
+import { AlertsRepository, type AlertRecord, type CreateAlertInput, type UpdateAlertInput } from '../repositories/alerts.repository';
 import { getDatabasePool } from '../config/database.config';
 
 export class AlertsError extends Error {
@@ -11,13 +11,49 @@ export class AlertsError extends Error {
 }
 
 const VALID_CONDITIONS = ['crosses_above', 'crosses_below', 'greater_than', 'less_than', 'equals'] as const;
-const VALID_CHART_IDS = ['bitcoin-rainbow', 'pi-cycle-top', 'stock-to-flow'] as const;
+const VALID_CHART_IDS = [
+  'bitcoin-rainbow',
+  'pi-cycle-top',
+  'stock-to-flow',
+  'mvrv-z-score',
+  'fear-greed-index',
+  'puell-multiple',
+  'mayer-multiple',
+  'vdd-multiple',
+  'realized-price',
+  'bitcoin-cvdd',
+  'bitcoin-power-law',
+  'hash-ribbons',
+  'difficulty-ribbon',
+  'nvt-ratio',
+  'thermocap-multiple',
+  '200-week-ma-heatmap',
+  '2yr-ma-multiplier',
+  'price-forecast-tools',
+  'stock-to-income',
+] as const;
 const MAX_ALERTS_FREE_TIER = 5;
 
 const CHART_TITLES: Record<string, string> = {
-  'bitcoin-rainbow': 'Bitcoin Rainbow Price Chart',
-  'pi-cycle-top': 'Pi Cycle Top Indicator',
-  'stock-to-flow': 'Stock-to-Flow Model',
+  'bitcoin-rainbow':    'Bitcoin Rainbow Price Chart',
+  'pi-cycle-top':       'Pi Cycle Top Indicator',
+  'stock-to-flow':      'Stock-to-Flow Model',
+  'mvrv-z-score':       'MVRV Z-Score',
+  'fear-greed-index':   'Fear & Greed Index',
+  'puell-multiple':     'Puell Multiple',
+  'mayer-multiple':     'Mayer Multiple',
+  'vdd-multiple':       'VDD Multiple',
+  'realized-price':     'Realized Price',
+  'bitcoin-cvdd':       'Bitcoin CVDD',
+  'bitcoin-power-law':  'Bitcoin Power Law',
+  'hash-ribbons':       'Hash Ribbons',
+  'difficulty-ribbon':  'Difficulty Ribbon',
+  'nvt-ratio':          'NVT Ratio',
+  'thermocap-multiple': 'Thermocap Multiple',
+  '200-week-ma-heatmap':'200-Week MA Heatmap',
+  '2yr-ma-multiplier':  '2-Year MA Multiplier',
+  'price-forecast-tools':'Price Forecast Tools',
+  'stock-to-income':    'Stock-to-Income',
 };
 
 export interface AlertWithTitle extends AlertRecord {
@@ -40,6 +76,7 @@ interface AlertsStore {
   countActiveForUser(userId: string): Promise<number>;
   countForUser(userId: string): Promise<number>;
   listForUser(userId: string): Promise<AlertRecord[]>;
+  updateForUser(userId: string, alertId: string, input: UpdateAlertInput): Promise<AlertRecord | null>;
   deleteForUser(userId: string, alertId: string): Promise<boolean>;
   resetForUser(userId: string, alertId: string): Promise<AlertRecord | null>;
 }
@@ -103,6 +140,37 @@ export class AlertsService {
       thresholdValue,
       alertName: alertName.trim(),
     });
+  }
+
+  async updateAlert(userId: string, alertId: string, body: unknown): Promise<AlertWithTitle> {
+    if (!alertId?.trim()) throw new AlertsError('alertId is required', 400);
+    if (typeof body !== 'object' || body === null) throw new AlertsError('Request body is required', 400);
+
+    const { alertName, condition, thresholdValue, status } = body as Record<string, unknown>;
+    const input: UpdateAlertInput = {};
+
+    if (alertName !== undefined) {
+      if (typeof alertName !== 'string' || !alertName.trim()) throw new AlertsError('alertName must be a non-empty string', 400);
+      input.alertName = alertName.trim();
+    }
+    if (condition !== undefined) {
+      if (!(VALID_CONDITIONS as readonly string[]).includes(condition as string)) {
+        throw new AlertsError(`condition must be one of: ${VALID_CONDITIONS.join(', ')}`, 400);
+      }
+      input.condition = condition as string;
+    }
+    if (thresholdValue !== undefined) {
+      if (typeof thresholdValue !== 'number' || !isFinite(thresholdValue)) throw new AlertsError('thresholdValue must be a finite number', 400);
+      input.thresholdValue = thresholdValue;
+    }
+    if (status !== undefined) {
+      if (!['active', 'paused'].includes(status as string)) throw new AlertsError('status must be active or paused', 400);
+      input.status = status as string;
+    }
+
+    const alert = await this.repository.updateForUser(userId, alertId, input);
+    if (!alert) throw new AlertsError('Alert not found', 404);
+    return { ...alert, chartTitle: CHART_TITLES[alert.chartId] ?? alert.chartId };
   }
 
   async listAlerts(userId: string, userRole: string): Promise<AlertsListResponse> {

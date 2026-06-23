@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Route, Router, RouterLink } from '@angular/router';
-import type { RecentChart } from '@crypto-market-analysis/data-access/api-client';
+import type { RecentChart, SignalSummary } from '@crypto-market-analysis/data-access/api-client';
 import {
   ApiClientError,
   AuthApiClient,
@@ -170,6 +170,42 @@ export class LandingPage {
         }
       </div>
 
+      <!-- Market Signals Banner -->
+      @if (signals()) {
+        @let s = signals()!;
+        <a class="msi-banner" routerLink="/trading-plans" [attr.data-zone]="s.overallZone">
+          <!-- Score ring -->
+          <div class="msi-score">
+            <svg viewBox="0 0 80 80" aria-hidden="true">
+              <circle cx="40" cy="40" r="32" fill="none" stroke="rgba(0,0,0,0.08)" stroke-width="6"/>
+              <circle cx="40" cy="40" r="32" fill="none"
+                [attr.stroke]="signalColor(s.overallZone)"
+                stroke-width="6" stroke-linecap="round"
+                transform="rotate(-90 40 40)"
+                [attr.stroke-dasharray]="201.06"
+                [attr.stroke-dashoffset]="201.06 * (1 - (s.normalizedScore + 100) / 200)"/>
+            </svg>
+            <span class="msi-score-num">{{ s.normalizedScore }}</span>
+          </div>
+          <!-- Summary -->
+          <div class="msi-summary">
+            <span class="msi-zone-badge" [attr.data-zone]="s.overallZone">{{ s.overallLabel }}</span>
+            <span class="msi-btc">BTC: {{ formatUsd(s.btcPriceUsd) }}</span>
+            <span class="msi-link">View Trade Planner →</span>
+          </div>
+          <!-- Signal grid -->
+          <div class="msi-grid">
+            @for (sig of s.signals; track sig.name) {
+              <div class="msi-sig" [attr.data-zone]="sig.zone">
+                <span class="msi-sig-label">{{ sig.label }}</span>
+                <span class="msi-sig-value">{{ sig.zone === 'no_data' ? 'N/A' : sig.formattedValue }}</span>
+                <span class="msi-sig-zone">{{ sig.zone === 'no_data' ? '—' : sig.zone.replace('_', ' ') }}</span>
+              </div>
+            }
+          </div>
+        </a>
+      }
+
       @if (isLoadingWidgets()) {
         <p i18n="Dashboard widgets loading@@dashboard.widgetsLoading">Loading...</p>
       } @else {
@@ -249,7 +285,7 @@ export class LandingPage {
                     <svg viewBox="0 0 80 80" aria-hidden="true">
                       <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(156,163,175,0.2)" stroke-width="8"/>
                       <circle cx="40" cy="40" r="34" fill="none"
-                        stroke="#22c55e" stroke-width="8" stroke-linecap="round"
+                        stroke="#60a5fa" stroke-width="8" stroke-linecap="round"
                         transform="rotate(-90 40 40)"
                         [attr.stroke-dasharray]="halvingData.circumference"
                         [attr.stroke-dashoffset]="halvingData.offset"/>
@@ -465,6 +501,7 @@ export class DashboardPage {
   protected readonly isRefreshing = signal(false);
   protected readonly refreshMessage = signal('');
   protected readonly refreshError = signal(false);
+  protected readonly signals = signal<SignalSummary | null>(null);
 
   private activePointerId: number | null = null;
   private pointerDragId: string | null = null;
@@ -477,6 +514,7 @@ export class DashboardPage {
     void this.checkOnboardingStatus();
     void this.loadWidgets();
     void this.loadRecentCharts();
+    void this.loadSignals();
   }
 
   protected async completeOnboarding(): Promise<void> {
@@ -756,12 +794,55 @@ export class DashboardPage {
     return 'Extreme Scarcity';
   }
 
+  private async loadSignals(): Promise<void> {
+    try {
+      const data = await this.auth.getTradingSignals();
+      const fearGreedMissing = data.signals.find((s) => s.name === 'fear_greed')?.zone === 'no_data';
+      if (fearGreedMissing) {
+        try {
+          const resp = await fetch('https://api.alternative.me/fng/?limit=1&format=json');
+          if (resp.ok) {
+            const json = await resp.json() as { data?: Array<{ value?: string }> };
+            const raw = json?.data?.[0]?.value;
+            if (raw !== undefined) {
+              const fgValue = parseInt(raw, 10);
+              if (!isNaN(fgValue)) {
+                const pct = fgValue <= 20 ? 1 : fgValue <= 40 ? 0.53 : fgValue <= 60 ? 0 : fgValue <= 80 ? -0.53 : -1;
+                const zone = pct >= 0.6 ? 'very_bullish' : pct >= 0.2 ? 'bullish' : pct >= -0.2 ? 'neutral' : pct >= -0.6 ? 'bearish' : 'very_bearish';
+                const score = Math.round(pct * 15);
+                data.signals = data.signals.map((s) =>
+                  s.name === 'fear_greed'
+                    ? { ...s, value: fgValue, formattedValue: `${fgValue}/100`, score, zone, interpretation: `Fear & Greed live: ${fgValue}/100` }
+                    : s,
+                );
+              }
+            }
+          }
+        } catch { /* leave as no_data */ }
+      }
+      this.signals.set(data);
+    } catch { /* banner stays hidden */ }
+  }
+
+  protected signalColor(zone: string): string {
+    const map: Record<string, string> = {
+      very_bullish: '#16a34a', bullish: '#22c55e', neutral: '#f59e0b',
+      bearish: '#f97316', very_bearish: '#ef4444',
+    };
+    return map[zone] ?? '#9ca3af';
+  }
+
+  protected formatUsd(value: number | null): string {
+    if (value === null) return '—';
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+  }
+
   protected lastUpdatedText(lastUpdated: string | null): string {
     if (!lastUpdated) {
       return $localize`:Widget waiting for data@@dashboard.widgetWaiting:Waiting for data`;
     }
 
-    return new Date(lastUpdated).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
+    return new Date(lastUpdated).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }) + ' UTC';
   }
 
   private async checkOnboardingStatus(): Promise<void> {
@@ -1659,6 +1740,14 @@ export const appRoutes: Route[] = [
       ),
   },
   { path: 'alerts', canActivate: [authGuard], loadComponent: () => import('./components/alerts-page/alerts-page.component').then((m) => m.AlertsPageComponent) },
+  {
+    path: 'trading-plans',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/trading-plans-page/trading-plans-page.component').then(
+        (m) => m.TradingPlansPageComponent,
+      ),
+  },
   {
     path: 'donate/thank-you',
     loadComponent: () =>

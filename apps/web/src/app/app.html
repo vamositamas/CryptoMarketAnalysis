@@ -1,4 +1,5 @@
-<div class="app-shell" [class.nav-open]="mobileMenuOpen()">
+<div class="app-shell" [class.nav-open]="mobileMenuOpen()" [class.auth-shell]="isAuthPage()">
+  @if (!isAuthPage()) {
   <header class="topbar">
     <a class="brand" [routerLink]="currentUser() ? '/dashboard' : '/'">
       <span class="brand-mark" aria-hidden="true">₿</span>
@@ -13,6 +14,9 @@
         </a>
         <a routerLink="/charts" routerLinkActive="active">
           <ng-container i18n="Charts navigation label@@nav.charts">Charts</ng-container>
+        </a>
+        <a routerLink="/trading-plans" routerLinkActive="active">
+          <ng-container i18n="Trade planner navigation label@@nav.tradingPlans">Trade Planner</ng-container>
         </a>
         <a routerLink="/alerts" routerLinkActive="active">
           <ng-container i18n="Alerts navigation label@@nav.alerts">Alerts</ng-container>
@@ -93,9 +97,19 @@
       }
     </div>
   </header>
+  } <!-- end @if (!isAuthPage()) -->
+
+  @if (isAuthPage()) {
+    <div class="auth-brand">
+      <a class="brand" routerLink="/">
+        <span class="brand-mark" aria-hidden="true">₿</span>
+        <span i18n="Application name@@app.name">CryptoMarketAnalysis</span>
+      </a>
+    </div>
+  }
 
   <!-- Mobile slide-out drawer -->
-  @if (currentUser() && mobileMenuOpen()) {
+  @if (!isAuthPage() && currentUser() && mobileMenuOpen()) {
     <div class="mobile-nav-backdrop" (click)="closeMobileMenu()" aria-hidden="true"></div>
     <nav class="mobile-nav" aria-label="Mobile navigation">
       <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMobileMenu()">
@@ -103,6 +117,9 @@
       </a>
       <a routerLink="/charts" routerLinkActive="active" (click)="closeMobileMenu()">
         <ng-container i18n="Charts navigation label@@nav.charts">Charts</ng-container>
+      </a>
+      <a routerLink="/trading-plans" routerLinkActive="active" (click)="closeMobileMenu()">
+        <ng-container i18n="Trade planner navigation label@@nav.tradingPlans">Trade Planner</ng-container>
       </a>
       <a routerLink="/alerts" routerLinkActive="active" (click)="closeMobileMenu()">
         <ng-container i18n="Alerts navigation label@@nav.alerts">Alerts</ng-container>

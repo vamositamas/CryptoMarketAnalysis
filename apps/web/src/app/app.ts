@@ -1,5 +1,7 @@
-import { Component, LOCALE_ID, inject, signal, HostListener, ElementRef } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { Component, LOCALE_ID, inject, signal, computed, HostListener, ElementRef } from '@angular/core';
+import { Router, RouterModule, NavigationEnd } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { filter, map, startWith } from 'rxjs';
 import { AuthSessionService } from './services/auth-session.service';
 import { DonateModalComponent } from './components/donate-modal/donate-modal.component';
 
@@ -22,6 +24,19 @@ export class App {
   protected readonly showDonateModal = signal(false);
   protected readonly mobileMenuOpen = signal(false);
   protected readonly userMenuOpen = signal(false);
+
+  private readonly currentUrl = toSignal(
+    this.router.events.pipe(
+      filter((e) => e instanceof NavigationEnd),
+      map((e) => (e as NavigationEnd).urlAfterRedirects),
+      startWith(this.router.url),
+    ),
+    { initialValue: this.router.url },
+  );
+  protected readonly isAuthPage = computed(() => {
+    const url = this.currentUrl() ?? '';
+    return url.startsWith('/login') || url.startsWith('/register') || url.startsWith('/reset-password') || url.startsWith('/forgot-password');
+  });
 
   protected userInitials(): string {
     const user = this.currentUser();

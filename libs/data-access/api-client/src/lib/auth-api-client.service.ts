@@ -562,6 +562,89 @@ export interface AdminCreateChartRequest {
   status: 'draft' | 'active' | 'inactive';
 }
 
+// ── Trading Plans types ──────────────────────────────────────────────────────
+
+export type PlanDirection = 'long' | 'short' | 'neutral';
+export type PlanStatus = 'active' | 'closed' | 'cancelled';
+
+export interface TradingPlanRecord {
+  id: string;
+  userId: string;
+  title: string;
+  direction: PlanDirection;
+  entryPrice: number;
+  targetPrice: number | null;
+  stopLoss: number | null;
+  positionSizeUsd: number | null;
+  riskPercent: number | null;
+  expiryDate: string | null;
+  notes: string | null;
+  status: PlanStatus;
+  closePrice: number | null;
+  closedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateTradingPlanRequest {
+  title: string;
+  direction: PlanDirection;
+  entryPrice: number;
+  targetPrice?: number | null;
+  stopLoss?: number | null;
+  positionSizeUsd?: number | null;
+  riskPercent?: number | null;
+  expiryDate?: string | null;
+  notes?: string | null;
+}
+
+export type SignalZone = 'very_bullish' | 'bullish' | 'neutral' | 'bearish' | 'very_bearish' | 'no_data';
+
+export interface SignalScore {
+  name: string;
+  label: string;
+  value: number | null;
+  formattedValue: string;
+  score: number;
+  maxScore: number;
+  interpretation: string;
+  zone: SignalZone;
+}
+
+export interface SignalSummary {
+  totalScore: number;
+  maxPossibleScore: number;
+  normalizedScore: number;
+  overallZone: 'very_bullish' | 'bullish' | 'neutral' | 'bearish' | 'very_bearish';
+  overallLabel: string;
+  btcPriceUsd: number | null;
+  signals: SignalScore[];
+  lastUpdated: string | null;
+  fearGreedMissing: boolean;
+}
+
+export interface PriceTarget {
+  label: string;
+  model: string;
+  priceUsd: number;
+  description: string;
+  timeframe: string;
+}
+
+export interface ProjectionScenario {
+  scenario: 'bear' | 'base' | 'bull' | 'ultra_bull';
+  label: string;
+  color: string;
+  targets: PriceTarget[];
+}
+
+export interface PriceProjectionsResponse {
+  btcPriceUsd: number | null;
+  scenarios: ProjectionScenario[];
+  historicalPoints: { date: string; priceUsd: number }[];
+  lastUpdated: string | null;
+}
+
 interface CsrfTokenResponse {
   csrfToken: string;
 }
@@ -952,6 +1035,10 @@ export class AuthApiClient {
     return this.patchWithCsrf<AlertWithTitle>(`/api/alerts/${alertId}/reset`, {});
   }
 
+  async updateAlert(alertId: string, data: Partial<{ alertName: string; condition: string; thresholdValue: number; status: string }>): Promise<AlertWithTitle> {
+    return this.patchWithCsrf<AlertWithTitle>(`/api/alerts/${alertId}`, data);
+  }
+
   async getEmailTemplates(): Promise<EmailTemplatesResponse> {
     try {
       return await firstValueFrom(
@@ -1128,6 +1215,55 @@ export class AuthApiClient {
     return this.postWithCsrf<{ success: boolean; message: string }>(
       `/api/admin/email-templates/${key}/send-test`, { recipientEmail, sampleData },
     );
+  }
+
+  // ── Trading Plans ───────────────────────────────────────────────────────────
+
+  async getTradingSignals(): Promise<SignalSummary> {
+    try {
+      return await firstValueFrom(
+        this.http.get<SignalSummary>('/api/trading-plans/signals', { withCredentials: true }),
+      );
+    } catch (error) { throw toApiClientError(error); }
+  }
+
+  async getPriceProjections(): Promise<PriceProjectionsResponse> {
+    try {
+      return await firstValueFrom(
+        this.http.get<PriceProjectionsResponse>('/api/trading-plans/projections', { withCredentials: true }),
+      );
+    } catch (error) { throw toApiClientError(error); }
+  }
+
+  async listTradingPlans(): Promise<{ plans: TradingPlanRecord[] }> {
+    try {
+      return await firstValueFrom(
+        this.http.get<{ plans: TradingPlanRecord[] }>('/api/trading-plans', { withCredentials: true }),
+      );
+    } catch (error) { throw toApiClientError(error); }
+  }
+
+  async createTradingPlan(input: CreateTradingPlanRequest): Promise<TradingPlanRecord> {
+    return this.postWithCsrf<TradingPlanRecord>('/api/trading-plans', input);
+  }
+
+  async closeTradingPlan(planId: string, closePrice: number): Promise<TradingPlanRecord> {
+    return this.patchWithCsrf<TradingPlanRecord>(`/api/trading-plans/${planId}/close`, { closePrice });
+  }
+
+  async cancelTradingPlan(planId: string): Promise<TradingPlanRecord> {
+    return this.patchWithCsrf<TradingPlanRecord>(`/api/trading-plans/${planId}/cancel`, {});
+  }
+
+  async deleteTradingPlan(planId: string): Promise<{ success: boolean }> {
+    try {
+      const csrfToken = await this.getCsrfToken();
+      return await firstValueFrom(
+        this.http.delete<{ success: boolean }>(`/api/trading-plans/${planId}`, {
+          headers: { 'x-csrf-token': csrfToken }, withCredentials: true,
+        }),
+      );
+    } catch (error) { throw toApiClientError(error); }
   }
 
   startGoogleLogin(): void {

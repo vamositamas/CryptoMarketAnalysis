@@ -8,6 +8,7 @@ import type { AlertWithTitle, AlertsListResponse } from '../services/alerts.serv
 export interface AlertsManager {
   createAlert(userId: string, userRole: string, body: unknown): Promise<AlertRecord>;
   listAlerts(userId: string, userRole: string): Promise<AlertsListResponse>;
+  updateAlert(userId: string, alertId: string, body: unknown): Promise<AlertWithTitle>;
   deleteAlert(userId: string, alertId: string): Promise<void>;
   resetAlert(userId: string, alertId: string): Promise<AlertWithTitle>;
 }
@@ -66,6 +67,20 @@ export function createAlertsRouter(
       const { userId, userRole } = userFrom(req as AuthenticatedRequest);
       const alert = await getService().createAlert(userId, userRole, req.body);
       res.status(201).json(alert);
+    } catch (error) {
+      if (error instanceof AlertsError) {
+        res.status(error.statusCode).json({ error: error.message });
+        return;
+      }
+      next(error);
+    }
+  });
+
+  router.patch('/:alertId', auth, anyRole, async (req, res, next) => {
+    try {
+      const { userId } = userFrom(req as AuthenticatedRequest);
+      const alert = await getService().updateAlert(userId, req.params.alertId, req.body);
+      res.status(200).json(alert);
     } catch (error) {
       if (error instanceof AlertsError) {
         res.status(error.statusCode).json({ error: error.message });

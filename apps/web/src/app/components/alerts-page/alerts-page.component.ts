@@ -1,4 +1,5 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import {
   ApiClientError,
@@ -33,7 +34,7 @@ const CHART_URLS: Record<string, string> = {
 
 @Component({
   selector: 'app-alerts-page',
-  imports: [RouterLink],
+  imports: [RouterLink, FormsModule],
   template: `
     <section class="content-section alerts-page">
       <div class="alerts-page-header">
@@ -60,6 +61,33 @@ const CHART_URLS: Record<string, string> = {
         <p class="form-message">{{ errorMessage() }}</p>
       }
 
+      @if (!isLoading() && (alertsData()?.alerts?.length ?? 0) > 0) {
+        <div class="alerts-filter-bar">
+          <div class="alerts-search-wrap">
+            <svg class="alerts-search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <circle cx="6" cy="6" r="4.5" stroke="#9ca3af" stroke-width="1.5"/>
+              <path d="M9.5 9.5L12 12" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <input
+              class="alerts-search-input"
+              type="text"
+              placeholder="Search alerts…"
+              [(ngModel)]="searchQuery"
+            />
+          </div>
+          <div class="alerts-status-filters">
+            @for (s of statusOptions; track s.value) {
+              <button
+                type="button"
+                class="alerts-filter-btn"
+                [class.active]="statusFilter() === s.value"
+                (click)="statusFilter.set(s.value)"
+              >{{ s.label }}</button>
+            }
+          </div>
+        </div>
+      }
+
       @if (isLoading()) {
         <p class="alerts-loading">Loading alerts...</p>
       } @else if (alertsData()?.alerts?.length === 0) {
@@ -68,54 +96,90 @@ const CHART_URLS: Record<string, string> = {
           <p>Click <strong>Create New Alert</strong> to open any chart and set up your first alert.</p>
         </div>
       } @else {
-        <div class="alerts-table-wrapper">
-          <table class="alerts-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Chart</th>
-                <th>Condition</th>
-                <th>Status</th>
-                <th>Created</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (alert of alertsData()?.alerts ?? []; track alert.id) {
-                <tr [class.alert-row-triggered]="alert.status === 'triggered'">
-                  <td class="alert-name-cell"><strong>{{ alert.alertName }}</strong></td>
-                  <td>
-                    <a class="form-link" [routerLink]="chartUrl(alert.chartId)">{{ alert.chartTitle }}</a>
-                  </td>
-                  <td class="alert-condition-cell">{{ conditionSummary(alert) }}</td>
-                  <td>
-                    <span class="alert-status-badge" [class]="'alert-status-' + alert.status">
-                      {{ titlecase(alert.status) }}
-                    </span>
-                  </td>
-                  <td class="alert-date-cell">{{ formatRelativeTime(alert.createdAt) }}</td>
-                  <td class="alert-actions-cell">
-                    @if (deleteTargetId() === alert.id) {
-                      <span class="alert-confirm-delete">
-                        Delete?
-                        <button type="button" class="alert-action-btn alert-action-danger" [disabled]="isDeleting()" (click)="confirmDelete(alert.id)">
-                          {{ isDeleting() ? 'Deleting…' : 'Confirm' }}
-                        </button>
-                        <button type="button" class="alert-action-btn" (click)="cancelDelete()">Cancel</button>
+        @if (filteredAlerts().length === 0) {
+          <p class="alerts-no-results">No alerts match your filter.</p>
+        }
+        <div class="alerts-card-list">
+          @for (alert of filteredAlerts(); track alert.id) {
+            <div class="alert-card" [attr.data-status]="editTargetId() === alert.id ? 'editing' : alert.status">
+              <div class="alert-card-accent"></div>
+              <div class="alert-card-body">
+                @if (editTargetId() === alert.id) {
+                  <div class="alert-edit-panel">
+                    <label class="alert-edit-label">Alert name
+                      <input class="alert-edit-input" type="text" [(ngModel)]="editDraft.alertName" />
+                    </label>
+                    <div class="alert-edit-row">
+                      <label class="alert-edit-label">Condition
+                        <select class="alert-edit-input" [(ngModel)]="editDraft.condition">
+                          <option value="crosses_above">Crosses above</option>
+                          <option value="crosses_below">Crosses below</option>
+                          <option value="greater_than">Greater than</option>
+                          <option value="less_than">Less than</option>
+                          <option value="equals">Equals</option>
+                        </select>
+                      </label>
+                      <label class="alert-edit-label">Threshold
+                        <input class="alert-edit-input" type="number" [(ngModel)]="editDraft.thresholdValue" />
+                      </label>
+                      <label class="alert-edit-label">Status
+                        <select class="alert-edit-input" [(ngModel)]="editDraft.status">
+                          <option value="active">Active</option>
+                          <option value="paused">Paused</option>
+                        </select>
+                      </label>
+                    </div>
+                    <div class="alert-edit-actions">
+                      <button type="button" class="alert-action-btn alert-action-primary" [disabled]="isSaving()" (click)="saveEdit(alert.id)">
+                        {{ isSaving() ? 'Saving…' : 'Save changes' }}
+                      </button>
+                      <button type="button" class="alert-action-btn" (click)="cancelEdit()">Cancel</button>
+                    </div>
+                  </div>
+                } @else {
+                  <div class="alert-card-top">
+                    <div class="alert-card-title-row">
+                      <strong class="alert-card-name">{{ alert.alertName }}</strong>
+                      <span class="alert-status-badge" [class]="'alert-status-' + alert.status">
+                        {{ titlecase(alert.status) }}
                       </span>
-                    } @else {
-                      <button type="button" class="alert-action-btn" (click)="requestDelete(alert.id)">Delete</button>
-                      @if (alert.status === 'triggered') {
-                        <button type="button" class="alert-action-btn" [disabled]="isResetting() === alert.id" (click)="resetAlert(alert)">
-                          {{ isResetting() === alert.id ? 'Resetting…' : 'Reset' }}
-                        </button>
+                    </div>
+                    <p class="alert-card-condition">{{ conditionSummary(alert) }}</p>
+                  </div>
+                  <div class="alert-card-bottom">
+                    <div class="alert-card-meta">
+                      <a class="alert-card-chart-link" [routerLink]="chartUrl(alert.chartId)">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                          <path d="M2 9L5 5.5L7.5 7.5L10 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        {{ alert.chartTitle }}
+                      </a>
+                      <span class="alert-card-time">{{ formatRelativeTime(alert.createdAt) }}</span>
+                    </div>
+                    <div class="alert-card-actions">
+                      @if (deleteTargetId() === alert.id) {
+                        <span class="alert-confirm-delete">
+                          Sure?
+                          <button type="button" class="alert-action-btn alert-action-danger" [disabled]="isDeleting()" (click)="confirmDelete(alert.id)">
+                            {{ isDeleting() ? 'Deleting…' : 'Yes, delete' }}
+                          </button>
+                          <button type="button" class="alert-action-btn" (click)="cancelDelete()">Cancel</button>
+                        </span>
+                      } @else {
+                        @if (alert.status === 'triggered') {
+                          <button type="button" class="alert-action-btn" [disabled]="isResetting() === alert.id" (click)="resetAlert(alert)">
+                            {{ isResetting() === alert.id ? 'Resetting…' : 'Reset' }}
+                          </button>
+                        }
+                        <button type="button" class="alert-action-btn" (click)="openEdit(alert)">Edit</button>
+                        <button type="button" class="alert-action-btn alert-action-danger" (click)="requestDelete(alert.id)">Delete</button>
                       }
-                    }
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
         </div>
       }
     </section>
@@ -129,6 +193,27 @@ export class AlertsPageComponent implements OnInit {
   protected readonly deleteTargetId = signal<string | null>(null);
   protected readonly isDeleting = signal(false);
   protected readonly isResetting = signal<string | null>(null);
+  protected readonly editTargetId = signal<string | null>(null);
+  protected readonly isSaving = signal(false);
+  protected editDraft: { alertName: string; condition: string; thresholdValue: number; status: string } = { alertName: '', condition: '', thresholdValue: 0, status: 'active' };
+
+  protected searchQuery = '';
+  protected readonly statusFilter = signal<'all' | 'active' | 'triggered' | 'paused'>('all');
+  protected readonly statusOptions = [
+    { label: 'All', value: 'all' as const },
+    { label: 'Active', value: 'active' as const },
+    { label: 'Triggered', value: 'triggered' as const },
+    { label: 'Paused', value: 'paused' as const },
+  ];
+  protected readonly filteredAlerts = computed(() => {
+    const q = this.searchQuery.toLowerCase().trim();
+    const status = this.statusFilter();
+    return (this.alertsData()?.alerts ?? []).filter((a) => {
+      if (status !== 'all' && a.status !== status) return false;
+      if (q && !a.alertName.toLowerCase().includes(q) && !a.chartTitle.toLowerCase().includes(q)) return false;
+      return true;
+    });
+  });
 
   private readonly api = inject(AuthApiClient);
   private readonly router = inject(Router);
@@ -166,6 +251,50 @@ export class AlertsPageComponent implements OnInit {
     if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
     const diffDays = Math.floor(diffHours / 24);
     return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+  }
+
+  protected openEdit(alert: AlertWithTitle): void {
+    this.editDraft = {
+      alertName: alert.alertName,
+      condition: alert.condition,
+      thresholdValue: alert.thresholdValue,
+      status: alert.status,
+    };
+    this.editTargetId.set(alert.id);
+    this.deleteTargetId.set(null);
+  }
+
+  protected cancelEdit(): void {
+    this.editTargetId.set(null);
+  }
+
+  protected async saveEdit(alertId: string): Promise<void> {
+    this.isSaving.set(true);
+    this.errorMessage.set('');
+    try {
+      const updated = await this.api.updateAlert(alertId, {
+        alertName: this.editDraft.alertName,
+        condition: this.editDraft.condition,
+        thresholdValue: this.editDraft.thresholdValue,
+        status: this.editDraft.status,
+      });
+      const current = this.alertsData();
+      if (current) {
+        this.alertsData.set({
+          ...current,
+          alerts: current.alerts.map((a) => (a.id === alertId ? { ...a, ...updated } : a)),
+        });
+      }
+      this.editTargetId.set(null);
+      this.successMessage.set('Alert updated.');
+      setTimeout(() => this.successMessage.set(''), 3000);
+    } catch (error) {
+      this.errorMessage.set(
+        error instanceof ApiClientError ? error.message : 'Could not save alert. Please try again.',
+      );
+    } finally {
+      this.isSaving.set(false);
+    }
   }
 
   protected requestDelete(alertId: string): void {

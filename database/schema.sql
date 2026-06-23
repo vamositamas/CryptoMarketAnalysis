@@ -10,3 +10,4 @@
 \i database/migrations/007_create_user_chart_annotations_table.sql
 \i database/migrations/008_create_dashboard_schema.sql
 \i database/migrations/009_create_alerts_schema.sql
+\i database/migrations/013_trading_plans.sql
