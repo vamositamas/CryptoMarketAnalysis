@@ -8,15 +8,13 @@ export class LanguageService {
   private readonly localeId = inject(LOCALE_ID);
 
   readonly current = signal<Locale>(this.normalize(this.localeId));
-  readonly isSwitching = signal(false);
 
-  async switchTo(locale: Locale): Promise<void> {
-    if (locale === this.current() || this.isSwitching()) return;
-    this.isSwitching.set(true);
-    // Dynamic import avoids circular dependency with main.ts
-    const { switchLocale } = await import('../../main');
-    await switchLocale(locale);
-    // isSwitching stays true — the app re-bootstraps so this instance is destroyed
+  switchTo(locale: Locale): void {
+    if (locale === this.current()) return;
+    // Dynamic import avoids circular dependency with main.ts.
+    // switchLocale saves locale to localStorage then reloads the page,
+    // so the app re-bootstraps at the same URL with the new translations.
+    void import('../../main').then(({ switchLocale }) => switchLocale(locale));
   }
 
   private normalize(locale: string): Locale {

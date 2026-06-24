@@ -19,7 +19,6 @@ export class App {
   private readonly elRef = inject(ElementRef);
 
   protected readonly language = this.langService.current;
-  protected readonly isSwitchingLanguage = this.langService.isSwitching;
   protected readonly currentUser = this.authSession.currentUser;
   protected readonly showDonateModal = signal(false);
   protected readonly mobileMenuOpen = signal(false);
@@ -53,7 +52,7 @@ export class App {
   }
 
   protected switchLanguage(locale: 'en' | 'hu'): void {
-    void this.langService.switchTo(locale);
+    this.langService.switchTo(locale);
   }
 
   protected toggleUserMenu(): void {
