@@ -376,6 +376,7 @@ export class AuthService {
         existingUser.oauthProvider === 'google' &&
         existingUser.oauthProviderId === profile.id
       ) {
+        void this.users.recordLastLogin?.(existingUser.id);
         return createLoginResponse(existingUser);
       }
 
@@ -394,6 +395,8 @@ export class AuthService {
       oauthProvider: 'google',
       oauthProviderId: profile.id,
     });
+
+    void this.users.recordLastLogin?.(user.id);
 
     return createLoginResponse({
       id: user.id,
