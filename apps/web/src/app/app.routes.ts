@@ -1719,6 +1719,45 @@ export class DashboardPage {
           }
         </div>
       </form>
+
+      <div class="admin-config-section__divider"></div>
+
+      <div class="section-heading">
+        <h3 i18n="Historical data init title@@adminDataConfig.initHistoricalTitle">
+          Initialize historical data
+        </h3>
+        <p i18n="Historical data init description@@adminDataConfig.initHistoricalDesc">
+          Backfill Bitcoin price history for a date range. Run year by year for all-time data (each request may take up to 30 seconds).
+        </p>
+      </div>
+
+      <div class="admin-backfill-form">
+        <label class="select-label">
+          <span i18n="Start date label@@adminDataConfig.startDate">Start date</span>
+          <input type="date" [value]="backfillStartDate()" (change)="onBackfillStartDateChange($event)" />
+        </label>
+        <label class="select-label">
+          <span i18n="End date label@@adminDataConfig.endDate">End date</span>
+          <input type="date" [value]="backfillEndDate()" (change)="onBackfillEndDateChange($event)" />
+        </label>
+        <div class="admin-actions">
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="initHistorical()"
+            [disabled]="isInitializing()"
+          >
+            @if (isInitializing()) {
+              <ng-container i18n="Initializing state@@adminDataConfig.initializing">Initializing...</ng-container>
+            } @else {
+              <ng-container i18n="Initialize button@@adminDataConfig.initButton">Backfill This Range</ng-container>
+            }
+          </button>
+        </div>
+        @if (initMessage()) {
+          <p class="form-message" [class.success]="initSuccess()">{{ initMessage() }}</p>
+        }
+      </div>
     </section>
   `,
 })
@@ -1728,8 +1767,13 @@ export class AdminDataConfigurationPage {
   protected readonly configuration = signal<DataRefreshConfigurationResponse | null>(null);
   protected readonly isSaving = signal(false);
   protected readonly isRefreshing = signal(false);
+  protected readonly isInitializing = signal(false);
   protected readonly message = signal('');
   protected readonly isSuccess = signal(false);
+  protected readonly initMessage = signal('');
+  protected readonly initSuccess = signal(false);
+  protected readonly backfillStartDate = signal(new Date(new Date().getFullYear() - 1, 0, 1).toISOString().slice(0, 10));
+  protected readonly backfillEndDate = signal(new Date().toISOString().slice(0, 10));
   protected readonly form = this.fb.nonNullable.group({
     refreshFrequency: this.fb.nonNullable.control<RefreshFrequency>('daily', Validators.required),
     historicalDepth: this.fb.nonNullable.control<HistoricalDepth>('all_time', Validators.required),
@@ -1799,6 +1843,32 @@ export class AdminDataConfigurationPage {
       this.message.set(getErrorMessage(error));
     } finally {
       this.isRefreshing.set(false);
+    }
+  }
+
+  protected onBackfillStartDateChange(event: Event): void {
+    this.backfillStartDate.set((event.target as HTMLInputElement).value);
+  }
+
+  protected onBackfillEndDateChange(event: Event): void {
+    this.backfillEndDate.set((event.target as HTMLInputElement).value);
+  }
+
+  protected async initHistorical(): Promise<void> {
+    if (this.isInitializing()) return;
+    this.isInitializing.set(true);
+    this.initMessage.set('');
+    this.initSuccess.set(false);
+    try {
+      const result = await this.auth.initHistoricalData(this.backfillStartDate(), this.backfillEndDate());
+      this.initSuccess.set(true);
+      this.initMessage.set(
+        $localize`:Backfill success@@adminDataConfig.backfillComplete:Backfilled ${result.fetchedDays}:days: days (${result.failedRanges.length}:failed: failed ranges)`,
+      );
+    } catch (error) {
+      this.initMessage.set(getErrorMessage(error));
+    } finally {
+      this.isInitializing.set(false);
     }
   }
 

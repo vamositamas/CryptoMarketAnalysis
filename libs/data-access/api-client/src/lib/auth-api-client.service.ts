@@ -800,6 +800,10 @@ export class AuthApiClient {
     );
   }
 
+  async initHistoricalData(startDate: string, endDate: string): Promise<{ fetchedDays: number; failedRanges: unknown[] }> {
+    return this.postWithCsrf('/api/admin/data-configuration/init-historical', { startDate, endDate });
+  }
+
   async triggerDashboardRefresh(): Promise<ManualDataRefreshResponse> {
     return this.postWithCsrf<ManualDataRefreshResponse>('/api/dashboard/refresh', {});
   }

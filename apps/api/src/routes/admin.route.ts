@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { BitcoinDataClient, BlockchainInfoClient, FearGreedClient } from '@crypto-market-analysis/calculation-engines/data-sources';
 import { getDatabasePool } from '../config/database.config';
 import { DailyDataRefreshService, insertBitcoinMetricsDaily } from '../jobs/daily-data-refresh.controller';
+import { runHistoricalDataInitialization } from '../jobs/init-historical-data';
 import { requireAuth, requireRole } from '../middleware/rbac.middleware';
 import type { TokenInvalidationReader, AuthenticatedRequest } from '../middleware/rbac.middleware';
 import { AuditLogRepository } from '../repositories/audit-log.repository';
@@ -391,6 +392,21 @@ export function createAdminRouter(
   router.post('/data-configuration/refresh-now', ...adminOnly, async (_req, res, next) => {
     try {
       res.status(200).json(await dailyDataRefreshService.run());
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post('/data-configuration/init-historical', ...adminOnly, async (req, res, next) => {
+    try {
+      const database = getDatabasePool();
+      if (!database) {
+        res.status(503).json({ error: 'Database unavailable' });
+        return;
+      }
+      const { startDate, endDate } = req.body as { startDate?: string; endDate?: string };
+      const summary = await runHistoricalDataInitialization({ database, startDate, endDate });
+      res.status(200).json(summary);
     } catch (error) {
       next(error);
     }
