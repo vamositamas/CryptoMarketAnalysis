@@ -1,10 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "npx nx build web --configuration=production-i18n",
+  "buildCommand": "npx nx build web --configuration=production-i18n && npx esbuild api/_handler.ts --bundle --packages=external --platform=node --target=node20 --outfile=api/index.js --tsconfig=api/tsconfig.json --format=cjs",
   "outputDirectory": "dist/apps/web/browser",
   "framework": "angular",
   "functions": {
-    "api/index.ts": {
+    "api/index.js": {
       "maxDuration": 30
     }
   },
