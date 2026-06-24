@@ -1119,6 +1119,26 @@ main .msi-sig-zone {
   line-height: 1;
 }
 
+@media (max-width: 640px) {
+  main .msi-banner {
+    flex-wrap: wrap;
+    gap: 14px;
+    padding: 14px 16px;
+  }
+  main .msi-summary {
+    flex: 1;
+    min-width: 0;
+    border-right: none;
+    border-bottom: 1px solid #e5ebe7;
+    padding-right: 0;
+    padding-bottom: 14px;
+  }
+  main .msi-grid {
+    flex-basis: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 main .dashboard-widget-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
