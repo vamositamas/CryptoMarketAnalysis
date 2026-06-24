@@ -553,6 +553,69 @@ main .content-section p {
   max-width: 760px;
 }
 
+.landing-footer {
+  border-top: 1px solid #dce2dd;
+  padding: 28px 0 32px;
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.landing-footer p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #7a8a7d;
+  flex: 1;
+  min-width: 200px;
+}
+
+.landing-footer a {
+  font-size: 0.82rem;
+  color: #4a7a55;
+  text-decoration: none;
+  white-space: nowrap;
+  &:hover { text-decoration: underline; }
+}
+
+.disclaimer-page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 40px 24px 64px;
+}
+
+.disclaimer-page h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 16px 0 28px;
+  color: #1a2e1c;
+}
+
+.disclaimer-page p,
+.disclaimer-page li {
+  font-size: 0.95rem;
+  line-height: 1.75;
+  color: #3c4f3e;
+  margin-bottom: 16px;
+}
+
+.disclaimer-page ul {
+  padding-left: 24px;
+  margin-bottom: 16px;
+}
+
+.disclaimer-page li {
+  margin-bottom: 8px;
+}
+
+.disclaimer-back {
+  display: inline-block;
+  font-size: 0.85rem;
+  color: #4a7a55;
+  text-decoration: none;
+  &:hover { text-decoration: underline; }
+}
+
 main .content-section {
   padding-block: 28px 54px;
 }

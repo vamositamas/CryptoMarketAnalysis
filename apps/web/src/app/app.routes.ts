@@ -118,6 +118,13 @@ import { AuthSessionService } from './services/auth-session.service';
         Start with registration
       </a>
     </section>
+
+    <footer class="landing-footer">
+      <p i18n="Landing disclaimer notice@@landing.disclaimerNotice">
+        The information on this platform is for informational purposes only and does not constitute financial advice.
+      </p>
+      <a routerLink="/disclaimer" i18n="Landing disclaimer link@@landing.disclaimerLink">Disclaimer</a>
+    </footer>
   `,
 })
 export class LandingPage {
@@ -130,6 +137,71 @@ export class LandingPage {
     }
   }
 }
+
+@Component({
+  selector: 'app-disclaimer-page',
+  imports: [RouterLink],
+  template: `
+    <article class="disclaimer-page">
+      <a routerLink="/" class="disclaimer-back" i18n="Disclaimer back link@@disclaimer.back">← Back</a>
+      <h1 i18n="Disclaimer page title@@disclaimer.title">Disclaimer – No Financial Advice</h1>
+
+      <p i18n="Disclaimer intro@@disclaimer.intro">
+        The information, data, charts, analytics, metrics, indicators, and blockchain-related content provided
+        on this platform are for informational and educational purposes only.
+      </p>
+
+      <p i18n="Disclaimer not advisor@@disclaimer.notAdvisor">
+        This platform is not a financial advisor, investment advisor, broker, dealer, or financial institution.
+        Nothing displayed on this website constitutes financial advice, investment advice, trading advice,
+        legal advice, tax advice, or any recommendation to buy, sell, hold, or trade any cryptocurrency,
+        digital asset, token, security, or financial instrument.
+      </p>
+
+      <p i18n="Disclaimer data sources@@disclaimer.dataSources">
+        All information presented on this platform is derived from publicly available blockchain data,
+        third-party data providers, or automated analytical processes. The platform merely aggregates,
+        visualizes, and presents blockchain information and current network activity through charts,
+        dashboards, statistics, and other analytical tools.
+      </p>
+
+      <p i18n="Disclaimer historical data@@disclaimer.historicalData">
+        The charts, indicators, rankings, wallet information, transaction data, market metrics, and other
+        visualizations displayed on this website reflect historical or real-time blockchain data and should
+        not be interpreted as predictions, guarantees, recommendations, or endorsements of future performance.
+      </p>
+
+      <p i18n="Disclaimer volatility@@disclaimer.volatility">
+        Cryptocurrency and digital asset markets are highly volatile and involve substantial risk. Users are
+        solely responsible for conducting their own research and due diligence before making any financial,
+        investment, or trading decisions. Any actions taken based on information obtained from this platform
+        are done entirely at the user's own risk.
+      </p>
+
+      <p i18n="Disclaimer accuracy@@disclaimer.accuracy">
+        While we strive to provide accurate and up-to-date information, we make no representations or
+        warranties regarding the accuracy, completeness, reliability, availability, or timeliness of any
+        information displayed. Blockchain data may be delayed, incomplete, inaccurate, or subject to
+        technical limitations.
+      </p>
+
+      <p i18n="Disclaimer acknowledgement intro@@disclaimer.acknowledgementIntro">
+        By using this platform, you acknowledge and agree that:
+      </p>
+      <ul>
+        <li i18n="Disclaimer ack 1@@disclaimer.ack1">The platform provides informational blockchain data only.</li>
+        <li i18n="Disclaimer ack 2@@disclaimer.ack2">No financial, investment, legal, or tax advice is being provided.</li>
+        <li i18n="Disclaimer ack 3@@disclaimer.ack3">You are solely responsible for your own investment and trading decisions.</li>
+        <li i18n="Disclaimer ack 4@@disclaimer.ack4">The platform and its operators shall not be liable for any losses, damages, or consequences arising from the use of the information provided.</li>
+      </ul>
+
+      <p i18n="Disclaimer consult@@disclaimer.consult">
+        Always consult qualified financial, legal, and tax professionals before making any investment decisions.
+      </p>
+    </article>
+  `,
+})
+export class DisclaimerPage {}
 
 @Component({
   selector: 'app-dashboard-page',
@@ -2472,6 +2544,7 @@ function getErrorMessage(error: unknown): string {
 
 export const appRoutes: Route[] = [
   { path: '', component: LandingPage },
+  { path: 'disclaimer', component: DisclaimerPage },
   { path: 'dashboard', component: DashboardPage, canActivate: [authGuard] },
   {
     path: 'charts',

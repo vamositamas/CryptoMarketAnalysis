@@ -277,5 +277,22 @@
   "s2f.highScarcity": "Magas szűkösség",
   "s2f.veryHighScarcity": "Nagyon magas szűkösség",
   "s2f.extremeScarcity": "Extrém szűkösség",
-  "auth.logout": "Kilépés"
+  "auth.logout": "Kilépés",
+  "nav.disclaimer": "Jogi nyilatkozat",
+  "landing.disclaimerNotice": "Az ezen a platformon található információk kizárólag tájékoztató jellegűek, és nem minősülnek pénzügyi tanácsadásnak.",
+  "landing.disclaimerLink": "Jogi nyilatkozat",
+  "disclaimer.back": "← Vissza",
+  "disclaimer.title": "Jogi nyilatkozat – Nem pénzügyi tanácsadás",
+  "disclaimer.intro": "Az ezen a platformon megjelenített információk, adatok, grafikonok, elemzések, mutatók, indikátorok és blockchain-nal kapcsolatos tartalmak kizárólag tájékoztató és oktatási célt szolgálnak.",
+  "disclaimer.notAdvisor": "Ez a platform nem pénzügyi tanácsadó, befektetési tanácsadó, bróker, kereskedő vagy pénzintézet. Az ezen a weboldalon megjelenített tartalom semmilyen formában nem minősül pénzügyi tanácsnak, befektetési tanácsnak, kereskedési tanácsnak, jogi tanácsnak, adótanácsnak, vagy kriptovaluták, digitális eszközök, tokenek, értékpapírok vagy egyéb pénzügyi instrumentumok vételére, eladására, tartására vagy kereskedésére vonatkozó ajánlásnak.",
+  "disclaimer.dataSources": "A platformon bemutatott összes információ nyilvánosan elérhető blockchain-adatokból, harmadik feles adatszolgáltatókból vagy automatizált elemzési folyamatokból származik. A platform csupán összesíti, vizualizálja és bemutatja a blockchain-információkat és az aktuális hálózati aktivitást grafikonok, irányítópultok, statisztikák és egyéb elemzőeszközök segítségével.",
+  "disclaimer.historicalData": "Az ezen a weboldalon megjelenített grafikonok, indikátorok, rangsorok, tárca-információk, tranzakciós adatok, piaci mutatók és egyéb vizualizációk historikus vagy valós idejű blockchain-adatokat tükröznek, és nem értelmezhetők jövőbeli teljesítményre vonatkozó előrejelzésként, garanciáként, ajánlásként vagy jóváhagyásként.",
+  "disclaimer.volatility": "A kriptovaluta- és digitáliseszköz-piacok rendkívül volatilisek és jelentős kockázatot hordoznak. A felhasználók kizárólag maguk felelnek saját kutatásaik elvégzéséért és az átvilágításért, mielőtt bármilyen pénzügyi, befektetési vagy kereskedési döntést hoznának. Az ezen a platformon szerzett információk alapján tett intézkedések teljes mértékben a felhasználó saját kockázatára történnek.",
+  "disclaimer.accuracy": "Bár törekszünk pontos és naprakész információk nyújtására, nem vállalunk semmilyen nyilatkozatot vagy garanciát a megjelenített információk pontosságára, teljességére, megbízhatóságára, elérhetőségére vagy időszerűségére vonatkozóan. A blockchain-adatok késhetnek, hiányosak, pontatlanok lehetnek, vagy technikai korlátoknak lehetnek kitéve.",
+  "disclaimer.acknowledgementIntro": "A platform használatával elismered és elfogadod, hogy:",
+  "disclaimer.ack1": "A platform kizárólag tájékoztató jellegű blockchain-adatokat nyújt.",
+  "disclaimer.ack2": "Nem nyújtunk pénzügyi, befektetési, jogi vagy adótanácsot.",
+  "disclaimer.ack3": "Kizárólag te felelsz saját befektetési és kereskedési döntéseidért.",
+  "disclaimer.ack4": "A platform és üzemeltetői nem vállalnak felelősséget a megadott információk felhasználásából eredő veszteségekért, károkért vagy következményekért.",
+  "disclaimer.consult": "Befektetési döntések meghozatala előtt mindig konzultálj képzett pénzügyi, jogi és adózási szakemberekkel."
 }

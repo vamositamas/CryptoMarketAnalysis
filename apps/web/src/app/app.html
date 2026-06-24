@@ -86,6 +86,12 @@
                 </div>
               </div>
               <div class="user-menu-divider"></div>
+              <a routerLink="/disclaimer" class="user-menu-item" role="menuitem"
+                (click)="userMenuOpen.set(false)"
+                i18n="Disclaimer menu item@@nav.disclaimer">
+                Disclaimer
+              </a>
+              <div class="user-menu-divider"></div>
               <button type="button" class="user-menu-item" role="menuitem" (click)="logout()"
                 i18n="Log out button@@auth.logout">
                 Log out
