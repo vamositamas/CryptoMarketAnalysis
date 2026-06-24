@@ -21,7 +21,7 @@ export interface CsvExportInput<TRow> {
 const PNG_WIDTH = 1920;
 const PNG_HEIGHT = 1080;
 const HEADER_HEIGHT = 112;
-const WATERMARK = 'CryptoMarketAnalysis.com';
+const WATERMARK = 'BitWLab.com';
 
 export async function exportChartPng(input: PngExportInput): Promise<void> {
   const documentRef = input.documentRef ?? document;

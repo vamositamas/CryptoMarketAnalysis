@@ -5,7 +5,7 @@
       <h1 i18n="Chart library title@@charts.title">Tracked Bitcoin models</h1>
     </div>
     <label class="chart-lib-search">
-      <span aria-hidden="true">⌕</span>
+      <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="8.5" cy="8.5" r="5.5"/><line x1="13" y1="13" x2="18" y2="18"/></svg>
       <input
         type="search"
         [value]="searchQuery()"
@@ -15,10 +15,6 @@
       />
     </label>
   </header>
-
-  @if (premiumNotice()) {
-    <p class="form-message">{{ premiumNotice() }}</p>
-  }
 
   @for (group of filteredCategories(); track group.category) {
     <section class="chart-lib-category">
@@ -454,6 +450,35 @@
                   <path d="M 0,310 C 60,295 100,240 140,180 C 175,128 200,60 240,52 C 275,115 310,300 345,310 C 380,305 410,250 445,200 C 475,158 500,65 535,55 C 565,120 595,295 625,308 C 655,305 680,265 720,230 C 750,203 775,175 800,165" stroke="#0d9488" stroke-width="2" fill="none"/>
                   <path d="M 0,355 C 80,340 150,305 220,268 C 290,232 360,196 430,165 C 500,135 570,118 640,105 C 700,95 760,90 800,88" stroke="#1f2937" stroke-width="1.5" fill="none" opacity="0.6"/>
                 </svg>
+              } @else if (chart.thumbnailClass === 'excess-liquidity') {
+                <!-- Excess Liquidity thumbnail — dark yield curve (bps) + amber excess liquidity oscillating around zero -->
+                <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
+                  <rect width="800" height="360" fill="#fff"/>
+                  <!-- Light grid lines -->
+                  <line x1="0" y1="90"  x2="800" y2="90"  stroke="#e5e7eb" stroke-width="1"/>
+                  <line x1="0" y1="180" x2="800" y2="180" stroke="#e5e7eb" stroke-width="1"/>
+                  <line x1="0" y1="270" x2="800" y2="270" stroke="#e5e7eb" stroke-width="1"/>
+                  <!-- Zero reference line (dashed) -->
+                  <line x1="0" y1="180" x2="800" y2="180" stroke="rgba(107,114,128,0.5)" stroke-width="1.5" stroke-dasharray="6,4"/>
+                  <!-- Yield curve 1yr change (bps) — dark oscillating line -->
+                  <path d="M 0,195 C 30,210 55,240 80,260 C 105,280 120,300 140,310 C 160,320 175,300 195,270 C 215,240 230,200 250,175 C 270,150 285,130 305,110 C 325,90 345,75 365,70 C 385,65 405,80 425,105 C 445,130 460,160 480,185 C 500,210 515,230 535,240 C 555,250 575,240 595,215 C 615,190 635,160 655,135 C 675,110 695,90 720,80 C 745,70 770,75 800,85" stroke="#1f2937" stroke-width="2" fill="none"/>
+                  <!-- Excess liquidity leading (%) — amber smoother wave -->
+                  <path d="M 0,160 C 40,155 75,145 110,138 C 145,130 175,118 210,108 C 245,98 275,90 310,88 C 345,86 375,92 410,102 C 445,113 475,128 510,148 C 545,168 575,188 610,198 C 645,208 675,205 710,195 C 745,185 775,172 800,165" stroke="rgba(234,179,8,0.9)" stroke-width="2.5" fill="none"/>
+                </svg>
+              } @else if (chart.thumbnailClass === 'spx-liquidity') {
+                <!-- SPX vs Liquidity thumbnail — dark SPX YoY volatile line + blue smooth excess liquidity wave -->
+                <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
+                  <rect width="800" height="360" fill="#fff"/>
+                  <line x1="0" y1="90"  x2="800" y2="90"  stroke="#e5e7eb" stroke-width="1"/>
+                  <line x1="0" y1="180" x2="800" y2="180" stroke="#e5e7eb" stroke-width="1"/>
+                  <line x1="0" y1="270" x2="800" y2="270" stroke="#e5e7eb" stroke-width="1"/>
+                  <!-- Zero reference line (dashed) -->
+                  <line x1="0" y1="200" x2="800" y2="200" stroke="rgba(107,114,128,0.5)" stroke-width="1.5" stroke-dasharray="6,4"/>
+                  <!-- SPX YoY — jagged black line (volatile equity returns) -->
+                  <path d="M 0,215 C 15,210 25,195 40,185 C 55,175 65,160 80,150 C 95,140 105,148 120,155 C 135,162 145,168 160,162 C 175,156 185,140 200,125 C 215,110 225,100 240,92 C 255,84 265,80 280,75 C 295,70 310,72 325,78 C 340,84 350,88 365,82 C 380,76 390,65 405,52 C 420,39 430,28 445,20 C 460,12 475,15 490,22 C 505,29 515,40 530,52 C 545,64 555,80 570,95 C 585,110 595,128 610,145 C 625,162 640,178 655,188 C 670,198 685,202 700,198 C 715,194 730,182 750,172 C 770,162 785,155 800,150" stroke="#111827" stroke-width="2" fill="none"/>
+                  <!-- Excess liquidity — smooth blue wave (leading indicator) -->
+                  <path d="M 0,155 C 40,148 80,138 120,128 C 160,118 200,108 240,102 C 280,96 320,95 360,98 C 400,101 440,110 480,125 C 520,140 560,158 600,170 C 640,182 680,185 720,178 C 750,172 775,162 800,155" stroke="#2563eb" stroke-width="2.5" fill="none"/>
+                </svg>
               }
               <div class="chart-card-thumb-cta" aria-hidden="true">
                 <span i18n="View chart button@@charts.viewChart">View Chart →</span>
@@ -463,9 +488,6 @@
             <div class="chart-card-info">
               <div class="chart-card-tags">
                 <span class="chart-card-signal">{{ chart.signal }}</span>
-                <span class="tier-badge" [class.premium]="chart.accessTier === 'premium'">
-                  {{ tierLabel(chart.accessTier) }}
-                </span>
               </div>
               <h3>{{ chart.title }}</h3>
               <p>{{ chart.description }}</p>

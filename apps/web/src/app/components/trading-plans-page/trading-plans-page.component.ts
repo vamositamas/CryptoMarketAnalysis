@@ -24,7 +24,7 @@ type Tab = 'signals' | 'projections' | 'plans';
     .tp-tabs { display: flex; gap: 0; border-bottom: 2px solid var(--color-border, #e5e7eb); margin-bottom: 2rem; }
     .tp-tab { background: none; border: none; padding: 0.75rem 1.5rem; font-size: 0.875rem; font-weight: 500; color: var(--color-text-muted, #6b7280); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: color 0.15s, border-color 0.15s; }
     .tp-tab:hover { color: var(--color-text, #111); }
-    .tp-tab.active { color: var(--color-accent, #f59e0b); border-bottom-color: var(--color-accent, #f59e0b); }
+    .tp-tab.active { color: #111827; border-bottom-color: #111827; font-weight: 600; }
     .tp-loading { padding: 3rem 0; text-align: center; color: var(--color-text-muted, #6b7280); }
     /* Signal dashboard */
     .sig-hero { display: flex; align-items: center; gap: 2rem; background: var(--color-surface, #f9fafb); border: 1px solid var(--color-border, #e5e7eb); border-radius: 12px; padding: 1.5rem 2rem; margin-bottom: 2rem; }

@@ -35,8 +35,19 @@ interface Queryable {
   query<Row = MetricPointRow>(sql: string, values?: unknown[]): Promise<{ rows: Row[] }>;
 }
 
+interface SystemConfigRow {
+  value: string;
+}
+
 export class DashboardMetricsRepository {
   constructor(private readonly database: Queryable) {}
+
+  async getLastRefreshTimestamp(): Promise<string | null> {
+    const result = await this.database.query<SystemConfigRow>(
+      `SELECT value FROM system_configuration WHERE key = 'last_refresh_timestamp' LIMIT 1`,
+    );
+    return result.rows[0]?.value ?? null;
+  }
 
   async getLatestPrices(limit = 2): Promise<MetricPoint[]> {
     const result = await this.database.query(

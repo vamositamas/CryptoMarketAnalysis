@@ -6,10 +6,13 @@ import type { AuthenticatedRequest, TokenInvalidationReader } from '../middlewar
 import { DashboardMetricsRepository } from '../repositories/dashboard-metrics.repository';
 import { DashboardWidgetRepository } from '../repositories/dashboard-widget.repository';
 import { DashboardError, DashboardService } from '../services/dashboard.service';
+import { LivePriceService } from '../services/live-price.service';
+import { CoinGeckoClient } from '@crypto-market-analysis/calculation-engines/data-sources';
 
 interface DashboardRouterOptions {
   dashboardService?: Pick<DashboardService, 'getWidgets' | 'addWidget' | 'reorderWidgets' | 'removeWidget'>;
   dailyDataRefreshService?: Pick<DailyDataRefreshService, 'run'>;
+  livePriceService?: Pick<LivePriceService, 'getLivePrice'>;
 }
 
 export function createDashboardRouter(
@@ -19,6 +22,7 @@ export function createDashboardRouter(
   const router = Router();
   let dashboardService = options.dashboardService;
   const refreshService = options.dailyDataRefreshService ?? new DailyDataRefreshService();
+  let livePriceService = options.livePriceService;
 
   router.get('/widgets', requireAuth(tokenInvalidations), async (req, res, next) => {
     try {
@@ -90,11 +94,24 @@ export function createDashboardRouter(
     }
   });
 
+  router.get('/live-price', requireAuth(tokenInvalidations), async (_req, res, next) => {
+    try {
+      res.status(200).json(await getLivePriceService().getLivePrice());
+    } catch (error) {
+      next(error);
+    }
+  });
+
   return router;
 
   function getDashboardService(): Pick<DashboardService, 'getWidgets' | 'addWidget' | 'reorderWidgets' | 'removeWidget'> {
     dashboardService ??= createDefaultDashboardService();
     return dashboardService;
+  }
+
+  function getLivePriceService(): Pick<LivePriceService, 'getLivePrice'> {
+    livePriceService ??= createDefaultLivePriceService();
+    return livePriceService;
   }
 }
 
@@ -109,4 +126,14 @@ function createDefaultDashboardService(): DashboardService {
     new DashboardWidgetRepository(database),
     new DashboardMetricsRepository(database),
   );
+}
+
+function createDefaultLivePriceService(): LivePriceService {
+  const database = getDatabasePool();
+
+  if (!database) {
+    throw new Error('SUPABASE_DATABASE_URL is required for live price endpoint');
+  }
+
+  return new LivePriceService(new CoinGeckoClient(), database);
 }

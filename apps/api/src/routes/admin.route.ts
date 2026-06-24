@@ -16,7 +16,7 @@ import {
   DataRefreshConfigurationService,
 } from '../services/data-refresh-configuration.service';
 import { DonationsService } from '../services/donations.service';
-import { ResendEmailService, substituteTemplateVars } from '../services/email.service';
+import { ResendEmailService, sendRawEmail, substituteTemplateVars } from '../services/email.service';
 import { UserManagementError, UserManagementService } from '../services/user-management.service';
 
 type DataRefreshConfigurationServiceContract = Pick<
@@ -53,23 +53,101 @@ interface AdminRouterOptions {
   tokenInvalidations?: TokenInvalidationReader;
 }
 
-const DEFAULT_ALERT_TRIGGERED_HTML = `<h2 style="color:#1a1a2e">Alert Triggered: {{alertName}}</h2>
-<p>Your alert on the <strong>{{chartTitle}}</strong> has been triggered.</p>
-<table style="border-collapse:collapse;margin:16px 0">
-  <tr>
-    <td style="padding:6px 12px;font-weight:bold;color:#555">Condition</td>
-    <td style="padding:6px 12px">{{metricLabel}} {{conditionLabel}} {{thresholdValue}}</td>
-  </tr>
-  <tr style="background:#f5f5f5">
-    <td style="padding:6px 12px;font-weight:bold;color:#555">Current value</td>
-    <td style="padding:6px 12px"><strong>{{currentValue}}</strong></td>
-  </tr>
-  <tr>
-    <td style="padding:6px 12px;font-weight:bold;color:#555">Triggered at</td>
-    <td style="padding:6px 12px">{{triggeredAt}} UTC</td>
-  </tr>
-</table>
-<p><a href="{{appUrl}}/alerts" style="color:#6c63ff">View your alerts</a></p>`;
+const DEFAULT_ALERT_TRIGGERED_HTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alert Triggered — {{alertName}}</title>
+</head>
+<body style="margin:0;padding:0;background:#e8f0e9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#e8f0e9;padding:32px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+
+        <!-- Header -->
+        <tr>
+          <td style="background:#1a4731;border-radius:12px 12px 0 0;padding:28px 40px;text-align:center;">
+            <p style="margin:0 0 4px;font-size:22px;font-weight:700;color:#ffffff;">BitWLab</p>
+            <p style="margin:0;font-size:13px;color:#86b89a;">Bitcoin Blockchain Analysis</p>
+          </td>
+        </tr>
+
+        <!-- Body card -->
+        <tr>
+          <td style="background:#ffffff;padding:40px 40px 32px;border-left:1px solid #dce8dd;border-right:1px solid #dce8dd;">
+            <h2 style="margin:0 0 20px;font-size:24px;font-weight:700;color:#111827;">Your alert has been triggered!</h2>
+            <p style="margin:0 0 8px;font-size:15px;color:#374151;line-height:1.6;">Hello,</p>
+            <p style="margin:0 0 24px;font-size:15px;color:#374151;line-height:1.6;">
+              Your alert <strong>{{alertName}}</strong> on the <strong>{{chartTitle}}</strong> chart has been triggered.
+            </p>
+
+            <!-- Details box -->
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f0f7f1;border-radius:8px;margin-bottom:24px;">
+              <tr><td style="padding:20px 24px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="padding-bottom:12px;border-bottom:1px solid #d1e7d4;">
+                      <span style="font-size:13px;color:#6b7280;">Condition</span><br/>
+                      <strong style="font-size:15px;color:#111827;">{{metricLabel}} {{conditionLabel}} {{thresholdValue}}</strong>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding-top:12px;padding-bottom:12px;border-bottom:1px solid #d1e7d4;">
+                      <span style="font-size:13px;color:#6b7280;">Current Value</span><br/>
+                      <strong style="font-size:22px;color:#1a4731;">{{currentValue}}</strong>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding-top:12px;">
+                      <span style="font-size:13px;color:#6b7280;">Triggered At</span><br/>
+                      <strong style="font-size:15px;color:#111827;">{{triggeredAt}} UTC</strong>
+                    </td>
+                  </tr>
+                </table>
+              </td></tr>
+            </table>
+
+            <p style="margin:0 0 28px;font-size:15px;color:#374151;line-height:1.6;">
+              Log in to your BitWLab account to review this alert and update your settings.
+            </p>
+
+            <!-- CTA -->
+            <table role="presentation" cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
+              <tr>
+                <td style="background:#1a4731;border-radius:8px;">
+                  <a href="{{appUrl}}/alerts" style="display:inline-block;padding:13px 30px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;">View My Alerts →</a>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Divider -->
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+              <tr><td style="border-top:1px solid #e5e7eb;font-size:0;line-height:0;">&nbsp;</td></tr>
+            </table>
+
+            <p style="margin:0;font-size:15px;color:#374151;line-height:1.6;">
+              We look forward to keeping you informed!
+            </p>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background:#d4e8d6;border-radius:0 0 12px 12px;padding:20px 40px;text-align:center;border:1px solid #bdd9bf;border-top:none;">
+            <p style="margin:0 0 4px;font-size:13px;color:#3d6b4a;">This is an automated message. Please do not reply to this email.</p>
+            <p style="margin:0;font-size:12px;color:#5a8a68;">
+              <a href="{{appUrl}}" style="color:#1a4731;text-decoration:none;">BitWLab</a>
+              &nbsp;·&nbsp; Bitcoin Blockchain Analysis
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
 
 const TEMPLATE_DEFINITIONS = [
   {
@@ -96,7 +174,7 @@ const TEMPLATE_SAMPLE_DATA: Record<string, string> = {
   thresholdValue: '7.0',
   currentValue: '7.23',
   triggeredAt: new Date().toUTCString(),
-  appUrl: process.env['APP_URL'] ?? 'https://cryptomarketanalysis.com',
+  appUrl: process.env['APP_URL'] ?? 'https://bitwlab.com',
   userName: 'John Doe',
   userEmail: 'john@example.com',
   donationAmount: '$10.00',
@@ -428,6 +506,73 @@ export function createAdminRouter(
     } catch (error) { next(error); }
   });
 
+  // ── Email Config (summary for UI) ────────────────────────────────────────────
+
+  router.get('/email-config', ...adminOnly, async (_req, res, next) => {
+    try {
+      const db = getDatabasePool();
+      const result = await db?.query<{ key: string; value: string }>(
+        `SELECT key, value FROM system_configuration WHERE key IN ('email_from_address', 'email_app_url', 'smtp_host', 'smtp_password')`,
+      );
+      const map = new Map((result?.rows ?? []).map((r) => [r.key, r.value]));
+      const hasSmtp = map.has('smtp_host') && (map.has('smtp_password') || !!process.env['SMTP_PASSWORD']);
+      const hasResend = !!process.env['RESEND_API_KEY'];
+      const provider = hasSmtp ? 'SMTP' : hasResend ? 'Resend' : 'None';
+      const fromEmail = map.get('email_from_address') ?? process.env['RESEND_FROM_EMAIL'] ?? null;
+      const appUrl = map.get('email_app_url') ?? process.env['APP_URL'] ?? 'https://bitwlab.com';
+      res.json({ provider, apiKeyConfigured: hasSmtp || hasResend, fromEmail, appUrl });
+    } catch (error) { next(error); }
+  });
+
+  // ── Email Settings ───────────────────────────────────────────────────────────
+
+  router.get('/email-settings', ...adminOnly, async (_req, res, next) => {
+    try {
+      const db = getDatabasePool();
+      const KEYS = ['email_from_address', 'email_app_url', 'email_admin_email',
+        'smtp_host', 'smtp_port', 'smtp_user', 'smtp_password'];
+      const result = await db?.query<{ key: string; value: string }>(
+        `SELECT key, value FROM system_configuration WHERE key = ANY($1)`,
+        [KEYS],
+      );
+      const map = new Map((result?.rows ?? []).map((r) => [r.key, r.value]));
+      res.json({
+        fromAddress: map.get('email_from_address') ?? process.env['RESEND_FROM_EMAIL'] ?? '',
+        appUrl: map.get('email_app_url') ?? process.env['APP_URL'] ?? '',
+        adminEmail: map.get('email_admin_email') ?? process.env['ADMIN_ALERT_EMAIL'] ?? '',
+        smtpHost: map.get('smtp_host') ?? process.env['SMTP_HOST'] ?? '',
+        smtpPort: map.get('smtp_port') ?? process.env['SMTP_PORT'] ?? '587',
+        smtpUser: map.get('smtp_user') ?? process.env['SMTP_USER'] ?? '',
+        smtpPasswordConfigured: map.has('smtp_password') || !!process.env['SMTP_PASSWORD'],
+      });
+    } catch (error) { next(error); }
+  });
+
+  router.put('/email-settings', ...adminOnly, async (req, res, next) => {
+    try {
+      const body = req.body as Record<string, unknown>;
+      const db = getDatabasePool();
+      const upsert = async (key: string, raw: unknown) => {
+        const value = String(raw ?? '').trim();
+        if (!value) return;
+        await db?.query(
+          `INSERT INTO system_configuration (key, value) VALUES ($1, $2)
+           ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = CURRENT_TIMESTAMP`,
+          [key, value],
+        );
+      };
+      if (body['email_from_address'] !== undefined || body['fromAddress'] !== undefined)
+        await upsert('email_from_address', body['fromAddress'] ?? body['email_from_address']);
+      if (body['appUrl'] !== undefined) await upsert('email_app_url', body['appUrl']);
+      if (body['adminEmail'] !== undefined) await upsert('email_admin_email', body['adminEmail']);
+      if (body['smtpHost'] !== undefined) await upsert('smtp_host', body['smtpHost']);
+      if (body['smtpPort'] !== undefined) await upsert('smtp_port', body['smtpPort']);
+      if (body['smtpUser'] !== undefined) await upsert('smtp_user', body['smtpUser']);
+      if (body['smtpPassword'] !== undefined) await upsert('smtp_password', body['smtpPassword']);
+      res.json({ success: true });
+    } catch (error) { next(error); }
+  });
+
   // ── Email Templates ─────────────────────────────────────────────────────────
 
   router.get('/email-templates', ...adminOnly, async (_req, res, next) => {
@@ -539,28 +684,10 @@ export function createAdminRouter(
       const customData = (req.body?.sampleData ?? {}) as Record<string, string>;
       const vars = { ...TEMPLATE_SAMPLE_DATA, ...customData };
       const rendered = substituteTemplateVars(template, vars);
-      const testBanner = `<div style="background:#fff3cd;border:1px solid #ffc107;padding:8px 16px;margin-bottom:16px;font-size:13px">⚠️ This is a test email sent from CryptoMarketAnalysis admin panel</div>`;
+      const testBanner = `<div style="background:#fff3cd;border:1px solid #ffc107;padding:8px 16px;margin-bottom:16px;font-size:13px">⚠️ This is a test email sent from BitWLab admin panel</div>`;
       const html = testBanner + rendered;
 
-      const apiKey = process.env['RESEND_API_KEY'];
-      const from = process.env['RESEND_FROM_EMAIL'];
-
-      if (!apiKey || !from) {
-        console.info(JSON.stringify({ event: 'admin.test_email', to: recipientEmail, key, timestamp: new Date().toISOString() }));
-        res.json({ success: true, message: `Test email logged (no RESEND_API_KEY). Would send to ${recipientEmail}` });
-        return;
-      }
-
-      const response = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: { authorization: `Bearer ${apiKey}`, 'content-type': 'application/json' },
-        body: JSON.stringify({ from, to: recipientEmail, subject: `[TEST] ${def.label}`, html }),
-      });
-
-      if (!response.ok) {
-        res.status(502).json({ error: 'Failed to send test email via Resend' });
-        return;
-      }
+      await sendRawEmail({ to: recipientEmail, subject: `[TEST] ${def.label}`, html });
 
       res.json({ success: true, message: `Test email sent to ${recipientEmail}` });
     } catch (error) {

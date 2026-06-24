@@ -18,6 +18,7 @@ import {
   ChartInfoPanelComponent,
   type ChartInfoField,
 } from '../chart-info-panel/chart-info-panel.component';
+import { ChartFavouriteButtonComponent } from '../chart-favourite-button/chart-favourite-button.component';
 
 
 // Full halving schedule including estimated next
@@ -44,7 +45,7 @@ const NEXT_HALVING_EST_MS = Date.parse(HALVINGS[5] + 'T00:00:00Z');
 @Component({
   selector: 'app-bitcoin-halving-progress-chart-page',
   standalone: true,
-  imports: [ChartViewerComponent, ChartInfoPanelComponent, RouterLink],
+  imports: [ChartViewerComponent, ChartInfoPanelComponent, RouterLink, ChartFavouriteButtonComponent],
   templateUrl: './bitcoin-halving-progress-chart-page.component.html',
 })
 export class BitcoinHalvingProgressChartPageComponent {
@@ -174,7 +175,7 @@ export class BitcoinHalvingProgressChartPageComponent {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           fill: false as any,
         },
-      ],
+  ],
     };
   });
 

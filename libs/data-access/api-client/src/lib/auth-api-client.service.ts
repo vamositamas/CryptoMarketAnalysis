@@ -316,6 +316,22 @@ export interface ThermocapMultipleChartResponse {
   lastUpdated: string | null;
 }
 
+export interface ExcessLiquidityChartResponse {
+  chartId: 'excess-liquidity';
+  title: string;
+  timeframe: string;
+  dataPoints: { date: string; yieldCurve1yChange: number | null; excessLiquidityLeading: number | null; }[];
+  lastUpdated: string | null;
+}
+
+export interface SpxLiquidityChartResponse {
+  chartId: 'spx-liquidity';
+  title: string;
+  timeframe: string;
+  dataPoints: { date: string; spxYoyChange: number | null; excessLiquidityLeading: number | null; }[];
+  lastUpdated: string | null;
+}
+
 export type ChartAnnotation =
   | {
       id: string;
@@ -459,6 +475,22 @@ export interface RecentChart {
 
 export interface RecentChartsResponse {
   recentCharts: RecentChart[];
+}
+
+export interface FavouriteChart {
+  chartId: string;
+  title: string;
+  url: string;
+  createdAt: string;
+}
+
+export interface FavouriteChartsResponse {
+  favouriteCharts: FavouriteChart[];
+}
+
+export interface ToggleFavouriteResponse {
+  chartId: string;
+  isFavourite: boolean;
 }
 
 export type DonationStatus = 'pending' | 'completed' | 'cancelled' | 'refunded';
@@ -946,6 +978,18 @@ export class AuthApiClient {
     } catch (error) { throw toApiClientError(error); }
   }
 
+  async getExcessLiquidityChartData(timeframe: ChartTimeframe): Promise<ExcessLiquidityChartResponse> {
+    try {
+      return await firstValueFrom(this.http.get<ExcessLiquidityChartResponse>('/api/charts/excess-liquidity', { params: { timeframe }, withCredentials: true }));
+    } catch (error) { throw toApiClientError(error); }
+  }
+
+  async getSpxLiquidityChartData(timeframe: ChartTimeframe): Promise<SpxLiquidityChartResponse> {
+    try {
+      return await firstValueFrom(this.http.get<SpxLiquidityChartResponse>('/api/charts/spx-liquidity', { params: { timeframe }, withCredentials: true }));
+    } catch (error) { throw toApiClientError(error); }
+  }
+
   async getChartAnnotations(chartId: string): Promise<ChartAnnotation[]> {
     try {
       return await firstValueFrom(
@@ -1003,6 +1047,19 @@ export class AuthApiClient {
     await this.deleteWithCsrf(`/api/dashboard/widgets/${widgetId}`);
   }
 
+  async getLivePrice(): Promise<{ priceUsd: number; change24hPercent: number | null; fetchedAt: string }> {
+    try {
+      return await firstValueFrom(
+        this.http.get<{ priceUsd: number; change24hPercent: number | null; fetchedAt: string }>(
+          '/api/dashboard/live-price',
+          { withCredentials: true },
+        ),
+      );
+    } catch (error) {
+      throw toApiClientError(error);
+    }
+  }
+
   async getAlerts(): Promise<AlertsListResponse> {
     try {
       return await firstValueFrom(
@@ -1037,6 +1094,38 @@ export class AuthApiClient {
 
   async updateAlert(alertId: string, data: Partial<{ alertName: string; condition: string; thresholdValue: number; status: string }>): Promise<AlertWithTitle> {
     return this.patchWithCsrf<AlertWithTitle>(`/api/alerts/${alertId}`, data);
+  }
+
+  async getEmailConfig(): Promise<{ provider: string; apiKeyConfigured: boolean; fromEmail: string | null; appUrl: string }> {
+    try {
+      return await firstValueFrom(
+        this.http.get<{ provider: string; apiKeyConfigured: boolean; fromEmail: string | null; appUrl: string }>(
+          '/api/admin/email-config', { withCredentials: true },
+        ),
+      );
+    } catch (error) { throw toApiClientError(error); }
+  }
+
+  async getEmailSettings(): Promise<{ fromAddress: string; appUrl: string; adminEmail: string; smtpHost: string; smtpPort: string; smtpUser: string; smtpPasswordConfigured: boolean }> {
+    try {
+      return await firstValueFrom(
+        this.http.get<{ fromAddress: string; appUrl: string; adminEmail: string; smtpHost: string; smtpPort: string; smtpUser: string; smtpPasswordConfigured: boolean }>(
+          '/api/admin/email-settings', { withCredentials: true },
+        ),
+      );
+    } catch (error) { throw toApiClientError(error); }
+  }
+
+  async saveEmailSettings(data: { fromAddress?: string; appUrl?: string; adminEmail?: string; smtpHost?: string; smtpPort?: string; smtpUser?: string; smtpPassword?: string }): Promise<{ success: boolean }> {
+    try {
+      const csrfToken = await this.getCsrfToken();
+      return await firstValueFrom(
+        this.http.put<{ success: boolean }>('/api/admin/email-settings', data, {
+          headers: { 'x-csrf-token': csrfToken },
+          withCredentials: true,
+        }),
+      );
+    } catch (error) { throw toApiClientError(error); }
   }
 
   async getEmailTemplates(): Promise<EmailTemplatesResponse> {
@@ -1101,6 +1190,22 @@ export class AuthApiClient {
     try {
       return await firstValueFrom(
         this.http.get<RecentChartsResponse>('/api/users/me/recent-charts', {
+          withCredentials: true,
+        }),
+      );
+    } catch (error) {
+      throw toApiClientError(error);
+    }
+  }
+
+  async toggleFavouriteChart(chartId: string): Promise<ToggleFavouriteResponse> {
+    return this.postWithCsrf<ToggleFavouriteResponse>('/api/users/me/favourite-charts', { chartId });
+  }
+
+  async getFavouriteCharts(): Promise<FavouriteChartsResponse> {
+    try {
+      return await firstValueFrom(
+        this.http.get<FavouriteChartsResponse>('/api/users/me/favourite-charts', {
           withCredentials: true,
         }),
       );

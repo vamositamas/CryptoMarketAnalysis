@@ -7,7 +7,7 @@ import type { AlertWithTitle, AlertsListResponse } from '../services/alerts.serv
 
 export interface AlertsManager {
   createAlert(userId: string, userRole: string, body: unknown): Promise<AlertRecord>;
-  listAlerts(userId: string, userRole: string): Promise<AlertsListResponse>;
+  listAlerts(userId: string): Promise<AlertsListResponse>;
   updateAlert(userId: string, alertId: string, body: unknown): Promise<AlertWithTitle>;
   deleteAlert(userId: string, alertId: string): Promise<void>;
   resetAlert(userId: string, alertId: string): Promise<AlertWithTitle>;
@@ -50,8 +50,8 @@ export function createAlertsRouter(
 
   router.get('/', auth, anyRole, async (req, res, next) => {
     try {
-      const { userId, userRole } = userFrom(req as AuthenticatedRequest);
-      const response = await getService().listAlerts(userId, userRole);
+      const { userId } = userFrom(req as AuthenticatedRequest);
+      const response = await getService().listAlerts(userId);
       res.status(200).json(response);
     } catch (error) {
       if (error instanceof AlertsError) {

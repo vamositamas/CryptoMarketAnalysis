@@ -19,6 +19,7 @@ import {
   ChartInfoPanelComponent,
   type ChartInfoField,
 } from '../chart-info-panel/chart-info-panel.component';
+import { ChartFavouriteButtonComponent } from '../chart-favourite-button/chart-favourite-button.component';
 import {
   exportChartCsv,
   exportChartPng,
@@ -183,7 +184,7 @@ const spiralGridPlugin: Plugin = {
 @Component({
   selector: 'app-halving-spiral-chart-page',
   standalone: true,
-  imports: [RouterLink, ChartInfoPanelComponent],
+  imports: [RouterLink, ChartInfoPanelComponent, ChartFavouriteButtonComponent],
   templateUrl: './halving-spiral-chart-page.component.html',
 })
 export class HavingSpiralChartPageComponent implements AfterViewInit, OnDestroy {
@@ -311,7 +312,7 @@ export class HavingSpiralChartPageComponent implements AfterViewInit, OnDestroy 
             return '';
           },
         },
-      ],
+  ],
       fileName: `halving-spiral-${getExportDateStamp()}.csv`,
     });
   }

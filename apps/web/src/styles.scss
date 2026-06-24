@@ -129,7 +129,8 @@ nav {
 nav a,
 .ghost-link,
 .primary-link,
-main button {
+main button,
+main a.secondary-button {
   min-height: 40px;
   padding: 0 14px;
   border: 1px solid transparent;
@@ -138,6 +139,11 @@ main button {
   font: inherit;
   font-weight: 700;
   text-decoration: none;
+}
+
+main a.secondary-button {
+  display: inline-flex;
+  align-items: center;
 }
 
 nav a.active,
@@ -983,6 +989,52 @@ main .recent-charts-section {
   margin-top: 40px;
 }
 
+main .charts-tab-bar {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 20px;
+}
+
+main .charts-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+
+  &:hover { color: #374151; }
+
+  &.active {
+    color: #111827;
+    border-bottom-color: #111827;
+
+    svg { fill: currentColor; }
+  }
+}
+
+main .charts-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: #d97706;
+  color: #fff;
+  border-radius: 9px;
+}
+
 main .recent-charts-heading {
   font-size: 1rem;
   font-weight: 600;
@@ -1551,17 +1603,18 @@ main .chart-lib-search {
   color: #65736f;
 }
 
-main .chart-lib-search span {
+main .chart-lib-search > svg {
   display: flex;
+  flex-shrink: 0;
   width: 38px;
   height: 42px;
-  align-items: center;
-  justify-content: center;
+  padding: 13px 11px;
+  box-sizing: border-box;
   border: 1px solid #cbd8d1;
   border-right: none;
   border-radius: 8px 0 0 8px;
   background: #ffffff;
-  font-size: 1.15rem;
+  color: #65736f;
 }
 
 main .chart-lib-search input {
@@ -2294,6 +2347,21 @@ main .form-link:hover {
   text-decoration: underline;
 }
 
+main .auth-switch {
+  margin: 4px 0 0;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #6b7280;
+
+  a {
+    color: #145c4b;
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover { text-decoration: underline; }
+  }
+}
+
 main .form-message {
   margin: 0;
   padding: 10px 12px;
@@ -2622,18 +2690,21 @@ main .halving-spiral-chart-page {
 /* ── Donate nav button ──────────────────────────────────────────────── */
 
 .donate-nav-btn {
-  background: linear-gradient(135deg, #f7971e, #ffd200);
-  border: none;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid #d7ded8;
   border-radius: 6px;
-  color: #1a1a1a;
+  background: rgba(255, 255, 255, 0.64);
+  color: #4c5b57;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
   cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 600;
-  padding: 6px 14px;
-  transition: opacity 0.15s;
 
   &:hover {
-    opacity: 0.85;
+    background: rgba(255, 255, 255, 0.9);
+    border-color: #b0bcb7;
   }
 }
 
@@ -2900,40 +2971,142 @@ main .halving-spiral-chart-page {
   cursor: pointer;
 }
 
-.admin-table-wrapper {
-  overflow-x: auto;
-  border: 1px solid #e3e6e0;
-  border-radius: 8px;
+.user-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1.5px solid #e5ebe7;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
 }
 
-.admin-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
+.user-card-header {
+  display: grid;
+  grid-template-columns: 2.5fr 0.8fr 0.9fr 1fr 1fr 1.4fr;
+  gap: 12px;
+  padding: 10px 20px;
+  background: #f5f7f4;
+  border-bottom: 1.5px solid #e5ebe7;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
 
-  th {
-    text-align: left;
-    padding: 10px 14px;
-    background: #f0f2ed;
-    color: #4a5568;
-    font-weight: 600;
-    white-space: nowrap;
-    border-bottom: 1px solid #e3e6e0;
-  }
+.user-card {
+  display: grid;
+  grid-template-columns: 2.5fr 0.8fr 0.9fr 1fr 1fr 1.4fr;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid #f0f4f1;
+  transition: background 0.12s;
+}
+.user-card:last-child { border-bottom: none; }
+.user-card:hover { background: #fafbf8; }
 
-  td {
-    padding: 10px 14px;
-    border-bottom: 1px solid #f0f2ed;
-    vertical-align: middle;
-  }
+.user-card--deleted {
+  opacity: 0.55;
+  background: #fef9f9;
+}
+.user-card--deleted:hover { background: #fef2f2; }
 
-  tbody tr:last-child td {
-    border-bottom: none;
-  }
+.user-card-identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
 
-  tbody tr:hover {
-    background: #fafbf9;
-  }
+.user-avatar {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: #d1fae5;
+  color: #065f46;
+}
+.user-avatar[data-role="administrator"] { background: #fde68a; color: #78350f; }
+.user-avatar[data-role="premium_user"]  { background: #dbeafe; color: #1e40af; }
+
+.user-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.user-card-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #17202a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.user-card-email {
+  font-size: 0.78rem;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-card-role { display: flex; align-items: center; }
+
+.user-card-verified { display: flex; align-items: center; }
+.verified-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+.verified-yes { color: #16a34a; }
+.verified-no  { color: #dc2626; }
+
+.user-card-date {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.user-card-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.uact-btn {
+  padding: 5px 11px;
+  border-radius: 7px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: background 0.12s, border-color 0.12s;
+}
+.uact-edit    { background: #eff6ff; color: #1e40af; border-color: #bfdbfe; }
+.uact-edit:hover    { background: #dbeafe; }
+.uact-reset   { background: #f5f3ff; color: #6d28d9; border-color: #ddd6fe; }
+.uact-reset:hover   { background: #ede9fe; }
+.uact-delete  { background: #fff1f2; color: #be123c; border-color: #fecdd3; }
+.uact-delete:hover  { background: #ffe4e6; }
+.uact-restore { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+.uact-restore:hover { background: #dcfce7; }
+
+.user-card-empty {
+  padding: 40px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.875rem;
 }
 
 .deleted-row {
@@ -3140,11 +3313,76 @@ main .halving-spiral-chart-page {
   }
 }
 
-.primary-button.danger {
-  background: #c0392b;
-  border-color: #c0392b;
+.modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid #e5ebe7;
 
-  &:hover { background: #a93226; }
+  .ghost-link {
+    height: 40px;
+    padding: 0 16px;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #4a5568;
+    background: #f5f7f4;
+    border-color: #e5ebe7;
+    &:hover { background: #edf2ee; }
+  }
+}
+
+.primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+  height: 40px;
+  background: #1a4731;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover:not(:disabled) { background: #15392a; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.primary-button.danger {
+  background: #be123c;
+
+  &:hover:not(:disabled) { background: #9f1239; }
+}
+
+/* ── Chart Favourite Button ──────────────────────────────── */
+.chart-favourite-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #6b7280;
+
+  svg { flex-shrink: 0; transition: fill 0.15s, stroke 0.15s; }
+
+  &.is-favourite {
+    color: #d97706;
+    border-color: #fbbf24;
+    background: #fffbeb;
+
+    svg { fill: #d97706; stroke: #d97706; }
+
+    &:hover:not(:disabled) { background: #fef3c7; }
+  }
+}
+
+.primary-button.paypal {
+  background: #0070ba;
+
+  &:hover:not(:disabled) { background: #005ea6; }
 }
 
 .badge {
@@ -3299,12 +3537,6 @@ main .halving-spiral-chart-page {
     color: #718096;
   }
 
-  .mobile-donate {
-    width: 100%;
-    text-align: center;
-    margin-top: 8px;
-    min-height: 44px;
-  }
 }
 
 .vdd-pending-notice {

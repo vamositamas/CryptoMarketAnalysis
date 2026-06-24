@@ -6,8 +6,11 @@ import {
   BlockchainInfoClient,
   CoinGeckoClient,
   FearGreedClient,
+  FredClient,
   RetryExhaustedError,
 } from '@crypto-market-analysis/calculation-engines/data-sources';
+import { ExcessLiquidityService } from '../services/excess-liquidity.service';
+import { SpxLiquidityService } from '../services/spx-liquidity.service';
 import {
   selectLatestBitcoinDailyIndicators,
   type BitcoinDailyIndicatorInput,
@@ -109,6 +112,8 @@ export class DailyDataRefreshService {
   >;
   private readonly fearGreedClient: Pick<FearGreedClient, 'fetchLatest'>;
   private readonly bitcoinDataClient: Pick<BitcoinDataClient, 'fetchMvrvZScore' | 'fetchRealizedPrice' | 'fetchVddMultiple' | 'fetchCvdd' | 'fetchBalancedPrice' | 'fetchTerminalPrice'>;
+  private readonly excessLiquidityService: ExcessLiquidityService;
+  private readonly spxLiquidityService: SpxLiquidityService;
   private readonly database: Parameters<typeof insertBitcoinPriceDaily>[0] | undefined;
   private readonly emailService: DailyDataRefreshFailureEmailSender;
   private readonly alertEvaluationService: Pick<AlertEvaluationService, 'evaluateAlerts'>;
@@ -120,6 +125,8 @@ export class DailyDataRefreshService {
     this.blockchainInfoClient = options.blockchainInfoClient ?? new BlockchainInfoClient();
     this.fearGreedClient = options.fearGreedClient ?? new FearGreedClient();
     this.bitcoinDataClient = options.bitcoinDataClient ?? new BitcoinDataClient();
+    this.excessLiquidityService = new ExcessLiquidityService({ fredClient: new FredClient() });
+    this.spxLiquidityService = new SpxLiquidityService({ fredClient: new FredClient() });
     this.database = options.database ?? getDatabasePool();
     this.emailService = options.emailService ?? new ResendEmailService();
     const evalDatabase = getDatabasePool();
@@ -302,6 +309,30 @@ export class DailyDataRefreshService {
 
     if (records.length > 0) {
       await insertBitcoinMetricsDaily(database, records);
+    }
+
+    // Refresh FRED macro data (yield curve + excess liquidity) — best-effort
+    if (database) {
+      try {
+        const fredRecords = await this.excessLiquidityService.computeAllRecords();
+        await this.excessLiquidityService.upsertRecords(database, fredRecords);
+        this.logger.log('FRED macro data refreshed', { records: fredRecords.length });
+      } catch (error) {
+        this.logger.warn('Failed to refresh FRED macro data; skipping for this run', {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+
+      // Refresh SPX YoY data — best-effort
+      try {
+        const spxRecords = await this.spxLiquidityService.computeAllRecords();
+        await this.spxLiquidityService.upsertRecords(database, spxRecords);
+        this.logger.log('SPX YoY data refreshed', { records: spxRecords.length });
+      } catch (error) {
+        this.logger.warn('Failed to refresh SPX YoY data; skipping for this run', {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
     }
 
     return records;

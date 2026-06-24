@@ -22,6 +22,7 @@ import {
   type ChartInfoField,
 } from '../chart-info-panel/chart-info-panel.component';
 import { parseChartTimeframe } from '../chart-timeframe/chart-timeframe-url.util';
+import { ChartFavouriteButtonComponent } from '../chart-favourite-button/chart-favourite-button.component';
 import {
   CreateAlertModalComponent,
   type AlertMetricOption,
@@ -80,7 +81,7 @@ const STOCK_TO_FLOW_ALERT_METRICS: AlertMetricOption[] = [
 
 @Component({
   selector: 'app-stock-to-flow-chart-page',
-  imports: [ChartViewerComponent, ChartAnnotationsComponent, ChartInfoPanelComponent, RouterLink, CreateAlertModalComponent],
+  imports: [ChartViewerComponent, ChartAnnotationsComponent, ChartInfoPanelComponent, RouterLink, CreateAlertModalComponent, ChartFavouriteButtonComponent],
   templateUrl: './stock-to-flow-chart-page.component.html',
 })
 export class StockToFlowChartPageComponent implements AfterViewInit {
@@ -181,7 +182,7 @@ export class StockToFlowChartPageComponent implements AfterViewInit {
           pointHitRadius: 12,
           tension: 0.1,
         },
-      ],
+  ],
     };
   });
   protected readonly chartOptions = computed<ChartOptions<'line'>>(() => {

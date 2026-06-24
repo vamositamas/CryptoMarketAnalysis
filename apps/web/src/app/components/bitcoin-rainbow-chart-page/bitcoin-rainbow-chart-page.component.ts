@@ -22,6 +22,7 @@ import {
   type ChartInfoField,
 } from '../chart-info-panel/chart-info-panel.component';
 import { parseChartTimeframe } from '../chart-timeframe/chart-timeframe-url.util';
+import { ChartFavouriteButtonComponent } from '../chart-favourite-button/chart-favourite-button.component';
 import {
   CreateAlertModalComponent,
   type AlertMetricOption,
@@ -90,7 +91,7 @@ const RAINBOW_ALERT_METRICS: AlertMetricOption[] = [
 
 @Component({
   selector: 'app-bitcoin-rainbow-chart-page',
-  imports: [ChartViewerComponent, ChartAnnotationsComponent, ChartInfoPanelComponent, RouterLink, CreateAlertModalComponent],
+  imports: [ChartViewerComponent, ChartAnnotationsComponent, ChartInfoPanelComponent, RouterLink, CreateAlertModalComponent, ChartFavouriteButtonComponent],
   templateUrl: './bitcoin-rainbow-chart-page.component.html',
 })
 export class BitcoinRainbowChartPageComponent implements AfterViewInit {
@@ -173,7 +174,7 @@ export class BitcoinRainbowChartPageComponent implements AfterViewInit {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           fill: false as any,
         },
-      ],
+  ],
     };
   });
   protected readonly chartOptions = computed<ChartOptions<'line'>>(() => {

@@ -43,11 +43,7 @@ const CHART_URLS: Record<string, string> = {
           <h2>My Alerts</h2>
           @if (alertsData()) {
             <p class="alerts-count-label">
-              @if (alertsData()!.alertLimit.unlimited) {
-                {{ alertsData()!.alertLimit.used }} alert{{ alertsData()!.alertLimit.used === 1 ? '' : 's' }}
-              } @else {
-                {{ alertsData()!.alertLimit.used }} of {{ alertsData()!.alertLimit.max }} alerts used
-              }
+              {{ alertsData()!.alertLimit.used }} alert{{ alertsData()!.alertLimit.used === 1 ? '' : 's' }}
             </p>
           }
         </div>

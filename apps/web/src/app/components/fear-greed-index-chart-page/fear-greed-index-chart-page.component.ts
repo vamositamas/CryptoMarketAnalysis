@@ -22,6 +22,7 @@ import {
   type ChartInfoField,
 } from '../chart-info-panel/chart-info-panel.component';
 import { parseChartTimeframe } from '../chart-timeframe/chart-timeframe-url.util';
+import { ChartFavouriteButtonComponent } from '../chart-favourite-button/chart-favourite-button.component';
 import {
   CreateAlertModalComponent,
   type AlertMetricOption,
@@ -55,6 +56,7 @@ const FEAR_GREED_ALERT_METRICS: AlertMetricOption[] = [
     ChartInfoPanelComponent,
     RouterLink,
     CreateAlertModalComponent,
+    ChartFavouriteButtonComponent,
   ],
   templateUrl: './fear-greed-index-chart-page.component.html',
 })

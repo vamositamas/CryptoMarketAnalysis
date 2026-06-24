@@ -42,6 +42,7 @@
         (annotationsChanged)="updateUserAnnotations($event)"
       ></app-chart-annotations>
       <button type="button" class="secondary-button" (click)="openAlertModal()">Create Alert</button>
+      <app-chart-favourite-button [chartId]="'fear-greed-index'"></app-chart-favourite-button>
       <button type="button" class="secondary-button" (click)="toggleInfo()">Info</button>
     </div>
   </div>

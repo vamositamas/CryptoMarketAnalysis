@@ -22,6 +22,7 @@ import {
   type ChartInfoField,
 } from '../chart-info-panel/chart-info-panel.component';
 import { parseChartTimeframe } from '../chart-timeframe/chart-timeframe-url.util';
+import { ChartFavouriteButtonComponent } from '../chart-favourite-button/chart-favourite-button.component';
 import {
   CreateAlertModalComponent,
   type AlertMetricOption,
@@ -65,6 +66,7 @@ const VDD_BUY_THRESHOLD = 0.75;
     ChartInfoPanelComponent,
     RouterLink,
     CreateAlertModalComponent,
+    ChartFavouriteButtonComponent,
   ],
   templateUrl: './vdd-multiple-chart-page.component.html',
 })

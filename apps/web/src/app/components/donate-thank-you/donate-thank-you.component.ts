@@ -60,7 +60,7 @@ import {
           }
         } @else {
           <p class="thank-you-sub">
-            Thank you for supporting CryptoMarketAnalysis. Your donation helps keep professional
+            Thank you for supporting BitWLab. Your donation helps keep professional
             Bitcoin analysis free for everyone.
           </p>
 

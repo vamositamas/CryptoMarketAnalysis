@@ -517,7 +517,8 @@ function getRequiredEnv(name: string): string {
 }
 
 function getGoogleRedirectUri(): string {
-  return process.env.GOOGLE_REDIRECT_URI ?? 'http://localhost:3000/api/auth/google/callback';
+  const port = process.env.PORT ?? '3000';
+  return process.env.GOOGLE_REDIRECT_URI ?? `http://localhost:${port}/api/auth/google/callback`;
 }
 
 async function exchangeGoogleCode(code: string): Promise<string> {

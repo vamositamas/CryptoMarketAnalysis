@@ -22,6 +22,7 @@ import {
   type ChartInfoField,
 } from '../chart-info-panel/chart-info-panel.component';
 import { parseChartTimeframe } from '../chart-timeframe/chart-timeframe-url.util';
+import { ChartFavouriteButtonComponent } from '../chart-favourite-button/chart-favourite-button.component';
 import {
   CreateAlertModalComponent,
   type AlertMetricOption,
@@ -63,7 +64,7 @@ const PUELL_ALERT_METRICS: AlertMetricOption[] = [
 
 @Component({
   selector: 'app-puell-multiple-chart-page',
-  imports: [ChartViewerComponent, ChartAnnotationsComponent, ChartInfoPanelComponent, RouterLink, CreateAlertModalComponent],
+  imports: [ChartViewerComponent, ChartAnnotationsComponent, ChartInfoPanelComponent, RouterLink, CreateAlertModalComponent, ChartFavouriteButtonComponent],
   templateUrl: './puell-multiple-chart-page.component.html',
 })
 export class PuellMultipleChartPageComponent implements AfterViewInit {
@@ -157,7 +158,7 @@ export class PuellMultipleChartPageComponent implements AfterViewInit {
           tension: 0.16,
           yAxisID: 'y2',
         },
-      ],
+  ],
     };
   });
 

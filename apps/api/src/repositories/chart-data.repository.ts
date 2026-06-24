@@ -62,9 +62,105 @@ const TIMEFRAME_DAYS: Record<Exclude<ChartTimeframe, 'all'>, number> = {
   '2y': 730,
 };
 
+export interface ExcessLiquidityDataRow {
+  date: string;
+  yieldCurve1yChange: number | null;
+  excessLiquidityLeading: number | null;
+  lastUpdated: string | null;
+}
+
+export interface SpxLiquidityDataRow {
+  date: string;
+  spxYoyChange: number | null;
+  excessLiquidityLeading: number | null;
+  lastUpdated: string | null;
+}
+
 export class ChartDataRepository extends BaseRepository {
   constructor(private readonly database: Queryable) {
     super();
+  }
+
+  async findExcessLiquidityData(timeframe: ChartTimeframe, today = new Date()): Promise<ExcessLiquidityDataRow[]> {
+    const startDate = timeframe === 'all' ? '1993-01-01' : getStartDate(today, TIMEFRAME_DAYS[timeframe]);
+
+    const result = await this.database.query(
+      `
+        WITH dates AS (
+          SELECT DISTINCT date FROM bitcoin_metrics_daily
+          WHERE metric_name IN ('yield_curve_1y_change', 'excess_liquidity_leading')
+            AND date >= $1::date
+        )
+        SELECT
+          d.date,
+          yc.metric_value  AS yield_curve_1y_change,
+          el.metric_value  AS excess_liquidity_leading,
+          GREATEST(
+            COALESCE(yc.created_at, NULL),
+            COALESCE(el.created_at, NULL)
+          ) AS last_updated
+        FROM dates d
+        LEFT JOIN bitcoin_metrics_daily yc
+          ON yc.date = d.date AND yc.metric_name = 'yield_curve_1y_change'
+        LEFT JOIN bitcoin_metrics_daily el
+          ON el.date = d.date AND el.metric_name = 'excess_liquidity_leading'
+        ORDER BY d.date ASC
+      `,
+      [startDate],
+    );
+
+    return (result.rows as unknown as Array<{
+      date: string | Date;
+      yield_curve_1y_change: string | number | null;
+      excess_liquidity_leading: string | number | null;
+      last_updated: string | Date | null;
+    }>).map((row) => ({
+      date: formatDate(row.date),
+      yieldCurve1yChange: nullableNumber(row.yield_curve_1y_change),
+      excessLiquidityLeading: nullableNumber(row.excess_liquidity_leading),
+      lastUpdated: row.last_updated === null ? null : formatTimestamp(row.last_updated),
+    }));
+  }
+
+  async findSpxLiquidityData(timeframe: ChartTimeframe, today = new Date()): Promise<SpxLiquidityDataRow[]> {
+    const startDate = timeframe === 'all' ? '2017-01-01' : getStartDate(today, TIMEFRAME_DAYS[timeframe]);
+
+    const result = await this.database.query(
+      `
+        WITH dates AS (
+          SELECT DISTINCT date FROM bitcoin_metrics_daily
+          WHERE metric_name IN ('spx_yoy_change', 'excess_liquidity_leading')
+            AND date >= $1::date
+        )
+        SELECT
+          d.date,
+          spx.metric_value AS spx_yoy_change,
+          el.metric_value  AS excess_liquidity_leading,
+          GREATEST(
+            COALESCE(spx.created_at, NULL),
+            COALESCE(el.created_at, NULL)
+          ) AS last_updated
+        FROM dates d
+        LEFT JOIN bitcoin_metrics_daily spx
+          ON spx.date = d.date AND spx.metric_name = 'spx_yoy_change'
+        LEFT JOIN bitcoin_metrics_daily el
+          ON el.date = d.date AND el.metric_name = 'excess_liquidity_leading'
+        ORDER BY d.date ASC
+      `,
+      [startDate],
+    );
+
+    return (result.rows as unknown as Array<{
+      date: string | Date;
+      spx_yoy_change: string | number | null;
+      excess_liquidity_leading: string | number | null;
+      last_updated: string | Date | null;
+    }>).map((row) => ({
+      date: formatDate(row.date),
+      spxYoyChange: nullableNumber(row.spx_yoy_change),
+      excessLiquidityLeading: nullableNumber(row.excess_liquidity_leading),
+      lastUpdated: row.last_updated === null ? null : formatTimestamp(row.last_updated),
+    }));
   }
 
   async findBitcoinChartData(timeframe: ChartTimeframe, today = new Date()): Promise<ChartDataRow[]> {

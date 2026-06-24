@@ -3,7 +3,7 @@
   <header class="topbar">
     <a class="brand" [routerLink]="currentUser() ? '/dashboard' : '/'">
       <span class="brand-mark" aria-hidden="true">₿</span>
-      <span i18n="Application name@@app.name">CryptoMarketAnalysis</span>
+      <span i18n="Application name@@app.name">BitWLab</span>
     </a>
 
     <!-- Desktop nav -->
@@ -28,19 +28,19 @@
           <a routerLink="/admin/data-configuration" routerLinkActive="active">
             <ng-container i18n="Admin data navigation label@@nav.adminData">Data</ng-container>
           </a>
-          <a routerLink="/admin/email-templates" routerLinkActive="active">
+          <a routerLink="/admin/email-settings" routerLinkActive="active">
             <ng-container i18n="Admin email templates navigation label@@nav.adminEmail">Email</ng-container>
           </a>
-        }
-        @if (currentUser()?.role === 'free_user') {
-          <button type="button" class="donate-nav-btn" (click)="openDonateModal()">
-            <ng-container i18n="Donate navigation label@@nav.donate">Donate</ng-container>
-          </button>
         }
       </nav>
     }
 
     <div class="topbar-actions">
+      @if (currentUser()?.role === 'free_user') {
+        <button type="button" class="donate-nav-btn" (click)="openDonateModal()">
+          <ng-container i18n="Donate navigation label@@nav.donate">Donate</ng-container>
+        </button>
+      }
       <button
         type="button"
         class="lang-btn"
@@ -103,7 +103,7 @@
     <div class="auth-brand">
       <a class="brand" routerLink="/">
         <span class="brand-mark" aria-hidden="true">₿</span>
-        <span i18n="Application name@@app.name">CryptoMarketAnalysis</span>
+        <span i18n="Application name@@app.name">BitWLab</span>
       </a>
     </div>
   }
@@ -132,14 +132,9 @@
         <a routerLink="/admin/data-configuration" routerLinkActive="active" (click)="closeMobileMenu()">
           <ng-container i18n="Admin data navigation label@@nav.adminData">Data Config</ng-container>
         </a>
-        <a routerLink="/admin/email-templates" routerLinkActive="active" (click)="closeMobileMenu()">
-          <ng-container i18n="Admin email templates navigation label@@nav.adminEmail">Email Templates</ng-container>
+        <a routerLink="/admin/email-settings" routerLinkActive="active" (click)="closeMobileMenu()">
+          <ng-container i18n="Admin email templates navigation label@@nav.adminEmail">Email</ng-container>
         </a>
-      }
-      @if (currentUser()?.role === 'free_user') {
-        <button type="button" class="donate-nav-btn mobile-donate" (click)="openDonateModal()">
-          <ng-container i18n="Donate navigation label@@nav.donate">Donate</ng-container>
-        </button>
       }
     </nav>
   }

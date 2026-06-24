@@ -22,6 +22,7 @@ import {
   type ChartInfoField,
 } from '../chart-info-panel/chart-info-panel.component';
 import { parseChartTimeframe } from '../chart-timeframe/chart-timeframe-url.util';
+import { ChartFavouriteButtonComponent } from '../chart-favourite-button/chart-favourite-button.component';
 import {
   CreateAlertModalComponent,
   type AlertMetricOption,
@@ -73,7 +74,7 @@ function cvdd(dateStr: string): number {
 
 @Component({
   selector: 'app-bitcoin-cvdd-chart-page',
-  imports: [ChartViewerComponent, ChartAnnotationsComponent, ChartInfoPanelComponent, RouterLink, CreateAlertModalComponent],
+  imports: [ChartViewerComponent, ChartAnnotationsComponent, ChartInfoPanelComponent, RouterLink, CreateAlertModalComponent, ChartFavouriteButtonComponent],
   templateUrl: './bitcoin-cvdd-chart-page.component.html',
 })
 export class BitcoinCvddChartPageComponent implements AfterViewInit {
@@ -166,7 +167,7 @@ export class BitcoinCvddChartPageComponent implements AfterViewInit {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           fill: false as any,
         },
-      ],
+  ],
     };
   });
 

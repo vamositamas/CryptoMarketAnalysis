@@ -11,7 +11,7 @@ export function isDevelopmentAdminEmail(email: string): boolean {
 }
 
 export function getDevelopmentAdminEmail(): string {
-  return normalizeEmail(process.env.DEV_ADMIN_EMAIL ?? 'admin@cryptomarketanalysis.com');
+  return normalizeEmail(process.env.DEV_ADMIN_EMAIL ?? 'admin@bitwlab.com');
 }
 
 export function getDevelopmentAdminPassword(): string {

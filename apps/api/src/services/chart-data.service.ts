@@ -5,7 +5,7 @@ import {
   type ChartTimeframe,
 } from '../repositories/chart-data.repository';
 
-export type ChartId = 'bitcoin-rainbow' | 'pi-cycle-top' | 'stock-to-flow' | 'mvrv-z-score' | 'puell-multiple' | 'vdd-multiple' | 'realized-price' | 'stock-to-income' | '2yr-ma-multiplier' | 'price-forecast-tools' | 'mayer-multiple' | '200-week-ma-heatmap' | 'fear-greed-index' | 'hash-ribbons' | 'difficulty-ribbon' | 'nvt-ratio' | 'thermocap-multiple';
+export type ChartId = 'bitcoin-rainbow' | 'pi-cycle-top' | 'stock-to-flow' | 'mvrv-z-score' | 'puell-multiple' | 'vdd-multiple' | 'realized-price' | 'stock-to-income' | '2yr-ma-multiplier' | 'price-forecast-tools' | 'mayer-multiple' | '200-week-ma-heatmap' | 'fear-greed-index' | 'hash-ribbons' | 'difficulty-ribbon' | 'nvt-ratio' | 'thermocap-multiple' | 'excess-liquidity' | 'spx-liquidity';
 
 export interface BitcoinRainbowChartResponse {
   chartId: 'bitcoin-rainbow';
@@ -199,6 +199,22 @@ export interface ThermocapMultipleChartResponse {
   lastUpdated: string | null;
 }
 
+export interface ExcessLiquidityChartResponse {
+  chartId: 'excess-liquidity';
+  title: 'Excess Liquidity Leading Indicator';
+  timeframe: ChartTimeframe;
+  dataPoints: { date: string; yieldCurve1yChange: number | null; excessLiquidityLeading: number | null; }[];
+  lastUpdated: string | null;
+}
+
+export interface SpxLiquidityChartResponse {
+  chartId: 'spx-liquidity';
+  title: 'S&P 500 vs Excess Liquidity';
+  timeframe: ChartTimeframe;
+  dataPoints: { date: string; spxYoyChange: number | null; excessLiquidityLeading: number | null; }[];
+  lastUpdated: string | null;
+}
+
 export type ChartDataResponse =
   | BitcoinRainbowChartResponse
   | PiCycleTopChartResponse
@@ -216,7 +232,9 @@ export type ChartDataResponse =
   | HashRibbonsChartResponse
   | DifficultyRibbonChartResponse
   | NvtRatioChartResponse
-  | ThermocapMultipleChartResponse;
+  | ThermocapMultipleChartResponse
+  | ExcessLiquidityChartResponse
+  | SpxLiquidityChartResponse;
 
 export class ChartDataRequestError extends Error {
   constructor(
@@ -229,13 +247,51 @@ export class ChartDataRequestError extends Error {
 
 export class ChartDataService {
   constructor(
-    private readonly repository: Pick<ChartDataRepository, 'findBitcoinChartData'>,
+    private readonly repository: Pick<ChartDataRepository, 'findBitcoinChartData' | 'findExcessLiquidityData' | 'findSpxLiquidityData'>,
     private readonly now: () => Date = () => new Date(),
     private readonly bitcoinDataClient: Pick<BitcoinDataClient, 'fetchVddMultipleHistory'> = new BitcoinDataClient(),
   ) {}
 
   async getChartData(chartId: ChartId, timeframeInput: unknown): Promise<ChartDataResponse> {
     const timeframe = parseTimeframe(timeframeInput);
+
+    if (chartId === 'excess-liquidity') {
+      const rows = await this.repository.findExcessLiquidityData(timeframe, this.now());
+      const lastUpdated = rows.reduce<string | null>((acc, r) => {
+        if (!r.lastUpdated) return acc;
+        return !acc || r.lastUpdated > acc ? r.lastUpdated : acc;
+      }, null);
+      return {
+        chartId: 'excess-liquidity',
+        title: 'Excess Liquidity Leading Indicator',
+        timeframe,
+        dataPoints: rows.map((r) => ({
+          date: r.date,
+          yieldCurve1yChange: r.yieldCurve1yChange,
+          excessLiquidityLeading: r.excessLiquidityLeading,
+        })),
+        lastUpdated,
+      };
+    }
+
+    if (chartId === 'spx-liquidity') {
+      const rows = await this.repository.findSpxLiquidityData(timeframe, this.now());
+      const lastUpdated = rows.reduce<string | null>((acc, r) => {
+        if (!r.lastUpdated) return acc;
+        return !acc || r.lastUpdated > acc ? r.lastUpdated : acc;
+      }, null);
+      return {
+        chartId: 'spx-liquidity',
+        title: 'S&P 500 vs Excess Liquidity',
+        timeframe,
+        dataPoints: rows.map((r) => ({
+          date: r.date,
+          spxYoyChange: r.spxYoyChange,
+          excessLiquidityLeading: r.excessLiquidityLeading,
+        })),
+        lastUpdated,
+      };
+    }
 
     if (chartId === 'mayer-multiple') {
       const allRows = await this.repository.findBitcoinChartData('all', this.now());

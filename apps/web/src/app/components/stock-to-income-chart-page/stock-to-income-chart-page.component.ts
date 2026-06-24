@@ -22,6 +22,7 @@ import {
   type ChartInfoField,
 } from '../chart-info-panel/chart-info-panel.component';
 import { parseChartTimeframe } from '../chart-timeframe/chart-timeframe-url.util';
+import { ChartFavouriteButtonComponent } from '../chart-favourite-button/chart-favourite-button.component';
 import {
   CreateAlertModalComponent,
   type AlertMetricOption,
@@ -63,6 +64,7 @@ const S2I_ALERT_METRICS: AlertMetricOption[] = [
     ChartInfoPanelComponent,
     RouterLink,
     CreateAlertModalComponent,
+    ChartFavouriteButtonComponent,
   ],
   templateUrl: './stock-to-income-chart-page.component.html',
 })

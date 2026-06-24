@@ -47,43 +47,56 @@ type ModalMode = 'edit' | 'delete' | 'restore' | 'force-reset' | null;
       @if (isLoading()) {
         <p class="loading-text">Loading users…</p>
       } @else {
-        <div class="admin-table-wrapper">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Verified</th>
-                <th>Registered</th>
-                <th>Last Login</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (user of users(); track user.id) {
-                <tr [class.deleted-row]="user.deletedAt">
-                  <td>{{ user.fullName ?? '—' }}</td>
-                  <td>{{ user.email }}</td>
-                  <td><span class="role-badge role-{{ user.role }}">{{ roleLabel(user.role) }}</span></td>
-                  <td>{{ user.emailVerified ? '✓' : '✗' }}</td>
-                  <td>{{ formatDate(user.createdAt) }}</td>
-                  <td>{{ user.lastLoginAt ? formatDate(user.lastLoginAt) : '—' }}</td>
-                  <td class="action-cell">
-                    @if (user.deletedAt) {
-                      <button class="action-btn restore" (click)="openModal('restore', user)">Restore</button>
-                    } @else {
-                      <button class="action-btn edit" (click)="openModal('edit', user)">Edit</button>
-                      <button class="action-btn reset" (click)="openModal('force-reset', user)">Reset PW</button>
-                      <button class="action-btn delete" (click)="openModal('delete', user)">Delete</button>
-                    }
-                  </td>
-                </tr>
-              } @empty {
-                <tr><td colspan="7" class="empty-cell">No users found.</td></tr>
-              }
-            </tbody>
-          </table>
+        <div class="user-card-list">
+          <div class="user-card-header">
+            <span>User</span>
+            <span>Role</span>
+            <span>Verified</span>
+            <span>Registered</span>
+            <span>Last Login</span>
+            <span></span>
+          </div>
+
+          @for (user of users(); track user.id) {
+            <div class="user-card" [class.user-card--deleted]="user.deletedAt">
+              <div class="user-card-identity">
+                <div class="user-avatar" [attr.data-role]="user.role">{{ avatarInitials(user) }}</div>
+                <div class="user-card-info">
+                  <span class="user-card-name">{{ user.fullName ?? '—' }}</span>
+                  <span class="user-card-email">{{ user.email }}</span>
+                </div>
+              </div>
+              <div class="user-card-role">
+                <span class="role-badge role-{{ user.role }}">{{ roleLabel(user.role) }}</span>
+              </div>
+              <div class="user-card-verified">
+                @if (user.emailVerified) {
+                  <span class="verified-icon verified-yes">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6.5" fill="#dcfce7" stroke="#22c55e"/><path d="M4 7l2 2 4-4" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Verified
+                  </span>
+                } @else {
+                  <span class="verified-icon verified-no">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6.5" fill="#fee2e2" stroke="#ef4444"/><path d="M4.5 4.5l5 5M9.5 4.5l-5 5" stroke="#dc2626" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    Unverified
+                  </span>
+                }
+              </div>
+              <div class="user-card-date">{{ formatDate(user.createdAt) }}</div>
+              <div class="user-card-date">{{ user.lastLoginAt ? formatDate(user.lastLoginAt) : '—' }}</div>
+              <div class="user-card-actions">
+                @if (user.deletedAt) {
+                  <button class="uact-btn uact-restore" (click)="openModal('restore', user)">Restore</button>
+                } @else {
+                  <button class="uact-btn uact-edit" (click)="openModal('edit', user)">Edit</button>
+                  <button class="uact-btn uact-reset" (click)="openModal('force-reset', user)">Reset PW</button>
+                  <button class="uact-btn uact-delete" (click)="openModal('delete', user)">Delete</button>
+                }
+              </div>
+            </div>
+          } @empty {
+            <div class="user-card-empty">No users found.</div>
+          }
         </div>
 
         <div class="pagination">
@@ -315,6 +328,13 @@ export class AdminUsersPageComponent implements OnInit {
     if (mode === 'delete') return 'Deactivate Account';
     if (mode === 'restore') return 'Restore Account';
     return 'Send Reset Email';
+  }
+
+  protected avatarInitials(user: AdminUserRecord): string {
+    if (user.fullName) {
+      return user.fullName.split(' ').slice(0, 2).map((n) => n[0]).join('').toUpperCase();
+    }
+    return user.email[0].toUpperCase();
   }
 
   protected roleLabel(role: string): string {

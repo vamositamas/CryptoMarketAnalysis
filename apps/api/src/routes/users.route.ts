@@ -23,6 +23,12 @@ import {
   RecentChartsService,
   type RecentChartsResponse,
 } from '../services/recent-charts.service';
+import {
+  FavouriteChartsError,
+  FavouriteChartsService,
+  type FavouriteChartsResponse,
+  type ToggleFavouriteResponse,
+} from '../services/favourite-charts.service';
 
 export interface UserProfileManager {
   getProfile(userId: string): Promise<UserProfileResponse>;
@@ -48,11 +54,17 @@ export interface RecentChartsManager {
   listRecent(userId: string): Promise<RecentChartsResponse>;
 }
 
+export interface FavouriteChartsManager {
+  toggle(userId: string, chartId: unknown): Promise<ToggleFavouriteResponse>;
+  list(userId: string): Promise<FavouriteChartsResponse>;
+}
+
 export function createUsersRouter(
   userProfileService: UserProfileManager = new UserProfileService(),
   tokenInvalidations?: TokenInvalidationReader,
   chartAnnotationService: ChartAnnotationManager = new ChartAnnotationService(),
   recentChartsService: RecentChartsManager = new RecentChartsService(),
+  favouriteChartsService: FavouriteChartsManager = new FavouriteChartsService(),
 ): Router {
   const router = Router();
 
@@ -173,6 +185,29 @@ export function createUsersRouter(
     }
   });
 
+  router.post('/me/favourite-charts', requireAuth(tokenInvalidations), async (req, res, next) => {
+    try {
+      const response = await favouriteChartsService.toggle(
+        (req as AuthenticatedRequest).user?.userId ?? '',
+        req.body?.chartId,
+      );
+      res.status(200).json(response);
+    } catch (error) {
+      handleFavouriteChartsError(error, res, next);
+    }
+  });
+
+  router.get('/me/favourite-charts', requireAuth(tokenInvalidations), async (req, res, next) => {
+    try {
+      const response = await favouriteChartsService.list(
+        (req as AuthenticatedRequest).user?.userId ?? '',
+      );
+      res.status(200).json(response);
+    } catch (error) {
+      handleFavouriteChartsError(error, res, next);
+    }
+  });
+
   return router;
 }
 
@@ -214,3 +249,17 @@ function handleRecentChartsError(
 
   next(error);
 }
+
+function handleFavouriteChartsError(
+  error: unknown,
+  res: Response,
+  next: NextFunction,
+): void {
+  if (error instanceof FavouriteChartsError) {
+    res.status(error.statusCode).json({ error: error.message });
+    return;
+  }
+
+  next(error);
+}
+

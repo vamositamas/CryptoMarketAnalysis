@@ -21,7 +21,7 @@ export class OnboardingCarouselComponent {
 
   protected readonly slides: readonly OnboardingSlide[] = [
     {
-      headline: $localize`:Onboarding slide 1 headline@@onboardingCarousel.slide1.headline:Welcome to CryptoMarketAnalysis`,
+      headline: $localize`:Onboarding slide 1 headline@@onboardingCarousel.slide1.headline:Welcome to BitWLab`,
       subheading: $localize`:Onboarding slide 1 subheading@@onboardingCarousel.slide1.subheading:Professional Bitcoin analysis tools, free forever`,
       body: $localize`:Onboarding slide 1 body@@onboardingCarousel.slide1.body:Follow cycle signals, valuation models, and on-chain context from a focused workspace built for long-term market decisions.`,
       visualLabel: $localize`:Onboarding slide 1 visual@@onboardingCarousel.slide1.visual:Cycle signal`,

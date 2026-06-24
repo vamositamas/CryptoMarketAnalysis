@@ -110,6 +110,7 @@ export class DashboardService {
       | 'getLatestCirculatingSupply'
       | 'getLatestMarketCap'
       | 'getLatestFormulaVariables'
+      | 'getLastRefreshTimestamp'
     >,
   ) {}
 
@@ -120,9 +121,18 @@ export class DashboardService {
       widgets = await this.widgetRepository.createMany(userId, DEFAULT_WIDGETS);
     }
 
-    const widgetResponses = await Promise.all(
-      widgets.map((widget) => this.buildWidgetResponse(widget)),
-    );
+    const [widgetResponses, refreshTimestamp] = await Promise.all([
+      Promise.all(widgets.map((widget) => this.buildWidgetResponse(widget, null))),
+      this.metricsRepository.getLastRefreshTimestamp(),
+    ]);
+
+    if (refreshTimestamp) {
+      for (const w of widgetResponses) {
+        if (w.lastUpdated !== null && w.type !== 'total_supply') {
+          w.lastUpdated = refreshTimestamp;
+        }
+      }
+    }
 
     return { widgets: widgetResponses };
   }
@@ -242,7 +252,7 @@ export class DashboardService {
     return this.buildWidgetResponse(widget);
   }
 
-  private async buildWidgetResponse(widget: DashboardWidgetRecord): Promise<DashboardWidgetResponse> {
+  private async buildWidgetResponse(widget: DashboardWidgetRecord, _refreshTimestamp?: string | null): Promise<DashboardWidgetResponse> {
     const config = parseWidgetConfig(widget.widgetConfig, widget.widgetType);
 
     if (widget.widgetType === 'custom') {
@@ -262,7 +272,7 @@ export class DashboardService {
         formattedValue: `${progressPct.toFixed(1)}%`,
         trend: 'up',
         trendPercent: null,
-        lastUpdated: new Date().toISOString(),
+        lastUpdated: null,
       };
     }
 

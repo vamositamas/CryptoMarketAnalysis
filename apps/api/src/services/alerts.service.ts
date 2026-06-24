@@ -32,7 +32,6 @@ const VALID_CHART_IDS = [
   'price-forecast-tools',
   'stock-to-income',
 ] as const;
-const MAX_ALERTS_FREE_TIER = 5;
 
 const CHART_TITLES: Record<string, string> = {
   'bitcoin-rainbow':    'Bitcoin Rainbow Price Chart',
@@ -123,16 +122,6 @@ export class AlertsService {
       throw new AlertsError('alertName must not exceed 255 characters', 400);
     }
 
-    if (userRole === 'free_user') {
-      const count = await this.repository.countActiveForUser(userId);
-      if (count >= MAX_ALERTS_FREE_TIER) {
-        throw new AlertsError(
-          'Free users can create maximum 5 alerts. Upgrade to Premium for unlimited alerts.',
-          403,
-        );
-      }
-    }
-
     return this.repository.create(userId, {
       chartId: chartId.trim(),
       metricName: metricName.trim(),
@@ -173,13 +162,11 @@ export class AlertsService {
     return { ...alert, chartTitle: CHART_TITLES[alert.chartId] ?? alert.chartId };
   }
 
-  async listAlerts(userId: string, userRole: string): Promise<AlertsListResponse> {
+  async listAlerts(userId: string): Promise<AlertsListResponse> {
     const [alerts, used] = await Promise.all([
       this.repository.listForUser(userId),
       this.repository.countForUser(userId),
     ]);
-
-    const unlimited = userRole !== 'free_user';
 
     return {
       alerts: alerts.map((alert) => ({
@@ -188,8 +175,8 @@ export class AlertsService {
       })),
       alertLimit: {
         used,
-        max: unlimited ? null : MAX_ALERTS_FREE_TIER,
-        unlimited,
+        max: null,
+        unlimited: true,
       },
     };
   }

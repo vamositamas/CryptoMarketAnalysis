@@ -13,14 +13,14 @@ const PRESET_AMOUNTS = [5, 10, 25] as const;
       <div class="modal-panel donate-modal-panel">
         <button class="modal-close" type="button" aria-label="Close" (click)="closed.emit()">✕</button>
 
-        <h2 id="donate-modal-title">Support CryptoMarketAnalysis</h2>
-        <p class="donate-sub">Help keep professional Bitcoin analysis free for everyone.</p>
+        <h2 id="donate-modal-title">Support BitWLab</h2>
+        <p class="donate-sub">BitWLab is free, built on open data, and has no ads. If it helps your research, a donation keeps it running.</p>
 
         <ul class="donate-benefits">
-          <li>Unlimited price alerts (free tier is capped at 5)</li>
-          <li>Access to future premium charts</li>
-          <li>Priority support</li>
+          <li>Help cover server and data costs</li>
+          <li>Keep all charts and tools free for everyone</li>
           <li>Recognition as a platform supporter</li>
+          <li>Support independent Bitcoin research tooling</li>
         </ul>
 
         <div class="donate-amounts">
@@ -68,14 +68,11 @@ const PRESET_AMOUNTS = [5, 10, 25] as const;
         <div class="donate-actions">
           <button
             type="button"
-            class="primary-button"
+            class="primary-button paypal"
             [disabled]="isProcessing() || !isAmountValid()"
             (click)="donate()"
           >
             {{ isProcessing() ? 'Processing...' : 'Donate via PayPal' }}
-          </button>
-          <button type="button" class="ghost-link" (click)="closed.emit()">
-            Continue as Free User
           </button>
         </div>
       </div>
