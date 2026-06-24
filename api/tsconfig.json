@@ -1,0 +1,15 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2020",
+    "esModuleInterop": true,
+    "types": ["node"],
+    "outDir": "../dist/api"
+  },
+  "include": [
+    "*.ts",
+    "../apps/api/src/**/*.ts",
+    "../libs/**/*.ts"
+  ]
+}
