@@ -453,8 +453,15 @@ main button {
 
 .primary-link,
 main button {
-  color: #ffffff;
-  background: #145c4b;
+  color: #344540;
+  background: #f7f8f4;
+  border-color: #e5ebe7;
+}
+
+.primary-link:hover,
+main button:hover:not(:disabled) {
+  background: #edf2ee;
+  border-color: #c8d8cc;
 }
 
 main button:disabled {
@@ -1914,6 +1921,28 @@ main .alert-card-actions {
   align-items: center;
 }
 
+main .alert-create-panel {
+  background: #fff;
+  border: 1.5px solid #e5ebe7;
+  border-radius: 12px;
+  padding: 20px 24px 24px;
+  margin-bottom: 24px;
+}
+
+main .alert-create-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 16px;
+}
+
+main .alert-create-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
 main .alert-edit-panel {
   display: flex;
   flex-direction: column;
@@ -1953,13 +1982,13 @@ main .alert-edit-actions {
   padding-top: 4px;
 }
 main .alert-action-primary {
-  background: #1a56a4;
+  background: #145c4b;
   color: #fff;
-  border-color: #1a56a4;
+  border-color: #145c4b;
 }
 main .alert-action-primary:hover {
-  background: #134588;
-  border-color: #134588;
+  background: #0e4034;
+  border-color: #0e4034;
 }
 
 main .alert-status-badge {
@@ -1994,9 +2023,10 @@ main .alert-action-btn {
   font-weight: 500;
   cursor: pointer;
   color: #344540;
+  min-height: unset;
   transition: background 0.12s, border-color 0.12s;
 }
-main .alert-action-btn:hover {
+main .alert-action-btn:hover:not(:disabled) {
   background: #edf2ee;
   border-color: #c8d8cc;
 }
@@ -3922,16 +3952,16 @@ main .halving-spiral-chart-page {
   justify-content: center;
   padding: 0 20px;
   height: 40px;
-  background: #1a4731;
-  color: #fff;
-  border: none;
+  background: #f7f8f4;
+  color: #344540;
+  border: 1.5px solid #e5ebe7;
   border-radius: 8px;
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, border-color 0.15s;
 
-  &:hover:not(:disabled) { background: #15392a; }
+  &:hover:not(:disabled) { background: #edf2ee; border-color: #c8d8cc; }
   &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 

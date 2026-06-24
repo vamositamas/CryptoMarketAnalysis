@@ -1,6 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import {
   ApiClientError,
   AuthApiClient,
@@ -17,19 +17,91 @@ const CONDITION_LABELS: Record<string, string> = {
 };
 
 const METRIC_LABELS: Record<string, string> = {
-  rainbow_band: 'Szivárványsáv',
-  btc_price: 'BTC ár',
-  ma_111_day: '111-Day MA',
-  ma_350x2_day: '350-Day MA × 2',
-  stock_to_flow_ratio: 'Stock-to-Flow Ratio',
-  mvrv_zscore: 'MVRV Z-Score',
-  fear_greed_index: 'Félelem és kapzsiság index',
+  btc_price:               'BTC Price',
+  rainbow_band:            'Rainbow Band',
+  ma_111_day:              '111-Day MA',
+  ma_350_day:              '350-Day MA',
+  stock_to_flow_ratio:     'Stock-to-Flow Ratio',
+  mvrv_zscore:             'MVRV Z-Score',
+  fear_greed_index:        'Fear & Greed Index',
+  miners_revenue_usd:      'Miner Revenue (USD)',
+  vdd_multiple:            'VDD Multiple',
+  realized_price:          'Realized Price',
+  cvdd:                    'CVDD',
+  balanced_price:          'Balanced Price',
+  terminal_price:          'Terminal Price',
+  hash_rate:               'Hash Rate',
+  mining_difficulty:       'Mining Difficulty',
+  transaction_volume_usd:  'Transaction Volume',
+  coin_days_destroyed:     'Coin Days Destroyed',
+  excess_liquidity_leading:'Excess Liquidity',
+  spx_yoy_change:          'S&P 500 YoY Change',
+};
+
+const CHART_OPTIONS = [
+  { id: 'bitcoin-rainbow',    label: 'Bitcoin Rainbow Price Chart' },
+  { id: 'pi-cycle-top',       label: 'Pi Cycle Top Indicator' },
+  { id: 'stock-to-flow',      label: 'Stock-to-Flow Model' },
+  { id: 'mvrv-z-score',       label: 'MVRV Z-Score' },
+  { id: 'fear-greed-index',   label: 'Fear & Greed Index' },
+  { id: 'puell-multiple',     label: 'Puell Multiple' },
+  { id: 'mayer-multiple',     label: 'Mayer Multiple' },
+  { id: 'vdd-multiple',       label: 'VDD Multiple' },
+  { id: 'realized-price',     label: 'Realized Price' },
+  { id: 'bitcoin-cvdd',       label: 'Bitcoin CVDD' },
+  { id: 'bitcoin-power-law',  label: 'Bitcoin Power Law' },
+  { id: 'hash-ribbons',       label: 'Hash Ribbons' },
+  { id: 'difficulty-ribbon',  label: 'Difficulty Ribbon' },
+  { id: 'nvt-ratio',          label: 'NVT Ratio' },
+  { id: 'thermocap-multiple', label: 'Thermocap Multiple' },
+  { id: '200-week-ma-heatmap',label: '200-Week MA Heatmap' },
+  { id: '2yr-ma-multiplier',  label: '2-Year MA Multiplier' },
+  { id: 'price-forecast-tools',label: 'Price Forecast Tools' },
+  { id: 'stock-to-income',    label: 'Stock-to-Income' },
+];
+
+const CHART_METRICS: Record<string, { key: string; label: string }[]> = {
+  'bitcoin-rainbow':    [{ key: 'btc_price', label: 'BTC Price' }, { key: 'rainbow_band', label: 'Rainbow Band' }],
+  'pi-cycle-top':       [{ key: 'ma_111_day', label: '111-Day MA' }, { key: 'ma_350_day', label: '350-Day MA' }],
+  'stock-to-flow':      [{ key: 'stock_to_flow_ratio', label: 'Stock-to-Flow Ratio' }],
+  'mvrv-z-score':       [{ key: 'mvrv_zscore', label: 'MVRV Z-Score' }],
+  'fear-greed-index':   [{ key: 'fear_greed_index', label: 'Fear & Greed Index' }],
+  'puell-multiple':     [{ key: 'miners_revenue_usd', label: 'Miner Revenue (USD)' }],
+  'mayer-multiple':     [{ key: 'btc_price', label: 'BTC Price' }],
+  'vdd-multiple':       [{ key: 'vdd_multiple', label: 'VDD Multiple' }, { key: 'coin_days_destroyed', label: 'Coin Days Destroyed' }],
+  'realized-price':     [{ key: 'realized_price', label: 'Realized Price' }, { key: 'btc_price', label: 'BTC Price' }],
+  'bitcoin-cvdd':       [{ key: 'cvdd', label: 'CVDD' }, { key: 'balanced_price', label: 'Balanced Price' }, { key: 'terminal_price', label: 'Terminal Price' }],
+  'bitcoin-power-law':  [{ key: 'btc_price', label: 'BTC Price' }],
+  'hash-ribbons':       [{ key: 'hash_rate', label: 'Hash Rate' }],
+  'difficulty-ribbon':  [{ key: 'mining_difficulty', label: 'Mining Difficulty' }],
+  'nvt-ratio':          [{ key: 'transaction_volume_usd', label: 'Transaction Volume (USD)' }],
+  'thermocap-multiple': [{ key: 'miners_revenue_usd', label: 'Miner Revenue (USD)' }],
+  '200-week-ma-heatmap':[{ key: 'btc_price', label: 'BTC Price' }],
+  '2yr-ma-multiplier':  [{ key: 'btc_price', label: 'BTC Price' }],
+  'price-forecast-tools':[{ key: 'balanced_price', label: 'Balanced Price' }, { key: 'terminal_price', label: 'Terminal Price' }, { key: 'cvdd', label: 'CVDD' }],
+  'stock-to-income':    [{ key: 'stock_to_flow_ratio', label: 'Stock-to-Flow Ratio' }],
 };
 
 const CHART_URLS: Record<string, string> = {
-  'bitcoin-rainbow': '/charts/bitcoin-rainbow',
-  'pi-cycle-top': '/charts/pi-cycle-top',
-  'stock-to-flow': '/charts/stock-to-flow',
+  'bitcoin-rainbow':    '/charts/bitcoin-rainbow',
+  'pi-cycle-top':       '/charts/pi-cycle-top',
+  'stock-to-flow':      '/charts/stock-to-flow',
+  'mvrv-z-score':       '/charts/mvrv-z-score',
+  'fear-greed-index':   '/charts/fear-greed-index',
+  'puell-multiple':     '/charts/puell-multiple',
+  'mayer-multiple':     '/charts/mayer-multiple',
+  'vdd-multiple':       '/charts/vdd-multiple',
+  'realized-price':     '/charts/realized-price',
+  'bitcoin-cvdd':       '/charts/bitcoin-cvdd',
+  'bitcoin-power-law':  '/charts/bitcoin-power-law',
+  'hash-ribbons':       '/charts/hash-ribbons',
+  'difficulty-ribbon':  '/charts/difficulty-ribbon',
+  'nvt-ratio':          '/charts/nvt-ratio',
+  'thermocap-multiple': '/charts/thermocap-multiple',
+  '200-week-ma-heatmap':'/charts/200-week-ma-heatmap',
+  '2yr-ma-multiplier':  '/charts/2yr-ma-multiplier',
+  'price-forecast-tools':'/charts/price-forecast-tools',
+  'stock-to-income':    '/charts/stock-to-income',
 };
 
 @Component({
@@ -39,15 +111,17 @@ const CHART_URLS: Record<string, string> = {
     <section class="content-section alerts-page">
       <div class="alerts-page-header">
         <div>
-          <p class="eyebrow">Alerts</p>
-          <h2>My Alerts</h2>
+          <p class="eyebrow" i18n="Alerts eyebrow@@alerts.eyebrow">Alerts</p>
+          <h2 i18n="My alerts title@@alerts.title">My Alerts</h2>
           @if (alertsData()) {
             <p class="alerts-count-label">
-              {{ alertsData()!.alertLimit.used }} alert{{ alertsData()!.alertLimit.used === 1 ? '' : 's' }}
+              {{ alertsData()!.alertLimit.used }}
+              <ng-container i18n="Alert count label@@alerts.count"> alerts</ng-container>
             </p>
           }
         </div>
-        <a class="primary-link" routerLink="/charts">Create New Alert</a>
+        <button type="button" class="primary-link" (click)="openCreateForm()"
+          i18n="Create new alert button@@alerts.createNew">Create New Alert</button>
       </div>
 
       @if (successMessage()) {
@@ -55,6 +129,64 @@ const CHART_URLS: Record<string, string> = {
       }
       @if (errorMessage()) {
         <p class="form-message">{{ errorMessage() }}</p>
+      }
+
+      @if (showCreateForm()) {
+        <div class="alert-create-panel">
+          <h3 class="alert-create-title" i18n="Create alert panel title@@alerts.createTitle">New Alert</h3>
+          <div class="alert-create-grid">
+            <label class="alert-edit-label">
+              <span i18n="Alert name label@@alerts.alertName">Alert name</span>
+              <input class="alert-edit-input" type="text" [(ngModel)]="createDraft.alertName"
+                placeholder="My alert" i18n-placeholder="Alert name placeholder@@alerts.alertNamePlaceholder" />
+            </label>
+            <label class="alert-edit-label">
+              <span i18n="Chart label@@alerts.chart">Chart</span>
+              <select class="alert-edit-input" [ngModel]="createChartId()" (ngModelChange)="onChartChange($event)">
+                <option value="" i18n="Select chart option@@alerts.selectChart">Select chart…</option>
+                @for (c of chartOptions; track c.id) {
+                  <option [value]="c.id">{{ c.label }}</option>
+                }
+              </select>
+            </label>
+            <label class="alert-edit-label">
+              <span i18n="Metric label@@alerts.metric">Metric</span>
+              <select class="alert-edit-input" [(ngModel)]="createDraft.metricName" [disabled]="!createChartId()">
+                <option value="" i18n="Select metric option@@alerts.selectMetric">Select metric…</option>
+                @for (m of availableMetrics(); track m.key) {
+                  <option [value]="m.key">{{ m.label }}</option>
+                }
+              </select>
+            </label>
+            <label class="alert-edit-label">
+              <span i18n="Condition label@@alerts.condition">Condition</span>
+              <select class="alert-edit-input" [(ngModel)]="createDraft.condition">
+                <option value="crosses_above" i18n="Crosses above option@@alerts.crossesAbove">Crosses above</option>
+                <option value="crosses_below" i18n="Crosses below option@@alerts.crossesBelow">Crosses below</option>
+                <option value="greater_than" i18n="Greater than option@@alerts.greaterThan">Greater than</option>
+                <option value="less_than" i18n="Less than option@@alerts.lessThan">Less than</option>
+                <option value="equals" i18n="Equals option@@alerts.equals">Equals</option>
+              </select>
+            </label>
+            <label class="alert-edit-label">
+              <span i18n="Threshold label@@alerts.threshold">Threshold value</span>
+              <input class="alert-edit-input" type="number" [(ngModel)]="createDraft.thresholdValue" />
+            </label>
+          </div>
+          <div class="alert-edit-actions">
+            <button type="button" class="alert-action-btn alert-action-primary"
+              [disabled]="isCreating() || !createChartId() || !createDraft.metricName || !createDraft.alertName"
+              (click)="submitCreate()">
+              @if (isCreating()) {
+                <ng-container i18n="Creating state@@alerts.creating">Creating…</ng-container>
+              } @else {
+                <ng-container i18n="Create alert action@@alerts.create">Create alert</ng-container>
+              }
+            </button>
+            <button type="button" class="alert-action-btn" (click)="cancelCreate()"
+              i18n="Cancel button@@common.cancel">Cancel</button>
+          </div>
+        </div>
       }
 
       @if (!isLoading() && (alertsData()?.alerts?.length ?? 0) > 0) {
@@ -68,6 +200,7 @@ const CHART_URLS: Record<string, string> = {
               class="alerts-search-input"
               type="text"
               placeholder="Search alerts…"
+              i18n-placeholder="Search alerts placeholder@@alerts.search"
               [(ngModel)]="searchQuery"
             />
           </div>
@@ -85,15 +218,15 @@ const CHART_URLS: Record<string, string> = {
       }
 
       @if (isLoading()) {
-        <p class="alerts-loading">Loading alerts...</p>
+        <p class="alerts-loading" i18n="Loading alerts@@alerts.loading">Loading alerts…</p>
       } @else if (alertsData()?.alerts?.length === 0) {
         <div class="alerts-empty">
-          <p>You have no alerts yet.</p>
-          <p>Click <strong>Create New Alert</strong> to open any chart and set up your first alert.</p>
+          <p i18n="No alerts message@@alerts.empty">You have no alerts yet.</p>
+          <p i18n="No alerts hint@@alerts.emptyHint">Click <strong>Create New Alert</strong> above to set up your first alert.</p>
         </div>
       } @else {
         @if (filteredAlerts().length === 0) {
-          <p class="alerts-no-results">No alerts match your filter.</p>
+          <p class="alerts-no-results" i18n="No results@@alerts.noResults">No alerts match your filter.</p>
         }
         <div class="alerts-card-list">
           @for (alert of filteredAlerts(); track alert.id) {
@@ -102,34 +235,43 @@ const CHART_URLS: Record<string, string> = {
               <div class="alert-card-body">
                 @if (editTargetId() === alert.id) {
                   <div class="alert-edit-panel">
-                    <label class="alert-edit-label">Alert name
+                    <label class="alert-edit-label">
+                      <span i18n="Alert name label@@alerts.alertName">Alert name</span>
                       <input class="alert-edit-input" type="text" [(ngModel)]="editDraft.alertName" />
                     </label>
                     <div class="alert-edit-row">
-                      <label class="alert-edit-label">Condition
+                      <label class="alert-edit-label">
+                        <span i18n="Condition label@@alerts.condition">Condition</span>
                         <select class="alert-edit-input" [(ngModel)]="editDraft.condition">
-                          <option value="crosses_above">Crosses above</option>
-                          <option value="crosses_below">Crosses below</option>
-                          <option value="greater_than">Greater than</option>
-                          <option value="less_than">Less than</option>
-                          <option value="equals">Equals</option>
+                          <option value="crosses_above" i18n="Crosses above option@@alerts.crossesAbove">Crosses above</option>
+                          <option value="crosses_below" i18n="Crosses below option@@alerts.crossesBelow">Crosses below</option>
+                          <option value="greater_than" i18n="Greater than option@@alerts.greaterThan">Greater than</option>
+                          <option value="less_than" i18n="Less than option@@alerts.lessThan">Less than</option>
+                          <option value="equals" i18n="Equals option@@alerts.equals">Equals</option>
                         </select>
                       </label>
-                      <label class="alert-edit-label">Threshold
+                      <label class="alert-edit-label">
+                        <span i18n="Threshold label@@alerts.threshold">Threshold</span>
                         <input class="alert-edit-input" type="number" [(ngModel)]="editDraft.thresholdValue" />
                       </label>
-                      <label class="alert-edit-label">Status
+                      <label class="alert-edit-label">
+                        <span i18n="Status label@@alerts.status">Status</span>
                         <select class="alert-edit-input" [(ngModel)]="editDraft.status">
-                          <option value="active">Active</option>
-                          <option value="paused">Paused</option>
+                          <option value="active" i18n="Active option@@alerts.statusActive">Active</option>
+                          <option value="paused" i18n="Paused option@@alerts.statusPaused">Paused</option>
                         </select>
                       </label>
                     </div>
                     <div class="alert-edit-actions">
                       <button type="button" class="alert-action-btn alert-action-primary" [disabled]="isSaving()" (click)="saveEdit(alert.id)">
-                        {{ isSaving() ? 'Saving…' : 'Save changes' }}
+                        @if (isSaving()) {
+                          <ng-container i18n="Saving state@@common.saving">Saving…</ng-container>
+                        } @else {
+                          <ng-container i18n="Save changes@@common.saveChanges">Save changes</ng-container>
+                        }
                       </button>
-                      <button type="button" class="alert-action-btn" (click)="cancelEdit()">Cancel</button>
+                      <button type="button" class="alert-action-btn" (click)="cancelEdit()"
+                        i18n="Cancel button@@common.cancel">Cancel</button>
                     </div>
                   </div>
                 } @else {
@@ -155,20 +297,31 @@ const CHART_URLS: Record<string, string> = {
                     <div class="alert-card-actions">
                       @if (deleteTargetId() === alert.id) {
                         <span class="alert-confirm-delete">
-                          Sure?
+                          <ng-container i18n="Confirm delete prompt@@alerts.confirmDelete">Sure?</ng-container>
                           <button type="button" class="alert-action-btn alert-action-danger" [disabled]="isDeleting()" (click)="confirmDelete(alert.id)">
-                            {{ isDeleting() ? 'Deleting…' : 'Yes, delete' }}
+                            @if (isDeleting()) {
+                              <ng-container i18n="Deleting state@@alerts.deleting">Deleting…</ng-container>
+                            } @else {
+                              <ng-container i18n="Yes delete@@alerts.yesDelete">Yes, delete</ng-container>
+                            }
                           </button>
-                          <button type="button" class="alert-action-btn" (click)="cancelDelete()">Cancel</button>
+                          <button type="button" class="alert-action-btn" (click)="cancelDelete()"
+                            i18n="Cancel button@@common.cancel">Cancel</button>
                         </span>
                       } @else {
                         @if (alert.status === 'triggered') {
                           <button type="button" class="alert-action-btn" [disabled]="isResetting() === alert.id" (click)="resetAlert(alert)">
-                            {{ isResetting() === alert.id ? 'Resetting…' : 'Reset' }}
+                            @if (isResetting() === alert.id) {
+                              <ng-container i18n="Resetting state@@alerts.resetting">Resetting…</ng-container>
+                            } @else {
+                              <ng-container i18n="Reset button@@alerts.reset">Reset</ng-container>
+                            }
                           </button>
                         }
-                        <button type="button" class="alert-action-btn" (click)="openEdit(alert)">Edit</button>
-                        <button type="button" class="alert-action-btn alert-action-danger" (click)="requestDelete(alert.id)">Delete</button>
+                        <button type="button" class="alert-action-btn" (click)="openEdit(alert)"
+                          i18n="Edit button@@common.edit">Edit</button>
+                        <button type="button" class="alert-action-btn alert-action-danger" (click)="requestDelete(alert.id)"
+                          i18n="Delete button@@common.delete">Delete</button>
                       }
                     </div>
                   </div>
@@ -191,16 +344,32 @@ export class AlertsPageComponent implements OnInit {
   protected readonly isResetting = signal<string | null>(null);
   protected readonly editTargetId = signal<string | null>(null);
   protected readonly isSaving = signal(false);
-  protected editDraft: { alertName: string; condition: string; thresholdValue: number; status: string } = { alertName: '', condition: '', thresholdValue: 0, status: 'active' };
+  protected readonly showCreateForm = signal(false);
+  protected readonly isCreating = signal(false);
+
+  protected editDraft: { alertName: string; condition: string; thresholdValue: number; status: string } =
+    { alertName: '', condition: '', thresholdValue: 0, status: 'active' };
+
+  protected createDraft: { alertName: string; metricName: string; condition: string; thresholdValue: number } =
+    { alertName: '', metricName: '', condition: 'crosses_above', thresholdValue: 0 };
+
+  protected readonly createChartId = signal('');
+
+  protected readonly chartOptions = CHART_OPTIONS;
+
+  protected readonly availableMetrics = computed(() =>
+    CHART_METRICS[this.createChartId()] ?? [],
+  );
 
   protected searchQuery = '';
   protected readonly statusFilter = signal<'all' | 'active' | 'triggered' | 'paused'>('all');
   protected readonly statusOptions = [
-    { label: 'Mind', value: 'all' as const },
-    { label: 'Active', value: 'active' as const },
-    { label: 'Triggered', value: 'triggered' as const },
-    { label: 'Paused', value: 'paused' as const },
+    { label: $localize`:All filter@@alerts.filterAll:All`, value: 'all' as const },
+    { label: $localize`:Active filter@@alerts.filterActive:Active`, value: 'active' as const },
+    { label: $localize`:Triggered filter@@alerts.filterTriggered:Triggered`, value: 'triggered' as const },
+    { label: $localize`:Paused filter@@alerts.filterPaused:Paused`, value: 'paused' as const },
   ];
+
   protected readonly filteredAlerts = computed(() => {
     const q = this.searchQuery.toLowerCase().trim();
     const status = this.statusFilter();
@@ -212,15 +381,8 @@ export class AlertsPageComponent implements OnInit {
   });
 
   private readonly api = inject(AuthApiClient);
-  private readonly router = inject(Router);
 
   ngOnInit(): void {
-    const nav = this.router.getCurrentNavigation();
-    const message = nav?.extras?.state?.['successMessage'];
-    if (typeof message === 'string') {
-      this.successMessage.set(message);
-    }
-
     void this.loadAlerts();
   }
 
@@ -241,12 +403,59 @@ export class AlertsPageComponent implements OnInit {
   protected formatRelativeTime(isoString: string): string {
     const diffMs = Date.now() - new Date(isoString).getTime();
     const diffMins = Math.floor(diffMs / 60_000);
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins} minute${diffMins === 1 ? '' : 's'} ago`;
+    if (diffMins < 1) return $localize`:Just now@@time.justNow:Just now`;
+    if (diffMins < 60) return $localize`:Minutes ago@@time.minutesAgo:${diffMins}:count: minute${diffMins === 1 ? '' : 's'} ago`;
     const diffHours = Math.floor(diffMins / 60);
-    if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+    if (diffHours < 24) return $localize`:Hours ago@@time.hoursAgo:${diffHours}:count: hour${diffHours === 1 ? '' : 's'} ago`;
     const diffDays = Math.floor(diffHours / 24);
-    return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+    return $localize`:Days ago@@time.daysAgo:${diffDays}:count: day${diffDays === 1 ? '' : 's'} ago`;
+  }
+
+  protected openCreateForm(): void {
+    this.createDraft = { alertName: '', metricName: '', condition: 'crosses_above', thresholdValue: 0 };
+    this.createChartId.set('');
+    this.showCreateForm.set(true);
+    this.errorMessage.set('');
+  }
+
+  protected cancelCreate(): void {
+    this.showCreateForm.set(false);
+  }
+
+  protected onChartChange(chartId: string): void {
+    this.createChartId.set(chartId);
+    this.createDraft.metricName = '';
+  }
+
+  protected async submitCreate(): Promise<void> {
+    if (!this.createChartId() || !this.createDraft.metricName || !this.createDraft.alertName) return;
+    this.isCreating.set(true);
+    this.errorMessage.set('');
+    try {
+      const created = await this.api.createAlert({
+        chartId: this.createChartId(),
+        metricName: this.createDraft.metricName,
+        condition: this.createDraft.condition as never,
+        thresholdValue: this.createDraft.thresholdValue,
+        alertName: this.createDraft.alertName,
+      });
+      const current = this.alertsData();
+      if (current) {
+        this.alertsData.set({
+          alerts: [{ ...created, chartTitle: CHART_OPTIONS.find((c) => c.id === created.chartId)?.label ?? created.chartId, triggeredAt: null, lastEvaluatedAt: null }, ...current.alerts],
+          alertLimit: { ...current.alertLimit, used: current.alertLimit.used + 1 },
+        });
+      }
+      this.showCreateForm.set(false);
+      this.successMessage.set($localize`:Alert created@@alerts.created:Alert created successfully.`);
+      setTimeout(() => this.successMessage.set(''), 3000);
+    } catch (error) {
+      this.errorMessage.set(
+        error instanceof ApiClientError ? error.message : $localize`:Create alert error@@alerts.createError:Could not create alert. Please try again.`,
+      );
+    } finally {
+      this.isCreating.set(false);
+    }
   }
 
   protected openEdit(alert: AlertWithTitle): void {
@@ -282,11 +491,11 @@ export class AlertsPageComponent implements OnInit {
         });
       }
       this.editTargetId.set(null);
-      this.successMessage.set('Alert updated.');
+      this.successMessage.set($localize`:Alert updated@@alerts.updated:Alert updated.`);
       setTimeout(() => this.successMessage.set(''), 3000);
     } catch (error) {
       this.errorMessage.set(
-        error instanceof ApiClientError ? error.message : 'Could not save alert. Please try again.',
+        error instanceof ApiClientError ? error.message : $localize`:Save alert error@@alerts.saveError:Could not save alert. Please try again.`,
       );
     } finally {
       this.isSaving.set(false);
@@ -304,7 +513,6 @@ export class AlertsPageComponent implements OnInit {
   protected async confirmDelete(alertId: string): Promise<void> {
     this.isDeleting.set(true);
     this.errorMessage.set('');
-
     try {
       await this.api.deleteAlert(alertId);
       const current = this.alertsData();
@@ -318,7 +526,7 @@ export class AlertsPageComponent implements OnInit {
       this.deleteTargetId.set(null);
     } catch (error) {
       this.errorMessage.set(
-        error instanceof ApiClientError ? error.message : 'Could not delete alert. Please try again.',
+        error instanceof ApiClientError ? error.message : $localize`:Delete alert error@@alerts.deleteError:Could not delete alert. Please try again.`,
       );
     } finally {
       this.isDeleting.set(false);
@@ -328,7 +536,6 @@ export class AlertsPageComponent implements OnInit {
   protected async resetAlert(alert: AlertWithTitle): Promise<void> {
     this.isResetting.set(alert.id);
     this.errorMessage.set('');
-
     try {
       const updated = await this.api.resetAlert(alert.id);
       const current = this.alertsData();
@@ -342,7 +549,7 @@ export class AlertsPageComponent implements OnInit {
       }
     } catch (error) {
       this.errorMessage.set(
-        error instanceof ApiClientError ? error.message : 'Could not reset alert. Please try again.',
+        error instanceof ApiClientError ? error.message : $localize`:Reset alert error@@alerts.resetError:Could not reset alert. Please try again.`,
       );
     } finally {
       this.isResetting.set(null);
@@ -355,7 +562,7 @@ export class AlertsPageComponent implements OnInit {
       this.alertsData.set(await this.api.getAlerts());
     } catch (error) {
       this.errorMessage.set(
-        error instanceof ApiClientError ? error.message : 'Could not load alerts. Please try again.',
+        error instanceof ApiClientError ? error.message : $localize`:Load alerts error@@alerts.loadError:Could not load alerts. Please try again.`,
       );
     } finally {
       this.isLoading.set(false);

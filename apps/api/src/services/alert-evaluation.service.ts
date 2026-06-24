@@ -44,13 +44,25 @@ const METRIC_MULTIPLIERS: Record<string, number> = {
 };
 
 const METRIC_LABELS: Record<string, string> = {
-  rainbow_band: 'Rainbow Band',
-  btc_price: 'BTC Price (USD)',
-  ma_111_day: '111-Day Moving Average',
-  ma_350x2_day: '350-Day MA × 2',
-  stock_to_flow_ratio: 'Stock-to-Flow Ratio',
-  mvrv_zscore: 'MVRV Z-Score',
-  fear_greed_index: 'Fear & Greed Index',
+  btc_price:               'BTC Price (USD)',
+  rainbow_band:            'Rainbow Band',
+  ma_111_day:              '111-Day Moving Average',
+  ma_350_day:              '350-Day Moving Average',
+  stock_to_flow_ratio:     'Stock-to-Flow Ratio',
+  mvrv_zscore:             'MVRV Z-Score',
+  fear_greed_index:        'Fear & Greed Index',
+  miners_revenue_usd:      'Miner Revenue (USD)',
+  vdd_multiple:            'VDD Multiple',
+  realized_price:          'Realized Price',
+  cvdd:                    'CVDD',
+  balanced_price:          'Balanced Price',
+  terminal_price:          'Terminal Price',
+  hash_rate:               'Hash Rate',
+  mining_difficulty:       'Mining Difficulty',
+  transaction_volume_usd:  'Transaction Volume (USD)',
+  coin_days_destroyed:     'Coin Days Destroyed',
+  excess_liquidity_leading:'Excess Liquidity',
+  spx_yoy_change:          'S&P 500 YoY Change',
 };
 
 const CONDITION_LABELS: Record<string, string> = {
