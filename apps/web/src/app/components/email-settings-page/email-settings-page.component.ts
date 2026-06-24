@@ -10,8 +10,8 @@ import { ApiClientError, AuthApiClient, type EmailTemplate } from '@crypto-marke
   template: `
     <section class="content-section">
       <div class="section-heading" style="margin-bottom:24px">
-        <p class="eyebrow">Admin</p>
-        <h2>Email Settings</h2>
+        <p class="eyebrow" i18n="Admin eyebrow@@admin.common.eyebrow">Admin</p>
+        <h2 i18n="Email settings title@@emailSettings.title">Email Settings</h2>
       </div>
 
       @if (message()) {
@@ -21,37 +21,37 @@ import { ApiClientError, AuthApiClient, type EmailTemplate } from '@crypto-marke
       <!-- SMTP Settings -->
       <div class="es-card">
         <div class="es-card-head">
-          <h3 class="es-card-title">Email Sending Settings</h3>
-          <p class="es-card-sub">Configure SMTP to send emails. Leave SMTP Host blank to fall back to Resend API.</p>
+          <h3 class="es-card-title" i18n="Email sending settings title@@emailSettings.sending.title">Email Sending Settings</h3>
+          <p class="es-card-sub" i18n="Email sending settings subtitle@@emailSettings.sending.subtitle">Configure SMTP to send emails. Leave SMTP Host blank to fall back to Resend API.</p>
         </div>
 
         @if (isLoading()) {
-          <p class="loading-text">Loading…</p>
+          <p class="loading-text" i18n="Loading state@@common.loading">Loading...</p>
         } @else {
           <div class="es-grid">
             <div class="es-field">
-              <label class="es-label">SMTP Host</label>
+              <label class="es-label" i18n="SMTP host label@@emailSettings.smtpHost">SMTP Host</label>
               <input class="es-input" type="text" [(ngModel)]="form.smtpHost" placeholder="smtp.resend.com" />
             </div>
             <div class="es-field">
-              <label class="es-label">SMTP Port</label>
+              <label class="es-label" i18n="SMTP port label@@emailSettings.smtpPort">SMTP Port</label>
               <input class="es-input" type="number" [(ngModel)]="form.smtpPort" placeholder="587" />
             </div>
             <div class="es-field">
-              <label class="es-label">SMTP User</label>
+              <label class="es-label" i18n="SMTP user label@@emailSettings.smtpUser">SMTP User</label>
               <input class="es-input" type="text" [(ngModel)]="form.smtpUser" placeholder="resend" />
             </div>
             <div class="es-field">
-              <label class="es-label">From Email</label>
+              <label class="es-label" i18n="From email label@@email.fromEmail">From Email</label>
               <input class="es-input" type="email" [(ngModel)]="form.fromAddress" placeholder="noreply@bitwlab.com" />
             </div>
             <div class="es-field es-field--full">
-              <label class="es-label">SMTP Password</label>
+              <label class="es-label" i18n="SMTP password label@@emailSettings.smtpPassword">SMTP Password</label>
               <input class="es-input" type="password" [(ngModel)]="form.smtpPassword"
-                [placeholder]="smtpPasswordConfigured() ? 'Leave empty to keep current password' : 'Enter SMTP password'"
+                [placeholder]="smtpPasswordConfigured() ? keepPasswordPlaceholder() : enterPasswordPlaceholder()"
                 autocomplete="new-password" />
               @if (smtpPasswordConfigured()) {
-                <span class="es-hint ok">Password is configured.</span>
+                <span class="es-hint ok" i18n="SMTP password configured hint@@emailSettings.passwordConfigured">Password is configured.</span>
               }
             </div>
           </div>
@@ -60,18 +60,18 @@ import { ApiClientError, AuthApiClient, type EmailTemplate } from '@crypto-marke
 
           <div class="es-grid es-grid--secondary">
             <div class="es-field">
-              <label class="es-label">Admin Alert Email</label>
+              <label class="es-label" i18n="Admin alert email label@@emailSettings.adminAlertEmail">Admin Alert Email</label>
               <input class="es-input" type="email" [(ngModel)]="form.adminEmail" placeholder="admin@bitwlab.com" />
             </div>
             <div class="es-field">
-              <label class="es-label">App URL</label>
+              <label class="es-label" i18n="App URL label@@email.appUrl">App URL</label>
               <input class="es-input" type="url" [(ngModel)]="form.appUrl" placeholder="https://bitwlab.com" />
             </div>
           </div>
 
           <div class="es-actions">
             <button class="btn-primary" [disabled]="isSaving()" (click)="saveSettings()">
-              {{ isSaving() ? 'Saving…' : 'Save' }}
+              {{ isSaving() ? savingLabel() : saveLabel() }}
             </button>
           </div>
         }
@@ -80,29 +80,29 @@ import { ApiClientError, AuthApiClient, type EmailTemplate } from '@crypto-marke
       <!-- Send Test Email -->
       <div class="es-card">
         <div class="es-card-head">
-          <h3 class="es-card-title">Send Test Email</h3>
-          <p class="es-card-sub">Send a sample email to verify your configuration is working.</p>
+          <h3 class="es-card-title" i18n="Send test email title@@emailSettings.test.title">Send Test Email</h3>
+          <p class="es-card-sub" i18n="Send test email subtitle@@emailSettings.test.subtitle">Send a sample email to verify your configuration is working.</p>
         </div>
 
         <div class="es-grid">
           <div class="es-field">
-            <label class="es-label">Template</label>
+            <label class="es-label" i18n="Template label@@emailSettings.test.template">Template</label>
             <select class="es-input es-select" [(ngModel)]="testTemplateKey">
               @for (t of templates(); track t.key) {
                 @if (!t.key.endsWith('_subject')) {
-                  <option [value]="t.key">{{ t.label }}</option>
+                  <option [value]="t.key">{{ templateLabel(t) }}</option>
                 }
               }
             </select>
           </div>
           <div class="es-field">
-            <label class="es-label">Recipient Email</label>
+            <label class="es-label" i18n="Recipient email label@@emailSettings.test.recipientEmail">Recipient Email</label>
             <input class="es-input" type="email" [(ngModel)]="testRecipient" placeholder="test@example.com" />
           </div>
         </div>
         <div class="es-actions">
           <button class="btn-secondary" [disabled]="isSendingTest() || !testRecipient" (click)="sendTest()">
-            {{ isSendingTest() ? 'Sending…' : 'Send Test Email' }}
+            {{ isSendingTest() ? sendingLabel() : sendTestEmailLabel() }}
           </button>
         </div>
       </div>
@@ -111,10 +111,10 @@ import { ApiClientError, AuthApiClient, type EmailTemplate } from '@crypto-marke
       <div class="es-card es-card--subtle">
         <div class="es-card-link-row">
           <div>
-            <h3 class="es-card-title">Email Templates</h3>
-            <p class="es-card-sub">Customise the HTML body and subject line for each email type.</p>
+            <h3 class="es-card-title" i18n="Email templates title@@emailTemplates.title">Email Templates</h3>
+            <p class="es-card-sub" i18n="Email templates card subtitle@@emailSettings.templates.subtitle">Customise the HTML body and subject line for each email type.</p>
           </div>
-          <a class="btn-primary" routerLink="/admin/email-templates">Edit Templates →</a>
+          <a class="btn-primary" routerLink="/admin/email-templates" i18n="Edit templates button@@emailSettings.templates.edit">Edit Templates →</a>
         </div>
       </div>
 
@@ -189,10 +189,10 @@ export class EmailSettingsPageComponent implements OnInit {
       });
       this.form.smtpPassword = '';
       if (this.form.smtpUser) this.smtpPasswordConfigured.set(true);
-      this.showMessage('Settings saved successfully.', true);
+      this.showMessage($localize`:Email settings saved@@emailSettings.messages.saved:Settings saved successfully.`, true);
       void this.loadSettings();
     } catch (error) {
-      this.showMessage(error instanceof ApiClientError ? error.message : 'Could not save settings.', false);
+      this.showMessage(error instanceof ApiClientError ? error.message : $localize`:Email settings save failed@@emailSettings.messages.saveFailed:Could not save settings.`, false);
     } finally {
       this.isSaving.set(false);
     }
@@ -203,9 +203,9 @@ export class EmailSettingsPageComponent implements OnInit {
     this.isSendingTest.set(true);
     try {
       const result = await this.api.adminSendTestEmail(this.testTemplateKey, this.testRecipient);
-      this.showMessage(result.message || `Test email sent to ${this.testRecipient}.`, true);
+      this.showMessage(result.message || $localize`:Test email sent@@emailSettings.messages.testSent:Test email sent to ${this.testRecipient}.`, true);
     } catch (error) {
-      this.showMessage(error instanceof ApiClientError ? error.message : 'Could not send test email.', false);
+      this.showMessage(error instanceof ApiClientError ? error.message : $localize`:Test email failed@@emailSettings.messages.testFailed:Could not send test email.`, false);
     } finally {
       this.isSendingTest.set(false);
     }
@@ -240,5 +240,39 @@ export class EmailSettingsPageComponent implements OnInit {
     this.message.set(msg);
     this.isSuccess.set(success);
     setTimeout(() => this.message.set(''), 4000);
+  }
+
+  protected keepPasswordPlaceholder(): string {
+    return $localize`:Keep SMTP password placeholder@@emailSettings.keepPasswordPlaceholder:Leave empty to keep current password`;
+  }
+
+  protected enterPasswordPlaceholder(): string {
+    return $localize`:Enter SMTP password placeholder@@emailSettings.enterPasswordPlaceholder:Enter SMTP password`;
+  }
+
+  protected savingLabel(): string {
+    return $localize`:Saving state@@common.saving:Saving...`;
+  }
+
+  protected saveLabel(): string {
+    return $localize`:Save button@@common.save:Save`;
+  }
+
+  protected sendingLabel(): string {
+    return $localize`:Sending state@@common.sending:Sending...`;
+  }
+
+  protected sendTestEmailLabel(): string {
+    return $localize`:Send test email button@@emailSettings.test.sendButton:Send Test Email`;
+  }
+
+  protected templateLabel(template: EmailTemplate): string {
+    if (template.key === 'alert_triggered_en_html') {
+      return $localize`:Alert triggered English HTML template@@emailTemplates.labels.alertTriggeredEnHtml:Alert Triggered - English HTML Body`;
+    }
+    if (template.key === 'alert_triggered_hu_html') {
+      return $localize`:Alert triggered Hungarian HTML template@@emailTemplates.labels.alertTriggeredHuHtml:Alert Triggered - Hungarian HTML Body`;
+    }
+    return template.label;
   }
 }

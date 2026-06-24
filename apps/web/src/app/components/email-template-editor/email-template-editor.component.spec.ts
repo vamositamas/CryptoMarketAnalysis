@@ -4,8 +4,8 @@ import { AuthApiClient, type EmailTemplate } from '@crypto-market-analysis/data-
 import { EmailTemplateEditorComponent } from './email-template-editor.component';
 
 const mockHtmlTemplate: EmailTemplate = {
-  key: 'alert_triggered_html',
-  label: 'Alert Triggered — HTML Body',
+  key: 'alert_triggered_en_html',
+  label: 'Alert Triggered — HTML Body (EN)',
   value: '<h2>Alert Triggered: {{alertName}}</h2>',
   isCustom: false,
   updatedAt: null,
@@ -13,8 +13,8 @@ const mockHtmlTemplate: EmailTemplate = {
 };
 
 const mockSubjectTemplate: EmailTemplate = {
-  key: 'alert_triggered_subject',
-  label: 'Alert Triggered — Subject Line',
+  key: 'alert_triggered_en_subject',
+  label: 'Alert Triggered — Subject Line (EN)',
   value: 'Alert Triggered: {{alertName}}',
   isCustom: false,
   updatedAt: null,
@@ -25,6 +25,7 @@ describe('EmailTemplateEditorComponent', () => {
   let fixture: ComponentFixture<EmailTemplateEditorComponent>;
   let api: {
     getEmailTemplates: jest.Mock;
+    getEmailConfig: jest.Mock;
     updateEmailTemplate: jest.Mock;
     resetEmailTemplate: jest.Mock;
   };
@@ -44,6 +45,7 @@ describe('EmailTemplateEditorComponent', () => {
   beforeEach(() => {
     api = {
       getEmailTemplates: jest.fn().mockResolvedValue({ templates: [mockHtmlTemplate, mockSubjectTemplate] }),
+      getEmailConfig: jest.fn().mockResolvedValue({ provider: 'Resend', apiKeyConfigured: true, fromEmail: 'test@example.com', appUrl: 'https://example.com' }),
       updateEmailTemplate: jest.fn().mockResolvedValue({ ...mockHtmlTemplate, isCustom: true, updatedAt: '2026-06-17T08:00:00.000Z' }),
       resetEmailTemplate: jest.fn().mockResolvedValue({ ...mockHtmlTemplate, isCustom: false, updatedAt: null }),
     };
@@ -54,15 +56,19 @@ describe('EmailTemplateEditorComponent', () => {
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('Loading');
   });
 
-  it('renders template selector with both templates after load', async () => {
+  it('renders template type buttons and language buttons after load', async () => {
     setUp();
     await fixture.whenStable();
     fixture.detectChanges();
 
-    const options = (fixture.nativeElement as HTMLElement).querySelectorAll('option');
-    expect(options).toHaveLength(2);
-    expect(options[0].textContent?.trim()).toContain('HTML Body');
-    expect(options[1].textContent?.trim()).toContain('Subject Line');
+    const buttons = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('button'));
+    const typeBtn = buttons.find((b) => b.textContent?.includes('Alert Triggered'));
+    const enBtn = buttons.find((b) => b.textContent?.trim() === 'English');
+    const huBtn = buttons.find((b) => b.textContent?.trim() === 'Hungarian');
+
+    expect(typeBtn).not.toBeUndefined();
+    expect(enBtn).not.toBeUndefined();
+    expect(huBtn).not.toBeUndefined();
   });
 
   it('populates textarea with the first template value on load', async () => {
@@ -70,8 +76,7 @@ describe('EmailTemplateEditorComponent', () => {
     await fixture.whenStable();
     fixture.detectChanges();
 
-    const textarea = (fixture.nativeElement as HTMLElement).querySelector('textarea');
-    expect(textarea?.value).toContain('Alert Triggered: {{alertName}}');
+    expect(fixture.componentInstance['htmlDraft']).toContain('Alert Triggered: {{alertName}}');
   });
 
   it('shows variable reference panel for the selected template', async () => {
@@ -84,12 +89,17 @@ describe('EmailTemplateEditorComponent', () => {
     expect(text).toContain('chartTitle');
   });
 
-  it('shows Default badge when template is not customized', async () => {
+  it('does not show Custom badge when template is not customized', async () => {
     setUp();
     await fixture.whenStable();
     fixture.detectChanges();
 
-    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Default');
+    const badge = (fixture.nativeElement as HTMLElement).querySelector('.et-custom-badge');
+    expect(badge).toBeNull();
+    const resetBtn = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('button')).find(
+      (b) => b.textContent?.includes('Reset'),
+    );
+    expect(resetBtn).toBeUndefined();
   });
 
   it('shows Custom badge and Reset button when template is customized', async () => {
@@ -117,10 +127,10 @@ describe('EmailTemplateEditorComponent', () => {
     textarea.dispatchEvent(new Event('input'));
     fixture.detectChanges();
 
-    await fixture.componentInstance['save']();
+    await fixture.componentInstance['saveAll']();
     fixture.detectChanges();
 
-    expect(api.updateEmailTemplate).toHaveBeenCalledWith('alert_triggered_html', expect.any(String));
+    expect(api.updateEmailTemplate).toHaveBeenCalledWith('alert_triggered_en_html', expect.any(String));
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('saved successfully');
   });
 
@@ -132,10 +142,10 @@ describe('EmailTemplateEditorComponent', () => {
     await fixture.whenStable();
     fixture.detectChanges();
 
-    await fixture.componentInstance['resetToDefault']();
+    await fixture.componentInstance['resetAll']();
     fixture.detectChanges();
 
-    expect(api.resetEmailTemplate).toHaveBeenCalledWith('alert_triggered_html');
+    expect(api.resetEmailTemplate).toHaveBeenCalledWith('alert_triggered_en_html');
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('reset to default');
   });
 });

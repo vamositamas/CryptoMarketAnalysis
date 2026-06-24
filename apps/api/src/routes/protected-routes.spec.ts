@@ -228,15 +228,15 @@ describe('protected route wiring', () => {
     );
 
     expect(response.statusCode).toBe(200);
-    expect((response.body as { templates: unknown[] }).templates).toHaveLength(2);
-    expect((response.body as { templates: { key: string }[] }).templates[0].key).toBe('alert_triggered_html');
+    expect((response.body as { templates: unknown[] }).templates).toHaveLength(4);
+    expect((response.body as { templates: { key: string }[] }).templates[0].key).toBe('alert_triggered_en_html');
   });
 
   it('allows administrators to update an email template', async () => {
     const customValue = '<p>custom</p>';
     const emailTemplateRepository = {
       getTemplate: jest.fn(),
-      setTemplate: jest.fn().mockResolvedValue({ key: 'alert_triggered_html', value: customValue, updatedAt: '2026-06-17T08:00:00.000Z' }),
+      setTemplate: jest.fn().mockResolvedValue({ key: 'alert_triggered_en_html', value: customValue, updatedAt: '2026-06-17T08:00:00.000Z' }),
       deleteTemplate: jest.fn(),
       listTemplates: jest.fn(),
     };
@@ -244,11 +244,11 @@ describe('protected route wiring', () => {
 
     await runHandlers(
       getHandler(createAdminRouter({ emailTemplateRepository, tokenInvalidations }), '/email-templates/:key', 'put'),
-      { ...createRequest(createToken('administrator'), { value: customValue }), params: { key: 'alert_triggered_html' } } as unknown as import('express').Request,
+      { ...createRequest(createToken('administrator'), { value: customValue }), params: { key: 'alert_triggered_en_html' } } as unknown as import('express').Request,
       response,
     );
 
-    expect(emailTemplateRepository.setTemplate).toHaveBeenCalledWith('alert_triggered_html', customValue);
+    expect(emailTemplateRepository.setTemplate).toHaveBeenCalledWith('alert_triggered_en_html', customValue);
     expect(response.statusCode).toBe(200);
     expect((response.body as { isCustom: boolean }).isCustom).toBe(true);
   });
@@ -264,11 +264,11 @@ describe('protected route wiring', () => {
 
     await runHandlers(
       getHandler(createAdminRouter({ emailTemplateRepository, tokenInvalidations }), '/email-templates/:key', 'delete'),
-      { ...createRequest(createToken('administrator')), params: { key: 'alert_triggered_html' } } as unknown as import('express').Request,
+      { ...createRequest(createToken('administrator')), params: { key: 'alert_triggered_en_html' } } as unknown as import('express').Request,
       response,
     );
 
-    expect(emailTemplateRepository.deleteTemplate).toHaveBeenCalledWith('alert_triggered_html');
+    expect(emailTemplateRepository.deleteTemplate).toHaveBeenCalledWith('alert_triggered_en_html');
     expect(response.statusCode).toBe(200);
     expect((response.body as { isCustom: boolean }).isCustom).toBe(false);
   });
@@ -287,7 +287,7 @@ describe('protected route wiring', () => {
       lastEvaluatedAt: null,
       triggeredAt: null,
     };
-    const alertsService = { createAlert: jest.fn().mockResolvedValue(alertRecord), listAlerts: jest.fn(), deleteAlert: jest.fn(), resetAlert: jest.fn() };
+    const alertsService = { createAlert: jest.fn().mockResolvedValue(alertRecord), listAlerts: jest.fn(), deleteAlert: jest.fn(), resetAlert: jest.fn(), updateAlert: jest.fn() };
     const response = createResponse();
     const body = {
       chartId: 'bitcoin-rainbow',
@@ -317,6 +317,7 @@ describe('protected route wiring', () => {
       listAlerts: jest.fn(),
       deleteAlert: jest.fn(),
       resetAlert: jest.fn(),
+      updateAlert: jest.fn(),
     };
     const response = createResponse();
 
@@ -348,7 +349,7 @@ describe('protected route wiring', () => {
       alerts: [],
       alertLimit: { used: 0, max: 5, unlimited: false },
     };
-    const alertsService = { listAlerts: jest.fn().mockResolvedValue(listResponse), createAlert: jest.fn(), deleteAlert: jest.fn(), resetAlert: jest.fn() };
+    const alertsService = { listAlerts: jest.fn().mockResolvedValue(listResponse), createAlert: jest.fn(), deleteAlert: jest.fn(), resetAlert: jest.fn(), updateAlert: jest.fn() };
     const response = createResponse();
 
     await runHandlers(
@@ -357,13 +358,13 @@ describe('protected route wiring', () => {
       response,
     );
 
-    expect(alertsService.listAlerts).toHaveBeenCalledWith('user-id', 'free_user');
+    expect(alertsService.listAlerts).toHaveBeenCalledWith('user-id');
     expect(response.statusCode).toBe(200);
     expect(response.body).toEqual(listResponse);
   });
 
   it('deletes an alert and returns 200', async () => {
-    const alertsService = { listAlerts: jest.fn(), createAlert: jest.fn(), deleteAlert: jest.fn().mockResolvedValue(undefined), resetAlert: jest.fn() };
+    const alertsService = { listAlerts: jest.fn(), createAlert: jest.fn(), deleteAlert: jest.fn().mockResolvedValue(undefined), resetAlert: jest.fn(), updateAlert: jest.fn() };
     const response = createResponse();
 
     await runHandlers(
@@ -379,7 +380,7 @@ describe('protected route wiring', () => {
 
   it('resets a triggered alert and returns 200 with updated record', async () => {
     const resetResult = { id: 'alert-uuid', status: 'active', chartTitle: 'Bitcoin Rainbow Price Chart' };
-    const alertsService = { listAlerts: jest.fn(), createAlert: jest.fn(), deleteAlert: jest.fn(), resetAlert: jest.fn().mockResolvedValue(resetResult) };
+    const alertsService = { listAlerts: jest.fn(), createAlert: jest.fn(), deleteAlert: jest.fn(), resetAlert: jest.fn().mockResolvedValue(resetResult), updateAlert: jest.fn() };
     const response = createResponse();
 
     await runHandlers(
@@ -507,6 +508,7 @@ describe('protected route wiring', () => {
       }),
       addWidget: jest.fn(),
       reorderWidgets: jest.fn(),
+      removeWidget: jest.fn(),
     };
     const response = createResponse();
 
@@ -524,7 +526,7 @@ describe('protected route wiring', () => {
   });
 
   it('rejects unauthenticated dashboard widget requests', async () => {
-    const dashboardService = { getWidgets: jest.fn(), addWidget: jest.fn(), reorderWidgets: jest.fn() };
+    const dashboardService = { getWidgets: jest.fn(), addWidget: jest.fn(), reorderWidgets: jest.fn(), removeWidget: jest.fn() };
     const response = createResponse();
 
     await runHandlers(
@@ -541,6 +543,7 @@ describe('protected route wiring', () => {
     const dashboardService = {
       getWidgets: jest.fn(),
       reorderWidgets: jest.fn(),
+      removeWidget: jest.fn(),
       addWidget: jest.fn().mockResolvedValue({
         id: 'widget-2',
         type: 'ma_200_day',
@@ -574,6 +577,7 @@ describe('protected route wiring', () => {
       getWidgets: jest.fn(),
       addWidget: jest.fn().mockRejectedValue(new DashboardError('Maximum 20 widgets per dashboard', 400)),
       reorderWidgets: jest.fn(),
+      removeWidget: jest.fn(),
     };
     const response = createResponse();
 
@@ -592,6 +596,7 @@ describe('protected route wiring', () => {
       getWidgets: jest.fn(),
       addWidget: jest.fn(),
       reorderWidgets: jest.fn().mockResolvedValue(undefined),
+      removeWidget: jest.fn(),
     };
     const response = createResponse();
     const orderedIds = ['widget-b', 'widget-a', 'widget-c'];
@@ -612,6 +617,7 @@ describe('protected route wiring', () => {
       getWidgets: jest.fn(),
       addWidget: jest.fn(),
       reorderWidgets: jest.fn().mockRejectedValue(new DashboardError('orderedIds must be a non-empty array', 400)),
+      removeWidget: jest.fn(),
     };
     const response = createResponse();
 
@@ -1042,7 +1048,7 @@ describe('protected route wiring', () => {
 
     await runHandlers(
       getHandler(createAdminRouter({ emailTemplateRepository, tokenInvalidations }), '/email-templates/:key/preview', 'post'),
-      { ...createRequest(createToken('administrator'), {}), params: { key: 'alert_triggered_html' } } as unknown as import('express').Request,
+      { ...createRequest(createToken('administrator'), {}), params: { key: 'alert_triggered_en_html' } } as unknown as import('express').Request,
       response,
     );
 
@@ -1069,7 +1075,7 @@ describe('protected route wiring', () => {
 
     await runHandlers(
       getHandler(createAdminRouter({ emailTemplateRepository, tokenInvalidations }), '/email-templates/:key/send-test', 'post'),
-      { ...createRequest(createToken('administrator'), { recipientEmail: 'not-an-email' }), params: { key: 'alert_triggered_html' } } as unknown as import('express').Request,
+      { ...createRequest(createToken('administrator'), { recipientEmail: 'not-an-email' }), params: { key: 'alert_triggered_en_html' } } as unknown as import('express').Request,
       response,
     );
 

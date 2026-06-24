@@ -67,7 +67,7 @@ describe('UserProfileService', () => {
 
     await expect(service.getProfile('development-admin-user')).resolves.toMatchObject({
       id: 'development-admin-user',
-      email: 'admin@cryptomarketanalysis.com',
+      email: 'admin@bitwlab.com',
       role: 'administrator',
       emailVerified: true,
       onboardingCompleted: true,

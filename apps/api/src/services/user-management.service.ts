@@ -131,6 +131,7 @@ export class UserManagementService {
     await this.passwordResetEmails.sendPasswordResetEmail({
       email: user.email,
       resetUrl: `${getFrontendUrl()}/reset-password?token=${token}`,
+      languagePreference: user.languagePreference,
     });
 
     await this.tokenBlacklist.invalidateUserTokens(userId);

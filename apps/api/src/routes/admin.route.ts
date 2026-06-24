@@ -84,87 +84,208 @@ const DEFAULT_ALERT_TRIGGERED_HTML = `<!DOCTYPE html>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Alert Triggered — {{alertName}}</title>
+  <title>&#x26A1; Alert Triggered — {{alertName}}</title>
 </head>
-<body style="margin:0;padding:0;background:#e8f0e9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#e8f0e9;padding:32px 16px;">
+<body style="margin:0;padding:0;background:#f0f4f0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f0f4f0;padding:40px 16px;">
     <tr><td align="center">
       <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
 
         <!-- Header -->
         <tr>
-          <td style="background:#1a4731;border-radius:12px 12px 0 0;padding:28px 40px;text-align:center;">
-            <p style="margin:0 0 4px;font-size:22px;font-weight:700;color:#ffffff;">BitWLab</p>
-            <p style="margin:0;font-size:13px;color:#86b89a;">Bitcoin Blockchain Analysis</p>
+          <td style="background:linear-gradient(135deg,#0f2d1e 0%,#1a4731 60%,#22613f 100%);border-radius:16px 16px 0 0;padding:36px 48px 32px;text-align:center;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="text-align:center;padding-bottom:16px;">
+                  <span style="display:inline-block;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:50px;padding:6px 18px;font-size:12px;font-weight:600;color:#a8d5b5;letter-spacing:0.08em;text-transform:uppercase;">Price Alert</span>
+                </td>
+              </tr>
+              <tr>
+                <td style="text-align:center;">
+                  <p style="margin:0 0 4px;font-size:26px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">BitWLab</p>
+                  <p style="margin:0;font-size:13px;color:#7ab594;letter-spacing:0.03em;">Bitcoin Blockchain Analysis</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Alert badge strip -->
+        <tr>
+          <td style="background:#1e5c38;padding:0 48px;border-left:1px solid #1a4731;border-right:1px solid #1a4731;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.1);">
+                  <p style="margin:0;font-size:13px;color:#a8d5b5;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;">Alert triggered</p>
+                  <p style="margin:4px 0 0;font-size:19px;font-weight:700;color:#ffffff;">{{alertName}}</p>
+                </td>
+              </tr>
+            </table>
           </td>
         </tr>
 
         <!-- Body card -->
         <tr>
-          <td style="background:#ffffff;padding:40px 40px 32px;border-left:1px solid #dce8dd;border-right:1px solid #dce8dd;">
-            <h2 style="margin:0 0 20px;font-size:24px;font-weight:700;color:#111827;">Your alert has been triggered!</h2>
-            <p style="margin:0 0 8px;font-size:15px;color:#374151;line-height:1.6;">Hello,</p>
-            <p style="margin:0 0 24px;font-size:15px;color:#374151;line-height:1.6;">
-              Your alert <strong>{{alertName}}</strong> on the <strong>{{chartTitle}}</strong> chart has been triggered.
-            </p>
+          <td style="background:#ffffff;padding:36px 48px 32px;border-left:1px solid #dce8dd;border-right:1px solid #dce8dd;">
 
-            <!-- Details box -->
-            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f0f7f1;border-radius:8px;margin-bottom:24px;">
-              <tr><td style="padding:20px 24px;">
-                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-                  <tr>
-                    <td style="padding-bottom:12px;border-bottom:1px solid #d1e7d4;">
-                      <span style="font-size:13px;color:#6b7280;">Condition</span><br/>
-                      <strong style="font-size:15px;color:#111827;">{{metricLabel}} {{conditionLabel}} {{thresholdValue}}</strong>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="padding-top:12px;padding-bottom:12px;border-bottom:1px solid #d1e7d4;">
-                      <span style="font-size:13px;color:#6b7280;">Current Value</span><br/>
-                      <strong style="font-size:22px;color:#1a4731;">{{currentValue}}</strong>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="padding-top:12px;">
-                      <span style="font-size:13px;color:#6b7280;">Triggered At</span><br/>
-                      <strong style="font-size:15px;color:#111827;">{{triggeredAt}} UTC</strong>
-                    </td>
-                  </tr>
-                </table>
-              </td></tr>
-            </table>
-
+            <p style="margin:0 0 6px;font-size:15px;color:#374151;line-height:1.6;">Hello,</p>
             <p style="margin:0 0 28px;font-size:15px;color:#374151;line-height:1.6;">
-              Log in to your BitWLab account to review this alert and update your settings.
+              Your alert on the <strong style="color:#111827;">{{chartTitle}}</strong> chart just fired. Here's what happened:
             </p>
 
-            <!-- CTA -->
-            <table role="presentation" cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
+            <!-- 3-column stat cards -->
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
               <tr>
-                <td style="background:#1a4731;border-radius:8px;">
-                  <a href="{{appUrl}}/alerts" style="display:inline-block;padding:13px 30px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;">View My Alerts →</a>
+                <!-- Condition -->
+                <td width="32%" style="background:#f8faf8;border:1px solid #e3ede5;border-radius:10px;padding:16px 14px;vertical-align:top;">
+                  <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.07em;">Condition</p>
+                  <p style="margin:0;font-size:13px;font-weight:600;color:#1a4731;line-height:1.4;">{{metricLabel}}<br/>{{conditionLabel}}<br/>{{thresholdValue}}</p>
+                </td>
+                <td width="4%" style="font-size:0;">&nbsp;</td>
+                <!-- Current value -->
+                <td width="32%" style="background:#f0faf4;border:2px solid #22c55e;border-radius:10px;padding:16px 14px;vertical-align:top;text-align:center;">
+                  <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:0.07em;">Current Value</p>
+                  <p style="margin:0;font-size:28px;font-weight:800;color:#1a4731;line-height:1;">{{currentValue}}</p>
+                </td>
+                <td width="4%" style="font-size:0;">&nbsp;</td>
+                <!-- Triggered at -->
+                <td width="28%" style="background:#f8faf8;border:1px solid #e3ede5;border-radius:10px;padding:16px 14px;vertical-align:top;">
+                  <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.07em;">Triggered</p>
+                  <p style="margin:0;font-size:13px;font-weight:600;color:#374151;line-height:1.4;">{{triggeredAt}}<br/><span style="font-size:11px;color:#9ca3af;font-weight:400;">UTC</span></p>
                 </td>
               </tr>
             </table>
 
-            <!-- Divider -->
-            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
-              <tr><td style="border-top:1px solid #e5e7eb;font-size:0;line-height:0;">&nbsp;</td></tr>
+            <p style="margin:0 0 28px;font-size:14px;color:#6b7280;line-height:1.6;border-left:3px solid #d1e7d4;padding-left:14px;">
+              Log in to your BitWLab account to review this alert, check the latest chart data, and update your notification settings.
+            </p>
+
+            <!-- CTA -->
+            <table role="presentation" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="background:#1a4731;border-radius:10px;box-shadow:0 2px 8px rgba(26,71,49,0.25);">
+                  <a href="{{appUrl}}/alerts" style="display:inline-block;padding:14px 32px;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;letter-spacing:0.01em;">View My Alerts &#x2192;</a>
+                </td>
+              </tr>
             </table>
 
-            <p style="margin:0;font-size:15px;color:#374151;line-height:1.6;">
-              We look forward to keeping you informed!
-            </p>
           </td>
         </tr>
 
         <!-- Footer -->
         <tr>
-          <td style="background:#d4e8d6;border-radius:0 0 12px 12px;padding:20px 40px;text-align:center;border:1px solid #bdd9bf;border-top:none;">
-            <p style="margin:0 0 4px;font-size:13px;color:#3d6b4a;">This is an automated message. Please do not reply to this email.</p>
-            <p style="margin:0;font-size:12px;color:#5a8a68;">
-              <a href="{{appUrl}}" style="color:#1a4731;text-decoration:none;">BitWLab</a>
-              &nbsp;·&nbsp; Bitcoin Blockchain Analysis
+          <td style="background:#f8faf8;border-radius:0 0 16px 16px;padding:20px 48px;text-align:center;border:1px solid #dce8dd;border-top:1px solid #e8f0e9;">
+            <p style="margin:0 0 6px;font-size:12px;color:#9ca3af;">This is an automated alert notification. Please do not reply to this email.</p>
+            <p style="margin:0;font-size:12px;color:#9ca3af;">
+              <a href="{{appUrl}}" style="color:#1a4731;text-decoration:none;font-weight:600;">BitWLab</a>
+              &nbsp;&middot;&nbsp; Bitcoin Blockchain Analysis
+              &nbsp;&middot;&nbsp; <a href="{{appUrl}}/alerts" style="color:#6b7280;text-decoration:none;">Manage Alerts</a>
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+const DEFAULT_ALERT_TRIGGERED_HU_HTML = `<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>&#x26A1; Riasztás aktiválódott — {{alertName}}</title>
+</head>
+<body style="margin:0;padding:0;background:#f0f4f0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f0f4f0;padding:40px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+
+        <!-- Header -->
+        <tr>
+          <td style="background:linear-gradient(135deg,#0f2d1e 0%,#1a4731 60%,#22613f 100%);border-radius:16px 16px 0 0;padding:36px 48px 32px;text-align:center;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="text-align:center;padding-bottom:16px;">
+                  <span style="display:inline-block;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:50px;padding:6px 18px;font-size:12px;font-weight:600;color:#a8d5b5;letter-spacing:0.08em;text-transform:uppercase;">Áriasztás</span>
+                </td>
+              </tr>
+              <tr>
+                <td style="text-align:center;">
+                  <p style="margin:0 0 4px;font-size:26px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">BitWLab</p>
+                  <p style="margin:0;font-size:13px;color:#7ab594;letter-spacing:0.03em;">Bitcoin blokklánc elemzés</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Alert name strip -->
+        <tr>
+          <td style="background:#1e5c38;padding:0 48px;border-left:1px solid #1a4731;border-right:1px solid #1a4731;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.1);">
+                  <p style="margin:0;font-size:13px;color:#a8d5b5;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;">Riasztás aktiválódott</p>
+                  <p style="margin:4px 0 0;font-size:19px;font-weight:700;color:#ffffff;">{{alertName}}</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Body card -->
+        <tr>
+          <td style="background:#ffffff;padding:36px 48px 32px;border-left:1px solid #dce8dd;border-right:1px solid #dce8dd;">
+            <p style="margin:0 0 6px;font-size:15px;color:#374151;line-height:1.6;">Szia,</p>
+            <p style="margin:0 0 28px;font-size:15px;color:#374151;line-height:1.6;">
+              A(z) <strong style="color:#111827;">{{chartTitle}}</strong> grafikonon figyelt riasztásod élesedett. Íme a részletek:
+            </p>
+
+            <!-- 3-column stat cards -->
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+              <tr>
+                <td width="32%" style="background:#f8faf8;border:1px solid #e3ede5;border-radius:10px;padding:16px 14px;vertical-align:top;">
+                  <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.07em;">Feltétel</p>
+                  <p style="margin:0;font-size:13px;font-weight:600;color:#1a4731;line-height:1.4;">{{metricLabel}}<br/>{{conditionLabel}}<br/>{{thresholdValue}}</p>
+                </td>
+                <td width="4%" style="font-size:0;">&nbsp;</td>
+                <td width="32%" style="background:#f0faf4;border:2px solid #22c55e;border-radius:10px;padding:16px 14px;vertical-align:top;text-align:center;">
+                  <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:0.07em;">Aktuális érték</p>
+                  <p style="margin:0;font-size:28px;font-weight:800;color:#1a4731;line-height:1;">{{currentValue}}</p>
+                </td>
+                <td width="4%" style="font-size:0;">&nbsp;</td>
+                <td width="28%" style="background:#f8faf8;border:1px solid #e3ede5;border-radius:10px;padding:16px 14px;vertical-align:top;">
+                  <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.07em;">Aktiválódott</p>
+                  <p style="margin:0;font-size:13px;font-weight:600;color:#374151;line-height:1.4;">{{triggeredAt}}<br/><span style="font-size:11px;color:#9ca3af;font-weight:400;">UTC</span></p>
+                </td>
+              </tr>
+            </table>
+
+            <p style="margin:0 0 28px;font-size:14px;color:#6b7280;line-height:1.6;border-left:3px solid #d1e7d4;padding-left:14px;">
+              Jelentkezz be a BitWLab fiókodba a riasztás áttekintéséhez, az aktuális grafikonadatok megtekintéséhez és az értesítési beállítások módosításához.
+            </p>
+
+            <!-- CTA -->
+            <table role="presentation" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="background:#1a4731;border-radius:10px;box-shadow:0 2px 8px rgba(26,71,49,0.25);">
+                  <a href="{{appUrl}}/alerts" style="display:inline-block;padding:14px 32px;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;letter-spacing:0.01em;">Riasztásaim megtekintése &#x2192;</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background:#f8faf8;border-radius:0 0 16px 16px;padding:20px 48px;text-align:center;border:1px solid #dce8dd;border-top:1px solid #e8f0e9;">
+            <p style="margin:0 0 6px;font-size:12px;color:#9ca3af;">Ez egy automatikus értesítés. Kérjük, ne válaszolj erre az e-mailre.</p>
+            <p style="margin:0;font-size:12px;color:#9ca3af;">
+              <a href="{{appUrl}}" style="color:#1a4731;text-decoration:none;font-weight:600;">BitWLab</a>
+              &nbsp;&middot;&nbsp; Bitcoin blokklánc elemzés
+              &nbsp;&middot;&nbsp; <a href="{{appUrl}}/alerts" style="color:#6b7280;text-decoration:none;">Riasztások kezelése</a>
             </p>
           </td>
         </tr>
@@ -177,16 +298,36 @@ const DEFAULT_ALERT_TRIGGERED_HTML = `<!DOCTYPE html>
 
 const TEMPLATE_DEFINITIONS = [
   {
-    key: 'alert_triggered_html',
-    label: 'Alert Triggered — HTML Body',
+    key: 'alert_triggered_en_html',
+    label: 'Alert Triggered — English HTML Body',
     defaultValue: DEFAULT_ALERT_TRIGGERED_HTML,
     variables: ['alertName', 'chartTitle', 'metricLabel', 'conditionLabel', 'thresholdValue', 'currentValue', 'triggeredAt', 'appUrl'],
+    language: 'en',
+    kind: 'html',
   },
   {
-    key: 'alert_triggered_subject',
-    label: 'Alert Triggered — Subject Line',
-    defaultValue: 'Alert Triggered: {{alertName}}',
+    key: 'alert_triggered_en_subject',
+    label: 'Alert Triggered — English Subject Line',
+    defaultValue: '⚡ Alert Triggered: {{alertName}} — {{metricLabel}} {{conditionLabel}} {{thresholdValue}}',
     variables: ['alertName'],
+    language: 'en',
+    kind: 'subject',
+  },
+  {
+    key: 'alert_triggered_hu_html',
+    label: 'Riasztás aktiválódott — Magyar HTML törzs',
+    defaultValue: DEFAULT_ALERT_TRIGGERED_HU_HTML,
+    variables: ['alertName', 'chartTitle', 'metricLabel', 'conditionLabel', 'thresholdValue', 'currentValue', 'triggeredAt', 'appUrl'],
+    language: 'hu',
+    kind: 'html',
+  },
+  {
+    key: 'alert_triggered_hu_subject',
+    label: 'Riasztás aktiválódott — Magyar tárgy',
+    defaultValue: '⚡ Riasztás aktiválódott: {{alertName}} — {{metricLabel}} {{conditionLabel}} {{thresholdValue}}',
+    variables: ['alertName'],
+    language: 'hu',
+    kind: 'subject',
   },
 ] as const;
 
@@ -638,9 +779,12 @@ export function createAdminRouter(
 
   router.get('/email-templates', ...adminOnly, async (_req, res, next) => {
     try {
-      const repo = getEmailTemplateRepository();
-      const keys = TEMPLATE_DEFINITIONS.map((t) => t.key);
-      const stored = await repo.listTemplates([...keys]);
+      let stored = new Map<string, { key: string; value: string; updatedAt: string }>();
+      try {
+        const repo = getEmailTemplateRepository();
+        const keys = TEMPLATE_DEFINITIONS.map((t) => t.key);
+        stored = await repo.listTemplates([...keys]);
+      } catch { /* DB unavailable — fall back to built-in defaults */ }
 
       const templates = TEMPLATE_DEFINITIONS.map((def) => {
         const record = stored.get(def.key);
@@ -651,6 +795,8 @@ export function createAdminRouter(
           isCustom: record !== undefined,
           updatedAt: record?.updatedAt ?? null,
           variables: [...def.variables],
+          language: def.language,
+          kind: def.kind,
         };
       });
 
@@ -676,7 +822,7 @@ export function createAdminRouter(
 
       const record = await getEmailTemplateRepository().setTemplate(key, value);
       const def = TEMPLATE_DEFINITIONS.find((t) => t.key === key)!;
-      res.status(200).json({ key, label: def.label, value: record.value, isCustom: true, updatedAt: record.updatedAt, variables: [...def.variables] });
+      res.status(200).json({ key, label: def.label, value: record.value, isCustom: true, updatedAt: record.updatedAt, variables: [...def.variables], language: def.language, kind: def.kind });
     } catch (error) {
       next(error);
     }
@@ -692,7 +838,7 @@ export function createAdminRouter(
 
       await getEmailTemplateRepository().deleteTemplate(key);
       const def = TEMPLATE_DEFINITIONS.find((t) => t.key === key)!;
-      res.status(200).json({ key, label: def.label, value: def.defaultValue, isCustom: false, updatedAt: null, variables: [...def.variables] });
+      res.status(200).json({ key, label: def.label, value: def.defaultValue, isCustom: false, updatedAt: null, variables: [...def.variables], language: def.language, kind: def.kind });
     } catch (error) {
       next(error);
     }
@@ -745,12 +891,20 @@ export function createAdminRouter(
       const customData = (req.body?.sampleData ?? {}) as Record<string, string>;
       const vars = { ...TEMPLATE_SAMPLE_DATA, ...customData };
       const rendered = substituteTemplateVars(template, vars);
-      const testBanner = `<div style="background:#fff3cd;border:1px solid #ffc107;padding:8px 16px;margin-bottom:16px;font-size:13px">⚠️ This is a test email sent from BitWLab admin panel</div>`;
+      const isHungarian = def.language === 'hu';
+      const testBannerText = isHungarian
+        ? 'Ez egy teszt email, amelyet a BitWLab admin felület küldött'
+        : 'This is a test email sent from BitWLab admin panel';
+      const testBanner = `<div style="background:#fff3cd;border:1px solid #ffc107;padding:8px 16px;margin-bottom:16px;font-size:13px">⚠️ ${testBannerText}</div>`;
       const html = testBanner + rendered;
+      const subjectPrefix = isHungarian ? '[TESZT]' : '[TEST]';
 
-      await sendRawEmail({ to: recipientEmail, subject: `[TEST] ${def.label}`, html });
+      await sendRawEmail({ to: recipientEmail, subject: `${subjectPrefix} ${def.label}`, html });
 
-      res.json({ success: true, message: `Test email sent to ${recipientEmail}` });
+      res.json({
+        success: true,
+        message: isHungarian ? `Teszt email elküldve ide: ${recipientEmail}` : `Test email sent to ${recipientEmail}`,
+      });
     } catch (error) {
       next(error);
     }

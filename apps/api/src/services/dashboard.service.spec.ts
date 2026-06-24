@@ -309,6 +309,7 @@ function createWidgetRepositoryStub() {
     countForUser: jest.fn().mockResolvedValue(0),
     getMaxPosition: jest.fn().mockResolvedValue(null),
     reorderWidgets: jest.fn().mockResolvedValue(undefined),
+    deleteForUser: jest.fn().mockResolvedValue(true),
   };
 }
 
@@ -318,6 +319,7 @@ function createMetricsRepositoryStub() {
     getLatestMetricValues: jest.fn().mockResolvedValue([]),
     getLatestCirculatingSupply: jest.fn().mockResolvedValue([]),
     getLatestMarketCap: jest.fn().mockResolvedValue([]),
+    getLastRefreshTimestamp: jest.fn().mockResolvedValue(null),
     getLatestFormulaVariables: jest.fn().mockResolvedValue({
       btc_price: null,
       btc_price_24h_change: null,

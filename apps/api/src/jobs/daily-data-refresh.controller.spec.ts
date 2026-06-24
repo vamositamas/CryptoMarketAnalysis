@@ -186,6 +186,10 @@ describe('daily data refresh job', () => {
     const bitcoinDataClient = {
       fetchMvrvZScore: jest.fn().mockResolvedValue({ date: '2026-06-09', value: 1.23 }),
       fetchRealizedPrice: jest.fn().mockResolvedValue({ date: '2026-06-09', value: 53020.27 }),
+      fetchVddMultiple: jest.fn().mockRejectedValue(new Error('not available in test')),
+      fetchCvdd: jest.fn().mockRejectedValue(new Error('not available in test')),
+      fetchBalancedPrice: jest.fn().mockRejectedValue(new Error('not available in test')),
+      fetchTerminalPrice: jest.fn().mockRejectedValue(new Error('not available in test')),
     };
     const blockchainInfoClient = createBlockchainInfoClientStub();
     const service = new DailyDataRefreshService({
@@ -365,7 +369,7 @@ function createQStashSignature(input: {
 }
 
 function createRequest(input: { rawBody?: string; headers?: Record<string, string> } = {}): Request {
-  const headers = new Map(
+  const headerMap = new Map(
     Object.entries(input.headers ?? {}).map(([key, value]) => [key.toLowerCase(), value]),
   );
 
@@ -373,8 +377,9 @@ function createRequest(input: { rawBody?: string; headers?: Record<string, strin
     rawBody: input.rawBody,
     protocol: 'https',
     originalUrl: '/api/jobs/daily-data-refresh',
+    headers: Object.fromEntries(headerMap),
     get(name: string) {
-      return headers.get(name.toLowerCase());
+      return headerMap.get(name.toLowerCase());
     },
   } as unknown as Request;
 }
@@ -404,6 +409,10 @@ function createBitcoinDataClientStub() {
   return {
     fetchMvrvZScore: jest.fn().mockResolvedValue({ date: '2026-06-09', value: 1.23 }),
     fetchRealizedPrice: jest.fn().mockResolvedValue({ date: '2026-06-09', value: 53020.27 }),
+    fetchVddMultiple: jest.fn().mockRejectedValue(new Error('not available in test')),
+    fetchCvdd: jest.fn().mockRejectedValue(new Error('not available in test')),
+    fetchBalancedPrice: jest.fn().mockRejectedValue(new Error('not available in test')),
+    fetchTerminalPrice: jest.fn().mockRejectedValue(new Error('not available in test')),
   };
 }
 
@@ -416,6 +425,10 @@ function createBlockchainInfoClientStub(overrides: { fetchMarketPrice?: jest.Moc
     fetchDifficulty: jest
       .fn()
       .mockResolvedValue([{ date: '2026-06-10', value: 138955357012247.48 }]),
+    fetchCoinDaysDestroyed: jest.fn().mockRejectedValue(new Error('not available in test')),
+    fetchTransactionFees: jest.fn().mockRejectedValue(new Error('not available in test')),
+    fetchTransactionVolumeUsd: jest.fn().mockRejectedValue(new Error('not available in test')),
+    fetchMinersRevenueUsd: jest.fn().mockRejectedValue(new Error('not available in test')),
   };
 }
 

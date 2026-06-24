@@ -3,7 +3,7 @@ import type { Transporter } from 'nodemailer';
 import { getDatabasePool } from '../config/database.config';
 
 export interface PasswordResetEmailSender {
-  sendPasswordResetEmail(input: { email: string; resetUrl: string }): Promise<void>;
+  sendPasswordResetEmail(input: { email: string; resetUrl: string; languagePreference?: 'en' | 'hu' }): Promise<void>;
 }
 
 export interface DailyDataRefreshFailureEmailSender {
@@ -23,6 +23,7 @@ export interface AlertTriggeredEmailInput {
   thresholdValue: number;
   currentValue: number;
   triggeredAt: string;
+  languagePreference?: 'en' | 'hu';
   htmlTemplate?: string | null;
   subjectTemplate?: string | null;
 }
@@ -167,11 +168,14 @@ export class ResendEmailService
     AlertTriggeredEmailSender,
     DonationThankYouEmailSender
 {
-  async sendPasswordResetEmail(input: { email: string; resetUrl: string }): Promise<void> {
+  async sendPasswordResetEmail(input: { email: string; resetUrl: string; languagePreference?: 'en' | 'hu' }): Promise<void> {
+    const hu = input.languagePreference === 'hu';
     await sendRawEmail({
       to: input.email,
-      subject: 'Reset your BitWLab password',
-      html: `<p>Use this link to reset your password:</p><p><a href="${input.resetUrl}">${input.resetUrl}</a></p><p>This link expires in 1 hour.</p>`,
+      subject: hu ? 'BitWLab jelszó visszaállítása' : 'Reset your BitWLab password',
+      html: hu
+        ? `<p>Használd ezt a linket a jelszavad visszaállításához:</p><p><a href="${input.resetUrl}">${input.resetUrl}</a></p><p>Ez a link 1 óra múlva lejár.</p>`
+        : `<p>Use this link to reset your password:</p><p><a href="${input.resetUrl}">${input.resetUrl}</a></p><p>This link expires in 1 hour.</p>`,
     });
   }
 
@@ -189,7 +193,9 @@ export class ResendEmailService
     const vars = buildTemplateVars(input, appUrl);
     const subject = input.subjectTemplate
       ? substituteTemplateVars(input.subjectTemplate, vars)
-      : `Alert Triggered: ${input.alertName}`;
+      : input.languagePreference === 'hu'
+        ? `Riasztás aktiválódott: ${input.alertName}`
+        : `Alert Triggered: ${input.alertName}`;
     const html = input.htmlTemplate
       ? substituteTemplateVars(input.htmlTemplate, vars)
       : buildAlertTriggeredHtml(input, appUrl);
@@ -230,7 +236,8 @@ export function substituteTemplateVars(template: string, vars: Record<string, st
 }
 
 function buildTemplateVars(input: AlertTriggeredEmailInput, appUrl: string): Record<string, string> {
-  const date = new Date(input.triggeredAt).toLocaleString('en-US', { timeZone: 'UTC', dateStyle: 'medium', timeStyle: 'short' });
+  const locale = input.languagePreference === 'hu' ? 'hu-HU' : 'en-US';
+  const date = new Date(input.triggeredAt).toLocaleString(locale, { timeZone: 'UTC', dateStyle: 'medium', timeStyle: 'short' });
   return {
     alertName: escapeHtml(input.alertName),
     chartTitle: escapeHtml(input.chartTitle),
@@ -245,38 +252,60 @@ function buildTemplateVars(input: AlertTriggeredEmailInput, appUrl: string): Rec
 
 function buildAlertTriggeredHtml(input: AlertTriggeredEmailInput, appUrl: string): string {
   const v = buildTemplateVars(input, appUrl);
+  const hu = input.languagePreference === 'hu';
+  const copy = {
+    lang: hu ? 'hu' : 'en',
+    title: hu ? `Riasztás aktiválódott — ${v.alertName}` : `Alert Triggered — ${v.alertName}`,
+    subtitle: hu ? 'Bitcoin blokklánc elemzés' : 'Bitcoin Blockchain Analysis',
+    heading: hu ? 'A riasztásod aktiválódott!' : 'Your alert has been triggered!',
+    hello: hu ? 'Szia,' : 'Hello,',
+    intro: hu
+      ? `A(z) <strong>${v.alertName}</strong> riasztásod aktiválódott a(z) <strong>${v.chartTitle}</strong> grafikonon.`
+      : `Your alert <strong>${v.alertName}</strong> on the <strong>${v.chartTitle}</strong> chart has been triggered.`,
+    condition: hu ? 'Feltétel' : 'Condition',
+    currentValue: hu ? 'Aktuális érték' : 'Current Value',
+    triggeredAt: hu ? 'Aktiválódás ideje' : 'Triggered At',
+    review: hu
+      ? 'Jelentkezz be a BitWLab fiókodba a riasztás áttekintéséhez és a beállítások módosításához.'
+      : 'Log in to your BitWLab account to review this alert and update your settings.',
+    cta: hu ? 'Riasztásaim megtekintése →' : 'View My Alerts →',
+    signoff: hu ? 'Örömmel segítünk naprakésznek maradni!' : 'We look forward to keeping you informed!',
+    automated: hu
+      ? 'Ez egy automatikus üzenet. Kérjük, ne válaszolj erre az emailre.'
+      : 'This is an automated message. Please do not reply to this email.',
+  };
   return `<!DOCTYPE html>
-<html lang="en">
-<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>Alert Triggered — ${v.alertName}</title></head>
+<html lang="${copy.lang}">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>${copy.title}</title></head>
 <body style="margin:0;padding:0;background:#e8f0e9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#e8f0e9;padding:32px 16px;">
     <tr><td align="center">
       <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
         <tr><td style="background:#1a4731;border-radius:12px 12px 0 0;padding:28px 40px;text-align:center;">
           <p style="margin:0 0 4px;font-size:22px;font-weight:700;color:#ffffff;">BitWLab</p>
-          <p style="margin:0;font-size:13px;color:#86b89a;">Bitcoin Blockchain Analysis</p>
+          <p style="margin:0;font-size:13px;color:#86b89a;">${copy.subtitle}</p>
         </td></tr>
         <tr><td style="background:#ffffff;padding:40px 40px 32px;border-left:1px solid #dce8dd;border-right:1px solid #dce8dd;">
-          <h2 style="margin:0 0 20px;font-size:24px;font-weight:700;color:#111827;">Your alert has been triggered!</h2>
-          <p style="margin:0 0 8px;font-size:15px;color:#374151;line-height:1.6;">Hello,</p>
-          <p style="margin:0 0 24px;font-size:15px;color:#374151;line-height:1.6;">Your alert <strong>${v.alertName}</strong> on the <strong>${v.chartTitle}</strong> chart has been triggered.</p>
+          <h2 style="margin:0 0 20px;font-size:24px;font-weight:700;color:#111827;">${copy.heading}</h2>
+          <p style="margin:0 0 8px;font-size:15px;color:#374151;line-height:1.6;">${copy.hello}</p>
+          <p style="margin:0 0 24px;font-size:15px;color:#374151;line-height:1.6;">${copy.intro}</p>
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f0f7f1;border-radius:8px;margin-bottom:24px;">
             <tr><td style="padding:20px 24px;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-                <tr><td style="padding-bottom:12px;border-bottom:1px solid #d1e7d4;"><span style="font-size:13px;color:#6b7280;">Condition</span><br/><strong style="font-size:15px;color:#111827;">${v.metricLabel} ${v.conditionLabel} ${v.thresholdValue}</strong></td></tr>
-                <tr><td style="padding-top:12px;padding-bottom:12px;border-bottom:1px solid #d1e7d4;"><span style="font-size:13px;color:#6b7280;">Current Value</span><br/><strong style="font-size:22px;color:#1a4731;">${v.currentValue}</strong></td></tr>
-                <tr><td style="padding-top:12px;"><span style="font-size:13px;color:#6b7280;">Triggered At</span><br/><strong style="font-size:15px;color:#111827;">${v.triggeredAt} UTC</strong></td></tr>
+                <tr><td style="padding-bottom:12px;border-bottom:1px solid #d1e7d4;"><span style="font-size:13px;color:#6b7280;">${copy.condition}</span><br/><strong style="font-size:15px;color:#111827;">${v.metricLabel} ${v.conditionLabel} ${v.thresholdValue}</strong></td></tr>
+                <tr><td style="padding-top:12px;padding-bottom:12px;border-bottom:1px solid #d1e7d4;"><span style="font-size:13px;color:#6b7280;">${copy.currentValue}</span><br/><strong style="font-size:22px;color:#1a4731;">${v.currentValue}</strong></td></tr>
+                <tr><td style="padding-top:12px;"><span style="font-size:13px;color:#6b7280;">${copy.triggeredAt}</span><br/><strong style="font-size:15px;color:#111827;">${v.triggeredAt} UTC</strong></td></tr>
               </table>
             </td></tr>
           </table>
-          <p style="margin:0 0 28px;font-size:15px;color:#374151;line-height:1.6;">Log in to your BitWLab account to review this alert and update your settings.</p>
-          <table role="presentation" cellpadding="0" cellspacing="0" style="margin-bottom:32px;"><tr><td style="background:#1a4731;border-radius:8px;"><a href="${v.appUrl}/alerts" style="display:inline-block;padding:13px 30px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;">View My Alerts →</a></td></tr></table>
+          <p style="margin:0 0 28px;font-size:15px;color:#374151;line-height:1.6;">${copy.review}</p>
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin-bottom:32px;"><tr><td style="background:#1a4731;border-radius:8px;"><a href="${v.appUrl}/alerts" style="display:inline-block;padding:13px 30px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;">${copy.cta}</a></td></tr></table>
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;"><tr><td style="border-top:1px solid #e5e7eb;font-size:0;line-height:0;">&nbsp;</td></tr></table>
-          <p style="margin:0;font-size:15px;color:#374151;line-height:1.6;">We look forward to keeping you informed!</p>
+          <p style="margin:0;font-size:15px;color:#374151;line-height:1.6;">${copy.signoff}</p>
         </td></tr>
         <tr><td style="background:#d4e8d6;border-radius:0 0 12px 12px;padding:20px 40px;text-align:center;border:1px solid #bdd9bf;border-top:none;">
-          <p style="margin:0 0 4px;font-size:13px;color:#3d6b4a;">This is an automated message. Please do not reply to this email.</p>
-          <p style="margin:0;font-size:12px;color:#5a8a68;"><a href="${v.appUrl}" style="color:#1a4731;text-decoration:none;">BitWLab</a> &nbsp;·&nbsp; Bitcoin Blockchain Analysis</p>
+          <p style="margin:0 0 4px;font-size:13px;color:#3d6b4a;">${copy.automated}</p>
+          <p style="margin:0;font-size:12px;color:#5a8a68;"><a href="${v.appUrl}" style="color:#1a4731;text-decoration:none;">BitWLab</a> &nbsp;·&nbsp; ${copy.subtitle}</p>
         </td></tr>
       </table>
     </td></tr>

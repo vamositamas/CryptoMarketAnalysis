@@ -106,7 +106,7 @@ describe('AuthService', () => {
 
     const response = await service.register({
       ...baseRequest,
-      email: 'admin@cryptomarketanalysis.com',
+      email: 'admin@bitwlab.com',
       fullName: 'Admin User',
     });
 
@@ -115,7 +115,7 @@ describe('AuthService', () => {
     });
     expect(users.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        email: 'admin@cryptomarketanalysis.com',
+        email: 'admin@bitwlab.com',
         fullName: 'Admin User',
         role: 'administrator',
         emailVerified: true,
@@ -128,7 +128,7 @@ describe('AuthService', () => {
     const users = {
       findByEmail: jest.fn().mockResolvedValue(
         createUser({
-          email: 'admin@cryptomarketanalysis.com',
+          email: 'admin@bitwlab.com',
           role: 'free_user',
           emailVerified: false,
         }),
@@ -136,7 +136,7 @@ describe('AuthService', () => {
       create: jest.fn(),
       updateDevelopmentAdminCredentials: jest.fn().mockResolvedValue(
         createUser({
-          email: 'admin@cryptomarketanalysis.com',
+          email: 'admin@bitwlab.com',
           role: 'administrator',
           emailVerified: true,
         }),
@@ -152,7 +152,7 @@ describe('AuthService', () => {
 
     const response = await service.register({
       ...baseRequest,
-      email: 'admin@cryptomarketanalysis.com',
+      email: 'admin@bitwlab.com',
       password: 'AdminPass123!',
       confirmPassword: 'AdminPass123!',
       fullName: 'Admin User',
@@ -163,7 +163,7 @@ describe('AuthService', () => {
     });
     expect(users.create).not.toHaveBeenCalled();
     expect(users.updateDevelopmentAdminCredentials).toHaveBeenCalledWith(
-      'admin@cryptomarketanalysis.com',
+      'admin@bitwlab.com',
       expect.objectContaining({
         fullName: 'Admin User',
         languagePreference: 'en',
@@ -178,7 +178,7 @@ describe('AuthService', () => {
     const users = {
       findByEmail: jest.fn().mockResolvedValue(
         createUser({
-          email: 'admin@cryptomarketanalysis.com',
+          email: 'admin@bitwlab.com',
         }),
       ),
       create: jest.fn(),
@@ -193,7 +193,7 @@ describe('AuthService', () => {
     await expect(
       service.register({
         ...baseRequest,
-        email: 'admin@cryptomarketanalysis.com',
+        email: 'admin@bitwlab.com',
       }),
     ).rejects.toMatchObject({
       statusCode: 400,
@@ -221,7 +221,7 @@ describe('AuthService', () => {
     await expect(
       service.register({
         ...baseRequest,
-        email: 'admin@cryptomarketanalysis.com',
+        email: 'admin@bitwlab.com',
         password: 'AdminPass123!',
         confirmPassword: 'AdminPass123!',
       }),
@@ -230,13 +230,13 @@ describe('AuthService', () => {
     });
 
     const loginResponse = await service.login({
-      email: 'admin@cryptomarketanalysis.com',
+      email: 'admin@bitwlab.com',
       password: 'AdminPass123!',
     });
 
     expect(loginResponse.user).toMatchObject({
       id: 'development-admin-user',
-      email: 'admin@cryptomarketanalysis.com',
+      email: 'admin@bitwlab.com',
       role: 'administrator',
     });
   });
@@ -257,7 +257,7 @@ describe('AuthService', () => {
 
     await expect(
       service.login({
-        email: 'admin@cryptomarketanalysis.com',
+        email: 'admin@bitwlab.com',
         password: 'WrongPass123!',
       }),
     ).rejects.toMatchObject({
@@ -695,6 +695,7 @@ describe('AuthService', () => {
     expect(passwordResetEmails.sendPasswordResetEmail).toHaveBeenCalledWith({
       email: 'user@example.com',
       resetUrl: expect.stringContaining('/reset-password?token='),
+      languagePreference: 'en',
     });
   });
 

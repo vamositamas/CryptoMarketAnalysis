@@ -9,6 +9,7 @@ function makeAlertRow(overrides: Partial<{
   condition: string;
   threshold_value: string;
   user_email: string;
+  language_preference: 'en' | 'hu' | null;
 }> = {}) {
   return {
     id: 'alert-uuid',
@@ -18,6 +19,7 @@ function makeAlertRow(overrides: Partial<{
     condition: 'crosses_above',
     threshold_value: '7.5',
     user_email: 'user@example.com',
+    language_preference: null as 'en' | 'hu' | null,
     ...overrides,
   };
 }
@@ -238,6 +240,7 @@ describe('AlertEvaluationService', () => {
         thresholdValue: 7.0,
         currentValue: 7.5,
         triggeredAt: NOW_ISO,
+        languagePreference: 'en',
         htmlTemplate: null,
         subjectTemplate: null,
       });
@@ -295,7 +298,7 @@ describe('AlertEvaluationService', () => {
       };
       const templateLoader = {
         getTemplate: jest.fn().mockImplementation((key: string) =>
-          Promise.resolve(key === 'alert_triggered_html' ? customHtml : null),
+          Promise.resolve(key === 'alert_triggered_en_html' ? customHtml : null),
         ),
       };
       const db = makeTriggeredDb();

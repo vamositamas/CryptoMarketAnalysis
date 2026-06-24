@@ -459,6 +459,8 @@ export interface EmailTemplate {
   isCustom: boolean;
   updatedAt: string | null;
   variables: string[];
+  language?: 'en' | 'hu';
+  kind?: 'html' | 'subject';
 }
 
 export interface EmailTemplatesResponse {

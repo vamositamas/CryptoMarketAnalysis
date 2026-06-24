@@ -25,6 +25,7 @@ function createRepositoryStub() {
     listForUser: jest.fn().mockResolvedValue([alertRecord]),
     deleteForUser: jest.fn().mockResolvedValue(true),
     resetForUser: jest.fn().mockResolvedValue({ ...alertRecord, status: 'active', triggeredAt: null }),
+    updateForUser: jest.fn().mockResolvedValue(alertRecord),
   };
 }
 
@@ -85,25 +86,20 @@ describe('AlertsService — createAlert', () => {
     ).rejects.toThrow(AlertsError);
   });
 
-  it('blocks free users at the 5-alert limit with 403', async () => {
+  it('allows free users to create alerts without a cap', async () => {
     const repo = createRepositoryStub();
     repo.countActiveForUser.mockResolvedValue(5);
     const service = new AlertsService(repo);
 
-    const error = await service.createAlert(userId, 'free_user', validBody).catch((e) => e);
-
-    expect(error).toBeInstanceOf(AlertsError);
-    expect((error as AlertsError).statusCode).toBe(403);
-    expect((error as AlertsError).message).toContain('Free users can create maximum 5 alerts');
+    await expect(service.createAlert(userId, 'free_user', validBody)).resolves.toEqual(alertRecord);
   });
 
-  it('does not check the limit for premium users', async () => {
+  it('allows premium users to create alerts', async () => {
     const repo = createRepositoryStub();
     repo.countActiveForUser.mockResolvedValue(100);
     const service = new AlertsService(repo);
 
     await expect(service.createAlert(userId, 'premium_user', validBody)).resolves.toEqual(alertRecord);
-    expect(repo.countActiveForUser).not.toHaveBeenCalled();
   });
 
   it('does not check the limit for administrators', async () => {
@@ -124,23 +120,23 @@ describe('AlertsService — createAlert', () => {
 });
 
 describe('AlertsService — listAlerts', () => {
-  it('returns alerts enriched with chartTitle and limit info for free users', async () => {
+  it('returns alerts enriched with chartTitle and limit info', async () => {
     const repo = createRepositoryStub();
     repo.countForUser.mockResolvedValue(2);
     const service = new AlertsService(repo);
 
-    const result = await service.listAlerts(userId, 'free_user');
+    const result = await service.listAlerts(userId);
 
     expect(result.alerts[0].chartTitle).toBe('Bitcoin Rainbow Price Chart');
-    expect(result.alertLimit).toEqual({ used: 2, max: 5, unlimited: false });
+    expect(result.alertLimit).toEqual({ used: 2, max: null, unlimited: true });
   });
 
-  it('returns unlimited flag for premium users', async () => {
+  it('returns unlimited flag for all users', async () => {
     const repo = createRepositoryStub();
     repo.countForUser.mockResolvedValue(8);
     const service = new AlertsService(repo);
 
-    const result = await service.listAlerts(userId, 'premium_user');
+    const result = await service.listAlerts(userId);
 
     expect(result.alertLimit).toEqual({ used: 8, max: null, unlimited: true });
   });

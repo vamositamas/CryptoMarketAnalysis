@@ -18,6 +18,7 @@ interface ActiveAlertRow {
   condition: string;
   threshold_value: string;
   user_email: string;
+  language_preference: 'en' | 'hu' | null;
 }
 
 interface MetricValueRow {
@@ -92,7 +93,7 @@ export class AlertEvaluationService {
     const db = this.requireDatabase();
 
     const alertsResult = await db.query<ActiveAlertRow>(
-      `SELECT ua.id, ua.alert_name, ua.chart_id, ua.metric_name, ua.condition, ua.threshold_value, u.email AS user_email
+      `SELECT ua.id, ua.alert_name, ua.chart_id, ua.metric_name, ua.condition, ua.threshold_value, u.email AS user_email, u.language_preference
        FROM user_alerts ua
        JOIN users u ON ua.user_id = u.id
        WHERE ua.status = 'active'`,
@@ -105,10 +106,7 @@ export class AlertEvaluationService {
 
     const metricValues = await this.fetchMetricValues(db, alerts);
 
-    const [customHtml, customSubject] = await Promise.all([
-      this.templateLoader?.getTemplate('alert_triggered_html') ?? Promise.resolve(null),
-      this.templateLoader?.getTemplate('alert_triggered_subject') ?? Promise.resolve(null),
-    ]);
+    const templateCache = new Map<string, Promise<string | null>>();
 
     let triggered = 0;
     let skipped = 0;
@@ -140,6 +138,11 @@ export class AlertEvaluationService {
         );
         const triggerId = triggerResult.rows[0]?.id;
 
+        const locale = alert.language_preference === 'hu' ? 'hu' : 'en';
+        const [customHtml, customSubject] = await Promise.all([
+          this.getTemplate(`alert_triggered_${locale}_html`, templateCache, 'alert_triggered_html'),
+          this.getTemplate(`alert_triggered_${locale}_subject`, templateCache, 'alert_triggered_subject'),
+        ]);
         await this.sendNotification(db, alert, currentValue, triggerId, nowIso, customHtml, customSubject);
         triggered++;
       } else {
@@ -176,6 +179,7 @@ export class AlertEvaluationService {
         thresholdValue: parseFloat(alert.threshold_value),
         currentValue,
         triggeredAt: nowIso,
+        languagePreference: alert.language_preference === 'hu' ? 'hu' : 'en',
         htmlTemplate: customHtml,
         subjectTemplate: customSubject,
       });
@@ -191,6 +195,27 @@ export class AlertEvaluationService {
         error: error instanceof Error ? error.message : String(error),
       });
     }
+  }
+
+  private getTemplate(
+    key: string,
+    cache: Map<string, Promise<string | null>>,
+    fallbackKey?: string,
+  ): Promise<string | null> {
+    if (!this.templateLoader) return Promise.resolve(null);
+    if (!cache.has(key)) {
+      cache.set(key, this.templateLoader.getTemplate(key));
+    }
+    const primary = cache.get(key)!;
+    if (!fallbackKey) return primary;
+
+    return primary.then((template) => {
+      if (template) return template;
+      if (!cache.has(fallbackKey)) {
+        cache.set(fallbackKey, this.templateLoader!.getTemplate(fallbackKey));
+      }
+      return cache.get(fallbackKey)!;
+    });
   }
 
   private async fetchMetricValues(

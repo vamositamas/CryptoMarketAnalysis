@@ -23,6 +23,12 @@ export class AuthSessionService {
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(user));
   }
 
+  updateCurrentUser(patch: Partial<SessionUser>): void {
+    const current = this.currentUserSignal();
+    if (!current) return;
+    this.setCurrentUser({ ...current, ...patch });
+  }
+
   clearCurrentUser(): void {
     this.currentUserSignal.set(null);
     sessionStorage.removeItem(STORAGE_KEY);

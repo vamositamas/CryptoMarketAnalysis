@@ -22,15 +22,16 @@ function createQStashSignature(input: {
 }
 
 function createRequest(input: { rawBody?: string; headers?: Record<string, string> } = {}): Request {
-  const headers = new Map(
+  const headerMap = new Map(
     Object.entries(input.headers ?? {}).map(([key, value]) => [key.toLowerCase(), value]),
   );
   return {
     rawBody: input.rawBody ?? '',
     protocol: 'https',
     originalUrl: '/api/jobs/evaluate-alerts',
+    headers: Object.fromEntries(headerMap),
     get(name: string) {
-      return headers.get(name.toLowerCase());
+      return headerMap.get(name.toLowerCase());
     },
   } as unknown as Request;
 }

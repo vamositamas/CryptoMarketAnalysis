@@ -303,6 +303,7 @@ export class AuthService {
     await this.passwordResetEmails.sendPasswordResetEmail({
       email: user.email,
       resetUrl: `${getFrontendUrl()}/reset-password?token=${token}`,
+      languagePreference: user.languagePreference,
     });
 
     return response;

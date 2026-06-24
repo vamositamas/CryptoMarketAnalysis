@@ -6,6 +6,7 @@ import { AuthSessionService } from './services/auth-session.service';
 import { DonateModalComponent } from './components/donate-modal/donate-modal.component';
 import { LanguageService } from './services/language.service';
 import { LegalDialogService, LegalDoc } from './services/legal-dialog.service';
+import { AuthApiClient } from '@crypto-market-analysis/data-access/api-client';
 
 @Component({
   imports: [RouterModule, DonateModalComponent],
@@ -16,6 +17,7 @@ import { LegalDialogService, LegalDoc } from './services/legal-dialog.service';
 export class App {
   private readonly langService = inject(LanguageService);
   private readonly authSession = inject(AuthSessionService);
+  private readonly api = inject(AuthApiClient);
   private readonly router = inject(Router);
   private readonly elRef = inject(ElementRef);
   protected readonly legalDialog = inject(LegalDialogService);
@@ -53,7 +55,23 @@ export class App {
     return user.email[0].toUpperCase();
   }
 
-  protected switchLanguage(locale: 'en' | 'hu'): void {
+  protected async switchLanguage(locale: 'en' | 'hu'): Promise<void> {
+    const user = this.currentUser();
+    if (user) {
+      try {
+        const updated = await this.api.updateCurrentUserProfile({
+          fullName: user.fullName,
+          languagePreference: locale,
+        });
+        this.authSession.updateCurrentUser({
+          fullName: updated.fullName ?? undefined,
+          languagePreference: updated.languagePreference,
+          onboardingCompleted: updated.onboardingCompleted,
+        });
+      } catch {
+        this.authSession.updateCurrentUser({ languagePreference: locale });
+      }
+    }
     this.langService.switchTo(locale);
   }
 
