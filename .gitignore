@@ -6,7 +6,7 @@ node_modules/
 dist/
 tmp/
 coverage/
-api/index.js
+api/_bundle.js
 
 # Nx and Angular local state.
 .nx/
