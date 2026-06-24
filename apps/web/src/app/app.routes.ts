@@ -1727,19 +1727,11 @@ export class DashboardPage {
           Initialize historical data
         </h3>
         <p i18n="Historical data init description@@adminDataConfig.initHistoricalDesc">
-          Backfill Bitcoin price history for a date range. Run year by year for all-time data (each request may take up to 30 seconds).
+          Automatically backfills all Bitcoin price history from genesis (2009) to today, one year at a time.
         </p>
       </div>
 
       <div class="admin-backfill-form">
-        <label class="select-label">
-          <span i18n="Start date label@@adminDataConfig.startDate">Start date</span>
-          <input type="date" [value]="backfillStartDate()" (change)="onBackfillStartDateChange($event)" />
-        </label>
-        <label class="select-label">
-          <span i18n="End date label@@adminDataConfig.endDate">End date</span>
-          <input type="date" [value]="backfillEndDate()" (change)="onBackfillEndDateChange($event)" />
-        </label>
         <div class="admin-actions">
           <button
             type="button"
@@ -1748,9 +1740,9 @@ export class DashboardPage {
             [disabled]="isInitializing()"
           >
             @if (isInitializing()) {
-              <ng-container i18n="Initializing state@@adminDataConfig.initializing">Initializing...</ng-container>
+              <ng-container>{{ initProgress() }}</ng-container>
             } @else {
-              <ng-container i18n="Initialize button@@adminDataConfig.initButton">Backfill This Range</ng-container>
+              <ng-container i18n="Initialize all history button@@adminDataConfig.initButton">Initialize All Historical Data</ng-container>
             }
           </button>
         </div>
@@ -1772,8 +1764,7 @@ export class AdminDataConfigurationPage {
   protected readonly isSuccess = signal(false);
   protected readonly initMessage = signal('');
   protected readonly initSuccess = signal(false);
-  protected readonly backfillStartDate = signal(new Date(new Date().getFullYear() - 1, 0, 1).toISOString().slice(0, 10));
-  protected readonly backfillEndDate = signal(new Date().toISOString().slice(0, 10));
+  protected readonly initProgress = signal('');
   protected readonly form = this.fb.nonNullable.group({
     refreshFrequency: this.fb.nonNullable.control<RefreshFrequency>('daily', Validators.required),
     historicalDepth: this.fb.nonNullable.control<HistoricalDepth>('all_time', Validators.required),
@@ -1846,29 +1837,40 @@ export class AdminDataConfigurationPage {
     }
   }
 
-  protected onBackfillStartDateChange(event: Event): void {
-    this.backfillStartDate.set((event.target as HTMLInputElement).value);
-  }
-
-  protected onBackfillEndDateChange(event: Event): void {
-    this.backfillEndDate.set((event.target as HTMLInputElement).value);
-  }
-
   protected async initHistorical(): Promise<void> {
     if (this.isInitializing()) return;
     this.isInitializing.set(true);
     this.initMessage.set('');
     this.initSuccess.set(false);
+
+    const genesisYear = 2009;
+    const currentYear = new Date().getUTCFullYear();
+    let totalDays = 0;
+    let failedRanges = 0;
+
     try {
-      const result = await this.auth.initHistoricalData(this.backfillStartDate(), this.backfillEndDate());
+      for (let year = genesisYear; year <= currentYear; year++) {
+        const startDate = year === genesisYear ? '2009-01-03' : `${year}-01-01`;
+        const endDate = year === currentYear
+          ? new Date().toISOString().slice(0, 10)
+          : `${year}-12-31`;
+
+        this.initProgress.set(`Processing ${year}...`);
+
+        const result = await this.auth.initHistoricalData(startDate, endDate);
+        totalDays += result.fetchedDays;
+        failedRanges += result.failedRanges.length;
+      }
+
       this.initSuccess.set(true);
       this.initMessage.set(
-        $localize`:Backfill success@@adminDataConfig.backfillComplete:Backfilled ${result.fetchedDays}:days: days (${result.failedRanges.length}:failed: failed ranges)`,
+        $localize`:Backfill success@@adminDataConfig.backfillComplete:Initialized ${totalDays}:days: days of historical data${failedRanges > 0 ? ` (${failedRanges} failed ranges)` : ''}:failedNote:`,
       );
     } catch (error) {
-      this.initMessage.set(getErrorMessage(error));
+      this.initMessage.set(`Failed at ${this.initProgress()}: ${getErrorMessage(error)}`);
     } finally {
       this.isInitializing.set(false);
+      this.initProgress.set('');
     }
   }
 

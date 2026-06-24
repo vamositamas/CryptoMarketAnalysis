@@ -405,7 +405,13 @@ export function createAdminRouter(
         return;
       }
       const { startDate, endDate } = req.body as { startDate?: string; endDate?: string };
-      const summary = await runHistoricalDataInitialization({ database, startDate, endDate });
+      const summary = await runHistoricalDataInitialization({
+        database,
+        startDate,
+        endDate,
+        retryAttempts: 1,
+        retryDelayMs: 0,
+      });
       res.status(200).json(summary);
     } catch (error) {
       next(error);
