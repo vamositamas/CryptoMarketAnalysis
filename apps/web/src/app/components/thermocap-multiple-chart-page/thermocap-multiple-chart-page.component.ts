@@ -36,23 +36,23 @@ interface TimeframeOption {
 }
 
 const TIMEFRAMES: TimeframeOption[] = [
-  { label: '1M', value: '1m' },
-  { label: '3M', value: '3m' },
-  { label: '6M', value: '6m' },
-  { label: '1Y', value: '1y' },
-  { label: '2Y', value: '2y' },
-  { label: 'All', value: 'all' },
+  { label: '1 hó', value: '1m' },
+  { label: '3 hó', value: '3m' },
+  { label: '6 hó', value: '6m' },
+  { label: '1 év', value: '1y' },
+  { label: '2 év', value: '2y' },
+  { label: 'Mind', value: 'all' },
 ];
 
 const HALVING_EVENTS = [
-  { date: '2012-11-28', label: '2012 Halving' },
-  { date: '2016-07-09', label: '2016 Halving' },
-  { date: '2020-05-11', label: '2020 Halving' },
-  { date: '2024-04-19', label: '2024 Halving' },
+  { date: '2012-11-28', label: '2012 felezés' },
+  { date: '2016-07-09', label: '2016 felezés' },
+  { date: '2020-05-11', label: '2020 felezés' },
+  { date: '2024-04-19', label: '2024 felezés' },
 ];
 
 const THERMOCAP_ALERT_METRICS: AlertMetricOption[] = [
-  { value: 'btc_price', label: 'BTC Price USD' },
+  { value: 'btc_price', label: 'BTC ár USD' },
 ];
 
 @Component({
@@ -98,20 +98,20 @@ export class ThermocapMultipleChartPageComponent implements AfterViewInit {
       multiple !== null && multiple > 33
         ? 'Historically Overvalued'
         : multiple !== null && multiple > 10
-          ? 'Elevated'
+          ? 'Emelkedett'
           : multiple !== null && multiple < 4
             ? 'Accumulation Zone'
-            : 'Neutral';
+            : 'Semleges';
     return [
-      { label: 'BTC Price', value: formatUsd(price) },
-      { label: 'Thermocap Multiple', value: multiple !== null ? `${multiple.toFixed(1)}×` : 'N/A' },
-      { label: 'Signal', value: signal },
+      { label: 'BTC ár', value: formatUsd(price) },
+      { label: 'Thermocap Multiple', value: multiple !== null ? `${multiple.toFixed(1)}×` : 'Nincs adat' },
+      { label: 'Jelzés', value: signal },
     ];
   });
 
   protected readonly infoInterpretation = computed(() => {
     const points = this.dataPoints();
-    if (!points.length) return 'Waiting for data.';
+    if (!points.length) return 'Adatra vár.';
     const last = [...points].reverse().find((p) => p.thermocapMultiple !== null) ?? points[points.length - 1];
     const multiple = last.thermocapMultiple;
     if (multiple === null) return 'Thermocap Multiple not yet available.';
@@ -159,7 +159,7 @@ export class ThermocapMultipleChartPageComponent implements AfterViewInit {
         // BTC Price — dark line, right log axis
         {
           type: 'line' as const,
-          label: 'BTC Price',
+          label: 'BTC ár',
           data: points.map((p) => p.priceUsd),
           borderColor: '#1f2937',
           borderWidth: 1.5,
@@ -222,7 +222,7 @@ export class ThermocapMultipleChartPageComponent implements AfterViewInit {
             const v = Number(item.parsed.y);
             const label = item.dataset.label ?? '';
             if (item.dataset.yAxisID === 'y2') {
-              return `${label}: ${Number.isFinite(v) ? `${v.toFixed(1)}×` : 'N/A'}`;
+              return `${label}: ${Number.isFinite(v) ? `${v.toFixed(1)}×` : 'Nincs adat'}`;
             }
             return `${label}: ${formatUsd(v)}`;
           },
@@ -372,8 +372,8 @@ export class ThermocapMultipleChartPageComponent implements AfterViewInit {
       rows: this.dataPoints(),
       fileName: `thermocap-multiple_${getExportDateStamp()}.csv`,
       columns: [
-        { header: 'Date', value: (row) => row.date },
-        { header: 'Price USD', value: (row) => formatCsvNumber(row.priceUsd) },
+        { header: 'Dátum', value: (row) => row.date },
+        { header: 'Ár USD', value: (row) => formatCsvNumber(row.priceUsd) },
         { header: 'Thermocap Multiple', value: (row) => formatCsvNumber(row.thermocapMultiple) },
       ],
     });
@@ -381,7 +381,7 @@ export class ThermocapMultipleChartPageComponent implements AfterViewInit {
 
   protected lastUpdatedText(): string {
     const ts = this.lastUpdated();
-    if (!ts) return 'Waiting for data';
+    if (!ts) return 'Adatra vár';
     return new Date(ts).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
   }
 
@@ -433,7 +433,7 @@ function createHalvingAnnotations(startDate: string): Record<string, AnnotationO
 }
 
 function formatUsd(value: number): string {
-  if (!Number.isFinite(value)) return 'n/a';
+  if (!Number.isFinite(value)) return 'nincs adat';
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',

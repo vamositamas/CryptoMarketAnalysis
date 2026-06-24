@@ -36,23 +36,23 @@ interface TimeframeOption {
 }
 
 const TIMEFRAMES: TimeframeOption[] = [
-  { label: '1M', value: '1m' },
-  { label: '3M', value: '3m' },
-  { label: '6M', value: '6m' },
-  { label: '1Y', value: '1y' },
-  { label: '2Y', value: '2y' },
-  { label: 'All', value: 'all' },
+  { label: '1 hó', value: '1m' },
+  { label: '3 hó', value: '3m' },
+  { label: '6 hó', value: '6m' },
+  { label: '1 év', value: '1y' },
+  { label: '2 év', value: '2y' },
+  { label: 'Mind', value: 'all' },
 ];
 
 const HALVING_EVENTS = [
-  { date: '2012-11-28', label: '2012 Halving' },
-  { date: '2016-07-09', label: '2016 Halving' },
-  { date: '2020-05-11', label: '2020 Halving' },
-  { date: '2024-04-19', label: '2024 Halving' },
+  { date: '2012-11-28', label: '2012 felezés' },
+  { date: '2016-07-09', label: '2016 felezés' },
+  { date: '2020-05-11', label: '2020 felezés' },
+  { date: '2024-04-19', label: '2024 felezés' },
 ];
 
 const DIFFICULTY_RIBBON_ALERT_METRICS: AlertMetricOption[] = [
-  { value: 'btc_price', label: 'BTC Price USD' },
+  { value: 'btc_price', label: 'BTC ár USD' },
 ];
 
 @Component({
@@ -100,16 +100,16 @@ export class DifficultyRibbonChartPageComponent implements AfterViewInit {
         ? 'Compressed (Miner Stress)'
         : 'Expanded (Healthy)';
     return [
-      { label: 'BTC Price', value: formatUsd(price) },
-      { label: '9d MA', value: ma9 !== null ? formatDifficulty(ma9) : 'N/A' },
-      { label: '200d MA', value: ma200 !== null ? formatDifficulty(ma200) : 'N/A' },
-      { label: 'Ribbon Status', value: ribbonStatus },
+      { label: 'BTC ár', value: formatUsd(price) },
+      { label: '9d MA', value: ma9 !== null ? formatDifficulty(ma9) : 'Nincs adat' },
+      { label: '200d MA', value: ma200 !== null ? formatDifficulty(ma200) : 'Nincs adat' },
+      { label: 'Szalag állapota', value: ribbonStatus },
     ];
   });
 
   protected readonly infoInterpretation = computed(() => {
     const points = this.dataPoints();
-    if (!points.length) return 'Waiting for data.';
+    if (!points.length) return 'Adatra vár.';
     const last = [...points].reverse().find((p) => p.ma9 !== null) ?? points[points.length - 1];
     const ma9 = last.ma9;
     const ma200 = last.ma200;
@@ -230,7 +230,7 @@ export class DifficultyRibbonChartPageComponent implements AfterViewInit {
         },
         {
           type: 'line' as const,
-          label: 'BTC Price',
+          label: 'BTC ár',
           data: points.map((p) => p.priceUsd),
           borderColor: '#1f2937',
           borderWidth: 1.5,
@@ -379,7 +379,7 @@ export class DifficultyRibbonChartPageComponent implements AfterViewInit {
     this.exportMenuOpen.set(false);
     await exportChartPng({
       chartImageDataUrl,
-      chartTitle: 'Difficulty Ribbon',
+      chartTitle: 'Nehézségi szalag',
       fileName: `difficulty-ribbon_${getExportDateStamp()}.png`,
     });
   }
@@ -390,8 +390,8 @@ export class DifficultyRibbonChartPageComponent implements AfterViewInit {
       rows: this.dataPoints(),
       fileName: `difficulty-ribbon_${getExportDateStamp()}.csv`,
       columns: [
-        { header: 'Date', value: (row) => row.date },
-        { header: 'Price USD', value: (row) => formatCsvNumber(row.priceUsd) },
+        { header: 'Dátum', value: (row) => row.date },
+        { header: 'Ár USD', value: (row) => formatCsvNumber(row.priceUsd) },
         { header: '9d MA', value: (row) => formatCsvNumber(row.ma9) },
         { header: '14d MA', value: (row) => formatCsvNumber(row.ma14) },
         { header: '25d MA', value: (row) => formatCsvNumber(row.ma25) },
@@ -406,7 +406,7 @@ export class DifficultyRibbonChartPageComponent implements AfterViewInit {
 
   protected lastUpdatedText(): string {
     const ts = this.lastUpdated();
-    if (!ts) return 'Waiting for data';
+    if (!ts) return 'Adatra vár';
     return new Date(ts).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
   }
 
@@ -458,7 +458,7 @@ function createHalvingAnnotations(startDate: string): Record<string, AnnotationO
 }
 
 function formatUsd(value: number): string {
-  if (!Number.isFinite(value)) return 'n/a';
+  if (!Number.isFinite(value)) return 'nincs adat';
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -467,7 +467,7 @@ function formatUsd(value: number): string {
 }
 
 function formatDifficulty(value: number | null): string {
-  if (value === null || !Number.isFinite(value)) return 'N/A';
+  if (value === null || !Number.isFinite(value)) return 'Nincs adat';
   if (value >= 1e15) return `${(value / 1e15).toFixed(2)}P`;
   if (value >= 1e12) return `${(value / 1e12).toFixed(2)}T`;
   if (value >= 1e9) return `${(value / 1e9).toFixed(2)}B`;

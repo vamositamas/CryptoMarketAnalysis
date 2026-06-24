@@ -237,11 +237,11 @@ export class HavingSpiralChartPageComponent implements AfterViewInit, OnDestroy 
     const approxBlocks = Math.round(fraction * 210_000);
     const approxYears = (fraction * 4).toFixed(1);
     return [
-      { label: 'Current Cycle', value: 'Cycle 5 (2024 onwards)' },
-      { label: 'Progress', value: `${(fraction * 100).toFixed(1)}% complete` },
-      { label: 'Est. blocks into cycle', value: `${approxBlocks.toLocaleString()} / 210,000` },
-      { label: 'Est. years into cycle', value: `${approxYears} / 4 years` },
-      { label: 'BTC Price', value: formatUsdPrice(last.priceUsd) },
+      { label: 'Aktuális ciklus', value: '5. ciklus (2024-től)' },
+      { label: 'Előrehaladás', value: `${(fraction * 100).toFixed(1)}% complete` },
+      { label: 'Becsült blokkok a ciklusban', value: `${approxBlocks.toLocaleString()} / 210,000` },
+      { label: 'Becsült évek a ciklusban', value: `${approxYears} / 4 years` },
+      { label: 'BTC ár', value: formatUsdPrice(last.priceUsd) },
     ];
   });
 
@@ -287,7 +287,7 @@ export class HavingSpiralChartPageComponent implements AfterViewInit, OnDestroy 
     if (!canvas) return;
     await exportChartPng({
       chartImageDataUrl: canvas.toDataURL('image/png'),
-      chartTitle: 'Bitcoin Halving Spiral',
+      chartTitle: 'Bitcoin felezési spirál',
       fileName: `halving-spiral-${getExportDateStamp()}.png`,
     });
   }
@@ -297,11 +297,11 @@ export class HavingSpiralChartPageComponent implements AfterViewInit, OnDestroy 
     exportChartCsv({
       rows: this.dataPoints(),
       columns: [
-        { header: 'Date', value: (p) => p.date },
-        { header: 'Price USD', value: (p) => p.priceUsd },
-        { header: 'Cycle', value: (p) => getCycleNumber(Date.parse(p.date + 'T00:00:00Z')) },
+        { header: 'Dátum', value: (p) => p.date },
+        { header: 'Ár USD', value: (p) => p.priceUsd },
+        { header: 'Ciklus', value: (p) => getCycleNumber(Date.parse(p.date + 'T00:00:00Z')) },
         {
-          header: 'Cycle Fraction',
+          header: 'Ciklushányad',
           value: (p) => {
             const ms = Date.parse(p.date + 'T00:00:00Z');
             for (let i = 0; i < HALVINGS_SCHEDULE.length - 1; i++) {

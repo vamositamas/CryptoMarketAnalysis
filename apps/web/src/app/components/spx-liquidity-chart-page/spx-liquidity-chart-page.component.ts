@@ -32,12 +32,12 @@ interface TimeframeOption {
 }
 
 const TIMEFRAMES: TimeframeOption[] = [
-  { label: '1M', value: '1m' },
-  { label: '3M', value: '3m' },
-  { label: '6M', value: '6m' },
-  { label: '1Y', value: '1y' },
-  { label: '2Y', value: '2y' },
-  { label: 'All', value: 'all' },
+  { label: '1 hó', value: '1m' },
+  { label: '3 hó', value: '3m' },
+  { label: '6 hó', value: '6m' },
+  { label: '1 év', value: '1y' },
+  { label: '2 év', value: '2y' },
+  { label: 'Mind', value: 'all' },
 ];
 
 @Component({
@@ -80,22 +80,22 @@ export class SpxLiquidityChartPageComponent implements AfterViewInit {
     const elVal = lastEL?.excessLiquidityLeading ?? null;
 
     return [
-      { label: 'SPX YoY Change', value: spxVal !== null ? spxVal.toFixed(1) + '%' : 'N/A' },
+      { label: 'SPX YoY Change', value: spxVal !== null ? spxVal.toFixed(1) + '%' : 'Nincs adat' },
       {
         label: 'SPX Trend',
-        value: spxVal === null ? 'N/A' : spxVal > 0 ? 'Positive' : 'Negative',
+        value: spxVal === null ? 'Nincs adat' : spxVal > 0 ? 'Positive' : 'Negative',
       },
-      { label: 'Excess Liquidity (Leading)', value: elVal !== null ? elVal.toFixed(2) + '%' : 'N/A' },
+      { label: 'Excess Liquidity (Leading)', value: elVal !== null ? elVal.toFixed(2) + '%' : 'Nincs adat' },
       {
-        label: 'Liquidity Signal',
-        value: elVal === null ? 'N/A' : elVal > 0 ? 'Positive (supportive)' : 'Negative (headwind)',
+        label: 'Likviditási jelzés',
+        value: elVal === null ? 'Nincs adat' : elVal > 0 ? 'Positive (supportive)' : 'Negative (headwind)',
       },
     ];
   });
 
   protected readonly infoInterpretation = computed(() => {
     const points = this.dataPoints();
-    if (!points.length) return 'Waiting for data.';
+    if (!points.length) return 'Adatra vár.';
 
     const lastEL = [...points].reverse().find((p) => p.excessLiquidityLeading !== null);
     const lastSpx = [...points].reverse().find((p) => p.spxYoyChange !== null);
@@ -138,7 +138,7 @@ export class SpxLiquidityChartPageComponent implements AfterViewInit {
       datasets: [
         {
           type: 'line' as const,
-          label: 'Excess Liquidity Leading Indicator (6m forward, %)',
+          label: 'Többletlikviditási előrejelző indikátor (6 hónappal előre, %)',
           data: points.map((p) => p.excessLiquidityLeading),
           borderColor: '#2563eb',
           borderWidth: 1.5,
@@ -191,7 +191,7 @@ export class SpxLiquidityChartPageComponent implements AfterViewInit {
           maxTicksLimit: 8,
         },
         grid: { display: false },
-        title: { display: true, text: 'Excess Liquidity (%)', color: '#1d4ed8', font: { size: 11 } },
+        title: { display: true, text: 'Többletlikviditás (%)', color: '#1d4ed8', font: { size: 11 } },
       },
     },
     plugins: {
@@ -273,7 +273,7 @@ export class SpxLiquidityChartPageComponent implements AfterViewInit {
     this.exportMenuOpen.set(false);
     await exportChartPng({
       chartImageDataUrl,
-      chartTitle: 'S&P 500 vs Excess Liquidity',
+      chartTitle: 'S&P 500 vs többletlikviditás',
       fileName: `spx-liquidity_${getExportDateStamp()}.png`,
     });
   }
@@ -284,7 +284,7 @@ export class SpxLiquidityChartPageComponent implements AfterViewInit {
       rows: this.dataPoints(),
       fileName: `spx-liquidity_${getExportDateStamp()}.csv`,
       columns: [
-        { header: 'Date', value: (row) => row.date },
+        { header: 'Dátum', value: (row) => row.date },
         { header: 'S&P 500 YoY (%)', value: (row) => formatCsvNumber(row.spxYoyChange) },
         { header: 'Excess Liquidity Leading (%)', value: (row) => formatCsvNumber(row.excessLiquidityLeading) },
       ],
@@ -293,7 +293,7 @@ export class SpxLiquidityChartPageComponent implements AfterViewInit {
 
   protected lastUpdatedText(): string {
     const ts = this.lastUpdated();
-    if (!ts) return 'Waiting for data';
+    if (!ts) return 'Adatra vár';
     return new Date(ts).toLocaleString('en-GB', {
       day: '2-digit', month: 'short', year: 'numeric',
       hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false,

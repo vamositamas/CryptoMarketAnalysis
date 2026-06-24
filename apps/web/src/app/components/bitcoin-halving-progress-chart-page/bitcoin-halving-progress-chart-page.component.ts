@@ -97,9 +97,9 @@ export class BitcoinHalvingProgressChartPageComponent {
     const daysSince = Math.floor((Date.now() - CURRENT_CYCLE_START_MS) / 86_400_000);
     const totalDays = Math.floor((NEXT_HALVING_EST_MS - CURRENT_CYCLE_START_MS) / 86_400_000);
     const fields: ChartInfoField[] = [
-      { label: 'BTC Price (now)', value: fmtUsd(last.priceUsd) },
-      { label: 'Cycle Progress', value: `${(progress * 100).toFixed(2)}%` },
-      { label: 'Days into Cycle', value: `${daysSince} / ~${totalDays} days` },
+      { label: 'BTC ár (most)', value: fmtUsd(last.priceUsd) },
+      { label: 'Ciklus előrehaladása', value: `${(progress * 100).toFixed(2)}%` },
+      { label: 'Napok a ciklusban', value: `${daysSince} / ~${totalDays} days` },
     ];
     for (const c of this.pastCyclePrices()) {
       fields.push({ label: `${c.label} at same stage`, value: c.price !== null ? fmtUsd(c.price) : '—' });
@@ -118,7 +118,7 @@ export class BitcoinHalvingProgressChartPageComponent {
 
   protected readonly infoLastUpdated = computed(() => {
     const ts = this.lastUpdated();
-    if (!ts) return 'Waiting for data';
+    if (!ts) return 'Adatra vár';
     return new Date(ts).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
   });
 
@@ -149,7 +149,7 @@ export class BitcoinHalvingProgressChartPageComponent {
       labels: allDates,
       datasets: [
         {
-          label: 'BTC Price',
+          label: 'BTC ár',
           data: [...points.map((p) => p.priceUsd), ...futureNulls],
           borderColor: '#000000',
           backgroundColor: 'transparent',
@@ -162,7 +162,7 @@ export class BitcoinHalvingProgressChartPageComponent {
           fill: false as any,
         },
         {
-          label: 'All-Time High',
+          label: 'Történelmi csúcs',
           data: athData,
           showLine: false,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -335,7 +335,7 @@ export class BitcoinHalvingProgressChartPageComponent {
     this.exportMenuOpen.set(false);
     await exportChartPng({
       chartImageDataUrl: dataUrl,
-      chartTitle: 'Bitcoin Halving Progress',
+      chartTitle: 'Bitcoin felezési előrehaladás',
       fileName: `bitcoin-halving-progress_${getExportDateStamp()}.png`,
     });
   }
@@ -346,8 +346,8 @@ export class BitcoinHalvingProgressChartPageComponent {
       rows: this.dataPoints(),
       fileName: `bitcoin-halving-progress_${getExportDateStamp()}.csv`,
       columns: [
-        { header: 'Date', value: (row) => row.date },
-        { header: 'Price USD', value: (row) => formatCsvNumber(row.priceUsd) },
+        { header: 'Dátum', value: (row) => row.date },
+        { header: 'Ár USD', value: (row) => formatCsvNumber(row.priceUsd) },
       ],
     });
   }

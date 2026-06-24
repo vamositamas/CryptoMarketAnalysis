@@ -34,23 +34,23 @@ interface TimeframeOption {
 }
 
 const TIMEFRAMES: TimeframeOption[] = [
-  { label: '1M', value: '1m' },
-  { label: '3M', value: '3m' },
-  { label: '6M', value: '6m' },
-  { label: '1Y', value: '1y' },
-  { label: '2Y', value: '2y' },
-  { label: 'All', value: 'all' },
+  { label: '1 hó', value: '1m' },
+  { label: '3 hó', value: '3m' },
+  { label: '6 hó', value: '6m' },
+  { label: '1 év', value: '1y' },
+  { label: '2 év', value: '2y' },
+  { label: 'Mind', value: 'all' },
 ];
 
 const HALVING_EVENTS = [
-  { date: '2012-11-28', label: '2012 Halving' },
-  { date: '2016-07-09', label: '2016 Halving' },
-  { date: '2020-05-11', label: '2020 Halving' },
-  { date: '2024-04-19', label: '2024 Halving' },
+  { date: '2012-11-28', label: '2012 felezés' },
+  { date: '2016-07-09', label: '2016 felezés' },
+  { date: '2020-05-11', label: '2020 felezés' },
+  { date: '2024-04-19', label: '2024 felezés' },
 ];
 
 const TWO_YR_MA_ALERT_METRICS: AlertMetricOption[] = [
-  { value: 'btc_price', label: 'BTC Price USD' },
+  { value: 'btc_price', label: 'BTC ár USD' },
 ];
 
 @Component({
@@ -97,22 +97,22 @@ export class TwoYrMaMultiplierChartPageComponent implements AfterViewInit {
         ? 'Buy Zone (Below 2yr MA)'
         : ma5 !== null && price > ma5
           ? 'Sell Zone (Above 2yr MA×5)'
-          : 'Neutral';
+          : 'Semleges';
     const distancePct =
       ma !== null && ma > 0
         ? ((price / ma) - 1) * 100
         : null;
     return [
-      { label: 'BTC Price', value: formatUsd(price) },
-      { label: '2yr MA', value: ma !== null ? formatUsd(ma) : 'N/A' },
-      { label: '2yr MA × 5', value: ma5 !== null ? formatUsd(ma5) : 'N/A' },
-      { label: 'Signal', value: signal },
+      { label: 'BTC ár', value: formatUsd(price) },
+      { label: '2yr MA', value: ma !== null ? formatUsd(ma) : 'Nincs adat' },
+      { label: '2yr MA × 5', value: ma5 !== null ? formatUsd(ma5) : 'Nincs adat' },
+      { label: 'Jelzés', value: signal },
       {
-        label: 'Distance to MA',
+        label: 'Távolság az MA-tól',
         value:
           distancePct !== null
             ? `${distancePct > 0 ? '+' : ''}${distancePct.toFixed(1)}% ${distancePct >= 0 ? 'above' : 'below'} 2yr MA`
-            : 'N/A',
+            : 'Nincs adat',
       },
     ];
   });
@@ -120,7 +120,7 @@ export class TwoYrMaMultiplierChartPageComponent implements AfterViewInit {
   protected readonly infoInterpretation = computed(() => {
     const points = this.dataPoints();
     const last = points[points.length - 1];
-    if (!last) return 'Waiting for data.';
+    if (!last) return 'Adatra vár.';
     const price = last.priceUsd;
     const ma = last.ma730;
     const ma5 = last.ma730x5;
@@ -221,7 +221,7 @@ export class TwoYrMaMultiplierChartPageComponent implements AfterViewInit {
         // BTC Price — black line, thin, on top
         {
           type: 'line' as const,
-          label: 'BTC Price',
+          label: 'BTC ár',
           data: points.map((p) => p.priceUsd),
           borderColor: '#1f2937',
           borderWidth: 1,
@@ -353,7 +353,7 @@ export class TwoYrMaMultiplierChartPageComponent implements AfterViewInit {
     this.exportMenuOpen.set(false);
     await exportChartPng({
       chartImageDataUrl,
-      chartTitle: '2-Year MA Multiplier',
+      chartTitle: '2 éves MA szorzó',
       fileName: `2yr-ma-multiplier_${getExportDateStamp()}.png`,
     });
   }
@@ -364,8 +364,8 @@ export class TwoYrMaMultiplierChartPageComponent implements AfterViewInit {
       rows: this.dataPoints(),
       fileName: `2yr-ma-multiplier_${getExportDateStamp()}.csv`,
       columns: [
-        { header: 'Date', value: (row) => row.date },
-        { header: 'Price USD', value: (row) => formatCsvNumber(row.priceUsd) },
+        { header: 'Dátum', value: (row) => row.date },
+        { header: 'Ár USD', value: (row) => formatCsvNumber(row.priceUsd) },
         { header: '2yr MA', value: (row) => formatCsvNumber(row.ma730) },
         { header: '2yr MA × 2', value: (row) => formatCsvNumber(row.ma730x2) },
         { header: '2yr MA × 3', value: (row) => formatCsvNumber(row.ma730x3) },
@@ -377,7 +377,7 @@ export class TwoYrMaMultiplierChartPageComponent implements AfterViewInit {
 
   protected lastUpdatedText(): string {
     const ts = this.lastUpdated();
-    if (!ts) return 'Waiting for data';
+    if (!ts) return 'Adatra vár';
     return new Date(ts).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
   }
 
@@ -429,7 +429,7 @@ function createHalvingAnnotations(startDate: string): Record<string, AnnotationO
 }
 
 function formatUsd(value: number): string {
-  if (!Number.isFinite(value)) return 'n/a';
+  if (!Number.isFinite(value)) return 'nincs adat';
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',

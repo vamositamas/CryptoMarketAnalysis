@@ -36,23 +36,23 @@ interface TimeframeOption {
 }
 
 const TIMEFRAMES: TimeframeOption[] = [
-  { label: '1M', value: '1m' },
-  { label: '3M', value: '3m' },
-  { label: '6M', value: '6m' },
-  { label: '1Y', value: '1y' },
-  { label: '2Y', value: '2y' },
-  { label: 'All', value: 'all' },
+  { label: '1 hó', value: '1m' },
+  { label: '3 hó', value: '3m' },
+  { label: '6 hó', value: '6m' },
+  { label: '1 év', value: '1y' },
+  { label: '2 év', value: '2y' },
+  { label: 'Mind', value: 'all' },
 ];
 
 const HALVING_EVENTS = [
-  { date: '2012-11-28', label: '2012 Halving' },
-  { date: '2016-07-09', label: '2016 Halving' },
-  { date: '2020-05-11', label: '2020 Halving' },
-  { date: '2024-04-19', label: '2024 Halving' },
+  { date: '2012-11-28', label: '2012 felezés' },
+  { date: '2016-07-09', label: '2016 felezés' },
+  { date: '2020-05-11', label: '2020 felezés' },
+  { date: '2024-04-19', label: '2024 felezés' },
 ];
 
 const MAYER_MULTIPLE_ALERT_METRICS: AlertMetricOption[] = [
-  { value: 'btc_price', label: 'BTC Price USD' },
+  { value: 'btc_price', label: 'BTC ár USD' },
 ];
 
 @Component({
@@ -96,22 +96,22 @@ export class MayerMultipleChartPageComponent implements AfterViewInit {
     const multiple = last.mayerMultiple;
     const signalValue =
       multiple !== null && multiple > 2.4
-        ? 'Overheated'
+        ? 'Túlfűtött'
         : multiple !== null && multiple < 0.8
-          ? 'Accumulation'
-          : 'Neutral';
+          ? 'Akkumuláció'
+          : 'Semleges';
     return [
-      { label: 'BTC Price', value: formatUsd(price) },
-      { label: '200d MA', value: ma200 !== null ? formatUsd(ma200) : 'N/A' },
-      { label: 'Mayer Multiple', value: multiple !== null ? multiple.toFixed(3) : 'N/A' },
-      { label: 'Signal', value: signalValue },
+      { label: 'BTC ár', value: formatUsd(price) },
+      { label: '200d MA', value: ma200 !== null ? formatUsd(ma200) : 'Nincs adat' },
+      { label: 'Mayer Multiple', value: multiple !== null ? multiple.toFixed(3) : 'Nincs adat' },
+      { label: 'Jelzés', value: signalValue },
     ];
   });
 
   protected readonly infoInterpretation = computed(() => {
     const points = this.dataPoints();
     const last = points[points.length - 1];
-    if (!last) return 'Waiting for data.';
+    if (!last) return 'Adatra vár.';
     const multiple = last.mayerMultiple;
     if (multiple === null) return '200-day moving average not yet available (requires 200 days of data).';
     if (multiple > 2.4) {
@@ -157,7 +157,7 @@ export class MayerMultipleChartPageComponent implements AfterViewInit {
         // BTC Price — dark line, thin, right axis (y)
         {
           type: 'line' as const,
-          label: 'BTC Price',
+          label: 'BTC ár',
           data: points.map((p) => p.priceUsd),
           borderColor: '#1f2937',
           borderWidth: 1.5,
@@ -384,8 +384,8 @@ export class MayerMultipleChartPageComponent implements AfterViewInit {
       rows: this.dataPoints(),
       fileName: `mayer-multiple_${getExportDateStamp()}.csv`,
       columns: [
-        { header: 'Date', value: (row) => row.date },
-        { header: 'Price USD', value: (row) => formatCsvNumber(row.priceUsd) },
+        { header: 'Dátum', value: (row) => row.date },
+        { header: 'Ár USD', value: (row) => formatCsvNumber(row.priceUsd) },
         { header: '200d MA', value: (row) => formatCsvNumber(row.ma200) },
         { header: 'Mayer Multiple', value: (row) => formatCsvNumber(row.mayerMultiple) },
       ],
@@ -394,7 +394,7 @@ export class MayerMultipleChartPageComponent implements AfterViewInit {
 
   protected lastUpdatedText(): string {
     const ts = this.lastUpdated();
-    if (!ts) return 'Waiting for data';
+    if (!ts) return 'Adatra vár';
     return new Date(ts).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
   }
 
@@ -446,7 +446,7 @@ function createHalvingAnnotations(startDate: string): Record<string, AnnotationO
 }
 
 function formatUsd(value: number): string {
-  if (!Number.isFinite(value)) return 'n/a';
+  if (!Number.isFinite(value)) return 'nincs adat';
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',

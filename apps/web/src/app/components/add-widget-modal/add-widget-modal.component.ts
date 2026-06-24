@@ -21,7 +21,7 @@ const WIDGET_LIBRARY: WidgetLibraryItem[] = [
   {
     type: 'realized_price',
     icon: 'RP',
-    name: 'Realized Price',
+    name: 'Realizált ár',
     description: 'Average cost basis of all bitcoins, based on the price each coin last moved on-chain.',
     category: 'Price Metrics',
     decimals: 2,
@@ -37,7 +37,7 @@ const WIDGET_LIBRARY: WidgetLibraryItem[] = [
   {
     type: 'hash_rate',
     icon: 'HR',
-    name: 'Hash Rate',
+    name: 'Hash rate',
     description: 'Estimated computing power currently securing the Bitcoin network.',
     category: 'On-chain Metrics',
     decimals: 0,
@@ -69,7 +69,7 @@ const WIDGET_LIBRARY: WidgetLibraryItem[] = [
   {
     type: 'market_cap',
     icon: 'CAP',
-    name: 'Market Cap',
+    name: 'Piaci kapitalizáció',
     description: 'Current Bitcoin price multiplied by the circulating supply.',
     category: 'Supply Metrics',
     decimals: 0,

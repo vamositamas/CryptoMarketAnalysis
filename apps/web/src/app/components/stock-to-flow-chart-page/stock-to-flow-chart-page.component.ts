@@ -34,19 +34,19 @@ interface TimeframeOption {
 }
 
 const TIMEFRAMES: TimeframeOption[] = [
-  { label: '1M', value: '1m' },
-  { label: '3M', value: '3m' },
-  { label: '6M', value: '6m' },
-  { label: '1Y', value: '1y' },
-  { label: '2Y', value: '2y' },
-  { label: 'All', value: 'all' },
+  { label: '1 hó', value: '1m' },
+  { label: '3 hó', value: '3m' },
+  { label: '6 hó', value: '6m' },
+  { label: '1 év', value: '1y' },
+  { label: '2 év', value: '2y' },
+  { label: 'Mind', value: 'all' },
 ];
 
 const HALVING_EVENTS = [
-  { date: '2012-11-28', label: '2012 Halving' },
-  { date: '2016-07-09', label: '2016 Halving' },
-  { date: '2020-05-11', label: '2020 Halving' },
-  { date: '2024-04-20', label: '2024 Halving' },
+  { date: '2012-11-28', label: '2012 felezés' },
+  { date: '2016-07-09', label: '2016 felezés' },
+  { date: '2020-05-11', label: '2020 felezés' },
+  { date: '2024-04-20', label: '2024 felezés' },
 ];
 
 // Includes a projected 2028 halving so color can be computed for current data
@@ -76,7 +76,7 @@ function halvingDaysToColor(days: number): string {
 
 const STOCK_TO_FLOW_ALERT_METRICS: AlertMetricOption[] = [
   { value: 'stock_to_flow_ratio', label: 'Stock-to-Flow Ratio' },
-  { value: 'btc_price', label: 'BTC Price USD' },
+  { value: 'btc_price', label: 'BTC ár USD' },
 ];
 
 @Component({
@@ -105,10 +105,10 @@ export class StockToFlowChartPageComponent implements AfterViewInit {
     const point = this.latestPoint();
 
     return [
-      { label: 'Current Price', value: point ? formatUsd(point.priceUsd) : 'Waiting for data' },
-      { label: 'Model Price', value: point?.modelPrice ? formatUsd(point.modelPrice) : 'Waiting for model' },
+      { label: 'Aktuális ár', value: point ? formatUsd(point.priceUsd) : 'Adatra vár' },
+      { label: 'Modellár', value: point?.modelPrice ? formatUsd(point.modelPrice) : 'Waiting for model' },
       { label: 'Stock-to-Flow Ratio', value: point?.stockToFlowRatio ? point.stockToFlowRatio.toFixed(2) : 'Waiting for model' },
-      { label: 'Price vs Model', value: point ? formatPremium(point) : 'Waiting for data' },
+      { label: 'Ár vs. modell', value: point ? formatPremium(point) : 'Adatra vár' },
     ];
   });
   protected readonly infoInterpretation = computed(() => {
@@ -161,7 +161,7 @@ export class StockToFlowChartPageComponent implements AfterViewInit {
       labels: [...points.map((p) => p.date), ...futureLabels],
       datasets: [
         {
-          label: 'BTC Price',
+          label: 'BTC ár',
           data: [...points.map((p) => p.priceUsd), ...futureNulls],
           borderColor: '#22c55e',
           backgroundColor: 'transparent',
@@ -211,7 +211,7 @@ export class StockToFlowChartPageComponent implements AfterViewInit {
             usePointStyle: true,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             generateLabels: (): any[] => [
-              { text: 'BTC Price',             pointStyle: 'circle', fillStyle: '#22c55e', strokeStyle: '#22c55e', lineWidth: 0, hidden: false, datasetIndex: 0 },
+              { text: 'BTC ár',             pointStyle: 'circle', fillStyle: '#22c55e', strokeStyle: '#22c55e', lineWidth: 0, hidden: false, datasetIndex: 0 },
               { text: 'Stock/Flow (365d avg)', pointStyle: 'line',   strokeStyle: '#7f1d1d', lineWidth: 2,         hidden: false, datasetIndex: 1 },
               { text: 'Halving Dates',         pointStyle: 'dash',   strokeStyle: 'rgba(107,114,128,0.7)', lineWidth: 1, hidden: false, datasetIndex: -1 },
             ],
@@ -321,7 +321,7 @@ export class StockToFlowChartPageComponent implements AfterViewInit {
     this.exportMenuOpen.set(false);
     await exportChartPng({
       chartImageDataUrl,
-      chartTitle: 'Stock-to-Flow Model',
+      chartTitle: 'Stock-to-Flow modell',
       fileName: `stock-to-flow_${getExportDateStamp()}.png`,
     });
   }
@@ -332,8 +332,8 @@ export class StockToFlowChartPageComponent implements AfterViewInit {
       rows: this.dataPoints(),
       fileName: `stock-to-flow_${getExportDateStamp()}.csv`,
       columns: [
-        { header: 'Date', value: (row) => row.date },
-        { header: 'Price USD', value: (row) => formatCsvNumber(row.priceUsd) },
+        { header: 'Dátum', value: (row) => row.date },
+        { header: 'Ár USD', value: (row) => formatCsvNumber(row.priceUsd) },
         { header: 'S2F Model Price', value: (row) => formatCsvNumber(row.modelPrice) },
         { header: 'S2F Ratio', value: (row) => row.stockToFlowRatio },
       ],
@@ -344,7 +344,7 @@ export class StockToFlowChartPageComponent implements AfterViewInit {
     const timestamp = this.lastUpdated();
 
     if (!timestamp) {
-      return 'Waiting for data';
+      return 'Adatra vár';
     }
 
     return new Date(timestamp).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
@@ -430,7 +430,7 @@ function getPriceRange(
 
 function formatPremium(point: StockToFlowChartDataPoint): string {
   if (point.modelPrice === null || point.modelPrice <= 0) {
-    return 'n/a';
+    return 'nincs adat';
   }
 
   const premium = ((point.priceUsd - point.modelPrice) / point.modelPrice) * 100;
@@ -439,12 +439,12 @@ function formatPremium(point: StockToFlowChartDataPoint): string {
 }
 
 function formatRatio(value: number | null): string {
-  return value === null ? 'n/a' : value.toFixed(1);
+  return value === null ? 'nincs adat' : value.toFixed(1);
 }
 
 function formatUsd(value: number): string {
   if (!Number.isFinite(value)) {
-    return 'n/a';
+    return 'nincs adat';
   }
 
   return new Intl.NumberFormat('en-US', {

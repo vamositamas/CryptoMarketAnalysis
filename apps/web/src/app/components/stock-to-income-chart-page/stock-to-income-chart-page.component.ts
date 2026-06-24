@@ -34,26 +34,26 @@ interface TimeframeOption {
 }
 
 const TIMEFRAMES: TimeframeOption[] = [
-  { label: '1M', value: '1m' },
-  { label: '3M', value: '3m' },
-  { label: '6M', value: '6m' },
-  { label: '1Y', value: '1y' },
-  { label: '2Y', value: '2y' },
-  { label: 'All', value: 'all' },
+  { label: '1 hó', value: '1m' },
+  { label: '3 hó', value: '3m' },
+  { label: '6 hó', value: '6m' },
+  { label: '1 év', value: '1y' },
+  { label: '2 év', value: '2y' },
+  { label: 'Mind', value: 'all' },
 ];
 
 const HALVING_EVENTS = [
-  { date: '2012-11-28', label: '2012 Halving' },
-  { date: '2016-07-09', label: '2016 Halving' },
-  { date: '2020-05-11', label: '2020 Halving' },
-  { date: '2024-04-19', label: '2024 Halving' },
+  { date: '2012-11-28', label: '2012 felezés' },
+  { date: '2016-07-09', label: '2016 felezés' },
+  { date: '2020-05-11', label: '2020 felezés' },
+  { date: '2024-04-19', label: '2024 felezés' },
   { date: '2028-04-21', label: '2028 Halving' },
   { date: '2032-04-01', label: '2032 Halving' },
   { date: '2036-04-01', label: '2036 Halving' },
 ];
 
 const S2I_ALERT_METRICS: AlertMetricOption[] = [
-  { value: 'btc_price', label: 'BTC Price USD' },
+  { value: 'btc_price', label: 'BTC ár USD' },
 ];
 
 @Component({
@@ -101,16 +101,16 @@ export class StockToIncomeChartPageComponent implements AfterViewInit {
     const s2i = lastHistorical.s2iRatio;
     const pctDiff = model !== null && model > 0 ? ((price - model) / model) * 100 : null;
     return [
-      { label: 'BTC Price', value: formatUsd(price) },
-      { label: 'S2I Model Price', value: model !== null ? formatUsd(model) : 'N/A' },
-      { label: 'S2I Ratio', value: s2i !== null ? s2i.toFixed(1) : 'N/A' },
-      { label: 'Signal', value: s2i !== null ? getS2ISignal(s2i) : 'N/A' },
+      { label: 'BTC ár', value: formatUsd(price) },
+      { label: 'S2I Model Price', value: model !== null ? formatUsd(model) : 'Nincs adat' },
+      { label: 'S2I Ratio', value: s2i !== null ? s2i.toFixed(1) : 'Nincs adat' },
+      { label: 'Jelzés', value: s2i !== null ? getS2ISignal(s2i) : 'Nincs adat' },
       {
         label: 'Current vs Model',
         value:
           pctDiff !== null
             ? `${pctDiff > 0 ? '+' : ''}${pctDiff.toFixed(1)}% ${pctDiff >= 0 ? 'above' : 'below'} model`
-            : 'N/A',
+            : 'Nincs adat',
       },
     ];
   });
@@ -118,7 +118,7 @@ export class StockToIncomeChartPageComponent implements AfterViewInit {
   protected readonly infoInterpretation = computed(() => {
     const points = this.dataPoints();
     const lastHistorical = [...points].reverse().find((p) => p.priceUsd !== null);
-    if (!lastHistorical) return 'Waiting for data.';
+    if (!lastHistorical) return 'Adatra vár.';
     const s2i = lastHistorical.s2iRatio;
     if (s2i === null) return 'S2I ratio not yet available.';
     return `Current S2I ratio is ${s2i.toFixed(2)}. ${getS2IInterpretation(s2i)}`;
@@ -190,7 +190,7 @@ export class StockToIncomeChartPageComponent implements AfterViewInit {
         // BTC actual price — cyan, only historical (null for future and any zero-price rows)
         {
           type: 'line' as const,
-          label: 'BTC Price (USD)',
+          label: 'BTC ár (USD)',
           data: points.map((p) => (p.priceUsd !== null && p.priceUsd > 0 ? p.priceUsd : null)),
           borderColor: '#22d3ee',
           borderWidth: 1.5,
@@ -337,7 +337,7 @@ export class StockToIncomeChartPageComponent implements AfterViewInit {
     this.exportMenuOpen.set(false);
     await exportChartPng({
       chartImageDataUrl,
-      chartTitle: 'Stock to Income Model',
+      chartTitle: 'Stock to Income modell',
       fileName: `stock-to-income_${getExportDateStamp()}.png`,
     });
   }
@@ -348,9 +348,9 @@ export class StockToIncomeChartPageComponent implements AfterViewInit {
       rows: this.dataPoints(),
       fileName: `stock-to-income_${getExportDateStamp()}.csv`,
       columns: [
-        { header: 'Date', value: (row) => row.date },
-        { header: 'Price USD', value: (row) => formatCsvNumber(row.priceUsd) },
-        { header: 'Model Price', value: (row) => formatCsvNumber(row.modelPrice) },
+        { header: 'Dátum', value: (row) => row.date },
+        { header: 'Ár USD', value: (row) => formatCsvNumber(row.priceUsd) },
+        { header: 'Modellár', value: (row) => formatCsvNumber(row.modelPrice) },
         { header: 'Upper Band', value: (row) => formatCsvNumber(row.upperBand) },
         { header: 'Lower Band', value: (row) => formatCsvNumber(row.lowerBand) },
         { header: 'S2I Ratio', value: (row) => formatCsvNumber(row.s2iRatio) },
@@ -360,7 +360,7 @@ export class StockToIncomeChartPageComponent implements AfterViewInit {
 
   protected lastUpdatedText(): string {
     const ts = this.lastUpdated();
-    if (!ts) return 'Waiting for data';
+    if (!ts) return 'Adatra vár';
     return new Date(ts).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
   }
 
@@ -388,10 +388,10 @@ export class StockToIncomeChartPageComponent implements AfterViewInit {
 }
 
 function getS2ISignal(s2i: number): string {
-  if (s2i > 3.5) return 'Sell Zone';
-  if (s2i > 2.0) return 'Overvalued';
-  if (s2i >= 1.0) return 'Fair Value';
-  if (s2i >= 0.5) return 'Undervalued';
+  if (s2i > 3.5) return 'Eladási zóna';
+  if (s2i > 2.0) return 'Túlértékelt';
+  if (s2i >= 1.0) return 'Valós érték';
+  if (s2i >= 0.5) return 'Alulértékelt';
   return 'Deep Undervalue';
 }
 
@@ -439,7 +439,7 @@ function createHalvingAnnotations(startDate: string): Record<string, AnnotationO
 }
 
 function formatUsd(value: number): string {
-  if (!Number.isFinite(value)) return 'n/a';
+  if (!Number.isFinite(value)) return 'nincs adat';
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',

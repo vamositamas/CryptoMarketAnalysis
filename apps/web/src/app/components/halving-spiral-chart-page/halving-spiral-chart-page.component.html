@@ -1,28 +1,28 @@
 <section class="content-section halving-spiral-chart-page">
   <div class="chart-page-header">
     <div>
-      <a class="form-link" routerLink="/charts">Back to chart library</a>
-      <p class="eyebrow">Cycle indicator</p>
-      <h2>Bitcoin Halving Spiral</h2>
+      <a class="form-link" routerLink="/charts">Vissza a grafikontárba</a>
+      <p class="eyebrow">Ciklusindikátor</p>
+      <h2>Bitcoin felezési spirál</h2>
       <p>Each revolution = one halving cycle (~4 years). Radial distance = log price.</p>
     </div>
     <div class="chart-status">
-      <span>Last updated</span>
+      <span>Utoljára frissítve</span>
       <strong>{{ lastUpdatedText() }}</strong>
     </div>
   </div>
 
   <div class="chart-toolbar" aria-label="Chart controls">
     <div class="timeframe-selector" role="group">
-      <button type="button" class="timeframe-button active" disabled>All time</button>
+      <button type="button" class="timeframe-button active" disabled>Teljes időszak</button>
     </div>
     <div class="chart-actions">
       <div class="export-menu">
         <button type="button" class="secondary-button" (click)="toggleExportMenu()">Export</button>
         @if (exportMenuOpen()) {
           <div class="export-options">
-            <button type="button" (click)="exportPng()">Export as PNG</button>
-            <button type="button" (click)="exportCsv()">Export as CSV</button>
+            <button type="button" (click)="exportPng()">Exportálás PNG-ként</button>
+            <button type="button" (click)="exportCsv()">Exportálás CSV-ként</button>
           </div>
         }
       </div>
@@ -40,7 +40,7 @@
       @if (isLoading()) {
         <div class="loading-state" role="status">
           <span class="loading-spinner" aria-hidden="true"></span>
-          <span>Loading chart data...</span>
+          <span>Grafikonadatok betöltése...</span>
         </div>
       }
 
@@ -67,7 +67,7 @@
 
   @if (infoOpen()) {
     <app-chart-info-panel
-      title="Bitcoin Halving Spiral"
+      title="Bitcoin felezési spirál"
       [about]="infoAbout"
       [currentFields]="infoCurrentFields()"
       [interpretation]="infoInterpretation()"

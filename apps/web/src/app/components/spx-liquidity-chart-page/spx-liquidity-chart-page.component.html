@@ -1,13 +1,13 @@
 <section class="content-section rainbow-chart-page">
   <div class="chart-page-header">
     <div>
-      <a class="form-link" routerLink="/charts">Back to chart library</a>
-      <p class="eyebrow">Macro Indicators</p>
-      <h2>S&amp;P 500 vs Excess Liquidity</h2>
-      <p>S&amp;P 500 YoY % change vs. M2/GDP liquidity surplus — 6-month leading signal</p>
+      <a class="form-link" routerLink="/charts">Vissza a grafikontárba</a>
+      <p class="eyebrow">Makróindikátorok</p>
+      <h2>S&amp;P 500 vs többletlikviditás</h2>
+      <p>S&amp;P 500 éves % változás vs. M2/GDP likviditási többlet - 6 hónapos előrejelző jel</p>
     </div>
     <div class="chart-status">
-      <span>Last updated</span>
+      <span>Utoljára frissítve</span>
       <strong>{{ lastUpdatedText() }}</strong>
     </div>
   </div>
@@ -27,13 +27,13 @@
       }
     </div>
     <div class="chart-actions">
-      <button type="button" class="secondary-button" (click)="resetZoom()">Reset Zoom</button>
+      <button type="button" class="secondary-button" (click)="resetZoom()">Zoom visszaállítása</button>
       <div class="export-menu">
         <button type="button" class="secondary-button" (click)="toggleExportMenu()">Export</button>
         @if (exportMenuOpen()) {
           <div class="export-options">
-            <button type="button" (click)="exportPng()">Export as PNG</button>
-            <button type="button" (click)="exportCsv()">Export as CSV</button>
+            <button type="button" (click)="exportPng()">Exportálás PNG-ként</button>
+            <button type="button" (click)="exportCsv()">Exportálás CSV-ként</button>
           </div>
         }
       </div>
@@ -55,7 +55,7 @@
       @if (isLoading()) {
         <div class="loading-state" role="status">
           <span class="loading-spinner" aria-hidden="true"></span>
-          <span>Loading chart data...</span>
+          <span>Grafikonadatok betöltése...</span>
         </div>
       }
 
@@ -67,14 +67,14 @@
           (chartPointSelected)="handleChartPoint($event)"
         ></app-chart-viewer>
       } @else if (!isLoading() && !errorMessage()) {
-        <p class="empty-state">No data yet. Historical data will appear after the first refresh.</p>
+        <p class="empty-state">Még nincs adat. A historikus adatok az első frissítés után jelennek meg.</p>
       }
     </div>
   </div>
 
   @if (infoOpen()) {
     <app-chart-info-panel
-      title="S&P 500 vs Excess Liquidity"
+      title="S&P 500 vs többletlikviditás"
       [about]="infoAbout"
       [currentFields]="infoCurrentFields()"
       [interpretation]="infoInterpretation()"

@@ -36,17 +36,17 @@ interface TimeframeOption {
 }
 
 const TIMEFRAMES: TimeframeOption[] = [
-  { label: '1M', value: '1m' },
-  { label: '3M', value: '3m' },
-  { label: '6M', value: '6m' },
-  { label: '1Y', value: '1y' },
-  { label: '2Y', value: '2y' },
-  { label: 'All', value: 'all' },
+  { label: '1 hó', value: '1m' },
+  { label: '3 hó', value: '3m' },
+  { label: '6 hó', value: '6m' },
+  { label: '1 év', value: '1y' },
+  { label: '2 év', value: '2y' },
+  { label: 'Mind', value: 'all' },
 ];
 
 const MVRV_ALERT_METRICS: AlertMetricOption[] = [
   { value: 'mvrv_zscore', label: 'MVRV Z-Score' },
-  { value: 'btc_price', label: 'BTC Price USD' },
+  { value: 'btc_price', label: 'BTC ár USD' },
 ];
 
 @Component({
@@ -138,10 +138,10 @@ export class MvrvZScoreChartPageComponent implements AfterViewInit {
     const realizedPrice = point ? (this.enhancedRealizedPrices().get(point.date) ?? null) : null;
 
     return [
-      { label: 'BTC Price',         value: point ? formatUsd(point.priceUsd) : 'Waiting for data' },
-      { label: 'Realized Price',     value: realizedPrice !== null ? formatUsd(realizedPrice) : 'Waiting for data' },
-      { label: 'MVRV Z-Score',       value: zScore !== null ? zScore.toFixed(2) : 'Waiting for data' },
-      { label: 'Signal',             value: zScore !== null ? getMvrvSignal(zScore) : 'Waiting for data' },
+      { label: 'BTC ár',         value: point ? formatUsd(point.priceUsd) : 'Adatra vár' },
+      { label: 'Realizált ár',     value: realizedPrice !== null ? formatUsd(realizedPrice) : 'Adatra vár' },
+      { label: 'MVRV Z-Score',       value: zScore !== null ? zScore.toFixed(2) : 'Adatra vár' },
+      { label: 'Jelzés',             value: zScore !== null ? getMvrvSignal(zScore) : 'Adatra vár' },
     ];
   });
 
@@ -190,7 +190,7 @@ export class MvrvZScoreChartPageComponent implements AfterViewInit {
       labels: [...points.map((p) => p.date), ...futureLabels],
       datasets: [
         {
-          label: 'BTC Price',
+          label: 'BTC ár',
           data: [...points.map((p) => p.priceUsd), ...futureNulls],
           borderColor: '#111820',
           backgroundColor: 'transparent',
@@ -202,7 +202,7 @@ export class MvrvZScoreChartPageComponent implements AfterViewInit {
           order: 2,
         },
         {
-          label: 'Realized Price',
+          label: 'Realizált ár',
           data: [...points.map((p) => realizedMap.get(p.date) ?? null), ...futureNulls],
           borderColor: '#22a9d0',
           backgroundColor: 'transparent',
@@ -400,9 +400,9 @@ export class MvrvZScoreChartPageComponent implements AfterViewInit {
       rows: this.dataPoints(),
       fileName: `mvrv-z-score_${getExportDateStamp()}.csv`,
       columns: [
-        { header: 'Date',            value: (row) => row.date },
-        { header: 'Price USD',       value: (row) => formatCsvNumber(row.priceUsd) },
-        { header: 'Realized Price',  value: (row) => formatCsvNumber(realizedMap.get(row.date) ?? null) },
+        { header: 'Dátum',            value: (row) => row.date },
+        { header: 'Ár USD',       value: (row) => formatCsvNumber(row.priceUsd) },
+        { header: 'Realizált ár',  value: (row) => formatCsvNumber(realizedMap.get(row.date) ?? null) },
         { header: 'MVRV Z-Score',    value: (row) => formatCsvNumber(row.mvrvZScore) },
       ],
     });
@@ -410,7 +410,7 @@ export class MvrvZScoreChartPageComponent implements AfterViewInit {
 
   protected lastUpdatedText(): string {
     const timestamp = this.lastUpdated();
-    if (!timestamp) return 'Waiting for data';
+    if (!timestamp) return 'Adatra vár';
     return new Date(timestamp).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
   }
 
@@ -497,9 +497,9 @@ async function fetchWithLocalStorageCache<T>(
 
 function getMvrvSignal(zScore: number): string {
   if (zScore > 7)  return 'Overheated — Sell zone';
-  if (zScore > 5)  return 'Elevated';
-  if (zScore > 3)  return 'Caution';
-  if (zScore >= 0) return 'Fair Value';
+  if (zScore > 5)  return 'Emelkedett';
+  if (zScore > 3)  return 'Óvatosság';
+  if (zScore >= 0) return 'Valós érték';
   return 'Undervalued — Buy zone';
 }
 

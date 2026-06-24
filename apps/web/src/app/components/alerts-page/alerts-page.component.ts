@@ -17,13 +17,13 @@ const CONDITION_LABELS: Record<string, string> = {
 };
 
 const METRIC_LABELS: Record<string, string> = {
-  rainbow_band: 'Rainbow Band',
-  btc_price: 'BTC Price',
+  rainbow_band: 'Szivárványsáv',
+  btc_price: 'BTC ár',
   ma_111_day: '111-Day MA',
   ma_350x2_day: '350-Day MA × 2',
   stock_to_flow_ratio: 'Stock-to-Flow Ratio',
   mvrv_zscore: 'MVRV Z-Score',
-  fear_greed_index: 'Fear & Greed Index',
+  fear_greed_index: 'Félelem és kapzsiság index',
 };
 
 const CHART_URLS: Record<string, string> = {
@@ -196,7 +196,7 @@ export class AlertsPageComponent implements OnInit {
   protected searchQuery = '';
   protected readonly statusFilter = signal<'all' | 'active' | 'triggered' | 'paused'>('all');
   protected readonly statusOptions = [
-    { label: 'All', value: 'all' as const },
+    { label: 'Mind', value: 'all' as const },
     { label: 'Active', value: 'active' as const },
     { label: 'Triggered', value: 'triggered' as const },
     { label: 'Paused', value: 'paused' as const },

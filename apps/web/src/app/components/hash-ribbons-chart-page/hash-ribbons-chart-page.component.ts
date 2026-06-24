@@ -36,23 +36,23 @@ interface TimeframeOption {
 }
 
 const TIMEFRAMES: TimeframeOption[] = [
-  { label: '1M', value: '1m' },
-  { label: '3M', value: '3m' },
-  { label: '6M', value: '6m' },
-  { label: '1Y', value: '1y' },
-  { label: '2Y', value: '2y' },
-  { label: 'All', value: 'all' },
+  { label: '1 hó', value: '1m' },
+  { label: '3 hó', value: '3m' },
+  { label: '6 hó', value: '6m' },
+  { label: '1 év', value: '1y' },
+  { label: '2 év', value: '2y' },
+  { label: 'Mind', value: 'all' },
 ];
 
 const HALVING_EVENTS = [
-  { date: '2012-11-28', label: '2012 Halving' },
-  { date: '2016-07-09', label: '2016 Halving' },
-  { date: '2020-05-11', label: '2020 Halving' },
-  { date: '2024-04-19', label: '2024 Halving' },
+  { date: '2012-11-28', label: '2012 felezés' },
+  { date: '2016-07-09', label: '2016 felezés' },
+  { date: '2020-05-11', label: '2020 felezés' },
+  { date: '2024-04-19', label: '2024 felezés' },
 ];
 
 const HASH_RIBBONS_ALERT_METRICS: AlertMetricOption[] = [
-  { value: 'btc_price', label: 'BTC Price USD' },
+  { value: 'btc_price', label: 'BTC ár USD' },
 ];
 
 @Component({
@@ -100,9 +100,9 @@ export class HashRibbonsChartPageComponent implements AfterViewInit {
         : 'Capitulation (30d < 60d)';
     const recentSignal = isBuySignal ? 'Buy Signal Active' : 'No Active Signal';
     return [
-      { label: 'BTC Price', value: formatUsd(priceUsd) },
-      { label: '30d Hash Rate MA', value: ma30 !== null ? formatHashRate(ma30) : 'N/A' },
-      { label: '60d Hash Rate MA', value: ma60 !== null ? formatHashRate(ma60) : 'N/A' },
+      { label: 'BTC ár', value: formatUsd(priceUsd) },
+      { label: '30d Hash Rate MA', value: ma30 !== null ? formatHashRate(ma30) : 'Nincs adat' },
+      { label: '60d Hash Rate MA', value: ma60 !== null ? formatHashRate(ma60) : 'Nincs adat' },
       { label: 'Status', value: status },
       { label: 'Recent Signal', value: recentSignal },
     ];
@@ -110,7 +110,7 @@ export class HashRibbonsChartPageComponent implements AfterViewInit {
 
   protected readonly infoInterpretation = computed(() => {
     const points = this.dataPoints();
-    if (!points.length) return 'Waiting for data.';
+    if (!points.length) return 'Adatra vár.';
     const last = [...points].reverse().find((p) => p.ma30 !== null) ?? points[points.length - 1];
     const { ma30, ma60, isBuySignal } = last;
     if (ma30 === null || ma60 === null) {
@@ -172,7 +172,7 @@ export class HashRibbonsChartPageComponent implements AfterViewInit {
         // BTC Price — dark line, right log axis
         {
           type: 'line' as const,
-          label: 'BTC Price',
+          label: 'BTC ár',
           data: points.map((p) => p.priceUsd),
           borderColor: '#1f2937',
           borderWidth: 1.5,
@@ -351,8 +351,8 @@ export class HashRibbonsChartPageComponent implements AfterViewInit {
       rows: this.dataPoints(),
       fileName: `hash-ribbons_${getExportDateStamp()}.csv`,
       columns: [
-        { header: 'Date', value: (row) => row.date },
-        { header: 'Price USD', value: (row) => formatCsvNumber(row.priceUsd) },
+        { header: 'Dátum', value: (row) => row.date },
+        { header: 'Ár USD', value: (row) => formatCsvNumber(row.priceUsd) },
         { header: '30d Hash Rate MA', value: (row) => formatCsvNumber(row.ma30) },
         { header: '60d Hash Rate MA', value: (row) => formatCsvNumber(row.ma60) },
         { header: 'Buy Signal', value: (row) => (row.isBuySignal ? '1' : '0') },
@@ -362,7 +362,7 @@ export class HashRibbonsChartPageComponent implements AfterViewInit {
 
   protected lastUpdatedText(): string {
     const ts = this.lastUpdated();
-    if (!ts) return 'Waiting for data';
+    if (!ts) return 'Adatra vár';
     return new Date(ts).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
   }
 
@@ -414,7 +414,7 @@ function createHalvingAnnotations(startDate: string): Record<string, AnnotationO
 }
 
 function formatUsd(value: number): string {
-  if (!Number.isFinite(value)) return 'n/a';
+  if (!Number.isFinite(value)) return 'nincs adat';
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -423,7 +423,7 @@ function formatUsd(value: number): string {
 }
 
 function formatHashRate(value: number): string {
-  if (!Number.isFinite(value)) return 'n/a';
+  if (!Number.isFinite(value)) return 'nincs adat';
   if (value >= 1e21) return `${(value / 1e21).toFixed(2)} ZH/s`;
   if (value >= 1e18) return `${(value / 1e18).toFixed(2)} EH/s`;
   if (value >= 1e15) return `${(value / 1e15).toFixed(2)} PH/s`;

@@ -1,13 +1,13 @@
 <section class="content-section rainbow-chart-page">
   <div class="chart-page-header">
     <div>
-      <a class="form-link" routerLink="/charts">Back to chart library</a>
-      <p class="eyebrow">Cycle Indicators</p>
-      <h2>Difficulty Ribbon</h2>
-      <p>Mining difficulty moving average ribbon — miner stress indicator</p>
+      <a class="form-link" routerLink="/charts">Vissza a grafikontárba</a>
+      <p class="eyebrow">Ciklusindikátorok</p>
+      <h2>Nehézségi szalag</h2>
+      <p>Bányászati nehézség mozgóátlag-szalag - bányászstressz indikátor</p>
     </div>
     <div class="chart-status">
-      <span>Last updated</span>
+      <span>Utoljára frissítve</span>
       <strong>{{ lastUpdatedText() }}</strong>
     </div>
   </div>
@@ -27,13 +27,13 @@
       }
     </div>
     <div class="chart-actions">
-      <button type="button" class="secondary-button" (click)="resetZoom()">Reset Zoom</button>
+      <button type="button" class="secondary-button" (click)="resetZoom()">Zoom visszaállítása</button>
       <div class="export-menu">
         <button type="button" class="secondary-button" (click)="toggleExportMenu()">Export</button>
         @if (exportMenuOpen()) {
           <div class="export-options">
-            <button type="button" (click)="exportPng()">Export as PNG</button>
-            <button type="button" (click)="exportCsv()">Export as CSV</button>
+            <button type="button" (click)="exportPng()">Exportálás PNG-ként</button>
+            <button type="button" (click)="exportCsv()">Exportálás CSV-ként</button>
           </div>
         }
       </div>
@@ -41,7 +41,7 @@
         chartId="difficulty-ribbon"
         (annotationsChanged)="updateUserAnnotations($event)"
       ></app-chart-annotations>
-      <button type="button" class="secondary-button" (click)="openAlertModal()">Create Alert</button>
+      <button type="button" class="secondary-button" (click)="openAlertModal()">Riasztás létrehozása</button>
       <app-chart-favourite-button [chartId]="'difficulty-ribbon'"></app-chart-favourite-button>
       <button type="button" class="secondary-button" (click)="toggleInfo()">Info</button>
     </div>
@@ -64,7 +64,7 @@
       @if (isLoading()) {
         <div class="loading-state" role="status">
           <span class="loading-spinner" aria-hidden="true"></span>
-          <span>Loading chart data...</span>
+          <span>Grafikonadatok betöltése...</span>
         </div>
       }
 
@@ -76,14 +76,14 @@
           (chartPointSelected)="handleChartPoint($event)"
         ></app-chart-viewer>
       } @else if (!isLoading() && !errorMessage()) {
-        <p class="empty-state">No Difficulty Ribbon data is available yet.</p>
+        <p class="empty-state">Még nem áll rendelkezésre nehézségi szalag adat.</p>
       }
     </div>
   </div>
 
   @if (infoOpen()) {
     <app-chart-info-panel
-      title="Difficulty Ribbon"
+      title="Nehézségi szalag"
       [about]="infoAbout"
       [currentFields]="infoCurrentFields()"
       [interpretation]="infoInterpretation()"

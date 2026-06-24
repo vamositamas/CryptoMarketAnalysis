@@ -34,19 +34,19 @@ interface TimeframeOption {
 }
 
 const TIMEFRAMES: TimeframeOption[] = [
-  { label: '1M', value: '1m' },
-  { label: '3M', value: '3m' },
-  { label: '6M', value: '6m' },
-  { label: '1Y', value: '1y' },
-  { label: '2Y', value: '2y' },
-  { label: 'All', value: 'all' },
+  { label: '1 hó', value: '1m' },
+  { label: '3 hó', value: '3m' },
+  { label: '6 hó', value: '6m' },
+  { label: '1 év', value: '1y' },
+  { label: '2 év', value: '2y' },
+  { label: 'Mind', value: 'all' },
 ];
 
 const SIGNAL_MESSAGE = 'Historically, this signal has preceded major tops within 3-7 days';
 
 const PI_CYCLE_ALERT_METRICS: AlertMetricOption[] = [
-  { value: 'ma_111_day', label: '111-Day MA' },
-  { value: 'ma_350x2_day', label: '350-Day MA × 2' },
+  { value: 'ma_111_day', label: '111 napos MA' },
+  { value: 'ma_350x2_day', label: '350 napos MA × 2' },
 ];
 
 @Component({
@@ -78,10 +78,10 @@ export class PiCycleTopChartPageComponent implements AfterViewInit {
     const ma = lastIdx >= 0 ? this.maAt(lastIdx) : { ma111: null, ma350x2: null };
 
     return [
-      { label: 'Current Price',   value: point ? formatUsd(point.priceUsd) : 'Waiting for data' },
-      { label: '111-day MA',      value: ma.ma111   ? formatUsd(ma.ma111)   : 'Waiting for history' },
-      { label: '350-day MA x 2',  value: ma.ma350x2 ? formatUsd(ma.ma350x2) : 'Waiting for history' },
-      { label: 'Signal',          value: point ? getStatusText({ ...point, ...ma }) : 'Waiting for data' },
+      { label: 'Aktuális ár',   value: point ? formatUsd(point.priceUsd) : 'Adatra vár' },
+      { label: '111 napos MA',      value: ma.ma111   ? formatUsd(ma.ma111)   : 'Előzményekre vár' },
+      { label: '350 napos MA x 2',  value: ma.ma350x2 ? formatUsd(ma.ma350x2) : 'Előzményekre vár' },
+      { label: 'Jelzés',          value: point ? getStatusText({ ...point, ...ma }) : 'Adatra vár' },
     ];
   });
   protected readonly infoInterpretation = computed(() => {
@@ -134,7 +134,7 @@ export class PiCycleTopChartPageComponent implements AfterViewInit {
       labels: [...points.map((p) => p.date), ...futureLabels],
       datasets: [
         {
-          label: 'Bitcoin Price',
+          label: 'Bitcoin ár',
           data: [...points.map((p) => p.priceUsd), ...futureNulls],
           borderColor: '#000000',
           backgroundColor: 'transparent',
@@ -144,7 +144,7 @@ export class PiCycleTopChartPageComponent implements AfterViewInit {
           tension: 0.16,
         },
         {
-          label: '111-day MA',
+          label: '111 napos MA',
           data: [...mas.map((m) => m.ma111), ...futureNulls],
           borderColor: '#3B82F6',
           backgroundColor: 'transparent',
@@ -154,7 +154,7 @@ export class PiCycleTopChartPageComponent implements AfterViewInit {
           tension: 0.16,
         },
         {
-          label: '350-day MA x 2',
+          label: '350 napos MA x 2',
           data: [...mas.map((m) => m.ma350x2), ...futureNulls],
           borderColor: '#EF4444',
           backgroundColor: 'transparent',
@@ -298,10 +298,10 @@ export class PiCycleTopChartPageComponent implements AfterViewInit {
       rows: this.dataPoints(),
       fileName: `pi-cycle-top_${getExportDateStamp()}.csv`,
       columns: [
-        { header: 'Date', value: (row) => row.date },
-        { header: 'Price USD', value: (row) => formatCsvNumber(row.priceUsd) },
-        { header: '111-day MA', value: (row) => formatCsvNumber(row.ma111) },
-        { header: '350-day MA x2', value: (row) => formatCsvNumber(row.ma350x2) },
+        { header: 'Dátum', value: (row) => row.date },
+        { header: 'Ár USD', value: (row) => formatCsvNumber(row.priceUsd) },
+        { header: '111 napos MA', value: (row) => formatCsvNumber(row.ma111) },
+        { header: '350 napos MA x2', value: (row) => formatCsvNumber(row.ma350x2) },
       ],
     });
   }
@@ -310,7 +310,7 @@ export class PiCycleTopChartPageComponent implements AfterViewInit {
     const timestamp = this.lastUpdated();
 
     if (!timestamp) {
-      return 'Waiting for data';
+      return 'Adatra vár';
     }
 
     return new Date(timestamp).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
@@ -405,7 +405,7 @@ function createSignalAnnotations(
 
 function getStatusText(point: PiCycleTopChartDataPoint): string {
   if (point.ma111 === null || point.ma350x2 === null) {
-    return 'Waiting for enough moving-average history';
+    return 'Elég mozgóátlag-előzményre vár';
   }
 
   return point.ma111 > point.ma350x2
@@ -415,7 +415,7 @@ function getStatusText(point: PiCycleTopChartDataPoint): string {
 
 function formatUsd(value: number): string {
   if (!Number.isFinite(value)) {
-    return 'n/a';
+    return 'nincs adat';
   }
 
   return new Intl.NumberFormat('en-US', {

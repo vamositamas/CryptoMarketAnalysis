@@ -36,16 +36,16 @@ interface TimeframeOption {
 }
 
 const TIMEFRAMES: TimeframeOption[] = [
-  { label: '1M', value: '1m' },
-  { label: '3M', value: '3m' },
-  { label: '6M', value: '6m' },
-  { label: '1Y', value: '1y' },
-  { label: '2Y', value: '2y' },
-  { label: 'All', value: 'all' },
+  { label: '1 hó', value: '1m' },
+  { label: '3 hó', value: '3m' },
+  { label: '6 hó', value: '6m' },
+  { label: '1 év', value: '1y' },
+  { label: '2 év', value: '2y' },
+  { label: 'Mind', value: 'all' },
 ];
 
 const FEAR_GREED_ALERT_METRICS: AlertMetricOption[] = [
-  { value: 'btc_price', label: 'BTC Price USD' },
+  { value: 'btc_price', label: 'BTC ár USD' },
 ];
 
 @Component({
@@ -86,17 +86,17 @@ export class FearGreedIndexChartPageComponent implements AfterViewInit {
     if (!priceLast) return [];
     const last = [...points].reverse().find((p) => p.fearGreedValue !== null) ?? priceLast;
     const score = last.fearGreedValue;
-    const sentiment = score !== null ? getFearGreedSentiment(score) : 'N/A';
+    const sentiment = score !== null ? getFearGreedSentiment(score) : 'Nincs adat';
     return [
-      { label: 'BTC Price', value: formatUsd(last.priceUsd) },
-      { label: 'Fear & Greed Score', value: score !== null ? String(score) : 'N/A' },
+      { label: 'BTC ár', value: formatUsd(last.priceUsd) },
+      { label: 'Fear & Greed Score', value: score !== null ? String(score) : 'Nincs adat' },
       { label: 'Sentiment', value: sentiment },
     ];
   });
 
   protected readonly infoInterpretation = computed(() => {
     const points = this.dataPoints();
-    if (!points.length) return 'Waiting for data.';
+    if (!points.length) return 'Adatra vár.';
     const last = [...points].reverse().find((p) => p.fearGreedValue !== null) ?? points[points.length - 1];
     const score = last.fearGreedValue;
     if (score === null) return 'Fear & Greed score not available for the latest data point.';
@@ -125,7 +125,7 @@ export class FearGreedIndexChartPageComponent implements AfterViewInit {
         // Fear & Greed bars — left y2 axis, linear 0–100
         {
           type: 'bar' as const,
-          label: 'Fear & Greed Index',
+          label: 'Félelem és kapzsiság index',
           data: points.map((p) => p.fearGreedValue),
           backgroundColor: points.map((p) => getFearGreedColor(p.fearGreedValue)),
           borderWidth: 0,
@@ -137,7 +137,7 @@ export class FearGreedIndexChartPageComponent implements AfterViewInit {
         // BTC Price — dark line, right y axis, logarithmic
         {
           type: 'line' as const,
-          label: 'BTC Price',
+          label: 'BTC ár',
           data: points.map((p) => p.priceUsd),
           borderColor: '#1f2937',
           borderWidth: 1.5,
@@ -204,7 +204,7 @@ export class FearGreedIndexChartPageComponent implements AfterViewInit {
             const label = item.dataset.label ?? '';
             if (item.dataset.yAxisID === 'y2') {
               const v = item.parsed.y;
-              return `${label}: ${v !== null ? String(v) : 'N/A'}`;
+              return `${label}: ${v !== null ? String(v) : 'Nincs adat'}`;
             }
             return `${label}: ${formatUsd(Number(item.parsed.y))}`;
           },
@@ -324,7 +324,7 @@ export class FearGreedIndexChartPageComponent implements AfterViewInit {
     this.exportMenuOpen.set(false);
     await exportChartPng({
       chartImageDataUrl,
-      chartTitle: 'Fear & Greed Index',
+      chartTitle: 'Félelem és kapzsiság index',
       fileName: `fear-greed-index_${getExportDateStamp()}.png`,
     });
   }
@@ -335,8 +335,8 @@ export class FearGreedIndexChartPageComponent implements AfterViewInit {
       rows: this.dataPoints(),
       fileName: `fear-greed-index_${getExportDateStamp()}.csv`,
       columns: [
-        { header: 'Date', value: (row) => row.date },
-        { header: 'Price USD', value: (row) => formatCsvNumber(row.priceUsd) },
+        { header: 'Dátum', value: (row) => row.date },
+        { header: 'Ár USD', value: (row) => formatCsvNumber(row.priceUsd) },
         { header: 'Fear & Greed Value', value: (row) => formatCsvNumber(row.fearGreedValue) },
         {
           header: 'Sentiment',
@@ -349,7 +349,7 @@ export class FearGreedIndexChartPageComponent implements AfterViewInit {
 
   protected lastUpdatedText(): string {
     const ts = this.lastUpdated();
-    if (!ts) return 'Waiting for data';
+    if (!ts) return 'Adatra vár';
     return new Date(ts).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
   }
 
@@ -385,13 +385,13 @@ function getFearGreedColor(value: number | null): string {
 function getFearGreedSentiment(value: number): string {
   if (value < 25) return 'Extreme Fear';
   if (value < 45) return 'Fear';
-  if (value < 56) return 'Neutral';
+  if (value < 56) return 'Semleges';
   if (value < 75) return 'Greed';
   return 'Extreme Greed';
 }
 
 function formatUsd(value: number): string {
-  if (!Number.isFinite(value)) return 'n/a';
+  if (!Number.isFinite(value)) return 'nincs adat';
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',

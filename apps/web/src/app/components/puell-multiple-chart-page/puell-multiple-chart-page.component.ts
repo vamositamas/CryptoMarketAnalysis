@@ -34,19 +34,19 @@ interface TimeframeOption {
 }
 
 const TIMEFRAMES: TimeframeOption[] = [
-  { label: '1M', value: '1m' },
-  { label: '3M', value: '3m' },
-  { label: '6M', value: '6m' },
-  { label: '1Y', value: '1y' },
-  { label: '2Y', value: '2y' },
-  { label: 'All', value: 'all' },
+  { label: '1 hó', value: '1m' },
+  { label: '3 hó', value: '3m' },
+  { label: '6 hó', value: '6m' },
+  { label: '1 év', value: '1y' },
+  { label: '2 év', value: '2y' },
+  { label: 'Mind', value: 'all' },
 ];
 
 const HALVING_EVENTS = [
-  { date: '2012-11-28', label: '2012 Halving' },
-  { date: '2016-07-09', label: '2016 Halving' },
-  { date: '2020-05-11', label: '2020 Halving' },
-  { date: '2024-04-20', label: '2024 Halving' },
+  { date: '2012-11-28', label: '2012 felezés' },
+  { date: '2016-07-09', label: '2016 felezés' },
+  { date: '2020-05-11', label: '2020 felezés' },
+  { date: '2024-04-20', label: '2024 felezés' },
 ];
 
 const HALVINGS_SCHEDULE = [
@@ -59,7 +59,7 @@ const HALVINGS_SCHEDULE = [
 
 const PUELL_ALERT_METRICS: AlertMetricOption[] = [
   { value: 'puell_multiple', label: 'Puell Multiple' },
-  { value: 'btc_price', label: 'BTC Price USD' },
+  { value: 'btc_price', label: 'BTC ár USD' },
 ];
 
 @Component({
@@ -95,9 +95,9 @@ export class PuellMultipleChartPageComponent implements AfterViewInit {
     const puellValue = puell[lastIndex] ?? null;
 
     return [
-      { label: 'Current Price', value: point ? formatUsd(point.priceUsd) : 'Waiting for data' },
-      { label: 'Current Puell Multiple', value: puellValue !== null ? puellValue.toFixed(3) : 'Waiting for data' },
-      { label: 'Signal', value: puellValue !== null ? getPuellSignal(puellValue) : 'Waiting for data' },
+      { label: 'Aktuális ár', value: point ? formatUsd(point.priceUsd) : 'Adatra vár' },
+      { label: 'Aktuális Puell Multiple', value: puellValue !== null ? puellValue.toFixed(3) : 'Adatra vár' },
+      { label: 'Jelzés', value: puellValue !== null ? getPuellSignal(puellValue) : 'Adatra vár' },
     ];
   });
   protected readonly infoInterpretation = computed(() => {
@@ -137,7 +137,7 @@ export class PuellMultipleChartPageComponent implements AfterViewInit {
       labels: [...points.map((point) => point.date), ...futureLabels],
       datasets: [
         {
-          label: 'Bitcoin Price',
+          label: 'Bitcoin ár',
           data: [...points.map((point) => point.priceUsd), ...futureNulls],
           borderColor: '#000000',
           backgroundColor: 'transparent',
@@ -304,8 +304,8 @@ export class PuellMultipleChartPageComponent implements AfterViewInit {
       rows: this.dataPoints().map((row, i) => ({ ...row, puellMultiple: puell[i] ?? null })),
       fileName: `puell-multiple_${getExportDateStamp()}.csv`,
       columns: [
-        { header: 'Date', value: (row) => row.date },
-        { header: 'Price USD', value: (row) => formatCsvNumber(row.priceUsd) },
+        { header: 'Dátum', value: (row) => row.date },
+        { header: 'Ár USD', value: (row) => formatCsvNumber(row.priceUsd) },
         { header: 'Puell Multiple', value: (row) => formatCsvNumber(row.puellMultiple) },
       ],
     });
@@ -315,7 +315,7 @@ export class PuellMultipleChartPageComponent implements AfterViewInit {
     const timestamp = this.lastUpdated();
 
     if (!timestamp) {
-      return 'Waiting for data';
+      return 'Adatra vár';
     }
 
     return new Date(timestamp).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
@@ -386,9 +386,9 @@ function computePuellMultiple(dataPoints: PuellMultipleChartDataPoint[]): (numbe
 }
 
 function getPuellSignal(value: number): string {
-  if (value > 4) return 'Sell zone';
-  if (value < 0.5) return 'Buy zone';
-  return 'Neutral';
+  if (value > 4) return 'Eladási zóna';
+  if (value < 0.5) return 'Vételi zóna';
+  return 'Semleges';
 }
 
 function createPuellZoneAnnotations(): Record<string, AnnotationOptions<'box'>> {
@@ -403,7 +403,7 @@ function createPuellZoneAnnotations(): Record<string, AnnotationOptions<'box'>> 
       borderWidth: 0,
       label: {
         display: true,
-        content: 'Sell zone',
+        content: 'Eladási zóna',
         position: { x: 'end', y: 'start' },
         color: 'rgba(239,68,68,0.7)',
         font: { size: 11 },
@@ -419,7 +419,7 @@ function createPuellZoneAnnotations(): Record<string, AnnotationOptions<'box'>> 
       borderWidth: 0,
       label: {
         display: true,
-        content: 'Neutral',
+        content: 'Semleges',
         position: { x: 'end', y: 'start' },
         color: 'rgba(234,179,8,0.7)',
         font: { size: 11 },
@@ -435,7 +435,7 @@ function createPuellZoneAnnotations(): Record<string, AnnotationOptions<'box'>> 
       borderWidth: 0,
       label: {
         display: true,
-        content: 'Buy zone',
+        content: 'Vételi zóna',
         position: { x: 'end', y: 'start' },
         color: 'rgba(34,197,94,0.7)',
         font: { size: 11 },
@@ -468,7 +468,7 @@ function createHalvingAnnotations(): Record<string, AnnotationOptions<'line'>> {
 
 function formatUsd(value: number): string {
   if (!Number.isFinite(value)) {
-    return 'n/a';
+    return 'nincs adat';
   }
 
   return new Intl.NumberFormat('en-US', {

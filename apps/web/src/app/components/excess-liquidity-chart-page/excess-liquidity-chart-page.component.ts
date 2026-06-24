@@ -32,12 +32,12 @@ interface TimeframeOption {
 }
 
 const TIMEFRAMES: TimeframeOption[] = [
-  { label: '1M', value: '1m' },
-  { label: '3M', value: '3m' },
-  { label: '6M', value: '6m' },
-  { label: '1Y', value: '1y' },
-  { label: '2Y', value: '2y' },
-  { label: 'All', value: 'all' },
+  { label: '1 hó', value: '1m' },
+  { label: '3 hó', value: '3m' },
+  { label: '6 hó', value: '6m' },
+  { label: '1 év', value: '1y' },
+  { label: '2 év', value: '2y' },
+  { label: 'Mind', value: 'all' },
 ];
 
 @Component({
@@ -80,26 +80,26 @@ export class ExcessLiquidityChartPageComponent implements AfterViewInit {
     const elVal = lastEL?.excessLiquidityLeading ?? null;
 
     const ycSignal =
-      ycVal === null ? 'N/A'
+      ycVal === null ? 'Nincs adat'
       : ycVal > 0 ? 'Steepening'
       : 'Flattening / Inverted';
 
     const elSignal =
-      elVal === null ? 'N/A'
+      elVal === null ? 'Nincs adat'
       : elVal > 0 ? 'Positive'
       : 'Negative';
 
     return [
-      { label: '3m10y Change (1yr, bps)', value: ycVal !== null ? ycVal.toFixed(1) : 'N/A' },
-      { label: 'Yield Curve', value: ycSignal },
-      { label: 'Excess Liquidity (Leading)', value: elVal !== null ? elVal.toFixed(2) + '%' : 'N/A' },
-      { label: 'Liquidity Signal', value: elSignal },
+      { label: '3m10y Change (1yr, bps)', value: ycVal !== null ? ycVal.toFixed(1) : 'Nincs adat' },
+      { label: 'Hozamgörbe', value: ycSignal },
+      { label: 'Excess Liquidity (Leading)', value: elVal !== null ? elVal.toFixed(2) + '%' : 'Nincs adat' },
+      { label: 'Likviditási jelzés', value: elSignal },
     ];
   });
 
   protected readonly infoInterpretation = computed(() => {
     const points = this.dataPoints();
-    if (!points.length) return 'Waiting for data.';
+    if (!points.length) return 'Adatra vár.';
 
     const lastEL = [...points].reverse().find((p) => p.excessLiquidityLeading !== null);
     const elVal = lastEL?.excessLiquidityLeading ?? null;
@@ -136,7 +136,7 @@ export class ExcessLiquidityChartPageComponent implements AfterViewInit {
       datasets: [
         {
           type: 'line' as const,
-          label: 'Excess Liquidity Leading Indicator (6m forward, %)',
+          label: 'Többletlikviditási előrejelző indikátor (6 hónappal előre, %)',
           data: points.map((p) => p.excessLiquidityLeading),
           borderColor: 'rgba(234, 179, 8, 0.85)',
           borderWidth: 1.5,
@@ -189,7 +189,7 @@ export class ExcessLiquidityChartPageComponent implements AfterViewInit {
           maxTicksLimit: 8,
         },
         grid: { display: false },
-        title: { display: true, text: 'Excess Liquidity (%)', color: 'rgba(161, 120, 5, 1)', font: { size: 11 } },
+        title: { display: true, text: 'Többletlikviditás (%)', color: 'rgba(161, 120, 5, 1)', font: { size: 11 } },
       },
     },
     plugins: {
@@ -275,7 +275,7 @@ export class ExcessLiquidityChartPageComponent implements AfterViewInit {
     this.exportMenuOpen.set(false);
     await exportChartPng({
       chartImageDataUrl,
-      chartTitle: 'Excess Liquidity Leading Indicator',
+      chartTitle: 'Többletlikviditási előrejelző indikátor',
       fileName: `excess-liquidity_${getExportDateStamp()}.png`,
     });
   }
@@ -286,7 +286,7 @@ export class ExcessLiquidityChartPageComponent implements AfterViewInit {
       rows: this.dataPoints(),
       fileName: `excess-liquidity_${getExportDateStamp()}.csv`,
       columns: [
-        { header: 'Date', value: (row) => row.date },
+        { header: 'Dátum', value: (row) => row.date },
         { header: '3m10y 1yr Change (bps)', value: (row) => formatCsvNumber(row.yieldCurve1yChange) },
         { header: 'Excess Liquidity Leading (%)', value: (row) => formatCsvNumber(row.excessLiquidityLeading) },
       ],
@@ -295,7 +295,7 @@ export class ExcessLiquidityChartPageComponent implements AfterViewInit {
 
   protected lastUpdatedText(): string {
     const ts = this.lastUpdated();
-    if (!ts) return 'Waiting for data';
+    if (!ts) return 'Adatra vár';
     return new Date(ts).toLocaleString('en-GB', {
       day: '2-digit', month: 'short', year: 'numeric',
       hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false,

@@ -34,24 +34,24 @@ interface TimeframeOption {
 }
 
 const TIMEFRAMES: TimeframeOption[] = [
-  { label: '1M', value: '1m' },
-  { label: '3M', value: '3m' },
-  { label: '6M', value: '6m' },
-  { label: '1Y', value: '1y' },
-  { label: '2Y', value: '2y' },
-  { label: 'All', value: 'all' },
+  { label: '1 hó', value: '1m' },
+  { label: '3 hó', value: '3m' },
+  { label: '6 hó', value: '6m' },
+  { label: '1 év', value: '1y' },
+  { label: '2 év', value: '2y' },
+  { label: 'Mind', value: 'all' },
 ];
 
 const HALVING_EVENTS = [
-  { date: '2012-11-28', label: '2012 Halving' },
-  { date: '2016-07-09', label: '2016 Halving' },
-  { date: '2020-05-11', label: '2020 Halving' },
-  { date: '2024-04-19', label: '2024 Halving' },
+  { date: '2012-11-28', label: '2012 felezés' },
+  { date: '2016-07-09', label: '2016 felezés' },
+  { date: '2020-05-11', label: '2020 felezés' },
+  { date: '2024-04-19', label: '2024 felezés' },
 ];
 
 const VDD_ALERT_METRICS: AlertMetricOption[] = [
   { value: 'vdd_multiple', label: 'VDD Multiple' },
-  { value: 'btc_price', label: 'BTC Price USD' },
+  { value: 'btc_price', label: 'BTC ár USD' },
 ];
 
 // VDD zone thresholds (defined by TXMC, the creator of VDD Multiple)
@@ -98,10 +98,10 @@ export class VddMultipleChartPageComponent implements AfterViewInit {
     const lastVddPoint = [...points].reverse().find((p) => p.vddMultiple !== null);
     const vdd = lastVddPoint?.vddMultiple ?? null;
     return [
-      { label: 'BTC Price', value: formatUsd(last.priceUsd) },
-      { label: 'VDD Multiple', value: vdd !== null ? vdd.toFixed(3) : 'N/A' },
-      { label: 'Signal', value: vdd !== null ? getVddSignal(vdd) : 'N/A' },
-      { label: 'History in view', value: `${(points.length / 365).toFixed(1)} years` },
+      { label: 'BTC ár', value: formatUsd(last.priceUsd) },
+      { label: 'VDD Multiple', value: vdd !== null ? vdd.toFixed(3) : 'Nincs adat' },
+      { label: 'Jelzés', value: vdd !== null ? getVddSignal(vdd) : 'Nincs adat' },
+      { label: 'Megjelenített előzmény', value: `${(points.length / 365).toFixed(1)} years` },
     ];
   });
 
@@ -141,7 +141,7 @@ export class VddMultipleChartPageComponent implements AfterViewInit {
       datasets: [
         {
           type: 'line' as const,
-          label: 'BTC Price (USD)',
+          label: 'BTC ár (USD)',
           data: points.map((p) => p.priceUsd),
           borderColor: '#000000',
           borderWidth: 1.5,
@@ -208,7 +208,7 @@ export class VddMultipleChartPageComponent implements AfterViewInit {
           label: (item) => {
             if (item.dataset.yAxisID === 'y2') {
               const v = item.parsed.y;
-              return `VDD Multiple: ${v?.toFixed(3) ?? 'N/A'}`;
+              return `VDD Multiple: ${v?.toFixed(3) ?? 'Nincs adat'}`;
             }
             return `BTC Price: ${formatUsd(Number(item.parsed.y))}`;
           },
@@ -305,8 +305,8 @@ export class VddMultipleChartPageComponent implements AfterViewInit {
       rows: this.dataPoints(),
       fileName: `vdd-multiple_${getExportDateStamp()}.csv`,
       columns: [
-        { header: 'Date', value: (row) => row.date },
-        { header: 'Price USD', value: (row) => formatCsvNumber(row.priceUsd) },
+        { header: 'Dátum', value: (row) => row.date },
+        { header: 'Ár USD', value: (row) => formatCsvNumber(row.priceUsd) },
         { header: 'VDD Multiple', value: (row) => formatCsvNumber(row.vddMultiple) },
       ],
     });
@@ -314,7 +314,7 @@ export class VddMultipleChartPageComponent implements AfterViewInit {
 
   protected lastUpdatedText(): string {
     const ts = this.lastUpdated();
-    if (!ts) return 'Waiting for data';
+    if (!ts) return 'Adatra vár';
     return new Date(ts).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
   }
 
@@ -339,9 +339,9 @@ export class VddMultipleChartPageComponent implements AfterViewInit {
 }
 
 function getVddSignal(value: number): string {
-  if (value > VDD_SELL_THRESHOLD) return 'Sell zone — cycle top risk';
-  if (value < VDD_BUY_THRESHOLD) return 'Accumulation zone';
-  return 'Neutral';
+  if (value > VDD_SELL_THRESHOLD) return 'Eladási zóna - ciklustető kockázat';
+  if (value < VDD_BUY_THRESHOLD) return 'Akkumulációs zóna';
+  return 'Semleges';
 }
 
 function createVddThresholdAnnotations(): Record<string, AnnotationOptions> {
@@ -413,7 +413,7 @@ function createHalvingAnnotations(startDate: string): Record<string, AnnotationO
 }
 
 function formatUsd(value: number): string {
-  if (!Number.isFinite(value)) return 'n/a';
+  if (!Number.isFinite(value)) return 'nincs adat';
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',

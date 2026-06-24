@@ -34,12 +34,12 @@ interface TimeframeOption {
 }
 
 const TIMEFRAMES: TimeframeOption[] = [
-  { label: '1M', value: '1m' },
-  { label: '3M', value: '3m' },
-  { label: '6M', value: '6m' },
-  { label: '1Y', value: '1y' },
-  { label: '2Y', value: '2y' },
-  { label: 'All', value: 'all' },
+  { label: '1 hó', value: '1m' },
+  { label: '3 hó', value: '3m' },
+  { label: '6 hó', value: '6m' },
+  { label: '1 év', value: '1y' },
+  { label: '2 év', value: '2y' },
+  { label: 'Mind', value: 'all' },
 ];
 
 const HALVING_EVENTS = [
@@ -50,7 +50,7 @@ const HALVING_EVENTS = [
 ];
 
 const CVDD_ALERT_METRICS: AlertMetricOption[] = [
-  { value: 'btc_price', label: 'BTC Price USD' },
+  { value: 'btc_price', label: 'BTC ár USD' },
   { value: 'cvdd', label: 'CVDD' },
 ];
 
@@ -108,14 +108,14 @@ export class BitcoinCvddChartPageComponent implements AfterViewInit {
 
   protected readonly infoCurrentFields = computed<ChartInfoField[]>(() => {
     const point = this.latestPoint();
-    if (!point) return [{ label: 'Current Price', value: 'Waiting for data' }];
+    if (!point) return [{ label: 'Aktuális ár', value: 'Adatra vár' }];
     const cvddNow = cvdd(point.date);
     const ratio = point.priceUsd / cvddNow;
     return [
-      { label: 'BTC Price', value: formatUsd(point.priceUsd) },
+      { label: 'BTC ár', value: formatUsd(point.priceUsd) },
       { label: 'CVDD', value: formatUsd(cvddNow) },
       { label: 'BTC / CVDD Ratio', value: ratio.toFixed(2) + '×' },
-      { label: 'Signal', value: getCvddSignal(ratio) },
+      { label: 'Jelzés', value: getCvddSignal(ratio) },
     ];
   });
 
@@ -142,7 +142,7 @@ export class BitcoinCvddChartPageComponent implements AfterViewInit {
       labels: allDates,
       datasets: [
         {
-          label: 'BTC Price',
+          label: 'BTC ár',
           data: [...points.map((p) => p.priceUsd), ...futureNulls],
           borderColor: '#000000',
           backgroundColor: 'transparent',
@@ -293,8 +293,8 @@ export class BitcoinCvddChartPageComponent implements AfterViewInit {
       rows: this.dataPoints(),
       fileName: `bitcoin-cvdd_${getExportDateStamp()}.csv`,
       columns: [
-        { header: 'Date', value: (row) => row.date },
-        { header: 'Price USD', value: (row) => formatCsvNumber(row.priceUsd) },
+        { header: 'Dátum', value: (row) => row.date },
+        { header: 'Ár USD', value: (row) => formatCsvNumber(row.priceUsd) },
         { header: 'CVDD', value: (row) => formatCsvNumber(cvdd(row.date)) },
         { header: 'BTC/CVDD Ratio', value: (row) => formatCsvNumber(row.priceUsd / cvdd(row.date)) },
       ],
@@ -303,7 +303,7 @@ export class BitcoinCvddChartPageComponent implements AfterViewInit {
 
   protected lastUpdatedText(): string {
     const ts = this.lastUpdated();
-    if (!ts) return 'Waiting for data';
+    if (!ts) return 'Adatra vár';
     return new Date(ts).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
   }
 
@@ -357,7 +357,7 @@ function buildFutureLabels(points: { date: string }[], timeframe: string): strin
 function getCvddSignal(ratio: number): string {
   if (ratio < 1.0) return 'Exceptional — BTC below CVDD';
   if (ratio < 1.5) return 'Historic buy opportunity';
-  if (ratio < 3.0) return 'Accumulation zone';
+  if (ratio < 3.0) return 'Akkumulációs zóna';
   if (ratio < 6.0) return 'Bull market — elevated';
   return 'Late-cycle excess';
 }

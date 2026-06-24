@@ -36,23 +36,23 @@ interface TimeframeOption {
 }
 
 const TIMEFRAMES: TimeframeOption[] = [
-  { label: '1M', value: '1m' },
-  { label: '3M', value: '3m' },
-  { label: '6M', value: '6m' },
-  { label: '1Y', value: '1y' },
-  { label: '2Y', value: '2y' },
-  { label: 'All', value: 'all' },
+  { label: '1 hó', value: '1m' },
+  { label: '3 hó', value: '3m' },
+  { label: '6 hó', value: '6m' },
+  { label: '1 év', value: '1y' },
+  { label: '2 év', value: '2y' },
+  { label: 'Mind', value: 'all' },
 ];
 
 const HALVING_EVENTS = [
-  { date: '2012-11-28', label: '2012 Halving' },
-  { date: '2016-07-09', label: '2016 Halving' },
-  { date: '2020-05-11', label: '2020 Halving' },
-  { date: '2024-04-19', label: '2024 Halving' },
+  { date: '2012-11-28', label: '2012 felezés' },
+  { date: '2016-07-09', label: '2016 felezés' },
+  { date: '2020-05-11', label: '2020 felezés' },
+  { date: '2024-04-19', label: '2024 felezés' },
 ];
 
 const TWO_HUNDRED_WEEK_MA_ALERT_METRICS: AlertMetricOption[] = [
-  { value: 'btc_price', label: 'BTC Price USD' },
+  { value: 'btc_price', label: 'BTC ár USD' },
 ];
 
 @Component({
@@ -96,28 +96,28 @@ export class TwoHundredWeekMAHeatmapChartPageComponent implements AfterViewInit 
     const multiplier = last.multiplier;
     const signalLabel =
       multiplier === null
-        ? 'N/A'
+        ? 'Nincs adat'
         : multiplier > 5
           ? 'Historically Overheated'
           : multiplier > 3
-            ? 'Elevated'
+            ? 'Emelkedett'
             : multiplier >= 0.9 && multiplier <= 1.1
               ? 'Near MA'
               : multiplier < 1
                 ? 'Below MA'
-                : 'Neutral';
+                : 'Semleges';
     return [
-      { label: 'BTC Price', value: formatUsd(price) },
-      { label: '200-Week MA', value: ma200w !== null ? formatUsd(ma200w) : 'N/A' },
-      { label: 'Multiplier', value: multiplier !== null ? `${multiplier.toFixed(2)}×` : 'N/A' },
-      { label: 'Signal', value: signalLabel },
+      { label: 'BTC ár', value: formatUsd(price) },
+      { label: '200-Week MA', value: ma200w !== null ? formatUsd(ma200w) : 'Nincs adat' },
+      { label: 'Multiplier', value: multiplier !== null ? `${multiplier.toFixed(2)}×` : 'Nincs adat' },
+      { label: 'Jelzés', value: signalLabel },
     ];
   });
 
   protected readonly infoInterpretation = computed(() => {
     const points = this.dataPoints();
     const last = points[points.length - 1];
-    if (!last) return 'Waiting for data.';
+    if (!last) return 'Adatra vár.';
     const price = last.priceUsd;
     const ma200w = last.ma200w;
     const multiplier = last.multiplier;
@@ -172,7 +172,7 @@ export class TwoHundredWeekMAHeatmapChartPageComponent implements AfterViewInit 
         // BTC Price — dark line, right y-axis (log)
         {
           type: 'line' as const,
-          label: 'BTC Price',
+          label: 'BTC ár',
           data: points.map((p) => p.priceUsd),
           borderColor: '#1f2937',
           borderWidth: 1.5,
@@ -390,7 +390,7 @@ export class TwoHundredWeekMAHeatmapChartPageComponent implements AfterViewInit 
     this.exportMenuOpen.set(false);
     await exportChartPng({
       chartImageDataUrl,
-      chartTitle: '200-Week MA Heatmap',
+      chartTitle: '200 hetes MA hőtérkép',
       fileName: `200-week-ma-heatmap_${getExportDateStamp()}.png`,
     });
   }
@@ -401,8 +401,8 @@ export class TwoHundredWeekMAHeatmapChartPageComponent implements AfterViewInit 
       rows: this.dataPoints(),
       fileName: `200-week-ma-heatmap_${getExportDateStamp()}.csv`,
       columns: [
-        { header: 'Date', value: (row) => row.date },
-        { header: 'Price USD', value: (row) => formatCsvNumber(row.priceUsd) },
+        { header: 'Dátum', value: (row) => row.date },
+        { header: 'Ár USD', value: (row) => formatCsvNumber(row.priceUsd) },
         { header: '200-Week MA', value: (row) => formatCsvNumber(row.ma200w) },
         { header: 'Multiplier', value: (row) => formatCsvNumber(row.multiplier) },
       ],
@@ -411,7 +411,7 @@ export class TwoHundredWeekMAHeatmapChartPageComponent implements AfterViewInit 
 
   protected lastUpdatedText(): string {
     const ts = this.lastUpdated();
-    if (!ts) return 'Waiting for data';
+    if (!ts) return 'Adatra vár';
     return new Date(ts).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
   }
 
@@ -463,7 +463,7 @@ function createHalvingAnnotations(startDate: string): Record<string, AnnotationO
 }
 
 function formatUsd(value: number): string {
-  if (!Number.isFinite(value)) return 'n/a';
+  if (!Number.isFinite(value)) return 'nincs adat';
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
