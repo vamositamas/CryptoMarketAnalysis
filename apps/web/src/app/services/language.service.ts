@@ -1,6 +1,7 @@
 import { Injectable, LOCALE_ID, inject, signal } from '@angular/core';
+import type { Locale } from '../../main';
 
-export type Locale = 'en' | 'hu';
+export type { Locale };
 
 @Injectable({ providedIn: 'root' })
 export class LanguageService {
