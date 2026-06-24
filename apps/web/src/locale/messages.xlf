@@ -3,10 +3,14 @@
   <file source-language="en" datatype="plaintext" original="ng2.template">
     <body>
       <trans-unit id="app.name" datatype="html">
-        <source>CryptoMarketAnalysis</source>
+        <source>BitWLab</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.html</context>
-          <context context-type="linenumber">5,8</context>
+          <context context-type="linenumber">6,9</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">106,111</context>
         </context-group>
         <note priority="1" from="description">Application name</note>
       </trans-unit>
@@ -14,7 +18,11 @@
         <source>Dashboard</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.html</context>
-          <context context-type="linenumber">10,12</context>
+          <context context-type="linenumber">13,15</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">116,118</context>
         </context-group>
         <note priority="1" from="description">Dashboard navigation label</note>
       </trans-unit>
@@ -22,63 +30,95 @@
         <source>Charts</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.html</context>
-          <context context-type="linenumber">13,15</context>
+          <context context-type="linenumber">16,18</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">119,121</context>
         </context-group>
         <note priority="1" from="description">Charts navigation label</note>
       </trans-unit>
-      <trans-unit id="nav.onboarding" datatype="html">
-        <source>Onboarding</source>
+      <trans-unit id="nav.tradingPlans" datatype="html">
+        <source>Trade Planner</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.html</context>
-          <context context-type="linenumber">16,20</context>
+          <context context-type="linenumber">19,21</context>
         </context-group>
-        <note priority="1" from="description">Onboarding navigation label</note>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">122,124</context>
+        </context-group>
+        <note priority="1" from="description">Trade planner navigation label</note>
       </trans-unit>
-      <trans-unit id="language.selector" datatype="html">
-        <source>Language</source>
+      <trans-unit id="nav.alerts" datatype="html">
+        <source>Alerts</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.html</context>
-          <context context-type="linenumber">22,23</context>
+          <context context-type="linenumber">22,24</context>
         </context-group>
-        <note priority="1" from="description">Language selector label</note>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">125,127</context>
+        </context-group>
+        <note priority="1" from="description">Alerts navigation label</note>
       </trans-unit>
-      <trans-unit id="language.english" datatype="html">
-        <source>English</source>
+      <trans-unit id="nav.adminUsers" datatype="html">
+        <source>Users</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.html</context>
-          <context context-type="linenumber">24,25</context>
+          <context context-type="linenumber">26,28</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">507,508</context>
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">130,132</context>
         </context-group>
-        <note priority="1" from="description">English language option</note>
+        <note priority="1" from="description">Admin users navigation label</note>
       </trans-unit>
-      <trans-unit id="language.hungarian" datatype="html">
-        <source>Hungarian</source>
+      <trans-unit id="nav.adminData" datatype="html">
+        <source>Data</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.html</context>
-          <context context-type="linenumber">25,28</context>
+          <context context-type="linenumber">29,31</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">508,511</context>
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">133,135</context>
         </context-group>
-        <note priority="1" from="description">Hungarian language option</note>
+        <note priority="1" from="description">Admin data navigation label</note>
+      </trans-unit>
+      <trans-unit id="nav.adminEmail" datatype="html">
+        <source>Email</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">32,38</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">136,143</context>
+        </context-group>
+        <note priority="1" from="description">Admin email templates navigation label</note>
+      </trans-unit>
+      <trans-unit id="nav.donate" datatype="html">
+        <source>Donate</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="linenumber">41,44</context>
+        </context-group>
+        <note priority="1" from="description">Donate navigation label</note>
       </trans-unit>
       <trans-unit id="auth.login" datatype="html">
         <source>Login</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.html</context>
-          <context context-type="linenumber">28,29</context>
+          <context context-type="linenumber">52,53</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">168,169</context>
+          <context context-type="linenumber">1986,1987</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">183,185</context>
+          <context context-type="linenumber">2011,2013</context>
         </context-group>
         <note priority="1" from="description">Login link</note>
       </trans-unit>
@@ -86,139 +126,163 @@
         <source>Register</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.html</context>
-          <context context-type="linenumber">29,34</context>
+          <context context-type="linenumber">53,56</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">485,486</context>
+          <context context-type="linenumber">2329,2330</context>
         </context-group>
         <note priority="1" from="description">Register link</note>
       </trans-unit>
-      <trans-unit id="hero.eyebrow" datatype="html">
-        <source> Bitcoin analytics workspace </source>
+      <trans-unit id="nav.adminGroup" datatype="html">
+        <source>Admin</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.html</context>
-          <context context-type="linenumber">37,39</context>
+          <context context-type="linenumber">128,129</context>
         </context-group>
-        <note priority="1" from="description">Hero eyebrow</note>
+        <note priority="1" from="description">Admin nav group label</note>
       </trans-unit>
-      <trans-unit id="hero.title" datatype="html">
-        <source> Bitcoin market intelligence for cycle-aware decisions </source>
+      <trans-unit id="landing.eyebrow" datatype="html">
+        <source> Bitcoin cycle intelligence </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">apps/web/src/app/app.html</context>
-          <context context-type="linenumber">40,42</context>
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">28,30</context>
         </context-group>
-        <note priority="1" from="description">Hero title</note>
+        <note priority="1" from="description">Landing eyebrow</note>
       </trans-unit>
-      <trans-unit id="hero.text" datatype="html">
-        <source> Track on-chain valuation, cycle signals, and model context in one focused workspace. </source>
+      <trans-unit id="landing.title" datatype="html">
+        <source> BitWLab — Bitcoin Blockchain Analysis </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">apps/web/src/app/app.html</context>
-          <context context-type="linenumber">43,45</context>
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">31,33</context>
         </context-group>
-        <note priority="1" from="description">Hero supporting copy</note>
+        <note priority="1" from="description">Landing title</note>
       </trans-unit>
-      <trans-unit id="hero.cta" datatype="html">
-        <source> Review dashboard </source>
+      <trans-unit id="landing.text" datatype="html">
+        <source> A focused research workspace for Bitcoin valuation models, cycle signals, and long-term market context. Create an account to open the live charts. </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">apps/web/src/app/app.html</context>
-          <context context-type="linenumber">47,50</context>
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">34,37</context>
         </context-group>
-        <note priority="1" from="description">Hero primary action</note>
+        <note priority="1" from="description">Landing supporting copy</note>
       </trans-unit>
-      <trans-unit id="hero.secondaryCta" datatype="html">
+      <trans-unit id="landing.primaryCta" datatype="html">
         <source> Create account </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">apps/web/src/app/app.html</context>
-          <context context-type="linenumber">54,57</context>
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">39,41</context>
         </context-group>
-        <note priority="1" from="description">Hero secondary action</note>
+        <note priority="1" from="description">Landing primary CTA</note>
       </trans-unit>
-      <trans-unit id="market.previewAria" datatype="html">
-        <source>Bitcoin market signal preview</source>
+      <trans-unit id="landing.secondaryCta" datatype="html">
+        <source> Login </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">apps/web/src/app/app.html</context>
-          <context context-type="linenumber">61,62</context>
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">42,47</context>
         </context-group>
-        <note priority="1" from="description">Market preview accessibility label</note>
+        <note priority="1" from="description">Landing secondary CTA</note>
       </trans-unit>
-      <trans-unit id="market.state" datatype="html">
-        <source>Market state</source>
+      <trans-unit id="landing.previewAria" datatype="html">
+        <source>Bitcoin analytics preview</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">apps/web/src/app/app.html</context>
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">49,50</context>
+        </context-group>
+        <note priority="1" from="description">Landing preview accessibility label</note>
+      </trans-unit>
+      <trans-unit id="landing.previewLabel" datatype="html">
+        <source>Research preview</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">53,55</context>
+        </context-group>
+        <note priority="1" from="description">Landing preview label</note>
+      </trans-unit>
+      <trans-unit id="landing.rainbow" datatype="html">
+        <source>Rainbow</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
           <context context-type="linenumber">65,66</context>
         </context-group>
-        <note priority="1" from="description">Market state label</note>
+        <note priority="1" from="description">Landing preview rainbow</note>
       </trans-unit>
-      <trans-unit id="metric.risk" datatype="html">
-        <source>Cycle risk</source>
+      <trans-unit id="landing.piCycle" datatype="html">
+        <source>Pi Cycle</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">apps/web/src/app/app.html</context>
-          <context context-type="linenumber">77</context>
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">66,67</context>
         </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">apps/web/src/app/app.html</context>
-          <context context-type="linenumber">89,91</context>
-        </context-group>
-        <note priority="1" from="description">Cycle risk label</note>
+        <note priority="1" from="description">Landing preview pi cycle</note>
       </trans-unit>
-      <trans-unit id="metric.signalQuality" datatype="html">
-        <source>Signal quality</source>
+      <trans-unit id="landing.modelsEyebrow" datatype="html">
+        <source> Model library </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">apps/web/src/app/app.html</context>
-          <context context-type="linenumber">78,79</context>
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">77,79</context>
         </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">apps/web/src/app/app.html</context>
-          <context context-type="linenumber">99,101</context>
-        </context-group>
-        <note priority="1" from="description">Signal quality label</note>
+        <note priority="1" from="description">Landing models eyebrow</note>
       </trans-unit>
-      <trans-unit id="kpi.gridAria" datatype="html">
-        <source>Market KPI widgets</source>
+      <trans-unit id="landing.modelsTitle" datatype="html">
+        <source> Professional Bitcoin market tools after login </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">apps/web/src/app/app.html</context>
-          <context context-type="linenumber">85,86</context>
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">80,83</context>
         </context-group>
-        <note priority="1" from="description">Market KPI widgets accessibility label</note>
+        <note priority="1" from="description">Landing models title</note>
       </trans-unit>
-      <trans-unit id="metric.cycle" datatype="html">
-        <source>Cycle</source>
+      <trans-unit id="landing.rainbowCopy" datatype="html">
+        <source> Long-term logarithmic valuation bands for market-cycle context. </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">apps/web/src/app/app.html</context>
-          <context context-type="linenumber">91,93</context>
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">88,91</context>
         </context-group>
-        <note priority="1" from="description">Cycle label</note>
+        <note priority="1" from="description">Landing rainbow copy</note>
       </trans-unit>
-      <trans-unit id="metric.activeModels" datatype="html">
-        <source>Active models</source>
+      <trans-unit id="landing.piCycleCopy" datatype="html">
+        <source> Moving-average crossover signals designed for cycle-top awareness. </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">apps/web/src/app/app.html</context>
-          <context context-type="linenumber">94,96</context>
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">95,98</context>
         </context-group>
-        <note priority="1" from="description">Active models label</note>
+        <note priority="1" from="description">Landing pi cycle copy</note>
       </trans-unit>
-      <trans-unit id="metric.model" datatype="html">
-        <source>Model</source>
+      <trans-unit id="landing.stockToFlowCopy" datatype="html">
+        <source> Scarcity model tracking with halving context and divergence views. </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">apps/web/src/app/app.html</context>
-          <context context-type="linenumber">96,98</context>
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">102,106</context>
         </context-group>
-        <note priority="1" from="description">Model label</note>
+        <note priority="1" from="description">Landing stock to flow copy</note>
       </trans-unit>
-      <trans-unit id="metric.momentum" datatype="html">
-        <source>Momentum</source>
+      <trans-unit id="landing.accessEyebrow" datatype="html">
+        <source> Private workspace </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">apps/web/src/app/app.html</context>
-          <context context-type="linenumber">101,105</context>
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">111,113</context>
         </context-group>
-        <note priority="1" from="description">Momentum label</note>
+        <note priority="1" from="description">Landing access eyebrow</note>
+      </trans-unit>
+      <trans-unit id="landing.accessTitle" datatype="html">
+        <source> Charts, annotations, exports, and admin tools require an account. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">114,117</context>
+        </context-group>
+        <note priority="1" from="description">Landing access title</note>
+      </trans-unit>
+      <trans-unit id="landing.accessCta" datatype="html">
+        <source> Start with registration </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">118,123</context>
+        </context-group>
+        <note priority="1" from="description">Landing access CTA</note>
       </trans-unit>
       <trans-unit id="dashboard.eyebrow" datatype="html">
         <source> Model overview </source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">19,21</context>
+          <context context-type="linenumber">142,144</context>
         </context-group>
         <note priority="1" from="description">Dashboard eyebrow</note>
       </trans-unit>
@@ -226,107 +290,267 @@
         <source>Bitcoin cycle dashboard</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">21,23</context>
+          <context context-type="linenumber">144,146</context>
         </context-group>
         <note priority="1" from="description">Dashboard title</note>
       </trans-unit>
-      <trans-unit id="dashboard.mvrvSummary" datatype="html">
-        <source> Valuation stretch is below overheated territory. </source>
+      <trans-unit id="dashboard.openAddWidget" datatype="html">
+        <source> Add Widget </source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">28,30</context>
+          <context context-type="linenumber">167,170</context>
         </context-group>
-        <note priority="1" from="description">MVRV summary</note>
+        <note priority="1" from="description">Add widget button</note>
       </trans-unit>
-      <trans-unit id="dashboard.rainbowSummary" datatype="html">
-        <source> Price sits in the accumulation-to-fair-value band. </source>
+      <trans-unit id="dashboard.widgetsLoading" datatype="html">
+        <source>Loading...</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">35,38</context>
+          <context context-type="linenumber">214,216</context>
         </context-group>
-        <note priority="1" from="description">Rainbow summary</note>
+        <note priority="1" from="description">Dashboard widgets loading</note>
       </trans-unit>
-      <trans-unit id="dashboard.piCycleSummary" datatype="html">
-        <source> Moving averages have not produced a top signal. </source>
+      <trans-unit id="dashboard.recentChartsLoading" datatype="html">
+        <source> Loading... </source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">42,45</context>
+          <context context-type="linenumber">777,779</context>
         </context-group>
-        <note priority="1" from="description">Pi Cycle summary</note>
+        <note priority="1" from="description">Recent charts loading</note>
+      </trans-unit>
+      <trans-unit id="dashboard.noRecentCharts" datatype="html">
+        <source> No charts viewed yet. Explore the chart library to get started! </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">781,784</context>
+        </context-group>
+        <note priority="1" from="description">No recent charts message</note>
+      </trans-unit>
+      <trans-unit id="dashboard.exploreCharts" datatype="html">
+        <source>Explore Charts</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">787,789</context>
+        </context-group>
+        <note priority="1" from="description">Explore charts button</note>
       </trans-unit>
       <trans-unit id="onboarding.dialog" datatype="html">
         <source>Onboarding</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">52,53</context>
+          <context context-type="linenumber">1184,1185</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">208,209</context>
+          <context context-type="linenumber">2039,2040</context>
         </context-group>
         <note priority="1" from="description">Onboarding dialog label</note>
       </trans-unit>
-      <trans-unit id="charts.eyebrow" datatype="html">
-        <source> Chart library </source>
+      <trans-unit id="dashboard.widgetWaiting" datatype="html">
+        <source>Waiting for data</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">100,102</context>
+          <context context-type="linenumber">1570</context>
         </context-group>
-        <note priority="1" from="description">Chart library eyebrow</note>
+        <note priority="1" from="description">Widget waiting for data</note>
       </trans-unit>
-      <trans-unit id="charts.title" datatype="html">
-        <source>Tracked Bitcoin models</source>
+      <trans-unit id="adminDataConfig.eyebrow" datatype="html">
+        <source> Admin </source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">102,104</context>
+          <context context-type="linenumber">1642,1644</context>
         </context-group>
-        <note priority="1" from="description">Chart library title</note>
+        <note priority="1" from="description">Admin data configuration eyebrow</note>
       </trans-unit>
-      <trans-unit id="admin.eyebrow" datatype="html">
-        <source>Admin</source>
+      <trans-unit id="adminDataConfig.title" datatype="html">
+        <source> Data refresh configuration </source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">121,122</context>
+          <context context-type="linenumber">1645,1649</context>
         </context-group>
-        <note priority="1" from="description">Admin eyebrow</note>
+        <note priority="1" from="description">Data configuration title</note>
       </trans-unit>
-      <trans-unit id="admin.usersTitle" datatype="html">
-        <source>User management</source>
+      <trans-unit id="adminDataConfig.refreshFrequency" datatype="html">
+        <source> Refresh frequency </source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">122,125</context>
+          <context context-type="linenumber">1652,1655</context>
         </context-group>
-        <note priority="1" from="description">User management title</note>
+        <note priority="1" from="description">Refresh frequency legend</note>
       </trans-unit>
-      <trans-unit id="admin.users" datatype="html">
-        <source>Users</source>
+      <trans-unit id="adminDataConfig.daily" datatype="html">
+        <source>Daily</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">126,127</context>
+          <context context-type="linenumber">1656,1659</context>
         </context-group>
-        <note priority="1" from="description">Users label</note>
+        <note priority="1" from="description">Daily frequency option</note>
       </trans-unit>
-      <trans-unit id="status.ready" datatype="html">
-        <source>Ready</source>
+      <trans-unit id="adminDataConfig.hourly" datatype="html">
+        <source>Hourly</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">127,128</context>
+          <context context-type="linenumber">1660,1663</context>
         </context-group>
-        <note priority="1" from="description">Ready status</note>
+        <note priority="1" from="description">Hourly frequency option</note>
       </trans-unit>
-      <trans-unit id="admin.usersSummary" datatype="html">
-        <source> Administrative user list API access is role protected. </source>
+      <trans-unit id="adminDataConfig.manual" datatype="html">
+        <source>Manual</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">129,132</context>
+          <context context-type="linenumber">1664,1668</context>
         </context-group>
-        <note priority="1" from="description">Admin user access summary</note>
+        <note priority="1" from="description">Manual frequency option</note>
+      </trans-unit>
+      <trans-unit id="adminDataConfig.historicalDepth" datatype="html">
+        <source> Historical depth </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">1670,1672</context>
+        </context-group>
+        <note priority="1" from="description">Historical depth label</note>
+      </trans-unit>
+      <trans-unit id="adminDataConfig.oneYear" datatype="html">
+        <source>1 Year</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">1673,1674</context>
+        </context-group>
+        <note priority="1" from="description">One year depth</note>
+      </trans-unit>
+      <trans-unit id="adminDataConfig.twoYears" datatype="html">
+        <source>2 Years</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">1674,1675</context>
+        </context-group>
+        <note priority="1" from="description">Two years depth</note>
+      </trans-unit>
+      <trans-unit id="adminDataConfig.fiveYears" datatype="html">
+        <source>5 Years</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">1675,1676</context>
+        </context-group>
+        <note priority="1" from="description">Five years depth</note>
+      </trans-unit>
+      <trans-unit id="adminDataConfig.allTime" datatype="html">
+        <source>All-time</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">1676,1680</context>
+        </context-group>
+        <note priority="1" from="description">All time depth</note>
+      </trans-unit>
+      <trans-unit id="adminDataConfig.lastRefresh" datatype="html">
+        <source>Last refresh</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">1681,1683</context>
+        </context-group>
+        <note priority="1" from="description">Last refresh label</note>
+      </trans-unit>
+      <trans-unit id="adminDataConfig.saving" datatype="html">
+        <source> Saving... </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">1693,1695</context>
+        </context-group>
+        <note priority="1" from="description">Saving configuration state</note>
+      </trans-unit>
+      <trans-unit id="adminDataConfig.save" datatype="html">
+        <source> Save Configuration </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">1697,1700</context>
+        </context-group>
+        <note priority="1" from="description">Save configuration button</note>
+      </trans-unit>
+      <trans-unit id="adminDataConfig.refreshing" datatype="html">
+        <source> Refreshing... </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">1711,1713</context>
+        </context-group>
+        <note priority="1" from="description">Refreshing now state</note>
+      </trans-unit>
+      <trans-unit id="adminDataConfig.refreshNow" datatype="html">
+        <source> Refresh Now </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">1715,1717</context>
+        </context-group>
+        <note priority="1" from="description">Refresh now button</note>
+      </trans-unit>
+      <trans-unit id="adminDataConfig.initHistoricalTitle" datatype="html">
+        <source> Initialize historical data </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">1727,1729</context>
+        </context-group>
+        <note priority="1" from="description">Historical data init title</note>
+      </trans-unit>
+      <trans-unit id="adminDataConfig.initHistoricalDesc" datatype="html">
+        <source> Automatically backfills all Bitcoin price history from 2013 (earliest exchange data) to today, one year at a time. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">1730,1735</context>
+        </context-group>
+        <note priority="1" from="description">Historical data init description</note>
+      </trans-unit>
+      <trans-unit id="adminDataConfig.allYears" datatype="html">
+        <source>All (<x id="INTERPOLATION" equiv-text="{{ startYear }}"/>–<x id="INTERPOLATION_1" equiv-text="{{ currentYear }}"/>)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">1744,1745</context>
+        </context-group>
+        <note priority="1" from="description">Select all years</note>
+      </trans-unit>
+      <trans-unit id="adminDataConfig.initButton" datatype="html">
+        <source> Initialize Selected (<x id="INTERPOLATION" equiv-text="{{ selectedYears().size }}"/> year<x id="INTERPOLATION_1" equiv-text="{{ selectedYears().size === 1 ? &apos;&apos; : &apos;s&apos; }}"/>) </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">1772,1773</context>
+        </context-group>
+        <note priority="1" from="description">Initialize selected years button</note>
+      </trans-unit>
+      <trans-unit id="adminDataConfig.never" datatype="html">
+        <source>Never</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">1826</context>
+        </context-group>
+        <note priority="1" from="description">Never refreshed status</note>
+      </trans-unit>
+      <trans-unit id="adminDataConfig.updated" datatype="html">
+        <source>Configuration updated successfully</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">1853</context>
+        </context-group>
+        <note priority="1" from="description">Configuration updated success</note>
+      </trans-unit>
+      <trans-unit id="adminDataConfig.refreshComplete" datatype="html">
+        <source>Data refresh completed successfully</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">1876</context>
+        </context-group>
+        <note priority="1" from="description">Manual refresh success</note>
+      </trans-unit>
+      <trans-unit id="adminDataConfig.backfillComplete" datatype="html">
+        <source>Initialized <x id="days" equiv-text="totalDays"/> days of price data + all metrics<x id="failedNote" equiv-text="failedRanges &gt; 0 ? ` (${failedRanges} failed price ranges)` : &apos;&apos;"/></source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">1932</context>
+        </context-group>
+        <note priority="1" from="description">Backfill success</note>
       </trans-unit>
       <trans-unit id="onboarding.dismissed" datatype="html">
         <source>Onboarding dismissed. Account completion tracking will be enabled next.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">158</context>
+          <context context-type="linenumber">1976</context>
         </context-group>
         <note priority="1" from="description">Onboarding dismissed message</note>
       </trans-unit>
@@ -334,15 +558,15 @@
         <source> Email<x id="TAG_INPUT" ctype="x-input" equiv-text="&lt;input type=&quot;email&quot; autocomplete=&quot;email&quot; formControlName=&quot;email&quot; /&gt;"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">170,171</context>
+          <context context-type="linenumber">1988,1989</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">306,307</context>
+          <context context-type="linenumber">2150,2151</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">490,491</context>
+          <context context-type="linenumber">2334,2335</context>
         </context-group>
         <note priority="1" from="description">Email label</note>
       </trans-unit>
@@ -350,19 +574,27 @@
         <source> Password <x id="TAG_INPUT" ctype="x-input" equiv-text="&lt;input type=&quot;password&quot; autocomplete=&quot;current-password&quot; formControlName=&quot;password&quot; /&gt;"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">173,175</context>
+          <context context-type="linenumber">1991,1993</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">493,495</context>
+          <context context-type="linenumber">2337,2339</context>
         </context-group>
         <note priority="1" from="description">Password label</note>
+      </trans-unit>
+      <trans-unit id="auth.useDevelopmentAdmin" datatype="html">
+        <source> Use dev admin </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">2004,2007</context>
+        </context-group>
+        <note priority="1" from="description">Use development admin button</note>
       </trans-unit>
       <trans-unit id="auth.loggingIn" datatype="html">
         <source>Logging in...</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">181,183</context>
+          <context context-type="linenumber">2009,2011</context>
         </context-group>
         <note priority="1" from="description">Logging in state</note>
       </trans-unit>
@@ -370,7 +602,7 @@
         <source> Continue with Google </source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">192,195</context>
+          <context context-type="linenumber">2020,2023</context>
         </context-group>
         <note priority="1" from="description">Continue with Google button</note>
       </trans-unit>
@@ -378,15 +610,23 @@
         <source> Forgot password? </source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">199,203</context>
+          <context context-type="linenumber">2027,2029</context>
         </context-group>
         <note priority="1" from="description">Forgot password link</note>
+      </trans-unit>
+      <trans-unit id="auth.noAccount" datatype="html">
+        <source> Don&apos;t have an account? <x id="START_LINK" ctype="x-a" equiv-text="&lt;a routerLink=&quot;/register&quot;&gt;"/>Create one<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/></source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">2030,2032</context>
+        </context-group>
+        <note priority="1" from="description">No account prompt</note>
       </trans-unit>
       <trans-unit id="auth.loginOnboardingRequired" datatype="html">
         <source>Login successful. Complete the quick orientation to continue.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">255</context>
+          <context context-type="linenumber">2099</context>
         </context-group>
         <note priority="1" from="description">Login onboarding required message</note>
       </trans-unit>
@@ -394,7 +634,7 @@
         <source>Login successful. Redirecting to dashboard.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">261</context>
+          <context context-type="linenumber">2105</context>
         </context-group>
         <note priority="1" from="description">Login success message</note>
       </trans-unit>
@@ -402,7 +642,7 @@
         <source>Completing onboarding...</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">278</context>
+          <context context-type="linenumber">2122</context>
         </context-group>
         <note priority="1" from="description">Completing onboarding state</note>
       </trans-unit>
@@ -410,7 +650,7 @@
         <source>Reset password</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">304,306</context>
+          <context context-type="linenumber">2148,2150</context>
         </context-group>
         <note priority="1" from="description">Reset password title</note>
       </trans-unit>
@@ -418,7 +658,7 @@
         <source>Sending...</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">313,315</context>
+          <context context-type="linenumber">2157,2159</context>
         </context-group>
         <note priority="1" from="description">Sending state</note>
       </trans-unit>
@@ -426,7 +666,7 @@
         <source> Send reset instructions </source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">316,319</context>
+          <context context-type="linenumber">2160,2163</context>
         </context-group>
         <note priority="1" from="description">Send reset instructions button</note>
       </trans-unit>
@@ -434,7 +674,7 @@
         <source> Choose a new password </source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">363,365</context>
+          <context context-type="linenumber">2207,2209</context>
         </context-group>
         <note priority="1" from="description">Choose new password title</note>
       </trans-unit>
@@ -442,7 +682,7 @@
         <source> Reset link is invalid or expired </source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">367,370</context>
+          <context context-type="linenumber">2211,2214</context>
         </context-group>
         <note priority="1" from="description">Invalid reset token message</note>
       </trans-unit>
@@ -450,7 +690,7 @@
         <source> New password <x id="TAG_INPUT" ctype="x-input" equiv-text="&lt;input type=&quot;password&quot; autocomplete=&quot;new-password&quot; formControlName=&quot;password&quot; /&gt;"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">371,373</context>
+          <context context-type="linenumber">2215,2217</context>
         </context-group>
         <note priority="1" from="description">New password label</note>
       </trans-unit>
@@ -462,11 +702,11 @@
             /&gt;"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">375,381</context>
+          <context context-type="linenumber">2219,2225</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">497,503</context>
+          <context context-type="linenumber">2341,2347</context>
         </context-group>
         <note priority="1" from="description">Confirm password label</note>
       </trans-unit>
@@ -474,11 +714,11 @@
         <source> Passwords do not match. </source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">384,387</context>
+          <context context-type="linenumber">2228,2231</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">513,516</context>
+          <context context-type="linenumber">2357,2360</context>
         </context-group>
         <note priority="1" from="description">Passwords mismatch</note>
       </trans-unit>
@@ -486,7 +726,7 @@
         <source> Resetting... </source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">396,398</context>
+          <context context-type="linenumber">2240,2242</context>
         </context-group>
         <note priority="1" from="description">Resetting password state</note>
       </trans-unit>
@@ -494,7 +734,7 @@
         <source> Reset password </source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">400,402</context>
+          <context context-type="linenumber">2244,2246</context>
         </context-group>
         <note priority="1" from="description">Reset password button</note>
       </trans-unit>
@@ -502,7 +742,7 @@
         <source> Full name<x id="TAG_INPUT" ctype="x-input" equiv-text="&lt;input type=&quot;text&quot; autocomplete=&quot;name&quot; formControlName=&quot;fullName&quot; /&gt;"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">487,488</context>
+          <context context-type="linenumber">2331,2332</context>
         </context-group>
         <note priority="1" from="description">Full name label</note>
       </trans-unit>
@@ -510,15 +750,31 @@
         <source>Language</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">505,506</context>
+          <context context-type="linenumber">2349,2350</context>
         </context-group>
         <note priority="1" from="description">Language form label</note>
+      </trans-unit>
+      <trans-unit id="language.english" datatype="html">
+        <source>English</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">2351,2352</context>
+        </context-group>
+        <note priority="1" from="description">English language option</note>
+      </trans-unit>
+      <trans-unit id="language.hungarian" datatype="html">
+        <source>Hungarian</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">2352,2355</context>
+        </context-group>
+        <note priority="1" from="description">Hungarian language option</note>
       </trans-unit>
       <trans-unit id="auth.creatingAccount" datatype="html">
         <source> Creating account... </source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">522,524</context>
+          <context context-type="linenumber">2366,2368</context>
         </context-group>
         <note priority="1" from="description">Creating account state</note>
       </trans-unit>
@@ -526,17 +782,757 @@
         <source> Create account </source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">526,529</context>
+          <context context-type="linenumber">2370,2373</context>
         </context-group>
         <note priority="1" from="description">Create account button</note>
+      </trans-unit>
+      <trans-unit id="auth.haveAccount" datatype="html">
+        <source> Already have an account? <x id="START_LINK" ctype="x-a" equiv-text="&lt;a routerLink=&quot;/login&quot;&gt;"/>Sign in<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/></source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">2375,2377</context>
+        </context-group>
+        <note priority="1" from="description">Have account prompt</note>
       </trans-unit>
       <trans-unit id="errors.requestFailed" datatype="html">
         <source>The request could not be completed. Please try again.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
-          <context context-type="linenumber">584</context>
+          <context context-type="linenumber">2431</context>
         </context-group>
         <note priority="1" from="description">Generic request failure</note>
+      </trans-unit>
+      <trans-unit id="dashboard.addWidgetDialog" datatype="html">
+        <source>Add widget</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/add-widget-modal/add-widget-modal.component.html</context>
+          <context context-type="linenumber">5,6</context>
+        </context-group>
+        <note priority="1" from="description">Add widget dialog label</note>
+      </trans-unit>
+      <trans-unit id="dashboard.addWidgetTitle" datatype="html">
+        <source>Add Widget</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/add-widget-modal/add-widget-modal.component.html</context>
+          <context context-type="linenumber">10,13</context>
+        </context-group>
+        <note priority="1" from="description">Add widget modal title</note>
+      </trans-unit>
+      <trans-unit id="dashboard.closeAddWidget" datatype="html">
+        <source>Close</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/add-widget-modal/add-widget-modal.component.html</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+        <note priority="1" from="description">Close add widget modal</note>
+      </trans-unit>
+      <trans-unit id="dashboard.tabLibrary" datatype="html">
+        <source> Widget Library </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/add-widget-modal/add-widget-modal.component.html</context>
+          <context context-type="linenumber">31,34</context>
+        </context-group>
+        <note priority="1" from="description">Widget library tab</note>
+      </trans-unit>
+      <trans-unit id="dashboard.tabCustomFormula" datatype="html">
+        <source> Custom Formula </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/add-widget-modal/add-widget-modal.component.html</context>
+          <context context-type="linenumber">41,45</context>
+        </context-group>
+        <note priority="1" from="description">Custom formula tab</note>
+      </trans-unit>
+      <trans-unit id="dashboard.widgetSearchPlaceholder" datatype="html">
+        <source>Search widgets</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/add-widget-modal/add-widget-modal.component.html</context>
+          <context context-type="linenumber">53,54</context>
+        </context-group>
+        <note priority="1" from="description">Widget search placeholder</note>
+      </trans-unit>
+      <trans-unit id="dashboard.widgetAdded" datatype="html">
+        <source> Added </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/add-widget-modal/add-widget-modal.component.html</context>
+          <context context-type="linenumber">79,81</context>
+        </context-group>
+        <note priority="1" from="description">Widget already added label</note>
+      </trans-unit>
+      <trans-unit id="dashboard.addWidgetButton" datatype="html">
+        <source> Add </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/add-widget-modal/add-widget-modal.component.html</context>
+          <context context-type="linenumber">83,84</context>
+        </context-group>
+        <note priority="1" from="description">Add widget button</note>
+      </trans-unit>
+      <trans-unit id="dashboard.noWidgetsFound" datatype="html">
+        <source>No widgets match your search.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/add-widget-modal/add-widget-modal.component.html</context>
+          <context context-type="linenumber">92,97</context>
+        </context-group>
+        <note priority="1" from="description">No widgets match search</note>
+      </trans-unit>
+      <trans-unit id="dashboard.customFormulaIntro" datatype="html">
+        <source> Combine Bitcoin metrics with arithmetic operators to create your own KPI widget. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/add-widget-modal/add-widget-modal.component.html</context>
+          <context context-type="linenumber">100,103</context>
+        </context-group>
+        <note priority="1" from="description">Custom formula intro</note>
+      </trans-unit>
+      <trans-unit id="dashboard.customWidgetName" datatype="html">
+        <source>Widget name</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/add-widget-modal/add-widget-modal.component.html</context>
+          <context context-type="linenumber">105,108</context>
+        </context-group>
+        <note priority="1" from="description">Custom widget name label</note>
+      </trans-unit>
+      <trans-unit id="dashboard.customWidgetNamePlaceholder" datatype="html">
+        <source>e.g. S2F Implied Price</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/add-widget-modal/add-widget-modal.component.html</context>
+          <context context-type="linenumber">112,113</context>
+        </context-group>
+        <note priority="1" from="description">Custom widget name placeholder</note>
+      </trans-unit>
+      <trans-unit id="dashboard.customWidgetFormula" datatype="html">
+        <source>Formula</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/add-widget-modal/add-widget-modal.component.html</context>
+          <context context-type="linenumber">118,121</context>
+        </context-group>
+        <note priority="1" from="description">Custom widget formula label</note>
+      </trans-unit>
+      <trans-unit id="dashboard.customWidgetDescription" datatype="html">
+        <source>Description</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/add-widget-modal/add-widget-modal.component.html</context>
+          <context context-type="linenumber">131,132</context>
+        </context-group>
+        <note priority="1" from="description">Custom widget description label</note>
+      </trans-unit>
+      <trans-unit id="form.optional" datatype="html">
+        <source> (optional)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/add-widget-modal/add-widget-modal.component.html</context>
+          <context context-type="linenumber">132,134</context>
+        </context-group>
+        <note priority="1" from="description">Optional label</note>
+      </trans-unit>
+      <trans-unit id="dashboard.availableVariables" datatype="html">
+        <source> Available variables: </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/add-widget-modal/add-widget-modal.component.html</context>
+          <context context-type="linenumber">144,146</context>
+        </context-group>
+        <note priority="1" from="description">Available variables heading</note>
+      </trans-unit>
+      <trans-unit id="dashboard.formulaOperatorsHint" datatype="html">
+        <source> Supported operators: <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code&gt;"/>+<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/><x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code&gt;"/>-<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/><x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code&gt;"/>*<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/><x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code&gt;"/>/<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/><x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code&gt;"/>( )<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/></source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/add-widget-modal/add-widget-modal.component.html</context>
+          <context context-type="linenumber">152,154</context>
+        </context-group>
+        <note priority="1" from="description">Formula operators hint</note>
+      </trans-unit>
+      <trans-unit id="dashboard.savingCustomWidget" datatype="html">
+        <source> Saving... </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/add-widget-modal/add-widget-modal.component.html</context>
+          <context context-type="linenumber">163,166</context>
+        </context-group>
+        <note priority="1" from="description">Saving custom widget state</note>
+      </trans-unit>
+      <trans-unit id="dashboard.saveCustomWidget" datatype="html">
+        <source> Save Widget </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/add-widget-modal/add-widget-modal.component.html</context>
+          <context context-type="linenumber">167,170</context>
+        </context-group>
+        <note priority="1" from="description">Save custom widget button</note>
+      </trans-unit>
+      <trans-unit id="dashboard.addWidgetFailed" datatype="html">
+        <source>The widget could not be added. Please try again.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/add-widget-modal/add-widget-modal.component.ts</context>
+          <context context-type="linenumber">167</context>
+        </context-group>
+        <note priority="1" from="description">Add widget failure</note>
+      </trans-unit>
+      <trans-unit id="dashboard.customWidgetFailed" datatype="html">
+        <source>The widget could not be saved. Please try again.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/add-widget-modal/add-widget-modal.component.ts</context>
+          <context context-type="linenumber">216</context>
+        </context-group>
+        <note priority="1" from="description">Custom widget failure</note>
+      </trans-unit>
+      <trans-unit id="charts.backToLibrary" datatype="html">
+        <source> Back to chart library </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-cvdd-chart-page/bitcoin-cvdd-chart-page.component.html</context>
+          <context context-type="linenumber">5,7</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-power-law-chart-page/bitcoin-power-law-chart-page.component.html</context>
+          <context context-type="linenumber">5,7</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-rainbow-chart-page/bitcoin-rainbow-chart-page.component.html</context>
+          <context context-type="linenumber">5,7</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/mvrv-z-score-chart-page/mvrv-z-score-chart-page.component.html</context>
+          <context context-type="linenumber">5,7</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/pi-cycle-top-chart-page/pi-cycle-top-chart-page.component.html</context>
+          <context context-type="linenumber">5,7</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/puell-multiple-chart-page/puell-multiple-chart-page.component.html</context>
+          <context context-type="linenumber">5,7</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/stock-to-flow-chart-page/stock-to-flow-chart-page.component.html</context>
+          <context context-type="linenumber">5,7</context>
+        </context-group>
+        <note priority="1" from="description">Back to chart library</note>
+      </trans-unit>
+      <trans-unit id="charts.cvddEyebrow" datatype="html">
+        <source> Cycle indicator </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-cvdd-chart-page/bitcoin-cvdd-chart-page.component.html</context>
+          <context context-type="linenumber">8,10</context>
+        </context-group>
+        <note priority="1" from="description">CVDD eyebrow</note>
+      </trans-unit>
+      <trans-unit id="charts.cvddTitle" datatype="html">
+        <source>Bitcoin CVDD</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-cvdd-chart-page/bitcoin-cvdd-chart-page.component.html</context>
+          <context context-type="linenumber">10,11</context>
+        </context-group>
+        <note priority="1" from="description">CVDD title</note>
+      </trans-unit>
+      <trans-unit id="charts.cvddSubtitle" datatype="html">
+        <source> Cumulative Value Coin Days Destroyed — a historically accurate bottom indicator </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-cvdd-chart-page/bitcoin-cvdd-chart-page.component.html</context>
+          <context context-type="linenumber">12,15</context>
+        </context-group>
+        <note priority="1" from="description">CVDD subtitle</note>
+      </trans-unit>
+      <trans-unit id="charts.lastUpdated" datatype="html">
+        <source>Last updated</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-cvdd-chart-page/bitcoin-cvdd-chart-page.component.html</context>
+          <context context-type="linenumber">16,18</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-power-law-chart-page/bitcoin-power-law-chart-page.component.html</context>
+          <context context-type="linenumber">16,18</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-rainbow-chart-page/bitcoin-rainbow-chart-page.component.html</context>
+          <context context-type="linenumber">18,20</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/chart-info-panel/chart-info-panel.component.html</context>
+          <context context-type="linenumber">36,40</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/mvrv-z-score-chart-page/mvrv-z-score-chart-page.component.html</context>
+          <context context-type="linenumber">16,18</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/pi-cycle-top-chart-page/pi-cycle-top-chart-page.component.html</context>
+          <context context-type="linenumber">16,18</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/puell-multiple-chart-page/puell-multiple-chart-page.component.html</context>
+          <context context-type="linenumber">16,18</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/stock-to-flow-chart-page/stock-to-flow-chart-page.component.html</context>
+          <context context-type="linenumber">16,18</context>
+        </context-group>
+        <note priority="1" from="description">Chart last updated label</note>
+      </trans-unit>
+      <trans-unit id="charts.controls" datatype="html">
+        <source>Chart controls</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-cvdd-chart-page/bitcoin-cvdd-chart-page.component.html</context>
+          <context context-type="linenumber">21</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-power-law-chart-page/bitcoin-power-law-chart-page.component.html</context>
+          <context context-type="linenumber">21</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-rainbow-chart-page/bitcoin-rainbow-chart-page.component.html</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/mvrv-z-score-chart-page/mvrv-z-score-chart-page.component.html</context>
+          <context context-type="linenumber">21</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/pi-cycle-top-chart-page/pi-cycle-top-chart-page.component.html</context>
+          <context context-type="linenumber">21</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/puell-multiple-chart-page/puell-multiple-chart-page.component.html</context>
+          <context context-type="linenumber">21</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/stock-to-flow-chart-page/stock-to-flow-chart-page.component.html</context>
+          <context context-type="linenumber">21</context>
+        </context-group>
+        <note priority="1" from="description">Chart controls aria</note>
+      </trans-unit>
+      <trans-unit id="charts.timeframeSelector" datatype="html">
+        <source>Timeframe selector</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-cvdd-chart-page/bitcoin-cvdd-chart-page.component.html</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-power-law-chart-page/bitcoin-power-law-chart-page.component.html</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-rainbow-chart-page/bitcoin-rainbow-chart-page.component.html</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/mvrv-z-score-chart-page/mvrv-z-score-chart-page.component.html</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/pi-cycle-top-chart-page/pi-cycle-top-chart-page.component.html</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/puell-multiple-chart-page/puell-multiple-chart-page.component.html</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/stock-to-flow-chart-page/stock-to-flow-chart-page.component.html</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+        <note priority="1" from="description">Timeframe selector aria</note>
+      </trans-unit>
+      <trans-unit id="charts.zoomReset" datatype="html">
+        <source>Reset Zoom</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-cvdd-chart-page/bitcoin-cvdd-chart-page.component.html</context>
+          <context context-type="linenumber">36,38</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-power-law-chart-page/bitcoin-power-law-chart-page.component.html</context>
+          <context context-type="linenumber">36,38</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-rainbow-chart-page/bitcoin-rainbow-chart-page.component.html</context>
+          <context context-type="linenumber">38,40</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/mvrv-z-score-chart-page/mvrv-z-score-chart-page.component.html</context>
+          <context context-type="linenumber">36,38</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/pi-cycle-top-chart-page/pi-cycle-top-chart-page.component.html</context>
+          <context context-type="linenumber">36,38</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/puell-multiple-chart-page/puell-multiple-chart-page.component.html</context>
+          <context context-type="linenumber">36,38</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/stock-to-flow-chart-page/stock-to-flow-chart-page.component.html</context>
+          <context context-type="linenumber">36,38</context>
+        </context-group>
+        <note priority="1" from="description">Zoom reset label</note>
+      </trans-unit>
+      <trans-unit id="charts.exportControl" datatype="html">
+        <source> Export </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-cvdd-chart-page/bitcoin-cvdd-chart-page.component.html</context>
+          <context context-type="linenumber">39,41</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-power-law-chart-page/bitcoin-power-law-chart-page.component.html</context>
+          <context context-type="linenumber">39,41</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-rainbow-chart-page/bitcoin-rainbow-chart-page.component.html</context>
+          <context context-type="linenumber">41,43</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/mvrv-z-score-chart-page/mvrv-z-score-chart-page.component.html</context>
+          <context context-type="linenumber">39,41</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/pi-cycle-top-chart-page/pi-cycle-top-chart-page.component.html</context>
+          <context context-type="linenumber">39,41</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/puell-multiple-chart-page/puell-multiple-chart-page.component.html</context>
+          <context context-type="linenumber">39,41</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/stock-to-flow-chart-page/stock-to-flow-chart-page.component.html</context>
+          <context context-type="linenumber">39,41</context>
+        </context-group>
+        <note priority="1" from="description">Export control label</note>
+      </trans-unit>
+      <trans-unit id="charts.exportPng" datatype="html">
+        <source> Export as PNG </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-cvdd-chart-page/bitcoin-cvdd-chart-page.component.html</context>
+          <context context-type="linenumber">44,46</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-power-law-chart-page/bitcoin-power-law-chart-page.component.html</context>
+          <context context-type="linenumber">44,46</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-rainbow-chart-page/bitcoin-rainbow-chart-page.component.html</context>
+          <context context-type="linenumber">46,48</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/mvrv-z-score-chart-page/mvrv-z-score-chart-page.component.html</context>
+          <context context-type="linenumber">44,46</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/pi-cycle-top-chart-page/pi-cycle-top-chart-page.component.html</context>
+          <context context-type="linenumber">44,46</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/puell-multiple-chart-page/puell-multiple-chart-page.component.html</context>
+          <context context-type="linenumber">44,46</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/stock-to-flow-chart-page/stock-to-flow-chart-page.component.html</context>
+          <context context-type="linenumber">44,46</context>
+        </context-group>
+        <note priority="1" from="description">Export PNG option</note>
+      </trans-unit>
+      <trans-unit id="charts.exportCsv" datatype="html">
+        <source> Export as CSV </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-cvdd-chart-page/bitcoin-cvdd-chart-page.component.html</context>
+          <context context-type="linenumber">47,49</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-power-law-chart-page/bitcoin-power-law-chart-page.component.html</context>
+          <context context-type="linenumber">47,49</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-rainbow-chart-page/bitcoin-rainbow-chart-page.component.html</context>
+          <context context-type="linenumber">49,51</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/mvrv-z-score-chart-page/mvrv-z-score-chart-page.component.html</context>
+          <context context-type="linenumber">47,49</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/pi-cycle-top-chart-page/pi-cycle-top-chart-page.component.html</context>
+          <context context-type="linenumber">47,49</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/puell-multiple-chart-page/puell-multiple-chart-page.component.html</context>
+          <context context-type="linenumber">47,49</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/stock-to-flow-chart-page/stock-to-flow-chart-page.component.html</context>
+          <context context-type="linenumber">47,49</context>
+        </context-group>
+        <note priority="1" from="description">Export CSV option</note>
+      </trans-unit>
+      <trans-unit id="charts.infoControl" datatype="html">
+        <source> Info </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-cvdd-chart-page/bitcoin-cvdd-chart-page.component.html</context>
+          <context context-type="linenumber">61,66</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-power-law-chart-page/bitcoin-power-law-chart-page.component.html</context>
+          <context context-type="linenumber">61,66</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-rainbow-chart-page/bitcoin-rainbow-chart-page.component.html</context>
+          <context context-type="linenumber">63,68</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/mvrv-z-score-chart-page/mvrv-z-score-chart-page.component.html</context>
+          <context context-type="linenumber">61,66</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/pi-cycle-top-chart-page/pi-cycle-top-chart-page.component.html</context>
+          <context context-type="linenumber">61,66</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/puell-multiple-chart-page/puell-multiple-chart-page.component.html</context>
+          <context context-type="linenumber">61,66</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/stock-to-flow-chart-page/stock-to-flow-chart-page.component.html</context>
+          <context context-type="linenumber">61,66</context>
+        </context-group>
+        <note priority="1" from="description">Info control label</note>
+      </trans-unit>
+      <trans-unit id="charts.loading" datatype="html">
+        <source>Loading chart data...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-cvdd-chart-page/bitcoin-cvdd-chart-page.component.html</context>
+          <context context-type="linenumber">103,107</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-power-law-chart-page/bitcoin-power-law-chart-page.component.html</context>
+          <context context-type="linenumber">103,107</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-rainbow-chart-page/bitcoin-rainbow-chart-page.component.html</context>
+          <context context-type="linenumber">105,109</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/mvrv-z-score-chart-page/mvrv-z-score-chart-page.component.html</context>
+          <context context-type="linenumber">83,87</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/pi-cycle-top-chart-page/pi-cycle-top-chart-page.component.html</context>
+          <context context-type="linenumber">107,111</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/puell-multiple-chart-page/puell-multiple-chart-page.component.html</context>
+          <context context-type="linenumber">83,87</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/stock-to-flow-chart-page/stock-to-flow-chart-page.component.html</context>
+          <context context-type="linenumber">103,107</context>
+        </context-group>
+        <note priority="1" from="description">Chart loading state</note>
+      </trans-unit>
+      <trans-unit id="charts.noData" datatype="html">
+        <source> No CVDD chart data is available yet. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-cvdd-chart-page/bitcoin-cvdd-chart-page.component.html</context>
+          <context context-type="linenumber">115,119</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-power-law-chart-page/bitcoin-power-law-chart-page.component.html</context>
+          <context context-type="linenumber">115,119</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-rainbow-chart-page/bitcoin-rainbow-chart-page.component.html</context>
+          <context context-type="linenumber">129,134</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/mvrv-z-score-chart-page/mvrv-z-score-chart-page.component.html</context>
+          <context context-type="linenumber">95,100</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/pi-cycle-top-chart-page/pi-cycle-top-chart-page.component.html</context>
+          <context context-type="linenumber">119,124</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/puell-multiple-chart-page/puell-multiple-chart-page.component.html</context>
+          <context context-type="linenumber">95,100</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/stock-to-flow-chart-page/stock-to-flow-chart-page.component.html</context>
+          <context context-type="linenumber">123,128</context>
+        </context-group>
+        <note priority="1" from="description">No chart data message</note>
+      </trans-unit>
+      <trans-unit id="charts.powerLawEyebrow" datatype="html">
+        <source> Valuation model </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-power-law-chart-page/bitcoin-power-law-chart-page.component.html</context>
+          <context context-type="linenumber">8,10</context>
+        </context-group>
+        <note priority="1" from="description">Power Law eyebrow</note>
+      </trans-unit>
+      <trans-unit id="charts.powerLawTitle" datatype="html">
+        <source>Bitcoin Power Law Chart</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-power-law-chart-page/bitcoin-power-law-chart-page.component.html</context>
+          <context context-type="linenumber">10,11</context>
+        </context-group>
+        <note priority="1" from="description">Power Law title</note>
+      </trans-unit>
+      <trans-unit id="charts.powerLawSubtitle" datatype="html">
+        <source> Long-term price model based on power law regression since Bitcoin genesis </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-power-law-chart-page/bitcoin-power-law-chart-page.component.html</context>
+          <context context-type="linenumber">12,15</context>
+        </context-group>
+        <note priority="1" from="description">Power Law subtitle</note>
+      </trans-unit>
+      <trans-unit id="charts.rainbowEyebrow" datatype="html">
+        <source> Cycle indicator </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-rainbow-chart-page/bitcoin-rainbow-chart-page.component.html</context>
+          <context context-type="linenumber">8,10</context>
+        </context-group>
+        <note priority="1" from="description">Bitcoin Rainbow eyebrow</note>
+      </trans-unit>
+      <trans-unit id="charts.rainbowTitle" datatype="html">
+        <source> Bitcoin Rainbow Price Chart </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-rainbow-chart-page/bitcoin-rainbow-chart-page.component.html</context>
+          <context context-type="linenumber">11,13</context>
+        </context-group>
+        <note priority="1" from="description">Bitcoin Rainbow title</note>
+      </trans-unit>
+      <trans-unit id="charts.rainbowSubtitle" datatype="html">
+        <source> Logarithmic growth curve with color-coded valuation bands </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-rainbow-chart-page/bitcoin-rainbow-chart-page.component.html</context>
+          <context context-type="linenumber">14,18</context>
+        </context-group>
+        <note priority="1" from="description">Bitcoin Rainbow subtitle</note>
+      </trans-unit>
+      <trans-unit id="charts.rainbowLoadFailed" datatype="html">
+        <source>Chart data could not be loaded. Please try again.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/bitcoin-rainbow-chart-page/bitcoin-rainbow-chart-page.component.ts</context>
+          <context context-type="linenumber">374</context>
+        </context-group>
+        <note priority="1" from="description">Chart data load failure</note>
+      </trans-unit>
+      <trans-unit id="chartDetail.eyebrow" datatype="html">
+        <source>Chart</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/chart-detail-placeholder/chart-detail-placeholder.component.ts</context>
+          <context context-type="linenumber">15,17</context>
+        </context-group>
+        <note priority="1" from="description">Chart detail eyebrow</note>
+      </trans-unit>
+      <trans-unit id="chartDetail.placeholder" datatype="html">
+        <source> Interactive chart rendering starts in the next chart visualization story. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/chart-detail-placeholder/chart-detail-placeholder.component.ts</context>
+          <context context-type="linenumber">18,20</context>
+        </context-group>
+        <note priority="1" from="description">Chart detail placeholder text</note>
+      </trans-unit>
+      <trans-unit id="chartDetail.back" datatype="html">
+        <source> Back to charts </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/chart-detail-placeholder/chart-detail-placeholder.component.ts</context>
+          <context context-type="linenumber">21,26</context>
+        </context-group>
+        <note priority="1" from="description">Back to charts link</note>
+      </trans-unit>
+      <trans-unit id="charts.infoSummary" datatype="html">
+        <source>Chart information</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/chart-info-panel/chart-info-panel.component.html</context>
+          <context context-type="linenumber">3,7</context>
+        </context-group>
+        <note priority="1" from="description">Chart information summary</note>
+      </trans-unit>
+      <trans-unit id="charts.aboutIndicator" datatype="html">
+        <source>About This Indicator</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/chart-info-panel/chart-info-panel.component.html</context>
+          <context context-type="linenumber">9,13</context>
+        </context-group>
+        <note priority="1" from="description">About indicator heading</note>
+      </trans-unit>
+      <trans-unit id="charts.currentValue" datatype="html">
+        <source>Current Value &amp; Interpretation</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/chart-info-panel/chart-info-panel.component.html</context>
+          <context context-type="linenumber">14,16</context>
+        </context-group>
+        <note priority="1" from="description">Current value heading</note>
+      </trans-unit>
+      <trans-unit id="charts.dataSources" datatype="html">
+        <source>Data Sources</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/chart-info-panel/chart-info-panel.component.html</context>
+          <context context-type="linenumber">27,29</context>
+        </context-group>
+        <note priority="1" from="description">Data sources heading</note>
+      </trans-unit>
+      <trans-unit id="charts.eyebrow" datatype="html">
+        <source>Chart library</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/chart-library/chart-library.component.html</context>
+          <context context-type="linenumber">4,5</context>
+        </context-group>
+        <note priority="1" from="description">Chart library eyebrow</note>
+      </trans-unit>
+      <trans-unit id="charts.title" datatype="html">
+        <source>Tracked Bitcoin models</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/chart-library/chart-library.component.html</context>
+          <context context-type="linenumber">5,7</context>
+        </context-group>
+        <note priority="1" from="description">Chart library title</note>
+      </trans-unit>
+      <trans-unit id="charts.searchPlaceholder" datatype="html">
+        <source>Search charts</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/chart-library/chart-library.component.html</context>
+          <context context-type="linenumber">13,14</context>
+        </context-group>
+        <note priority="1" from="description">Chart search placeholder</note>
+      </trans-unit>
+      <trans-unit id="charts.viewChart" datatype="html">
+        <source>View Chart →</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/chart-library/chart-library.component.html</context>
+          <context context-type="linenumber">484,487</context>
+        </context-group>
+        <note priority="1" from="description">View chart button</note>
+      </trans-unit>
+      <trans-unit id="charts.empty" datatype="html">
+        <source>No charts match this search.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/chart-library/chart-library.component.html</context>
+          <context context-type="linenumber">500,503</context>
+        </context-group>
+        <note priority="1" from="description">No charts found message</note>
+      </trans-unit>
+      <trans-unit id="charts.mvrvEyebrow" datatype="html">
+        <source> Valuation model </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/mvrv-z-score-chart-page/mvrv-z-score-chart-page.component.html</context>
+          <context context-type="linenumber">8,10</context>
+        </context-group>
+        <note priority="1" from="description">MVRV Z-Score eyebrow</note>
+      </trans-unit>
+      <trans-unit id="charts.mvrvTitle" datatype="html">
+        <source>MVRV Z-Score</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/mvrv-z-score-chart-page/mvrv-z-score-chart-page.component.html</context>
+          <context context-type="linenumber">10,11</context>
+        </context-group>
+        <note priority="1" from="description">MVRV Z-Score title</note>
+      </trans-unit>
+      <trans-unit id="charts.mvrvSubtitle" datatype="html">
+        <source> Market value vs realized value to identify statistically extreme cycle positions </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/mvrv-z-score-chart-page/mvrv-z-score-chart-page.component.html</context>
+          <context context-type="linenumber">12,15</context>
+        </context-group>
+        <note priority="1" from="description">MVRV Z-Score subtitle</note>
+      </trans-unit>
+      <trans-unit id="charts.mvrvLoadFailed" datatype="html">
+        <source>Chart data could not be loaded. Please try again.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/mvrv-z-score-chart-page/mvrv-z-score-chart-page.component.ts</context>
+          <context context-type="linenumber">464</context>
+        </context-group>
+        <note priority="1" from="description">MVRV Z-Score chart load failure</note>
       </trans-unit>
       <trans-unit id="onboardingCarousel.aria" datatype="html">
         <source>Onboarding carousel</source>
@@ -595,7 +1591,7 @@
         <note priority="1" from="description">Slide indicator group</note>
       </trans-unit>
       <trans-unit id="onboardingCarousel.slide1.headline" datatype="html">
-        <source>Welcome to CryptoMarketAnalysis</source>
+        <source>Welcome to BitWLab</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/components/onboarding-carousel/onboarding-carousel.component.ts</context>
           <context context-type="linenumber">24</context>
@@ -761,6 +1757,102 @@
           <context context-type="linenumber">53</context>
         </context-group>
         <note priority="1" from="description">Onboarding slide 3 metric 3</note>
+      </trans-unit>
+      <trans-unit id="charts.piCycleEyebrow" datatype="html">
+        <source> Cycle indicator </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/pi-cycle-top-chart-page/pi-cycle-top-chart-page.component.html</context>
+          <context context-type="linenumber">8,10</context>
+        </context-group>
+        <note priority="1" from="description">Pi Cycle eyebrow</note>
+      </trans-unit>
+      <trans-unit id="charts.piCycleTitle" datatype="html">
+        <source>Pi Cycle Top Indicator</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/pi-cycle-top-chart-page/pi-cycle-top-chart-page.component.html</context>
+          <context context-type="linenumber">10,11</context>
+        </context-group>
+        <note priority="1" from="description">Pi Cycle title</note>
+      </trans-unit>
+      <trans-unit id="charts.piCycleSubtitle" datatype="html">
+        <source> Moving-average crossover signal for potential Bitcoin cycle tops </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/pi-cycle-top-chart-page/pi-cycle-top-chart-page.component.html</context>
+          <context context-type="linenumber">12,15</context>
+        </context-group>
+        <note priority="1" from="description">Pi Cycle subtitle</note>
+      </trans-unit>
+      <trans-unit id="charts.piCycleLoadFailed" datatype="html">
+        <source>Chart data could not be loaded. Please try again.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/pi-cycle-top-chart-page/pi-cycle-top-chart-page.component.ts</context>
+          <context context-type="linenumber">339</context>
+        </context-group>
+        <note priority="1" from="description">Pi Cycle chart load failure</note>
+      </trans-unit>
+      <trans-unit id="charts.puellEyebrow" datatype="html">
+        <source> Cycle indicator </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/puell-multiple-chart-page/puell-multiple-chart-page.component.html</context>
+          <context context-type="linenumber">8,10</context>
+        </context-group>
+        <note priority="1" from="description">Puell Multiple eyebrow</note>
+      </trans-unit>
+      <trans-unit id="charts.puellTitle" datatype="html">
+        <source>Puell Multiple</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/puell-multiple-chart-page/puell-multiple-chart-page.component.html</context>
+          <context context-type="linenumber">10,11</context>
+        </context-group>
+        <note priority="1" from="description">Puell Multiple title</note>
+      </trans-unit>
+      <trans-unit id="charts.puellSubtitle" datatype="html">
+        <source> Daily miner revenue relative to its 365-day average to identify miner stress and euphoria </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/puell-multiple-chart-page/puell-multiple-chart-page.component.html</context>
+          <context context-type="linenumber">12,15</context>
+        </context-group>
+        <note priority="1" from="description">Puell Multiple subtitle</note>
+      </trans-unit>
+      <trans-unit id="charts.puellLoadFailed" datatype="html">
+        <source>Chart data could not be loaded. Please try again.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/puell-multiple-chart-page/puell-multiple-chart-page.component.ts</context>
+          <context context-type="linenumber">338</context>
+        </context-group>
+        <note priority="1" from="description">Puell Multiple chart load failure</note>
+      </trans-unit>
+      <trans-unit id="charts.stockToFlowEyebrow" datatype="html">
+        <source> Valuation model </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/stock-to-flow-chart-page/stock-to-flow-chart-page.component.html</context>
+          <context context-type="linenumber">8,10</context>
+        </context-group>
+        <note priority="1" from="description">Stock to Flow eyebrow</note>
+      </trans-unit>
+      <trans-unit id="charts.stockToFlowTitle" datatype="html">
+        <source>Stock-to-Flow Model</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/stock-to-flow-chart-page/stock-to-flow-chart-page.component.html</context>
+          <context context-type="linenumber">10,11</context>
+        </context-group>
+        <note priority="1" from="description">Stock to Flow title</note>
+      </trans-unit>
+      <trans-unit id="charts.stockToFlowSubtitle" datatype="html">
+        <source> Scarcity-driven model price compared with Bitcoin market price </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/stock-to-flow-chart-page/stock-to-flow-chart-page.component.html</context>
+          <context context-type="linenumber">12,16</context>
+        </context-group>
+        <note priority="1" from="description">Stock to Flow subtitle</note>
+      </trans-unit>
+      <trans-unit id="charts.stockToFlowLoadFailed" datatype="html">
+        <source>Chart data could not be loaded. Please try again.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/components/stock-to-flow-chart-page/stock-to-flow-chart-page.component.ts</context>
+          <context context-type="linenumber">372</context>
+        </context-group>
+        <note priority="1" from="description">Stock to Flow chart load failure</note>
       </trans-unit>
     </body>
   </file>
