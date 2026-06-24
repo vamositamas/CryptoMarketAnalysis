@@ -1848,6 +1848,11 @@ export class AdminDataConfigurationPage {
     let totalDays = 0;
     let failedRanges = 0;
 
+    const metrics: Array<Parameters<typeof this.auth.backfillMetric>[0]> = [
+      'vdd', 'miner-fees', 'price-forecast', 'fear-greed',
+      'hash-rate', 'difficulty', 'transaction-volume', 'miners-revenue',
+    ];
+
     try {
       for (let year = startYear; year <= currentYear; year++) {
         const startDate = `${year}-01-01`;
@@ -1855,16 +1860,21 @@ export class AdminDataConfigurationPage {
           ? new Date().toISOString().slice(0, 10)
           : `${year}-12-31`;
 
-        this.initProgress.set(`Processing ${year}...`);
+        this.initProgress.set(`Loading prices: ${year}...`);
 
         const result = await this.auth.initHistoricalData(startDate, endDate);
         totalDays += result.fetchedDays;
         failedRanges += result.failedRanges.length;
       }
 
+      for (const metric of metrics) {
+        this.initProgress.set(`Backfilling ${metric}...`);
+        await this.auth.backfillMetric(metric);
+      }
+
       this.initSuccess.set(true);
       this.initMessage.set(
-        $localize`:Backfill success@@adminDataConfig.backfillComplete:Initialized ${totalDays}:days: days of historical data${failedRanges > 0 ? ` (${failedRanges} failed ranges)` : ''}:failedNote:`,
+        $localize`:Backfill success@@adminDataConfig.backfillComplete:Initialized ${totalDays}:days: days of price data + all metrics${failedRanges > 0 ? ` (${failedRanges} failed price ranges)` : ''}:failedNote:`,
       );
     } catch (error) {
       this.initMessage.set(`Failed at ${this.initProgress()}: ${getErrorMessage(error)}`);

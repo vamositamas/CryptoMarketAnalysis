@@ -804,6 +804,10 @@ export class AuthApiClient {
     return this.postWithCsrf('/api/admin/data-configuration/init-historical', { startDate, endDate });
   }
 
+  async backfillMetric(metric: 'vdd' | 'miner-fees' | 'price-forecast' | 'fear-greed' | 'hash-rate' | 'difficulty' | 'transaction-volume' | 'miners-revenue'): Promise<{ inserted: number }> {
+    return this.postWithCsrf(`/api/admin/data-configuration/backfill-${metric}`, {});
+  }
+
   async triggerDashboardRefresh(): Promise<ManualDataRefreshResponse> {
     return this.postWithCsrf<ManualDataRefreshResponse>('/api/dashboard/refresh', {});
   }
