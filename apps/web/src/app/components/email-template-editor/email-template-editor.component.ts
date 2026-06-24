@@ -363,11 +363,11 @@ const EMAIL_TYPES: EmailType[] = [
     .et-test-input:focus { border-color: #1a4731; }
 
     /* Buttons */
-    .btn-primary { display: inline-flex; align-items: center; padding: 8px 18px; background: #1a4731; color: #fff; border: none; border-radius: 8px; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: background 0.12s; }
-    .btn-primary:hover:not(:disabled) { background: #15392a; }
+    .btn-primary { display: inline-flex; align-items: center; padding: 8px 18px; background: #f7f8f4; color: #344540; border: 1.5px solid #e5ebe7; border-radius: 8px; font-size: 0.875rem; font-weight: 700; cursor: pointer; transition: background 0.12s, border-color 0.12s; }
+    .btn-primary:hover:not(:disabled) { background: #edf2ee; border-color: #c8d8cc; }
     .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-secondary { display: inline-flex; align-items: center; padding: 7px 14px; background: #f5f7f4; color: #344540; border: 1.5px solid #e5ebe7; border-radius: 8px; font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: background 0.12s; }
-    .btn-secondary:hover:not(:disabled) { background: #edf2ee; }
+    .btn-secondary { display: inline-flex; align-items: center; padding: 7px 14px; background: #f7f8f4; color: #344540; border: 1.5px solid #e5ebe7; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: background 0.12s, border-color 0.12s; }
+    .btn-secondary:hover:not(:disabled) { background: #edf2ee; border-color: #c8d8cc; }
     .btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-danger { display: inline-flex; align-items: center; padding: 7px 14px; background: #fff1f2; color: #be123c; border: 1.5px solid #fecdd3; border-radius: 8px; font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: background 0.12s; }
     .btn-danger:hover:not(:disabled) { background: #ffe4e6; }

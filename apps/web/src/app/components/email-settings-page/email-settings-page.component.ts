@@ -147,11 +147,11 @@ import { ApiClientError, AuthApiClient, type EmailTemplate } from '@crypto-marke
 
     .es-actions { display:flex; gap:10px; }
 
-    .btn-primary { display:inline-flex; align-items:center; padding:8px 20px; background:#1a4731; color:#fff; border:none; border-radius:8px; font-size:0.875rem; font-weight:600; cursor:pointer; transition:background 0.12s; text-decoration:none; }
-    .btn-primary:hover:not(:disabled) { background:#15392a; }
+    .btn-primary { display:inline-flex; align-items:center; padding:8px 20px; background:#f7f8f4; color:#344540; border:1.5px solid #e5ebe7; border-radius:8px; font-size:0.875rem; font-weight:700; cursor:pointer; transition:background 0.12s, border-color 0.12s; text-decoration:none; }
+    .btn-primary:hover:not(:disabled) { background:#edf2ee; border-color:#c8d8cc; }
     .btn-primary:disabled { opacity:0.5; cursor:not-allowed; }
-    .btn-secondary { display:inline-flex; align-items:center; padding:8px 20px; background:#f5f7f4; color:#344540; border:1.5px solid #e5ebe7; border-radius:8px; font-size:0.875rem; font-weight:600; cursor:pointer; transition:background 0.12s; }
-    .btn-secondary:hover:not(:disabled) { background:#edf2ee; }
+    .btn-secondary { display:inline-flex; align-items:center; padding:8px 20px; background:#f7f8f4; color:#344540; border:1.5px solid #e5ebe7; border-radius:8px; font-size:0.875rem; font-weight:700; cursor:pointer; transition:background 0.12s, border-color 0.12s; }
+    .btn-secondary:hover:not(:disabled) { background:#edf2ee; border-color:#c8d8cc; }
     .btn-secondary:disabled { opacity:0.5; cursor:not-allowed; }
   `],
 })
