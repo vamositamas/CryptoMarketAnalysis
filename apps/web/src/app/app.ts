@@ -5,6 +5,7 @@ import { filter, map, startWith } from 'rxjs';
 import { AuthSessionService } from './services/auth-session.service';
 import { DonateModalComponent } from './components/donate-modal/donate-modal.component';
 import { LanguageService } from './services/language.service';
+import { LegalDialogService, LegalDoc } from './services/legal-dialog.service';
 
 @Component({
   imports: [RouterModule, DonateModalComponent],
@@ -17,6 +18,7 @@ export class App {
   private readonly authSession = inject(AuthSessionService);
   private readonly router = inject(Router);
   private readonly elRef = inject(ElementRef);
+  protected readonly legalDialog = inject(LegalDialogService);
 
   protected readonly language = this.langService.current;
   protected readonly currentUser = this.authSession.currentUser;
@@ -53,6 +55,11 @@ export class App {
 
   protected switchLanguage(locale: 'en' | 'hu'): void {
     this.langService.switchTo(locale);
+  }
+
+  protected openLegal(doc: LegalDoc): void {
+    this.userMenuOpen.set(false);
+    this.legalDialog.open(doc);
   }
 
   protected toggleUserMenu(): void {
@@ -97,5 +104,6 @@ export class App {
   protected onEscape(): void {
     this.mobileMenuOpen.set(false);
     this.userMenuOpen.set(false);
+    this.legalDialog.close();
   }
 }

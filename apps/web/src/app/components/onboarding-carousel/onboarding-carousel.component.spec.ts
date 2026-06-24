@@ -17,7 +17,7 @@ describe('OnboardingCarouselComponent', () => {
 
   it('renders the first onboarding slide', () => {
     expect(nativeElement.querySelector('h2')?.textContent).toContain(
-      'Welcome to CryptoMarketAnalysis',
+      'Welcome to BitWLab',
     );
     expect(nativeElement.textContent).toContain('Professional Bitcoin analysis tools');
   });
@@ -34,7 +34,7 @@ describe('OnboardingCarouselComponent', () => {
     fixture.detectChanges();
 
     expect(nativeElement.querySelector('h2')?.textContent).toContain(
-      'Welcome to CryptoMarketAnalysis',
+      'Welcome to BitWLab',
     );
   });
 

@@ -481,7 +481,13 @@ main .content-section p {
 }
 
 .landing-section .section-heading {
-  max-width: 760px;
+  display: block;
+  max-width: none;
+}
+
+.landing-section h2 {
+  font-size: 1.55rem;
+  line-height: 1.22;
 }
 
 .feature-grid {
@@ -531,18 +537,16 @@ main .content-section p {
   border-top: 1px solid #dce2dd;
 }
 
-.landing-access h2 {
-  max-width: 760px;
-}
-
 /* ── Landing page indicators strip ── */
 .lp-strip {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 16px;
   padding: 11px 0;
   border-block: 1px solid #e8eeea;
-  overflow: hidden;
+  overflow: visible;
+  position: relative;
+  z-index: 2;
 }
 
 .lp-strip__label {
@@ -558,13 +562,15 @@ main .content-section p {
 .lp-strip__list {
   display: flex;
   flex-wrap: wrap;
-  row-gap: 4px;
+  gap: 8px 0;
   list-style: none;
   margin: 0;
   padding: 0;
+  min-width: 0;
 }
 
 .lp-strip__list li {
+  position: relative;
   font-size: 0.72rem;
   font-weight: 600;
   color: #4a7a55;
@@ -572,8 +578,69 @@ main .content-section p {
   padding: 0 10px;
   border-right: 1px solid #dce2dd;
   line-height: 1.4;
+  cursor: help;
+  outline: none;
 
   &:last-child { border-right: none; }
+
+  &:focus-visible {
+    color: #145c4b;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  &::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 10px);
+    z-index: 20;
+    width: min(260px, 78vw);
+    padding: 10px 12px;
+    border: 1px solid #c8d8ca;
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(20, 92, 75, 0.14);
+    color: #52605c;
+    font-size: 0.74rem;
+    font-weight: 500;
+    line-height: 1.45;
+    text-align: left;
+    white-space: normal;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 4px);
+    transition: opacity 0.12s ease, transform 0.12s ease;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 4px);
+    z-index: 21;
+    width: 10px;
+    height: 10px;
+    border-right: 1px solid #c8d8ca;
+    border-bottom: 1px solid #c8d8ca;
+    background: #fff;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-50%) rotate(45deg);
+    transition: opacity 0.12s ease;
+  }
+
+  &:hover::after,
+  &:hover::before,
+  &:focus-visible::after,
+  &:focus-visible::before {
+    opacity: 1;
+  }
+
+  &:hover::after,
+  &:focus-visible::after {
+    transform: translate(-50%, 0);
+  }
 }
 
 /* ── Landing footer ── */
@@ -691,6 +758,12 @@ main .section-heading h2,
 main .content-section h2 {
   margin: 0 0 18px;
   font-size: 1.8rem;
+}
+
+main .landing-section .section-heading h2,
+main .landing-access h2 {
+  font-size: 1.55rem;
+  line-height: 1.22;
 }
 
 main .model-grid {
@@ -2630,6 +2703,11 @@ main .form-message.success {
 
   .landing-access {
     justify-items: start;
+  }
+
+  .landing-section .section-heading,
+  .landing-access h2 {
+    max-width: 760px;
   }
 
   main .chart-browser-shell {

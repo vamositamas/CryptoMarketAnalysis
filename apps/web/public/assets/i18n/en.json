@@ -1,5 +1,5 @@
 {
-  "app.name": "CryptoMarketAnalysis",
+  "app.name": "BitWLab",
   "nav.dashboard": "Dashboard",
   "nav.charts": "Charts",
   "nav.onboarding": "Onboarding",
@@ -52,7 +52,7 @@
   "onboardingCarousel.next": "Next",
   "onboardingCarousel.complete": "Get Started",
   "onboardingCarousel.indicators": "Onboarding slides",
-  "onboardingCarousel.slide1.headline": "Welcome to CryptoMarketAnalysis",
+  "onboardingCarousel.slide1.headline": "Welcome to BitWLab",
   "onboardingCarousel.slide1.subheading": "Professional Bitcoin analysis tools, free forever",
   "onboardingCarousel.slide1.body": "Follow cycle signals, valuation models, and on-chain context from a focused workspace built for long-term market decisions.",
   "onboardingCarousel.slide1.visual": "Cycle signal",

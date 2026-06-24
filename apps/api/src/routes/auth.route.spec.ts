@@ -255,6 +255,7 @@ describe('auth route', () => {
     expect(response.statusCode).toBe(302);
     expect(response.redirectLocation).toContain('https://accounts.google.com');
     expect(response.headers.get('Set-Cookie')).toContain('googleOAuthState=');
+    expect(response.headers.get('Set-Cookie')).toContain('Path=/;');
     expect(authService.createGoogleAuthorizationUrl).toHaveBeenCalledWith(expect.any(String));
   });
 
@@ -289,6 +290,9 @@ describe('auth route', () => {
     expect(response.redirectLocation).toBe('http://localhost:4200/dashboard');
     expect(response.headers.get('Set-Cookie')).toEqual(
       expect.arrayContaining([expect.stringContaining('authToken=jwt-token')]),
+    );
+    expect(response.headers.get('Set-Cookie')).toEqual(
+      expect.arrayContaining([expect.stringContaining('googleOAuthState=; Path=/;')]),
     );
   });
 

@@ -3,8 +3,8 @@
   <file source-language="en" target-language="en" datatype="plaintext" original="ng2.template">
     <body>
       <trans-unit id="app.name" datatype="html">
-        <source>CryptoMarketAnalysis</source>
-        <target>CryptoMarketAnalysis</target>
+        <source>BitWLab</source>
+        <target>BitWLab</target>
       </trans-unit>
       <trans-unit id="nav.dashboard" datatype="html">
         <source>Dashboard</source>
@@ -124,7 +124,7 @@
       <trans-unit id="onboardingCarousel.next" datatype="html"><source>Next</source><target>Next</target></trans-unit>
       <trans-unit id="onboardingCarousel.complete" datatype="html"><source>Get Started</source><target>Get Started</target></trans-unit>
       <trans-unit id="onboardingCarousel.indicators" datatype="html"><source>Onboarding slides</source><target>Onboarding slides</target></trans-unit>
-      <trans-unit id="onboardingCarousel.slide1.headline" datatype="html"><source>Welcome to CryptoMarketAnalysis</source><target>Welcome to CryptoMarketAnalysis</target></trans-unit>
+      <trans-unit id="onboardingCarousel.slide1.headline" datatype="html"><source>Welcome to BitWLab</source><target>Welcome to BitWLab</target></trans-unit>
       <trans-unit id="onboardingCarousel.slide1.subheading" datatype="html"><source>Professional Bitcoin analysis tools, free forever</source><target>Professional Bitcoin analysis tools, free forever</target></trans-unit>
       <trans-unit id="onboardingCarousel.slide1.body" datatype="html"><source>Follow cycle signals, valuation models, and on-chain context from a focused workspace built for long-term market decisions.</source><target>Follow cycle signals, valuation models, and on-chain context from a focused workspace built for long-term market decisions.</target></trans-unit>
       <trans-unit id="onboardingCarousel.slide1.visual" datatype="html"><source>Cycle signal</source><target>Cycle signal</target></trans-unit>

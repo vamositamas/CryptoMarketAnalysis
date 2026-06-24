@@ -110,50 +110,104 @@ import { AuthSessionService } from './services/auth-session.service';
     <div class="lp-strip" aria-label="Available analytical models" role="list">
       <span class="lp-strip__label" aria-hidden="true" i18n="Indicators strip label@@landing.stripLabel">Models</span>
       <ul class="lp-strip__list">
-        <li>MVRV Z-Score</li>
-        <li>Rainbow Band</li>
-        <li>Pi Cycle Top</li>
-        <li>Stock-to-Flow</li>
-        <li>Fear &amp; Greed</li>
-        <li>Puell Multiple</li>
-        <li>Realized Price</li>
-        <li>200-Day MA</li>
-        <li>Hash Ribbons</li>
-        <li>VDD Multiple</li>
-        <li>Mayer Multiple</li>
-        <li>Difficulty Ribbon</li>
+        <li tabindex="0" data-tooltip="Compares Bitcoin market value with realized value to highlight historically overheated or undervalued cycle zones." title="Compares Bitcoin market value with realized value to highlight historically overheated or undervalued cycle zones.">
+          MVRV Z-Score
+        </li>
+        <li tabindex="0" data-tooltip="Logarithmic valuation bands that place Bitcoin price into long-term market-cycle ranges." title="Logarithmic valuation bands that place Bitcoin price into long-term market-cycle ranges.">
+          Rainbow Band
+        </li>
+        <li tabindex="0" data-tooltip="Moving-average crossover indicator designed to flag potential late-cycle Bitcoin market tops." title="Moving-average crossover indicator designed to flag potential late-cycle Bitcoin market tops.">
+          Pi Cycle Top
+        </li>
+        <li tabindex="0" data-tooltip="Scarcity model comparing Bitcoin supply issuance with market price around halving cycles." title="Scarcity model comparing Bitcoin supply issuance with market price around halving cycles.">
+          Stock-to-Flow
+        </li>
+        <li tabindex="0" data-tooltip="Market sentiment gauge that blends volatility, momentum, social, dominance, and trend inputs." title="Market sentiment gauge that blends volatility, momentum, social, dominance, and trend inputs.">
+          Fear &amp; Greed
+        </li>
+        <li tabindex="0" data-tooltip="Miner revenue multiple used to spot periods of miner stress or cycle euphoria." title="Miner revenue multiple used to spot periods of miner stress or cycle euphoria.">
+          Puell Multiple
+        </li>
+        <li tabindex="0" data-tooltip="Long-term power-law trend with floor and ceiling bands based on Bitcoin history since genesis." title="Long-term power-law trend with floor and ceiling bands based on Bitcoin history since genesis.">
+          Power Law
+        </li>
+        <li tabindex="0" data-tooltip="Cumulative Value Coin Days Destroyed model used as a historical Bitcoin cycle-bottom signal." title="Cumulative Value Coin Days Destroyed model used as a historical Bitcoin cycle-bottom signal.">
+          CVDD
+        </li>
+        <li tabindex="0" data-tooltip="Polar chart that overlays Bitcoin halving cycles to compare current cycle position with past cycles." title="Polar chart that overlays Bitcoin halving cycles to compare current cycle position with past cycles.">
+          Halving Spiral
+        </li>
+        <li tabindex="0" data-tooltip="Average on-chain acquisition price of circulating coins, often used as a cycle support baseline." title="Average on-chain acquisition price of circulating coins, often used as a cycle support baseline.">
+          Realized Price
+        </li>
+        <li tabindex="0" data-tooltip="Long-term moving average used to compare current price against broad market trend." title="Long-term moving average used to compare current price against broad market trend.">
+          200-Day MA
+        </li>
+        <li tabindex="0" data-tooltip="Compares Bitcoin price with the 2-year moving average and multiplier bands for broad buy and sell zones." title="Compares Bitcoin price with the 2-year moving average and multiplier bands for broad buy and sell zones.">
+          2-Year MA Multiplier
+        </li>
+        <li tabindex="0" data-tooltip="Combines several top and bottom models into a cycle price-target toolkit." title="Combines several top and bottom models into a cycle price-target toolkit.">
+          Price Forecast Tools
+        </li>
+        <li tabindex="0" data-tooltip="Hash-rate moving averages used to identify miner capitulation and recovery phases." title="Hash-rate moving averages used to identify miner capitulation and recovery phases.">
+          Hash Ribbons
+        </li>
+        <li tabindex="0" data-tooltip="Value Days Destroyed metric that relates coin movement age and value to market-cycle extremes." title="Value Days Destroyed metric that relates coin movement age and value to market-cycle extremes.">
+          VDD Multiple
+        </li>
+        <li tabindex="0" data-tooltip="Ratio of Bitcoin price to the 200-day moving average, used for overheated and undervalued zones." title="Ratio of Bitcoin price to the 200-day moving average, used for overheated and undervalued zones.">
+          Mayer Multiple
+        </li>
+        <li tabindex="0" data-tooltip="Mining difficulty moving averages that compress and expand around miner stress and recovery." title="Mining difficulty moving averages that compress and expand around miner stress and recovery.">
+          Difficulty Ribbon
+        </li>
+        <li tabindex="0" data-tooltip="Shows Bitcoin price relative to its 200-week moving average, a long-term cycle floor reference." title="Shows Bitcoin price relative to its 200-week moving average, a long-term cycle floor reference.">
+          200-Week MA Heatmap
+        </li>
+        <li tabindex="0" data-tooltip="Network Value to Transactions ratio, comparing Bitcoin market cap with on-chain transaction volume." title="Network Value to Transactions ratio, comparing Bitcoin market cap with on-chain transaction volume.">
+          NVT Ratio
+        </li>
+        <li tabindex="0" data-tooltip="Compares market cap with cumulative miner revenue to show how expensive Bitcoin is relative to security spend." title="Compares market cap with cumulative miner revenue to show how expensive Bitcoin is relative to security spend.">
+          Thermocap Multiple
+        </li>
+        <li tabindex="0" data-tooltip="Macro liquidity indicator using money growth and economic growth to identify risk-on conditions." title="Macro liquidity indicator using money growth and economic growth to identify risk-on conditions.">
+          Excess Liquidity
+        </li>
+        <li tabindex="0" data-tooltip="Compares S&P 500 performance with excess liquidity to show broader macro risk conditions." title="Compares S&P 500 performance with excess liquidity to show broader macro risk conditions.">
+          S&amp;P 500 Liquidity
+        </li>
       </ul>
     </div>
 
-    <section class="landing-section" aria-labelledby="models-title">
+    <section class="landing-section" aria-labelledby="platform-title">
       <div class="section-heading">
-        <p class="eyebrow" i18n="Landing models eyebrow@@landing.modelsEyebrow">
-          Model library
+        <p class="eyebrow" i18n="Landing platform eyebrow@@landing.platformEyebrow">
+          Platform functions
         </p>
-        <h2 id="models-title" i18n="Landing models title@@landing.modelsTitle">
-          Professional Bitcoin market tools after login
+        <h2 id="platform-title" i18n="Landing platform title@@landing.platformTitle">
+          A focused Bitcoin research workspace for everyday market analysis
         </h2>
       </div>
       <div class="feature-grid">
         <article>
           <span>01</span>
-          <h3>Bitcoin Rainbow</h3>
-          <p i18n="Landing rainbow copy@@landing.rainbowCopy">
-            Long-term logarithmic valuation bands for market-cycle context.
+          <h3 i18n="Landing function charts title@@landing.functionChartsTitle">Interactive charts</h3>
+          <p i18n="Landing function charts copy@@landing.functionChartsCopy">
+            Explore valuation models, cycle indicators, moving averages, and macro context in one chart library.
           </p>
         </article>
         <article>
           <span>02</span>
-          <h3>Pi Cycle Top</h3>
-          <p i18n="Landing pi cycle copy@@landing.piCycleCopy">
-            Moving-average crossover signals designed for cycle-top awareness.
+          <h3 i18n="Landing function workspace title@@landing.functionWorkspaceTitle">Personal workspace</h3>
+          <p i18n="Landing function workspace copy@@landing.functionWorkspaceCopy">
+            Save dashboards, follow recent charts, and organize the signals that matter to your research.
           </p>
         </article>
         <article>
           <span>03</span>
-          <h3>Stock-to-Flow</h3>
-          <p i18n="Landing stock to flow copy@@landing.stockToFlowCopy">
-            Scarcity model tracking with halving context and divergence views.
+          <h3 i18n="Landing function workflow title@@landing.functionWorkflowTitle">Research workflow</h3>
+          <p i18n="Landing function workflow copy@@landing.functionWorkflowCopy">
+            Use alerts, trading plans, exports, and admin tools without subscriptions or paid data feeds.
           </p>
         </article>
       </div>
@@ -162,10 +216,10 @@ import { AuthSessionService } from './services/auth-session.service';
     <section class="landing-section landing-access">
       <div>
         <p class="eyebrow" i18n="Landing access eyebrow@@landing.accessEyebrow">
-          Private workspace
+          Free access
         </p>
         <h2 i18n="Landing access title@@landing.accessTitle">
-          Charts, annotations, exports, and admin tools require an account.
+          The full platform is totally free to use and relies only on free data sources.
         </h2>
       </div>
       <a class="primary-link" routerLink="/register" i18n="Landing access CTA@@landing.accessCta">
@@ -176,8 +230,11 @@ import { AuthSessionService } from './services/auth-session.service';
     <footer class="landing-footer">
       <div class="lp-footer-info">
         <strong>BitWLab</strong>
-        <p i18n="Landing disclaimer notice@@landing.disclaimerNotice">
-          For informational purposes only — not financial advice.
+        <p i18n="Landing copyright@@landing.copyright">
+          © 2026 BitWLab. All rights reserved.
+        </p>
+        <p i18n="Landing risk notice@@landing.riskNotice">
+          Not financial advice. Cryptocurrency investments carry risk.
         </p>
       </div>
       <nav class="lp-footer-links" aria-label="Legal">

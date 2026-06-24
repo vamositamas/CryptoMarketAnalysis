@@ -29,7 +29,7 @@ describe('DonateModalComponent', () => {
 
   it('renders heading and benefits list', () => {
     const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
-    expect(text).toContain('Support CryptoMarketAnalysis');
+    expect(text).toContain('Support BitWLab');
     expect(text).toContain('Unlimited price alerts');
   });
 

@@ -103,7 +103,7 @@ export function createAuthRouter(authService = new AuthService()): Router {
 
       res.setHeader(
         'Set-Cookie',
-        `googleOAuthState=${state}; Path=/api/auth/google/callback; Max-Age=600; SameSite=Lax;${secure} HttpOnly`,
+        `googleOAuthState=${state}; Path=/; Max-Age=600; SameSite=Lax;${secure} HttpOnly`,
       );
       res.redirect(302, authService.createGoogleAuthorizationUrl(state));
     } catch (error) {
@@ -131,7 +131,7 @@ export function createAuthRouter(authService = new AuthService()): Router {
 
       res.setHeader('Set-Cookie', [
         `authToken=${response.accessToken}; Path=/; Max-Age=86400; SameSite=Strict;${secure} HttpOnly`,
-        `googleOAuthState=; Path=/api/auth/google/callback; Max-Age=0; SameSite=Lax;${secure} HttpOnly`,
+        `googleOAuthState=; Path=/; Max-Age=0; SameSite=Lax;${secure} HttpOnly`,
       ]);
       res.redirect(302, `${getFrontendUrl()}/dashboard`);
     } catch (error) {
