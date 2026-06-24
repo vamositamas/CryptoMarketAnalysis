@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "node apps/web/scripts/xliff-to-json.mjs apps/web/src/locale/messages.hu.xlf apps/web/public/assets/i18n/hu.json && node apps/web/scripts/xliff-to-json.mjs apps/web/src/locale/messages.en.xlf apps/web/public/assets/i18n/en.json && npx nx build web --configuration=production && npx esbuild api/_handler.ts --bundle --packages=external --platform=node --target=node20 --outfile=api/_bundle.js --tsconfig=api/tsconfig.json --format=cjs",
+  "buildCommand": "npm run build:vercel",
   "outputDirectory": "dist/apps/web/browser",
   "framework": "angular",
   "functions": {
