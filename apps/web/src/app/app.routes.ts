@@ -1727,7 +1727,7 @@ export class DashboardPage {
           Initialize historical data
         </h3>
         <p i18n="Historical data init description@@adminDataConfig.initHistoricalDesc">
-          Automatically backfills all Bitcoin price history from genesis (2009) to today, one year at a time.
+          Automatically backfills all Bitcoin price history from 2013 (earliest exchange data) to today, one year at a time.
         </p>
       </div>
 
@@ -1843,14 +1843,14 @@ export class AdminDataConfigurationPage {
     this.initMessage.set('');
     this.initSuccess.set(false);
 
-    const genesisYear = 2009;
+    const startYear = 2013;
     const currentYear = new Date().getUTCFullYear();
     let totalDays = 0;
     let failedRanges = 0;
 
     try {
-      for (let year = genesisYear; year <= currentYear; year++) {
-        const startDate = year === genesisYear ? '2009-01-03' : `${year}-01-01`;
+      for (let year = startYear; year <= currentYear; year++) {
+        const startDate = `${year}-01-01`;
         const endDate = year === currentYear
           ? new Date().toISOString().slice(0, 10)
           : `${year}-12-31`;

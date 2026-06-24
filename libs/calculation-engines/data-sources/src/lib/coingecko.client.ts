@@ -212,7 +212,8 @@ function normalizeHistoryResponse(
   const priceUsd = marketData?.current_price?.usd;
 
   if (typeof priceUsd !== 'number') {
-    throw new CoinGeckoClientError('CoinGecko response is missing USD price');
+    // 404 signals "no data for this date" — not a transient error, should not be retried
+    throw new CoinGeckoClientError('CoinGecko response is missing USD price', 404);
   }
 
   return {
