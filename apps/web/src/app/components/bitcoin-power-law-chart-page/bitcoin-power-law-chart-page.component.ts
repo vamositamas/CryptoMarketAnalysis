@@ -34,11 +34,11 @@ interface TimeframeOption {
 }
 
 const TIMEFRAMES: TimeframeOption[] = [
-  { label: '1 hó', value: '1m' },
-  { label: '3 hó', value: '3m' },
-  { label: '6 hó', value: '6m' },
-  { label: '1 év', value: '1y' },
-  { label: '2 év', value: '2y' },
+  { label: $localize`:Timeframe 1 month@@charts.timeframe.1m:1 month`, value: '1m' },
+  { label: $localize`:Timeframe 3 months@@charts.timeframe.3m:3 months`, value: '3m' },
+  { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
+  { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
+  { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
   { label: 'Mind', value: 'all' },
 ];
 
@@ -59,7 +59,7 @@ const HALVING_EVENTS = [
 ];
 
 const POWER_LAW_ALERT_METRICS: AlertMetricOption[] = [
-  { value: 'btc_price', label: 'BTC ár USD' },
+  { value: 'btc_price', label: $localize`:BTC price USD metric@@charts.metric.btcPriceUsd:BTC price USD` },
   { value: 'power_law_model', label: 'Hatványtörvény modellár' },
 ];
 
@@ -119,15 +119,15 @@ export class BitcoinPowerLawChartPageComponent implements AfterViewInit {
   protected readonly infoCurrentFields = computed<ChartInfoField[]>(() => {
     const point = this.latestPoint();
     if (!point) {
-      return [{ label: 'Aktuális ár', value: 'Adatra vár' }];
+      return [{ label: $localize`:Current price metric@@charts.metric.currentPrice:Current price`, value: $localize`:Waiting for data@@charts.waitingForData:Waiting for data` }];
     }
     const model = powerLawModel(point.date);
     const floor = powerLawFloor(point.date);
     const ceiling = powerLawCeiling(point.date);
     const pct = ((point.priceUsd / model) - 1) * 100;
     return [
-      { label: 'Aktuális ár', value: formatUsd(point.priceUsd) },
-      { label: 'Modellár', value: formatUsd(model) },
+      { label: $localize`:Current price metric@@charts.metric.currentPrice:Current price`, value: formatUsd(point.priceUsd) },
+      { label: $localize`:Model price metric@@charts.metric.modelPrice:Model price`, value: formatUsd(model) },
       { label: 'Ár vs. modell', value: (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%' },
       { label: 'Alsó sáv ára', value: formatUsd(floor) },
       { label: 'Felső sáv ára', value: formatUsd(ceiling) },
@@ -177,7 +177,7 @@ export class BitcoinPowerLawChartPageComponent implements AfterViewInit {
       labels: allDates,
       datasets: [
         {
-          label: 'BTC ár',
+          label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`,
           data: [...points.map((p) => p.priceUsd), ...futureNulls],
           borderColor: '#000000',
           backgroundColor: 'transparent',
@@ -190,7 +190,7 @@ export class BitcoinPowerLawChartPageComponent implements AfterViewInit {
           fill: false as any,
         },
         {
-          label: 'Modellár',
+          label: $localize`:Model price metric@@charts.metric.modelPrice:Model price`,
           data: allDates.map((d) => powerLawModel(d)),
           borderColor: '#F97316',
           backgroundColor: 'transparent',
@@ -376,9 +376,9 @@ export class BitcoinPowerLawChartPageComponent implements AfterViewInit {
       rows: this.dataPoints(),
       fileName: `bitcoin-power-law-chart_${getExportDateStamp()}.csv`,
       columns: [
-        { header: 'Dátum', value: (row) => row.date },
-        { header: 'Ár USD', value: (row) => formatCsvNumber(row.priceUsd) },
-        { header: 'Modellár', value: (row) => formatCsvNumber(powerLawModel(row.date)) },
+        { header: $localize`:Date header@@charts.csv.date:Date`, value: (row) => row.date },
+        { header: $localize`:Price USD header@@charts.csv.priceUsd:Price USD`, value: (row) => formatCsvNumber(row.priceUsd) },
+        { header: $localize`:Model price metric@@charts.metric.modelPrice:Model price`, value: (row) => formatCsvNumber(powerLawModel(row.date)) },
         { header: 'Alsó sáv ára', value: (row) => formatCsvNumber(powerLawFloor(row.date)) },
         { header: 'Felső sáv ára', value: (row) => formatCsvNumber(powerLawCeiling(row.date)) },
       ],
@@ -387,7 +387,7 @@ export class BitcoinPowerLawChartPageComponent implements AfterViewInit {
 
   protected lastUpdatedText(): string {
     const timestamp = this.lastUpdated();
-    if (!timestamp) return 'Adatra vár';
+    if (!timestamp) return $localize`:Waiting for data@@charts.waitingForData:Waiting for data`;
     return new Date(timestamp).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
   }
 

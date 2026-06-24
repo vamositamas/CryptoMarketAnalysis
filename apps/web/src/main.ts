@@ -8,14 +8,13 @@ export type Locale = 'en' | 'hu';
 
 async function loadTranslationsForLocale(locale: Locale): Promise<void> {
   clearTranslations();
-  if (locale === 'en') return;
   try {
     const response = await fetch(`/assets/i18n/${locale}.json`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const translations = (await response.json()) as Record<string, string>;
     loadTranslations(translations);
   } catch (err) {
-    console.warn(`[i18n] Failed to load translations for "${locale}", falling back to English.`, err);
+    console.warn(`[i18n] Failed to load translations for "${locale}".`, err);
   }
 }
 

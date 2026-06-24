@@ -34,23 +34,23 @@ interface TimeframeOption {
 }
 
 const TIMEFRAMES: TimeframeOption[] = [
-  { label: '1 hó', value: '1m' },
-  { label: '3 hó', value: '3m' },
-  { label: '6 hó', value: '6m' },
-  { label: '1 év', value: '1y' },
-  { label: '2 év', value: '2y' },
+  { label: $localize`:Timeframe 1 month@@charts.timeframe.1m:1 month`, value: '1m' },
+  { label: $localize`:Timeframe 3 months@@charts.timeframe.3m:3 months`, value: '3m' },
+  { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
+  { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
+  { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
   { label: 'Mind', value: 'all' },
 ];
 
 const HALVING_EVENTS = [
-  { date: '2012-11-28', label: '2012 felezés' },
-  { date: '2016-07-09', label: '2016 felezés' },
-  { date: '2020-05-11', label: '2020 felezés' },
-  { date: '2024-04-19', label: '2024 felezés' },
+  { date: '2012-11-28', label: $localize`:2012 halving label@@charts.halving.2012:2012 halving` },
+  { date: '2016-07-09', label: $localize`:2016 halving label@@charts.halving.2016:2016 halving` },
+  { date: '2020-05-11', label: $localize`:2020 halving label@@charts.halving.2020:2020 halving` },
+  { date: '2024-04-19', label: $localize`:2024 halving label@@charts.halving.2024:2024 halving` },
 ];
 
 const TWO_YR_MA_ALERT_METRICS: AlertMetricOption[] = [
-  { value: 'btc_price', label: 'BTC ár USD' },
+  { value: 'btc_price', label: $localize`:BTC price USD metric@@charts.metric.btcPriceUsd:BTC price USD` },
 ];
 
 @Component({
@@ -103,16 +103,16 @@ export class TwoYrMaMultiplierChartPageComponent implements AfterViewInit {
         ? ((price / ma) - 1) * 100
         : null;
     return [
-      { label: 'BTC ár', value: formatUsd(price) },
-      { label: '2yr MA', value: ma !== null ? formatUsd(ma) : 'Nincs adat' },
-      { label: '2yr MA × 5', value: ma5 !== null ? formatUsd(ma5) : 'Nincs adat' },
-      { label: 'Jelzés', value: signal },
+      { label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`, value: formatUsd(price) },
+      { label: '2yr MA', value: ma !== null ? formatUsd(ma) : $localize`:No data value@@common.noData:No data` },
+      { label: '2yr MA × 5', value: ma5 !== null ? formatUsd(ma5) : $localize`:No data value@@common.noData:No data` },
+      { label: $localize`:Signal metric@@charts.metric.signal:Signal`, value: signal },
       {
         label: 'Távolság az MA-tól',
         value:
           distancePct !== null
             ? `${distancePct > 0 ? '+' : ''}${distancePct.toFixed(1)}% ${distancePct >= 0 ? 'above' : 'below'} 2yr MA`
-            : 'Nincs adat',
+            : $localize`:No data value@@common.noData:No data`,
       },
     ];
   });
@@ -120,7 +120,7 @@ export class TwoYrMaMultiplierChartPageComponent implements AfterViewInit {
   protected readonly infoInterpretation = computed(() => {
     const points = this.dataPoints();
     const last = points[points.length - 1];
-    if (!last) return 'Adatra vár.';
+    if (!last) return $localize`:Waiting for data sentence@@charts.waitingForDataSentence:Waiting for data.`;
     const price = last.priceUsd;
     const ma = last.ma730;
     const ma5 = last.ma730x5;
@@ -221,7 +221,7 @@ export class TwoYrMaMultiplierChartPageComponent implements AfterViewInit {
         // BTC Price — black line, thin, on top
         {
           type: 'line' as const,
-          label: 'BTC ár',
+          label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`,
           data: points.map((p) => p.priceUsd),
           borderColor: '#1f2937',
           borderWidth: 1,
@@ -364,8 +364,8 @@ export class TwoYrMaMultiplierChartPageComponent implements AfterViewInit {
       rows: this.dataPoints(),
       fileName: `2yr-ma-multiplier_${getExportDateStamp()}.csv`,
       columns: [
-        { header: 'Dátum', value: (row) => row.date },
-        { header: 'Ár USD', value: (row) => formatCsvNumber(row.priceUsd) },
+        { header: $localize`:Date header@@charts.csv.date:Date`, value: (row) => row.date },
+        { header: $localize`:Price USD header@@charts.csv.priceUsd:Price USD`, value: (row) => formatCsvNumber(row.priceUsd) },
         { header: '2yr MA', value: (row) => formatCsvNumber(row.ma730) },
         { header: '2yr MA × 2', value: (row) => formatCsvNumber(row.ma730x2) },
         { header: '2yr MA × 3', value: (row) => formatCsvNumber(row.ma730x3) },
@@ -377,7 +377,7 @@ export class TwoYrMaMultiplierChartPageComponent implements AfterViewInit {
 
   protected lastUpdatedText(): string {
     const ts = this.lastUpdated();
-    if (!ts) return 'Adatra vár';
+    if (!ts) return $localize`:Waiting for data@@charts.waitingForData:Waiting for data`;
     return new Date(ts).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
   }
 

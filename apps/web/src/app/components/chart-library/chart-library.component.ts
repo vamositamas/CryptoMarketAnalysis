@@ -13,225 +13,219 @@ interface ChartLibraryItem {
 const CHARTS: ChartLibraryItem[] = [
   {
     id: 'stock-to-flow',
-    title: 'Stock-to-Flow Model',
+    title: $localize`:Chart stock-to-flow title@@charts.library.stock-to-flow.title:Stock-to-Flow Model`,
     category: 'valuation',
 
-    signal: 'Szűkösségi értékelés',
+    signal: $localize`:Chart stock-to-flow signal@@charts.library.stock-to-flow.signal:Scarcity valuation`,
     description:
-      'A Bitcoin szűkösségét követi a forgalomban lévő kínálat és a kibocsátási ütem alapján, egyszerűsített modellárral a hosszú távú értékelési kontextushoz.',
+      $localize`:Chart stock-to-flow description@@charts.library.stock-to-flow.description:Tracks Bitcoin scarcity using circulating supply and issuance flow, with a simplified model price for long-term valuation context.`,
     thumbnailClass: 'stock-to-flow',
   },
   {
     id: 'bitcoin-rainbow',
-    title: 'Bitcoin szivárványárgrafikon',
+    title: $localize`:Chart bitcoin-rainbow title@@charts.library.bitcoin-rainbow.title:Bitcoin Rainbow Price Chart`,
     category: 'cycle',
 
-    signal: 'Ciklusértékelési sávok',
+    signal: $localize`:Chart bitcoin-rainbow signal@@charts.library.bitcoin-rainbow.signal:Cycle valuation bands`,
     description:
-      'Az árat logaritmikus ciklussávokhoz viszonyítja, hogy gyorsan láthatók legyenek a hűvösebb akkumulációs zónák és a túlfűtött piaci időszakok.',
+      $localize`:Chart bitcoin-rainbow description@@charts.library.bitcoin-rainbow.description:Compares price against logarithmic cycle bands so cooler accumulation zones and overheated market periods are easy to scan.`,
     thumbnailClass: 'bitcoin-rainbow',
   },
   {
     id: 'pi-cycle-top',
-    title: 'Pi Cycle Top Indicator',
+    title: $localize`:Chart pi-cycle-top title@@charts.library.pi-cycle-top.title:Pi Cycle Top Indicator`,
     category: 'cycle',
 
-    signal: 'Ciklustető keresztezés',
+    signal: $localize`:Chart pi-cycle-top signal@@charts.library.pi-cycle-top.signal:Cycle top crossover`,
     description:
-      'A 111 napos mozgóátlagot hasonlítja össze a 350 napos mozgóátlag kétszeresével, hogy lehetséges ciklustető-jelzéseket azonosítson.',
+      $localize`:Chart pi-cycle-top description@@charts.library.pi-cycle-top.description:Compares the 111-day moving average with twice the 350-day moving average to identify potential cycle-top signals.`,
     thumbnailClass: 'pi-cycle-top',
   },
   {
     id: 'mvrv-z-score',
-    title: 'MVRV Z-Score',
+    title: $localize`:Chart mvrv-z-score title@@charts.library.mvrv-z-score.title:MVRV Z-Score`,
     category: 'valuation',
 
-    signal: 'Piaci érték vs. realizált érték',
+    signal: $localize`:Chart mvrv-z-score signal@@charts.library.mvrv-z-score.signal:Market value vs realized value`,
     description:
-      'A Bitcoin piaci kapitalizációját hasonlítja a realizált kapitalizációhoz Z-Score segítségével, hogy statisztikailag szélsőséges túlértékeltségi és alulértékeltségi időszakokat jelezzen.',
+      $localize`:Chart mvrv-z-score description@@charts.library.mvrv-z-score.description:Compares Bitcoin market cap to realized cap using a Z-Score to identify statistically extreme overvaluation and undervaluation periods.`,
     thumbnailClass: 'mvrv-z-score',
   },
   {
     id: 'puell-multiple',
-    title: 'Puell Multiple',
+    title: $localize`:Chart puell-multiple title@@charts.library.puell-multiple.title:Puell Multiple`,
     category: 'cycle',
 
-    signal: 'Bányászbevételi ciklus',
+    signal: $localize`:Chart puell-multiple signal@@charts.library.puell-multiple.signal:Miner revenue cycle`,
     description:
-      'A napi bányászbevételt méri a 365 napos mozgóátlagához képest, hogy felismerhetők legyenek a bányászati stressz (vétel) és a magas profitabilitás (eladás) időszakai.',
+      $localize`:Chart puell-multiple description@@charts.library.puell-multiple.description:Measures daily miner revenue against its 365-day moving average to identify miner stress buy zones and high-profit sell zones.`,
     thumbnailClass: 'puell-multiple',
   },
   {
     id: 'bitcoin-power-law',
-    title: 'Bitcoin hatványtörvény grafikon',
+    title: $localize`:Chart bitcoin-power-law title@@charts.library.bitcoin-power-law.title:Bitcoin Power Law Chart`,
     category: 'valuation',
 
-    signal: 'Hosszú távú hatványtörvény trend',
+    signal: $localize`:Chart bitcoin-power-law signal@@charts.library.bitcoin-power-law.signal:Long-term power law trend`,
     description:
-      'A Bitcoin árát a genezis óta eltelt idő hatványfüggvényeként modellezi, történelmileg releváns alsó és felső sávokkal, amelyek sok ciklusban keretezték az ármozgást.',
+      $localize`:Chart bitcoin-power-law description@@charts.library.bitcoin-power-law.description:Models Bitcoin price as a power function of time since genesis, with floor and ceiling bands that have historically contained price action across market cycles.`,
     thumbnailClass: 'bitcoin-power-law',
   },
   {
     id: 'bitcoin-cvdd',
-    title: 'Bitcoin CVDD',
+    title: $localize`:Chart bitcoin-cvdd title@@charts.library.bitcoin-cvdd.title:Bitcoin CVDD`,
     category: 'cycle',
 
-    signal: 'Ciklusalj-jelzés',
+    signal: $localize`:Chart bitcoin-cvdd signal@@charts.library.bitcoin-cvdd.signal:Cycle bottom signal`,
     description:
-      'A Cumulative Value Coin Days Destroyed az érmemozgások felhalmozott érték-idő mutatóját követi a piac korához képest. Történelmileg pontosan jelezte a Bitcoin nagyobb árfolyamaljait.',
+      $localize`:Chart bitcoin-cvdd description@@charts.library.bitcoin-cvdd.description:Cumulative Value Coin Days Destroyed tracks the accumulated value-time of coin movements relative to market age. It has historically marked major Bitcoin price bottoms.`,
     thumbnailClass: 'bitcoin-cvdd',
   },
   {
     id: 'halving-spiral',
-    title: 'Bitcoin felezési spirál',
+    title: $localize`:Chart halving-spiral title@@charts.library.halving-spiral.title:Bitcoin Halving Spiral`,
     category: 'cycle',
 
-    signal: 'Cikluspozíció és lendület',
+    signal: $localize`:Chart halving-spiral signal@@charts.library.halving-spiral.signal:Cycle position and momentum`,
     description:
-      'A Bitcoin árát polárdiagramon ábrázolja, ahol egy teljes kör egy felezési ciklusnak felel meg (~4 év). A logaritmikus radiális tengely egymásra helyezi a ciklusokat, így összevethetők a bikapiaci és medvepiaci fázisok.',
+      $localize`:Chart halving-spiral description@@charts.library.halving-spiral.description:Plots Bitcoin price on a polar chart where one full rotation equals one halving cycle. The logarithmic radius overlays cycles so bull and bear phases can be compared.`,
     thumbnailClass: 'halving-spiral',
   },
   {
     id: 'vdd-multiple',
-    title: 'VDD Multiple',
+    title: $localize`:Chart vdd-multiple title@@charts.library.vdd-multiple.title:VDD Multiple`,
     category: 'cycle',
 
-    signal: 'Költési sebesség vs. éves átlag',
+    signal: $localize`:Chart vdd-multiple signal@@charts.library.vdd-multiple.signal:Spending velocity vs yearly average`,
     description:
-      'A Value Days Destroyed (CDD × ár) 30 napos mozgóátlagát hasonlítja a 365 napos átlaghoz. ' +
-      'A 2,9 feletti csúcsok ciklustetőket jelezhetnek, ahol a hosszú távú tartók erősen adnak el; ' +
-      'a 0,75 alatti értékek medvepiaci akkumulációs fázisokra utalnak.',
+      $localize`:Chart vdd-multiple description@@charts.library.vdd-multiple.description:Compares the 30-day moving average of Value Days Destroyed (CDD × price) with its 365-day average. Peaks above 2.9 can signal cycle tops as long-term holders sell heavily; values below 0.75 suggest bear-market accumulation phases.`,
     thumbnailClass: 'vdd-multiple',
   },
   {
     id: 'halving-progress',
-    title: 'Bitcoin felezési előrehaladás',
+    title: $localize`:Chart halving-progress title@@charts.library.halving-progress.title:Bitcoin Halving Progress`,
     category: 'cycle',
 
-    signal: 'Ciklusok összehasonlítása',
+    signal: $localize`:Chart halving-progress signal@@charts.library.halving-progress.signal:Cycle comparison`,
     description:
-      'A Bitcoin teljes ártörténetét mutatja az összes felezési cikluson át logaritmikus skálán. A ciklushátterek, felezési jelölők és előrehaladási mutató megmutatják, hol tart a jelenlegi ciklus a múltbeli ciklusok azonos szakaszához képest.',
+      $localize`:Chart halving-progress description@@charts.library.halving-progress.description:Shows Bitcoin price history across all halving cycles on a logarithmic scale. Cycle backgrounds, halving markers, and progress indicators show where the current cycle sits versus prior cycles.`,
     thumbnailClass: 'halving-progress',
   },
   {
     id: '2yr-ma-multiplier',
-    title: '2 éves MA szorzó',
+    title: $localize`:Chart 2yr-ma-multiplier title@@charts.library.2yr-ma-multiplier.title:2-Year MA Multiplier`,
     category: 'movingAverage',
 
-    signal: 'Vételi/eladási zóna 2 éves MA sávokkal',
+    signal: $localize`:Chart 2yr-ma-multiplier signal@@charts.library.2yr-ma-multiplier.signal:Buy/sell zones with 2-year MA bands`,
     description:
-      'Bitcoin befektetői eszköz: vétel a 2 éves mozgóátlag alatt (zöld), eladás a 2 éves MA × 5 felett (piros). ' +
-      'A köztes szorzósávok (×2, ×3, ×4) a túlfűtöttség mértékét mutatják. Naponta számítva a teljes ártörténetből.',
+      $localize`:Chart 2yr-ma-multiplier description@@charts.library.2yr-ma-multiplier.description:A Bitcoin investor tool: buy below the 2-year moving average and sell above the 2-year MA ×5. Intermediate multiplier bands show the degree of market overheating.`,
     thumbnailClass: '2yr-ma-multiplier',
   },
   {
     id: 'price-forecast-tools',
-    title: 'Ár-előrejelző eszközök',
+    title: $localize`:Chart price-forecast-tools title@@charts.library.price-forecast-tools.title:Price Forecast Tools`,
     category: 'valuation',
 
-    signal: 'Ciklustető- és aljcélárak',
+    signal: $localize`:Chart price-forecast-tools signal@@charts.library.price-forecast-tools.signal:Cycle top and bottom targets`,
     description:
-      '6 modelles ár-előrejelzés: Top Cap, Delta Top, CVDD, Terminal Price, Balanced Price. ' +
-      'On-chain modelleket kombinál, hogy történelmileg megbízható célárakat jelezzen Bitcoin ciklustetőkhöz és medvepiaci aljakhoz.',
+      $localize`:Chart price-forecast-tools description@@charts.library.price-forecast-tools.description:A 6-model price forecast using Top Cap, Delta Top, CVDD, Terminal Price, and Balanced Price to identify historically reliable Bitcoin cycle-top and bear-market-floor targets.`,
     thumbnailClass: 'price-forecast-tools',
   },
   {
     id: 'mayer-multiple',
-    title: 'Mayer Multiple',
+    title: $localize`:Chart mayer-multiple title@@charts.library.mayer-multiple.title:Mayer Multiple`,
     category: 'movingAverage',
 
-    signal: 'Túlvett / túladott a 200 napos MA-hoz képest',
+    signal: $localize`:Chart mayer-multiple signal@@charts.library.mayer-multiple.signal:Overbought / oversold vs 200-day MA`,
     description:
-      'A Bitcoin árának aránya a 200 napos mozgóátlagához képest. A 2,4 feletti értékek történelmileg túlfűtöttséget, az 1,0 alatti értékek alulértékeltséget és hosszú távú akkumulációs lehetőséget jeleztek.',
+      $localize`:Chart mayer-multiple description@@charts.library.mayer-multiple.description:Bitcoin price divided by its 200-day moving average. Values above 2.4 have historically signaled overheated markets, while values below 1.0 have signaled undervaluation and long-term accumulation.`,
     thumbnailClass: 'mayer-multiple',
   },
   {
     id: '200-week-ma-heatmap',
-    title: '200 hetes MA hőtérkép',
+    title: $localize`:Chart 200-week-ma-heatmap title@@charts.library.200-week-ma-heatmap.title:200-Week MA Heatmap`,
     category: 'movingAverage',
 
-    signal: 'Hosszú távú ciklusalj és felső tartomány',
+    signal: $localize`:Chart 200-week-ma-heatmap signal@@charts.library.200-week-ma-heatmap.signal:Long-term cycle floor and upper range`,
     description:
-      'Az ár a 200 hetes mozgóátlaghoz viszonyított arány alapján színezve. A 200 hetes MA történelmileg végső medvepiaci támaszként működött; a felette lévő színek a bikapiaci kiterjedés mértékét mutatják.',
+      $localize`:Chart 200-week-ma-heatmap description@@charts.library.200-week-ma-heatmap.description:Colors price by its ratio to the 200-week moving average. The 200-week MA has historically acted as a final bear-market support, while colors above it show bull-market extension.`,
     thumbnailClass: '200-week-ma-heatmap',
   },
   {
     id: 'fear-greed-index',
-    title: 'Félelem és kapzsiság index',
+    title: $localize`:Chart fear-greed-index title@@charts.library.fear-greed-index.title:Fear & Greed Index`,
     category: 'cycle',
 
-    signal: 'Piaci hangulati szélsőségek',
+    signal: $localize`:Chart fear-greed-index signal@@charts.library.fear-greed-index.signal:Market sentiment extremes`,
     description:
-      'Összetett hangulati pontszám (0-100) volatilitásból, volumenből, közösségi médiából és felmérésekből. Az extrém félelem történelmileg megbízható hosszú távú vételi jel volt; az extrém kapzsiság óvatosságra int.',
+      $localize`:Chart fear-greed-index description@@charts.library.fear-greed-index.description:Composite sentiment score from volatility, volume, social media, and surveys. Extreme fear has historically been a reliable long-term buy signal; extreme greed suggests caution.`,
     thumbnailClass: 'fear-greed-index',
   },
   {
     id: 'hash-ribbons',
-    title: 'Hash Ribbons',
+    title: $localize`:Chart hash-ribbons title@@charts.library.hash-ribbons.title:Hash Ribbons`,
     category: 'cycle',
 
-    signal: 'Bányászkapituláció és helyreállás',
+    signal: $localize`:Chart hash-ribbons signal@@charts.library.hash-ribbons.signal:Miner capitulation and recovery`,
     description:
-      'A Bitcoin hash rate 30 és 60 napos mozgóátlagát hasonlítja össze. Amikor a 30 napos átlag bányászkapituláció után visszakeresztezi a 60 napos fölé, történelmileg erős hosszú távú vételi jelzéseket adott.',
+      $localize`:Chart hash-ribbons description@@charts.library.hash-ribbons.description:Compares the 30-day and 60-day moving averages of Bitcoin hash rate. A recovery crossover after miner capitulation has historically produced strong long-term buy signals.`,
     thumbnailClass: 'hash-ribbons',
   },
   {
     id: 'difficulty-ribbon',
-    title: 'Nehézségi szalag',
+    title: $localize`:Chart difficulty-ribbon title@@charts.library.difficulty-ribbon.title:Difficulty Ribbon`,
     category: 'cycle',
 
-    signal: 'Bányászstressz nehézségi kompresszión keresztül',
+    signal: $localize`:Chart difficulty-ribbon signal@@charts.library.difficulty-ribbon.signal:Miner stress through difficulty compression`,
     description:
-      'A bányászati nehézség több mozgóátlaga (9-200 nap) szalagként rétegezve. Amikor a rövid távú MA-k a hosszabb távúak alá esnek, a szalag összenyomódik, ami bányászkapitulációt és történelmileg olcsó BTC-t jelezhet.',
+      $localize`:Chart difficulty-ribbon description@@charts.library.difficulty-ribbon.description:Layers multiple moving averages of mining difficulty. When short-term averages fall below longer-term averages, the ribbon compresses, signaling miner capitulation and historically cheap BTC.`,
     thumbnailClass: 'difficulty-ribbon',
   },
   {
     id: 'nvt-ratio',
-    title: 'NVT Ratio',
+    title: $localize`:Chart nvt-ratio title@@charts.library.nvt-ratio.title:NVT Ratio`,
     category: 'valuation',
 
-    signal: 'A Bitcoin P/E mutatója',
+    signal: $localize`:Chart nvt-ratio signal@@charts.library.nvt-ratio.signal:Bitcoin's P/E ratio`,
     description:
-      'Network Value to Transactions mutató: a Bitcoin piaci kapitalizációja osztva a napi on-chain tranzakciós volumennel. A magas NVT a használathoz képest túlértékelt hálózatot, az alacsony NVT alulértékeltséget jelezhet.',
+      $localize`:Chart nvt-ratio description@@charts.library.nvt-ratio.description:Network Value to Transactions ratio: Bitcoin market cap divided by daily on-chain transaction volume. High NVT can signal overvaluation relative to usage; low NVT can suggest undervaluation.`,
     thumbnailClass: 'nvt-ratio',
   },
   {
     id: 'thermocap-multiple',
-    title: 'Thermocap Multiple',
+    title: $localize`:Chart thermocap-multiple title@@charts.library.thermocap-multiple.title:Thermocap Multiple`,
     category: 'valuation',
 
-    signal: 'Piaci kapitalizáció vs. kumulatív bányászköltés',
+    signal: $localize`:Chart thermocap-multiple signal@@charts.library.thermocap-multiple.signal:Market cap vs cumulative miner spend`,
     description:
-      'Piaci kapitalizáció osztva a bányászok kumulatív teljes bevételével (Thermocap). Azt méri, mennyire drága a Bitcoin az eddigi teljes biztonsági ráfordításhoz képest. A történelmileg magas szorzók gyakran ciklustetőkkel estek egybe.',
+      $localize`:Chart thermocap-multiple description@@charts.library.thermocap-multiple.description:Market cap divided by cumulative total miner revenue. It measures how expensive Bitcoin is relative to all security spend ever made; historically high multiples often coincided with cycle tops.`,
     thumbnailClass: 'thermocap-multiple',
   },
   {
     id: 'excess-liquidity',
-    title: 'Többletlikviditási előrejelző indikátor',
+    title: $localize`:Chart excess-liquidity title@@charts.library.excess-liquidity.title:Excess Liquidity Lead Indicator`,
     category: 'macro',
-    signal: 'Makrolikviditás vs. hozamgörbe',
+    signal: $localize`:Chart excess-liquidity signal@@charts.library.excess-liquidity.signal:Macro liquidity vs yield curve`,
     description:
-      'A 3 hónapos/10 éves amerikai állampapír hozamkülönbözet 1 éves változását veti össze a 6 hónappal előretolt többletlikviditási indikátorral (M2 növekedés mínusz GDP-növekedés). ' +
-      'Amikor a többletlikviditás pozitív és emelkedik, történelmileg lazább pénzügyi feltételeket és kockázatvállalóbb környezetet előzött meg.',
+      $localize`:Chart excess-liquidity description@@charts.library.excess-liquidity.description:Compares the 1-year change in the US 3-month/10-year yield spread with a 6-month-forward excess liquidity indicator. Positive and rising liquidity has historically preceded easier financial conditions and stronger risk appetite.`,
     thumbnailClass: 'excess-liquidity',
   },
   {
     id: 'spx-liquidity',
-    title: 'S&P 500 vs Excess Liquidity',
+    title: $localize`:Chart spx-liquidity title@@charts.library.spx-liquidity.title:S&P 500 vs Excess Liquidity`,
     category: 'macro',
-    signal: 'Részvények vs. makrolikviditás',
+    signal: $localize`:Chart spx-liquidity signal@@charts.library.spx-liquidity.signal:Equities vs macro liquidity`,
     description:
-      'Az S&P 500 éves százalékos változását hasonlítja a többletlikviditási előrejelző indikátorhoz (M2 növekedés mínusz GDP-növekedés, 6 hónappal előretolva). ' +
-      'Amikor a többletlikviditás pozitívba fordult, történelmileg körülbelül 6 hónappal előzte meg a részvénypiaci emelkedéseket.',
+      $localize`:Chart spx-liquidity description@@charts.library.spx-liquidity.description:Compares the S&P 500 year-over-year change with the excess liquidity lead indicator. Positive turns in excess liquidity have historically led equity market advances by roughly 6 months.`,
     thumbnailClass: 'spx-liquidity',
   },
 ];
 
 const CATEGORY_LABELS: Record<ChartLibraryItem['category'], string> = {
-  valuation: 'Értékelési modellek',
-  cycle: 'Ciklusindikátorok',
-  movingAverage: 'Mozgóátlagok',
-  macro: 'Makróindikátorok',
+  valuation: $localize`:Chart category valuation@@charts.category.valuation:Valuation Models`,
+  cycle: $localize`:Chart category cycle@@charts.category.cycle:Cycle Indicators`,
+  movingAverage: $localize`:Chart category moving average@@charts.category.movingAverage:Moving Averages`,
+  macro: $localize`:Chart category macro@@charts.category.macro:Macro Indicators`,
 };
 
 const CATEGORIES: ChartLibraryItem['category'][] = ['valuation', 'cycle', 'movingAverage', 'macro'];

@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, LOCALE_ID, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   ApiClientError,
@@ -126,18 +126,18 @@ type Tab = 'signals' | 'projections' | 'plans';
   template: `
     <section class="content-section tp-page">
       <div class="tp-header">
-        <p class="eyebrow">Trade Planner</p>
-        <h2>Trading Plans & Market Signals</h2>
-        <p style="color: var(--color-text-muted, #6b7280); font-size: 0.875rem; margin: 0;">
+        <p class="eyebrow" i18n="Trade planner eyebrow@@trading.eyebrow">Trade Planner</p>
+        <h2 i18n="Trade planner title@@trading.title">Trading Plans & Market Signals</h2>
+        <p style="color: var(--color-text-muted, #6b7280); font-size: 0.875rem; margin: 0;" i18n="Trade planner subtitle@@trading.subtitle">
           Signal aggregation from all chart indicators, model-based price targets, and your personal trade plans.
         </p>
       </div>
 
       <div class="tp-tabs" role="tablist">
-        <button class="tp-tab" [class.active]="activeTab() === 'signals'" (click)="setTab('signals')" role="tab">
+        <button class="tp-tab" [class.active]="activeTab() === 'signals'" (click)="setTab('signals')" role="tab" i18n="Market signals tab@@trading.tabs.signals">
           Market Signals
         </button>
-        <button class="tp-tab" [class.active]="activeTab() === 'projections'" (click)="setTab('projections')" role="tab">
+        <button class="tp-tab" [class.active]="activeTab() === 'projections'" (click)="setTab('projections')" role="tab" i18n="Price projections tab@@trading.tabs.projections">
           Price Projections
         </button>
         <button class="tp-tab" [class.active]="activeTab() === 'plans'" (click)="setTab('plans')" role="tab">
@@ -148,7 +148,7 @@ type Tab = 'signals' | 'projections' | 'plans';
       <!-- SIGNALS TAB -->
       @if (activeTab() === 'signals') {
         @if (signalsLoading()) {
-          <div class="tp-loading">Loading signals...</div>
+          <div class="tp-loading" i18n="Signals loading@@trading.signals.loading">Loading signals...</div>
         } @else if (signals()) {
           @let s = signals()!;
           <div class="sig-hero">
@@ -168,7 +168,7 @@ type Tab = 'signals' | 'projections' | 'plans';
               </div>
             </div>
             <div class="sig-hero-text">
-              <span class="sig-zone-badge" [class]="'zone-' + s.overallZone">{{ s.overallLabel }}</span>
+              <span class="sig-zone-badge" [class]="'zone-' + s.overallZone">{{ overallLabel(s.normalizedScore) }}</span>
               <h3>{{ signalHeadline(s.normalizedScore) }}</h3>
               <p>{{ signalSubtext(s.normalizedScore) }}</p>
               @if (s.btcPriceUsd) {
@@ -180,8 +180,8 @@ type Tab = 'signals' | 'projections' | 'plans';
             @for (sig of s.signals; track sig.name) {
               <div class="sig-card" [attr.data-zone]="sig.zone">
                 <div class="sig-card-header">
-                  <span class="sig-card-name">{{ sig.label }}</span>
-                  <span class="sig-card-value">{{ sig.formattedValue }}</span>
+                  <span class="sig-card-name">{{ signalLabel(sig) }}</span>
+                  <span class="sig-card-value">{{ signalValue(sig) }}</span>
                 </div>
                 <div class="sig-card-bar">
                   <div class="sig-card-bar-fill"
@@ -190,13 +190,13 @@ type Tab = 'signals' | 'projections' | 'plans';
                   </div>
                 </div>
                 <span class="sig-zone-badge" [class]="'zone-' + sig.zone">{{ zoneLabel(sig.zone) }}</span>
-                <div class="sig-card-interp">{{ sig.interpretation }}</div>
+                <div class="sig-card-interp">{{ signalInterpretation(sig) }}</div>
               </div>
             }
           </div>
           @if (s.lastUpdated) {
             <p style="font-size:0.75rem;color:var(--color-text-muted,#6b7280);margin-top:1.5rem;">
-              Last updated: {{ formatDate(s.lastUpdated) }}
+              <ng-container i18n="Last updated label@@trading.lastUpdated">Last updated:</ng-container> {{ formatDate(s.lastUpdated) }}
             </p>
           }
         } @else if (signalsError()) {
@@ -207,32 +207,32 @@ type Tab = 'signals' | 'projections' | 'plans';
       <!-- PROJECTIONS TAB -->
       @if (activeTab() === 'projections') {
         @if (projectionsLoading()) {
-          <div class="tp-loading">Loading projections...</div>
+          <div class="tp-loading" i18n="Projections loading@@trading.projections.loading">Loading price projections...</div>
         } @else if (projections()) {
           @let p = projections()!;
           @if (p.btcPriceUsd) {
-            <div class="proj-btc">{{ formatUsd(p.btcPriceUsd) }} <span>current BTC price</span></div>
+            <div class="proj-btc">{{ formatUsd(p.btcPriceUsd) }} <span i18n="Current BTC price label@@trading.currentBtcPrice">current BTC price</span></div>
           }
           <div class="proj-scenarios">
             @for (scenario of p.scenarios; track scenario.scenario) {
               <div class="proj-scenario">
                 <div class="proj-scenario-header">
                   <div class="proj-scenario-dot" [style.background]="scenario.color"></div>
-                  <span class="proj-scenario-label">{{ scenario.label }}</span>
+                  <span class="proj-scenario-label">{{ scenarioLabel(scenario.label) }}</span>
                 </div>
                 <div class="proj-targets">
                   @for (target of scenario.targets; track target.label) {
                     <div class="proj-target">
-                      <div class="proj-target-label">{{ target.label }}</div>
+                      <div class="proj-target-label">{{ projectionLabel(target.label) }}</div>
                       <div class="proj-target-price" [style.color]="scenario.color">{{ formatUsd(target.priceUsd) }}</div>
-                      <div class="proj-target-model">{{ target.model }}</div>
+                      <div class="proj-target-model">{{ projectionModel(target.model) }}</div>
                       @if (p.btcPriceUsd) {
                         @let pct = ((target.priceUsd - p.btcPriceUsd) / p.btcPriceUsd * 100);
                         <div class="proj-target-pct" [class.up]="pct >= 0" [class.down]="pct < 0">
                           {{ pct >= 0 ? '+' : '' }}{{ pct.toFixed(1) }}% from now
                         </div>
                       }
-                      <div class="proj-target-timeframe">{{ target.timeframe }}</div>
+                      <div class="proj-target-timeframe">{{ projectionTimeframe(target.timeframe) }}</div>
                     </div>
                   }
                 </div>
@@ -241,8 +241,7 @@ type Tab = 'signals' | 'projections' | 'plans';
           </div>
           <div style="margin-top:1.5rem;padding:1rem;background:var(--color-surface,#f9fafb);border-radius:8px;border:1px solid var(--color-border,#e5e7eb);">
             <p style="font-size:0.75rem;color:var(--color-text-muted,#6b7280);margin:0;line-height:1.6;">
-              <strong>Disclaimer:</strong> These projections are based on on-chain and mathematical models (Stock-to-Flow, Mayer Multiple, Rainbow bands, Terminal Price, CVDD).
-              They reflect historical model behaviour — not financial advice. Always conduct your own research.
+              <strong i18n="Projection disclaimer label@@trading.projections.disclaimerLabel">Disclaimer:</strong> <ng-container i18n="Projection disclaimer text@@trading.projections.disclaimerText">These projections are based on on-chain and mathematical models (Stock-to-Flow, Mayer Multiple, Rainbow bands, Terminal Price, CVDD). They reflect historical model behaviour and are not financial advice. Always conduct your own research.</ng-container>
             </p>
           </div>
         } @else if (projectionsError()) {
@@ -254,121 +253,121 @@ type Tab = 'signals' | 'projections' | 'plans';
       @if (activeTab() === 'plans') {
         <div class="plans-header">
           <div>
-            <strong>{{ plans().length }} plan{{ plans().length === 1 ? '' : 's' }}</strong>
+            <strong>{{ plans().length }} <ng-container i18n="Plans count label@@trading.plans.countLabel">plans</ng-container></strong>
             @if (activePlansCount() > 0) {
-              <span style="color:var(--color-text-muted,#6b7280);font-size:0.875rem;"> &mdash; {{ activePlansCount() }} active</span>
+              <span style="color:var(--color-text-muted,#6b7280);font-size:0.875rem;"> &mdash; {{ activePlansCount() }} <ng-container i18n="Active plans count label@@trading.plans.activeLabel">active</ng-container></span>
             }
           </div>
           <button class="primary-button" (click)="toggleCreateForm()">
-            {{ showCreateForm() ? 'Cancel' : 'New Plan' }}
+            {{ showCreateForm() ? cancelLabel() : newPlanLabel() }}
           </button>
         </div>
 
         @if (showCreateForm()) {
           <div class="create-form-wrap">
-            <h3>Create Trading Plan</h3>
+            <h3 i18n="Create plan title@@trading.create.title">Create Trading Plan</h3>
             <form [formGroup]="createForm" (ngSubmit)="submitCreate()">
               <div class="form-row form-row-1">
                 <div class="form-group">
-                  <label for="plan-title">Plan title</label>
-                  <input id="plan-title" type="text" formControlName="title" placeholder="e.g. BTC Long — Mid-cycle entry" />
+                  <label for="plan-title" i18n="Plan title label@@trading.form.title">Plan title</label>
+                  <input id="plan-title" type="text" formControlName="title" placeholder="e.g. BTC Long - Mid-cycle entry" i18n-placeholder="Plan title placeholder@@trading.form.titlePlaceholder" />
                 </div>
               </div>
               <div class="form-row form-row-3">
                 <div class="form-group">
-                  <label for="plan-direction">Direction</label>
+                  <label for="plan-direction" i18n="Direction label@@trading.form.direction">Direction</label>
                   <select id="plan-direction" formControlName="direction">
                     <option value="long">Long</option>
                     <option value="short">Short</option>
-                    <option value="neutral">Neutral / DCA</option>
+                    <option value="neutral" i18n="Neutral DCA option@@trading.form.neutralDca">Neutral / DCA</option>
                   </select>
                 </div>
                 <div class="form-group">
-                  <label for="plan-entry">Entry price (USD)</label>
-                  <input id="plan-entry" type="number" formControlName="entryPrice" placeholder="e.g. 95000" min="0" />
+                  <label for="plan-entry" i18n="Entry price label@@trading.form.entryPrice">Entry price (USD)</label>
+                  <input id="plan-entry" type="number" formControlName="entryPrice" placeholder="e.g. 95000" i18n-placeholder="Entry price placeholder@@trading.form.entryPlaceholder" min="0" />
                 </div>
                 <div class="form-group">
-                  <label for="plan-expiry">Expiry date (optional)</label>
+                  <label for="plan-expiry" i18n="Expiry date label@@trading.form.expiryDate">Expiry date (optional)</label>
                   <input id="plan-expiry" type="date" formControlName="expiryDate" />
                 </div>
               </div>
               <div class="form-row">
                 <div class="form-group">
-                  <label for="plan-target">Target price (USD)</label>
-                  <input id="plan-target" type="number" formControlName="targetPrice" placeholder="e.g. 140000" min="0" />
+                  <label for="plan-target" i18n="Target price label@@trading.form.targetPrice">Target price (USD)</label>
+                  <input id="plan-target" type="number" formControlName="targetPrice" placeholder="e.g. 140000" i18n-placeholder="Target price placeholder@@trading.form.targetPlaceholder" min="0" />
                 </div>
                 <div class="form-group">
-                  <label for="plan-stop">Stop loss (USD)</label>
-                  <input id="plan-stop" type="number" formControlName="stopLoss" placeholder="e.g. 82000" min="0" />
+                  <label for="plan-stop" i18n="Stop loss label@@trading.form.stopLoss">Stop loss (USD)</label>
+                  <input id="plan-stop" type="number" formControlName="stopLoss" placeholder="e.g. 82000" i18n-placeholder="Stop loss placeholder@@trading.form.stopPlaceholder" min="0" />
                 </div>
               </div>
               <div class="form-row">
                 <div class="form-group">
-                  <label for="plan-size">Position size (USD)</label>
-                  <input id="plan-size" type="number" formControlName="positionSizeUsd" placeholder="e.g. 5000" min="0" />
+                  <label for="plan-size" i18n="Position size label@@trading.form.positionSize">Position size (USD)</label>
+                  <input id="plan-size" type="number" formControlName="positionSizeUsd" placeholder="e.g. 5000" i18n-placeholder="Position size placeholder@@trading.form.sizePlaceholder" min="0" />
                 </div>
                 <div class="form-group">
-                  <label for="plan-risk">Risk % of portfolio</label>
-                  <input id="plan-risk" type="number" formControlName="riskPercent" placeholder="e.g. 2" min="0" max="100" step="0.1" />
+                  <label for="plan-risk" i18n="Risk percent label@@trading.form.riskPercent">Risk % of portfolio</label>
+                  <input id="plan-risk" type="number" formControlName="riskPercent" placeholder="e.g. 2" i18n-placeholder="Risk percent placeholder@@trading.form.riskPlaceholder" min="0" max="100" step="0.1" />
                 </div>
               </div>
               <div class="form-row form-row-1">
                 <div class="form-group">
-                  <label for="plan-notes">Notes / thesis</label>
-                  <textarea id="plan-notes" formControlName="notes" rows="3" placeholder="Why this trade, what signals support it..."></textarea>
+                  <label for="plan-notes" i18n="Notes thesis label@@trading.form.notes">Notes / thesis</label>
+                  <textarea id="plan-notes" formControlName="notes" rows="3" placeholder="Why this trade, what signals support it..." i18n-placeholder="Notes placeholder@@trading.form.notesPlaceholder"></textarea>
                 </div>
               </div>
               @if (createError()) { <div class="form-msg error">{{ createError() }}</div> }
               <div class="form-actions">
                 <button type="submit" [disabled]="createForm.invalid || isCreating()">
-                  {{ isCreating() ? 'Creating...' : 'Create Plan' }}
+                  {{ isCreating() ? creatingLabel() : createPlanLabel() }}
                 </button>
-                <button type="button" class="secondary-button" (click)="toggleCreateForm()">Cancel</button>
+                <button type="button" class="secondary-button" (click)="toggleCreateForm()" i18n="Cancel button@@common.cancel">Cancel</button>
               </div>
             </form>
           </div>
         }
 
         @if (plansLoading()) {
-          <div class="tp-loading">Loading plans...</div>
+          <div class="tp-loading" i18n="Plans loading@@trading.plans.loading">Loading plans...</div>
         } @else if (plans().length === 0 && !showCreateForm()) {
           <div class="plans-empty">
-            <p>No trading plans yet.</p>
-            <button class="secondary-button" (click)="toggleCreateForm()">Create your first plan</button>
+            <p i18n="No plans yet@@trading.plans.empty">No trading plans yet.</p>
+            <button class="secondary-button" (click)="toggleCreateForm()" i18n="Create first plan button@@trading.plans.createFirst">Create your first plan</button>
           </div>
         } @else {
           @for (plan of plans(); track plan.id) {
             <div class="plan-card">
               <div class="plan-card-header">
-                <span class="plan-dir-badge" [class]="'plan-dir-' + plan.direction">{{ plan.direction }}</span>
-                <span class="plan-status-badge" [class]="'status-' + plan.status">{{ plan.status }}</span>
+                <span class="plan-dir-badge" [class]="'plan-dir-' + plan.direction">{{ directionLabel(plan.direction) }}</span>
+                <span class="plan-status-badge" [class]="'status-' + plan.status">{{ statusLabel(plan.status) }}</span>
                 <span class="plan-title">{{ plan.title }}</span>
                 <span style="font-size:0.75rem;color:var(--color-text-muted,#6b7280);">{{ formatDate(plan.createdAt) }}</span>
               </div>
               <div class="plan-card-body">
                 <div class="plan-metric">
-                  <div class="plan-metric-label">Entry</div>
+                  <div class="plan-metric-label" i18n="Entry metric label@@trading.metrics.entry">Entry</div>
                   <div class="plan-metric-value">{{ formatUsd(plan.entryPrice) }}</div>
                 </div>
                 @if (plan.targetPrice) {
                   <div class="plan-metric">
-                    <div class="plan-metric-label">Target</div>
+                    <div class="plan-metric-label" i18n="Target metric label@@trading.metrics.target">Target</div>
                     <div class="plan-metric-value">{{ formatUsd(plan.targetPrice) }}</div>
                   </div>
                 }
                 @if (plan.stopLoss) {
                   <div class="plan-metric">
-                    <div class="plan-metric-label">Stop Loss</div>
+                    <div class="plan-metric-label">Stop loss</div>
                     <div class="plan-metric-value">{{ formatUsd(plan.stopLoss) }}</div>
                   </div>
                 }
                 @if (plan.status === 'active' && currentBtcPrice()) {
                   <div class="plan-metric">
-                    <div class="plan-metric-label">Current BTC</div>
+                    <div class="plan-metric-label" i18n="Current BTC metric label@@trading.metrics.currentBtc">Current BTC</div>
                     <div class="plan-metric-value">{{ formatUsd(currentBtcPrice()!) }}</div>
                   </div>
                   <div class="plan-metric">
-                    <div class="plan-metric-label">Unrealised P&amp;L</div>
+                    <div class="plan-metric-label" i18n="Unrealized PnL label@@trading.metrics.unrealizedPnl">Unrealized P&amp;L</div>
                     @let pnl = calcPnl(plan);
                     <div class="plan-metric-value" [class.profit]="pnl >= 0" [class.loss]="pnl < 0">
                       {{ pnl >= 0 ? '+' : '' }}{{ pnl.toFixed(2) }}%
@@ -376,18 +375,18 @@ type Tab = 'signals' | 'projections' | 'plans';
                   </div>
                   @if (plan.targetPrice) {
                     <div class="plan-metric">
-                      <div class="plan-metric-label">To Target</div>
+                      <div class="plan-metric-label" i18n="To target metric label@@trading.metrics.toTarget">To target</div>
                       <div class="plan-metric-value profit">{{ toTargetPct(plan) }}</div>
                     </div>
                   }
                 }
                 @if (plan.status === 'closed' && plan.closePrice) {
                   <div class="plan-metric">
-                    <div class="plan-metric-label">Close Price</div>
+                    <div class="plan-metric-label" i18n="Close price metric label@@trading.metrics.closePrice">Close price</div>
                     <div class="plan-metric-value">{{ formatUsd(plan.closePrice) }}</div>
                   </div>
                   <div class="plan-metric">
-                    <div class="plan-metric-label">Realised P&amp;L</div>
+                    <div class="plan-metric-label" i18n="Realized PnL label@@trading.metrics.realizedPnl">Realized P&amp;L</div>
                     @let rpnl = realisedPnl(plan);
                     <div class="plan-metric-value" [class.profit]="rpnl >= 0" [class.loss]="rpnl < 0">
                       {{ rpnl >= 0 ? '+' : '' }}{{ rpnl.toFixed(2) }}%
@@ -396,19 +395,19 @@ type Tab = 'signals' | 'projections' | 'plans';
                 }
                 @if (plan.positionSizeUsd) {
                   <div class="plan-metric">
-                    <div class="plan-metric-label">Position</div>
+                    <div class="plan-metric-label" i18n="Position metric label@@trading.metrics.position">Position</div>
                     <div class="plan-metric-value">{{ formatUsd(plan.positionSizeUsd) }}</div>
                   </div>
                 }
                 @if (plan.riskPercent) {
                   <div class="plan-metric">
-                    <div class="plan-metric-label">Risk</div>
+                    <div class="plan-metric-label" i18n="Risk metric label@@trading.metrics.risk">Risk</div>
                     <div class="plan-metric-value">{{ plan.riskPercent }}%</div>
                   </div>
                 }
                 @if (plan.expiryDate) {
                   <div class="plan-metric">
-                    <div class="plan-metric-label">Expires</div>
+                    <div class="plan-metric-label" i18n="Expiry metric label@@trading.metrics.expiry">Expiry</div>
                     <div class="plan-metric-value">{{ plan.expiryDate }}</div>
                   </div>
                 }
@@ -418,13 +417,13 @@ type Tab = 'signals' | 'projections' | 'plans';
               }
               @if (plan.status === 'active') {
                 <div class="plan-card-actions">
-                  <button class="secondary-button" (click)="openClose(plan.id)">Close Position</button>
-                  <button class="secondary-button" (click)="cancelPlan(plan.id)" [disabled]="actionPlanId() === plan.id">Cancel Plan</button>
-                  <button style="margin-left:auto;background:none;border:none;color:var(--color-text-muted,#9ca3af);cursor:pointer;font-size:0.8rem;" (click)="deletePlan(plan.id)" [disabled]="actionPlanId() === plan.id">Delete</button>
+                  <button class="secondary-button" (click)="openClose(plan.id)" i18n="Close position button@@trading.actions.closePosition">Close position</button>
+                  <button class="secondary-button" (click)="cancelPlan(plan.id)" [disabled]="actionPlanId() === plan.id" i18n="Cancel plan button@@trading.actions.cancelPlan">Cancel plan</button>
+                  <button style="margin-left:auto;background:none;border:none;color:var(--color-text-muted,#9ca3af);cursor:pointer;font-size:0.8rem;" (click)="deletePlan(plan.id)" [disabled]="actionPlanId() === plan.id" i18n="Delete button@@common.delete">Delete</button>
                 </div>
               } @else {
                 <div class="plan-card-actions">
-                  <button style="background:none;border:none;color:var(--color-text-muted,#9ca3af);cursor:pointer;font-size:0.8rem;" (click)="deletePlan(plan.id)" [disabled]="actionPlanId() === plan.id">Delete</button>
+                  <button style="background:none;border:none;color:var(--color-text-muted,#9ca3af);cursor:pointer;font-size:0.8rem;" (click)="deletePlan(plan.id)" [disabled]="actionPlanId() === plan.id" i18n="Delete button@@common.delete">Delete</button>
                 </div>
               }
             </div>
@@ -437,19 +436,19 @@ type Tab = 'signals' | 'projections' | 'plans';
     @if (closingPlanId()) {
       <div class="close-overlay" (click)="closeModal()">
         <div class="close-modal" (click)="$event.stopPropagation()">
-          <h3>Close Position</h3>
-          <p style="font-size:0.875rem;color:var(--color-text-muted,#6b7280);margin-bottom:1rem;">
-            Enter the price at which you closed this position.
+          <h3 i18n="Close position title@@trading.close.title">Close position</h3>
+          <p style="font-size:0.875rem;color:var(--color-text-muted,#6b7280);margin-bottom:1rem;" i18n="Close position description@@trading.close.description">
+            Enter the price where you closed this position.
           </p>
           <div class="form-group">
-            <label for="close-price">Close price (USD)</label>
-            <input id="close-price" type="number" [value]="closePriceInput()" (input)="closePriceInput.set($any($event.target).value)" placeholder="e.g. 125000" min="0" />
+            <label for="close-price" i18n="Close price label@@trading.close.price">Close price (USD)</label>
+            <input id="close-price" type="number" [value]="closePriceInput()" (input)="closePriceInput.set($any($event.target).value)" placeholder="e.g. 125000" i18n-placeholder="Close price placeholder@@trading.close.pricePlaceholder" min="0" />
           </div>
           @if (closeError()) { <div class="form-msg error">{{ closeError() }}</div> }
           <div class="close-modal-actions">
-            <button class="secondary-button" (click)="closeModal()">Cancel</button>
+            <button class="secondary-button" (click)="closeModal()" i18n="Cancel button@@common.cancel">Cancel</button>
             <button (click)="confirmClose()" [disabled]="!closePriceInput() || isClosing()">
-              {{ isClosing() ? 'Closing...' : 'Confirm Close' }}
+              {{ isClosing() ? closingLabel() : confirmCloseLabel() }}
             </button>
           </div>
         </div>
@@ -460,6 +459,7 @@ type Tab = 'signals' | 'projections' | 'plans';
 export class TradingPlansPageComponent {
   private readonly api = inject(AuthApiClient);
   private readonly fb = inject(FormBuilder);
+  private readonly locale = inject(LOCALE_ID);
 
   protected readonly activeTab = signal<Tab>('signals');
   protected readonly signals = signal<SignalSummary | null>(null);
@@ -530,7 +530,7 @@ export class TradingPlansPageComponent {
     const price = parseFloat(this.closePriceInput());
 
     if (!planId || isNaN(price) || price <= 0) {
-      this.closeError.set('Please enter a valid price');
+      this.closeError.set($localize`:Invalid close price error@@trading.close.invalidPrice:Enter a valid price`);
       return;
     }
 
@@ -620,9 +620,51 @@ export class TradingPlansPageComponent {
 
   protected toTargetPct(plan: TradingPlanRecord): string {
     const btc = this.currentBtcPrice();
-    if (!btc || !plan.targetPrice) return 'N/A';
+    if (!btc || !plan.targetPrice) return $localize`:No data value@@common.noData:No data`;
     const pct = ((plan.targetPrice - btc) / btc) * 100;
     return `${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%`;
+  }
+
+  protected cancelLabel(): string {
+    return $localize`:Cancel button@@common.cancel:Cancel`;
+  }
+
+  protected newPlanLabel(): string {
+    return $localize`:New plan button@@trading.actions.newPlan:New Plan`;
+  }
+
+  protected creatingLabel(): string {
+    return $localize`:Creating plan state@@trading.actions.creating:Creating...`;
+  }
+
+  protected createPlanLabel(): string {
+    return $localize`:Create plan button@@trading.actions.createPlan:Create Plan`;
+  }
+
+  protected closingLabel(): string {
+    return $localize`:Closing position state@@trading.actions.closing:Closing...`;
+  }
+
+  protected confirmCloseLabel(): string {
+    return $localize`:Confirm close button@@trading.actions.confirmClose:Confirm close`;
+  }
+
+  protected directionLabel(direction: TradingPlanRecord['direction']): string {
+    const labels: Record<TradingPlanRecord['direction'], string> = {
+      long: 'Long',
+      short: 'Short',
+      neutral: $localize`:Neutral direction@@trading.direction.neutral:Neutral`,
+    };
+    return labels[direction] ?? direction;
+  }
+
+  protected statusLabel(status: TradingPlanRecord['status']): string {
+    const labels: Record<TradingPlanRecord['status'], string> = {
+      active: $localize`:Active status@@trading.status.active:Active`,
+      closed: $localize`:Closed status@@trading.status.closed:Closed`,
+      cancelled: $localize`:Cancelled status@@trading.status.cancelled:Cancelled`,
+    };
+    return labels[status] ?? status;
   }
 
   protected scoreColor(score: number): string {
@@ -655,30 +697,76 @@ export class TradingPlansPageComponent {
 
   protected zoneLabel(zone: string): string {
     const labels: Record<string, string> = {
-      very_bullish: 'Very Bullish',
-      bullish: 'Bullish',
-      neutral: 'Neutral',
-      bearish: 'Bearish',
-      very_bearish: 'Very Bearish',
-      no_data: 'No Data',
+      very_bullish: $localize`:Very bullish zone@@trading.zone.veryBullish:Very Bullish`,
+      bullish: $localize`:Bullish zone@@trading.zone.bullish:Bullish`,
+      neutral: $localize`:Neutral zone@@trading.zone.neutral:Neutral`,
+      bearish: $localize`:Bearish zone@@trading.zone.bearish:Bearish`,
+      very_bearish: $localize`:Very bearish zone@@trading.zone.veryBearish:Very Bearish`,
+      no_data: $localize`:No data zone@@trading.zone.noData:No Data`,
     };
     return labels[zone] ?? zone;
   }
 
   protected signalHeadline(score: number): string {
-    if (score >= 60) return 'Strong accumulation conditions';
-    if (score >= 20) return 'Favourable market conditions';
-    if (score >= -20) return 'Mixed signals — proceed with caution';
-    if (score >= -60) return 'Elevated risk — market overheating';
-    return 'Extreme caution — distribution zone';
+    if (score >= 60) return $localize`:Strong accumulation headline@@trading.signals.headline.strongAccumulation:Strong accumulation conditions`;
+    if (score >= 20) return $localize`:Favourable market headline@@trading.signals.headline.favourable:Favourable market conditions`;
+    if (score >= -20) return $localize`:Mixed signals headline@@trading.signals.headline.mixed:Mixed signals - proceed carefully`;
+    if (score >= -60) return $localize`:Elevated risk headline@@trading.signals.headline.elevatedRisk:Elevated risk - overheated market`;
+    return $localize`:Extreme caution headline@@trading.signals.headline.extremeCaution:Extreme caution - distribution zone`;
   }
 
   protected signalSubtext(score: number): string {
-    if (score >= 60) return 'Multiple indicators align for a long-term buy opportunity.';
-    if (score >= 20) return 'Most indicators lean bullish. Gradual accumulation appropriate.';
-    if (score >= -20) return 'Signals are conflicting. High conviction positions carry more risk.';
-    if (score >= -60) return 'Several indicators show overvaluation. Consider reducing exposure.';
-    return 'Most indicators signal overvaluation or a cycle top. Avoid new longs.';
+    if (score >= 60) return $localize`:Strong accumulation subtext@@trading.signals.subtext.strongAccumulation:Multiple indicators align for a long-term buy opportunity.`;
+    if (score >= 20) return $localize`:Favourable market subtext@@trading.signals.subtext.favourable:Most indicators are bullish. Gradual accumulation may be justified.`;
+    if (score >= -20) return $localize`:Mixed signals subtext@@trading.signals.subtext.mixed:Signals are conflicting. High-conviction positions carry more risk.`;
+    if (score >= -60) return $localize`:Elevated risk subtext@@trading.signals.subtext.elevatedRisk:Several indicators show overvaluation. Reducing exposure may be prudent.`;
+    return $localize`:Extreme caution subtext@@trading.signals.subtext.extremeCaution:Most indicators signal overvaluation or cycle-top risk. Avoid new longs.`;
+  }
+
+  protected overallLabel(score: number): string {
+    if (score >= 60) return $localize`:Strong buy label@@trading.overall.strongBuy:Strong Buy`;
+    if (score >= 20) return $localize`:Bullish label@@trading.overall.bullish:Bullish`;
+    if (score >= -20) return $localize`:Neutral label@@trading.overall.neutral:Neutral`;
+    if (score >= -60) return $localize`:Bearish label@@trading.overall.bearish:Bearish`;
+    return $localize`:Strong sell label@@trading.overall.strongSell:Strong Sell`;
+  }
+
+  protected signalLabel(signal: SignalScore): string {
+    const labels: Record<string, string> = {
+      mvrv_zscore: 'MVRV Z-Score',
+      fear_greed: $localize`:Fear greed label@@trading.signal.fearGreed:Fear & Greed Index`,
+      rainbow_band: $localize`:Rainbow band label@@trading.signal.rainbowBand:Rainbow Band`,
+      realized_price_premium: $localize`:Realized price premium label@@trading.signal.realizedPricePremium:Realized Price Premium`,
+      vdd_multiple: 'VDD Multiple',
+      pi_cycle_top: 'Pi Cycle Top',
+      mayer_multiple: 'Mayer Multiple',
+      puell_multiple: 'Puell Multiple',
+    };
+    return labels[signal.name] ?? this.translatePhrase(signal.label);
+  }
+
+  protected signalValue(signal: SignalScore): string {
+    return this.translatePhrase(signal.formattedValue);
+  }
+
+  protected signalInterpretation(signal: SignalScore): string {
+    return this.translatePhrase(signal.interpretation);
+  }
+
+  protected scenarioLabel(label: string): string {
+    return this.translatePhrase(label);
+  }
+
+  protected projectionLabel(label: string): string {
+    return this.translatePhrase(label);
+  }
+
+  protected projectionModel(model: string): string {
+    return this.translatePhrase(model);
+  }
+
+  protected projectionTimeframe(timeframe: string): string {
+    return this.translatePhrase(timeframe);
   }
 
   protected formatUsd(value: number): string {
@@ -686,7 +774,64 @@ export class TradingPlansPageComponent {
   }
 
   protected formatDate(iso: string): string {
-    return new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    return new Date(iso).toLocaleDateString(this.locale, { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  private translatePhrase(value: string): string {
+    const exact: Record<string, string> = {
+      'Strong Buy': $localize`:Strong buy phrase@@trading.phrase.strongBuy:Strong Buy`,
+      'Bullish': $localize`:Bullish phrase@@trading.phrase.bullish:Bullish`,
+      'Very Bullish': $localize`:Very bullish phrase@@trading.phrase.veryBullish:Very Bullish`,
+      'Neutral': $localize`:Neutral phrase@@trading.phrase.neutral:Neutral`,
+      'Bearish': $localize`:Bearish phrase@@trading.phrase.bearish:Bearish`,
+      'Very Bearish': $localize`:Very bearish phrase@@trading.phrase.veryBearish:Very Bearish`,
+      'Strong Sell': $localize`:Strong sell phrase@@trading.phrase.strongSell:Strong Sell`,
+      'No Data': $localize`:No data phrase@@common.noData:No Data`,
+      'Fear & Greed Index': $localize`:Fear greed label@@trading.signal.fearGreed:Fear & Greed Index`,
+      'Rainbow Band': $localize`:Rainbow band label@@trading.signal.rainbowBand:Rainbow Band`,
+      'Realized Price Premium': $localize`:Realized price premium label@@trading.signal.realizedPricePremium:Realized Price Premium`,
+      'Strong accumulation conditions': $localize`:Strong accumulation headline@@trading.signals.headline.strongAccumulation:Strong accumulation conditions`,
+      'Multiple indicators align for a long-term buy opportunity.': $localize`:Strong accumulation subtext@@trading.signals.subtext.strongAccumulation:Multiple indicators align for a long-term buy opportunity.`,
+      'Undervalued — accumulation zone': $localize`:Undervalued accumulation interpretation@@trading.interpretation.undervaluedAccumulation:Undervalued - accumulation zone`,
+      'Extreme fear — historically strong buy signal': $localize`:Extreme fear interpretation@@trading.interpretation.extremeFear:Extreme fear - historically strong buy signal`,
+      'Fear — accumulation favoured': $localize`:Fear accumulation interpretation@@trading.interpretation.fearAccumulation:Fear - accumulation favoured`,
+      'Neutral sentiment': $localize`:Neutral sentiment interpretation@@trading.interpretation.neutralSentiment:Neutral sentiment`,
+      'Greed — caution advised': $localize`:Greed caution interpretation@@trading.interpretation.greedCaution:Greed - caution advised`,
+      'Extreme greed — distribution zone': $localize`:Extreme greed interpretation@@trading.interpretation.extremeGreed:Extreme greed - distribution zone`,
+      'Band 2: Buy': $localize`:Band two buy interpretation@@trading.interpretation.band2Buy:Band 2: Buy`,
+      'Near realized price — healthy premium': $localize`:Realized price healthy premium@@trading.interpretation.realizedHealthy:Near realized price - healthy premium`,
+      'Very low — accumulation zone': $localize`:Very low accumulation interpretation@@trading.interpretation.veryLowAccumulation:Very low - accumulation zone`,
+      'Far from crossover — early/mid cycle': $localize`:Far crossover interpretation@@trading.interpretation.farCrossover:Far from crossover - early/mid cycle`,
+      'Below 200-day MA — accumulation zone': $localize`:Below 200 day MA interpretation@@trading.interpretation.below200Day:Below 200-day MA - accumulation zone`,
+      'Below average miner revenue — accumulation zone': $localize`:Below average miner revenue interpretation@@trading.interpretation.belowMinerRevenue:Below average miner revenue - accumulation zone`,
+      'Bear Case': $localize`:Bear case scenario@@trading.scenario.bear:Bear Case`,
+      'Base Case': $localize`:Base case scenario@@trading.scenario.base:Base Case`,
+      'Bull Case': $localize`:Bull case scenario@@trading.scenario.bull:Bull Case`,
+      'Ultra Bull': $localize`:Ultra bull scenario@@trading.scenario.ultraBull:Ultra Bull`,
+      'CVDD floor': $localize`:CVDD floor projection@@trading.projection.cvddFloor:CVDD floor`,
+      'Balanced Price': $localize`:Balanced price projection@@trading.projection.balancedPrice:Balanced Price`,
+      'Realized Price': $localize`:Realized price projection@@trading.projection.realizedPrice:Realized Price`,
+      '200-day MA ×1.5': $localize`:200 day MA x1.5 projection@@trading.projection.200day15:200-day MA ×1.5`,
+      '200-day MA ×2.4': $localize`:200 day MA x2.4 projection@@trading.projection.200day24:200-day MA ×2.4`,
+      'S2F model price': $localize`:S2F model price projection@@trading.projection.s2fModel:S2F model price`,
+      'S2F ×1.5': $localize`:S2F x1.5 projection@@trading.projection.s2f15:S2F ×1.5`,
+      'S2F ×3': $localize`:S2F x3 projection@@trading.projection.s2f3:S2F ×3`,
+      'Terminal Price': $localize`:Terminal price projection@@trading.projection.terminalPrice:Terminal Price`,
+      'Terminal ×1.5': $localize`:Terminal x1.5 projection@@trading.projection.terminal15:Terminal ×1.5`,
+      'Mayer Multiple': 'Mayer Multiple',
+      'Stock-to-Flow': 'Stock-to-Flow',
+      'CVDD': 'CVDD',
+      '3–12 months': $localize`:3 to 12 months timeframe@@trading.timeframe.3to12:3-12 months`,
+      '6–12 months': $localize`:6 to 12 months timeframe@@trading.timeframe.6to12:6-12 months`,
+      '6–18 months': $localize`:6 to 18 months timeframe@@trading.timeframe.6to18:6-18 months`,
+      '12–24 months': $localize`:12 to 24 months timeframe@@trading.timeframe.12to24:12-24 months`,
+      '18–36 months': $localize`:18 to 36 months timeframe@@trading.timeframe.18to36:18-36 months`,
+    };
+
+    if (exact[value]) return exact[value];
+
+    return value
+      ;
   }
 
   private async loadSignals(): Promise<void> {
@@ -748,17 +893,17 @@ export class TradingPlansPageComponent {
     let interpretation: string;
     const maxScore = 15;
 
-    if (fg <= 20)      { score = 15; interpretation = 'Extreme fear — historically strong buy signal'; }
-    else if (fg <= 40) { score = 8;  interpretation = 'Fear — accumulation favoured'; }
-    else if (fg <= 60) { score = 0;  interpretation = 'Neutral sentiment'; }
-    else if (fg <= 80) { score = -8; interpretation = 'Greed — caution advised'; }
-    else               { score = -15; interpretation = 'Extreme greed — distribution zone'; }
+    if (fg <= 20)      { score = 15; interpretation = $localize`:Extreme fear interpretation@@trading.interpretation.extremeFear:Extreme fear - historically strong buy signal`; }
+    else if (fg <= 40) { score = 8;  interpretation = $localize`:Fear accumulation interpretation@@trading.interpretation.fearAccumulation:Fear - accumulation favoured`; }
+    else if (fg <= 60) { score = 0;  interpretation = $localize`:Neutral sentiment interpretation@@trading.interpretation.neutralSentiment:Neutral sentiment`; }
+    else if (fg <= 80) { score = -8; interpretation = $localize`:Greed caution interpretation@@trading.interpretation.greedCaution:Greed - caution advised`; }
+    else               { score = -15; interpretation = $localize`:Extreme greed interpretation@@trading.interpretation.extremeGreed:Extreme greed - distribution zone`; }
 
     const pct = score / maxScore;
     const zone: SignalZone =
       pct >= 0.6 ? 'very_bullish' : pct >= 0.2 ? 'bullish' : pct >= -0.2 ? 'neutral' : pct >= -0.6 ? 'bearish' : 'very_bearish';
 
-    return { name: 'fear_greed', label: 'Fear & Greed Index', value: fg, formattedValue: `${fg}/100`, score, maxScore, interpretation, zone };
+    return { name: 'fear_greed', label: $localize`:Fear greed label@@trading.signal.fearGreed:Fear & Greed Index`, value: fg, formattedValue: `${fg}/100`, score, maxScore, interpretation, zone };
   }
 
   private toOverallZone(n: number): SignalSummary['overallZone'] {
@@ -770,11 +915,7 @@ export class TradingPlansPageComponent {
   }
 
   private toOverallLabel(n: number): string {
-    if (n >= 60) return 'Strong Buy';
-    if (n >= 20) return 'Bullish';
-    if (n >= -20) return 'Neutral';
-    if (n >= -60) return 'Bearish';
-    return 'Strong Sell';
+    return this.overallLabel(n);
   }
 
   private async loadProjections(): Promise<void> {
@@ -805,5 +946,5 @@ export class TradingPlansPageComponent {
 function toMessage(error: unknown): string {
   return error instanceof ApiClientError
     ? error.message
-    : 'Something went wrong. Please try again.';
+    : $localize`:Generic error@@common.genericError:Something went wrong. Please try again.`;
 }

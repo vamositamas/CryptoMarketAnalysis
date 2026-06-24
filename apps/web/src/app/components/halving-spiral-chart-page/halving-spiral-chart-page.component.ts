@@ -241,7 +241,7 @@ export class HavingSpiralChartPageComponent implements AfterViewInit, OnDestroy 
       { label: 'Előrehaladás', value: `${(fraction * 100).toFixed(1)}% complete` },
       { label: 'Becsült blokkok a ciklusban', value: `${approxBlocks.toLocaleString()} / 210,000` },
       { label: 'Becsült évek a ciklusban', value: `${approxYears} / 4 years` },
-      { label: 'BTC ár', value: formatUsdPrice(last.priceUsd) },
+      { label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`, value: formatUsdPrice(last.priceUsd) },
     ];
   });
 
@@ -297,8 +297,8 @@ export class HavingSpiralChartPageComponent implements AfterViewInit, OnDestroy 
     exportChartCsv({
       rows: this.dataPoints(),
       columns: [
-        { header: 'Dátum', value: (p) => p.date },
-        { header: 'Ár USD', value: (p) => p.priceUsd },
+        { header: $localize`:Date header@@charts.csv.date:Date`, value: (p) => p.date },
+        { header: $localize`:Price USD header@@charts.csv.priceUsd:Price USD`, value: (p) => p.priceUsd },
         { header: 'Ciklus', value: (p) => getCycleNumber(Date.parse(p.date + 'T00:00:00Z')) },
         {
           header: 'Ciklushányad',

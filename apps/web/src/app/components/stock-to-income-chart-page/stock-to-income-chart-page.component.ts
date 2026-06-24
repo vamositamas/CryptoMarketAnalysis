@@ -34,26 +34,26 @@ interface TimeframeOption {
 }
 
 const TIMEFRAMES: TimeframeOption[] = [
-  { label: '1 hó', value: '1m' },
-  { label: '3 hó', value: '3m' },
-  { label: '6 hó', value: '6m' },
-  { label: '1 év', value: '1y' },
-  { label: '2 év', value: '2y' },
+  { label: $localize`:Timeframe 1 month@@charts.timeframe.1m:1 month`, value: '1m' },
+  { label: $localize`:Timeframe 3 months@@charts.timeframe.3m:3 months`, value: '3m' },
+  { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
+  { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
+  { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
   { label: 'Mind', value: 'all' },
 ];
 
 const HALVING_EVENTS = [
-  { date: '2012-11-28', label: '2012 felezés' },
-  { date: '2016-07-09', label: '2016 felezés' },
-  { date: '2020-05-11', label: '2020 felezés' },
-  { date: '2024-04-19', label: '2024 felezés' },
+  { date: '2012-11-28', label: $localize`:2012 halving label@@charts.halving.2012:2012 halving` },
+  { date: '2016-07-09', label: $localize`:2016 halving label@@charts.halving.2016:2016 halving` },
+  { date: '2020-05-11', label: $localize`:2020 halving label@@charts.halving.2020:2020 halving` },
+  { date: '2024-04-19', label: $localize`:2024 halving label@@charts.halving.2024:2024 halving` },
   { date: '2028-04-21', label: '2028 Halving' },
   { date: '2032-04-01', label: '2032 Halving' },
   { date: '2036-04-01', label: '2036 Halving' },
 ];
 
 const S2I_ALERT_METRICS: AlertMetricOption[] = [
-  { value: 'btc_price', label: 'BTC ár USD' },
+  { value: 'btc_price', label: $localize`:BTC price USD metric@@charts.metric.btcPriceUsd:BTC price USD` },
 ];
 
 @Component({
@@ -101,16 +101,16 @@ export class StockToIncomeChartPageComponent implements AfterViewInit {
     const s2i = lastHistorical.s2iRatio;
     const pctDiff = model !== null && model > 0 ? ((price - model) / model) * 100 : null;
     return [
-      { label: 'BTC ár', value: formatUsd(price) },
-      { label: 'S2I Model Price', value: model !== null ? formatUsd(model) : 'Nincs adat' },
-      { label: 'S2I Ratio', value: s2i !== null ? s2i.toFixed(1) : 'Nincs adat' },
-      { label: 'Jelzés', value: s2i !== null ? getS2ISignal(s2i) : 'Nincs adat' },
+      { label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`, value: formatUsd(price) },
+      { label: 'S2I Model Price', value: model !== null ? formatUsd(model) : $localize`:No data value@@common.noData:No data` },
+      { label: 'S2I Ratio', value: s2i !== null ? s2i.toFixed(1) : $localize`:No data value@@common.noData:No data` },
+      { label: $localize`:Signal metric@@charts.metric.signal:Signal`, value: s2i !== null ? getS2ISignal(s2i) : $localize`:No data value@@common.noData:No data` },
       {
         label: 'Current vs Model',
         value:
           pctDiff !== null
             ? `${pctDiff > 0 ? '+' : ''}${pctDiff.toFixed(1)}% ${pctDiff >= 0 ? 'above' : 'below'} model`
-            : 'Nincs adat',
+            : $localize`:No data value@@common.noData:No data`,
       },
     ];
   });
@@ -118,7 +118,7 @@ export class StockToIncomeChartPageComponent implements AfterViewInit {
   protected readonly infoInterpretation = computed(() => {
     const points = this.dataPoints();
     const lastHistorical = [...points].reverse().find((p) => p.priceUsd !== null);
-    if (!lastHistorical) return 'Adatra vár.';
+    if (!lastHistorical) return $localize`:Waiting for data sentence@@charts.waitingForDataSentence:Waiting for data.`;
     const s2i = lastHistorical.s2iRatio;
     if (s2i === null) return 'S2I ratio not yet available.';
     return `Current S2I ratio is ${s2i.toFixed(2)}. ${getS2IInterpretation(s2i)}`;
@@ -190,7 +190,7 @@ export class StockToIncomeChartPageComponent implements AfterViewInit {
         // BTC actual price — cyan, only historical (null for future and any zero-price rows)
         {
           type: 'line' as const,
-          label: 'BTC ár (USD)',
+          label: $localize`:BTC price USD metric@@charts.metric.btcPriceUsd:BTC price USD`,
           data: points.map((p) => (p.priceUsd !== null && p.priceUsd > 0 ? p.priceUsd : null)),
           borderColor: '#22d3ee',
           borderWidth: 1.5,
@@ -348,9 +348,9 @@ export class StockToIncomeChartPageComponent implements AfterViewInit {
       rows: this.dataPoints(),
       fileName: `stock-to-income_${getExportDateStamp()}.csv`,
       columns: [
-        { header: 'Dátum', value: (row) => row.date },
-        { header: 'Ár USD', value: (row) => formatCsvNumber(row.priceUsd) },
-        { header: 'Modellár', value: (row) => formatCsvNumber(row.modelPrice) },
+        { header: $localize`:Date header@@charts.csv.date:Date`, value: (row) => row.date },
+        { header: $localize`:Price USD header@@charts.csv.priceUsd:Price USD`, value: (row) => formatCsvNumber(row.priceUsd) },
+        { header: $localize`:Model price metric@@charts.metric.modelPrice:Model price`, value: (row) => formatCsvNumber(row.modelPrice) },
         { header: 'Upper Band', value: (row) => formatCsvNumber(row.upperBand) },
         { header: 'Lower Band', value: (row) => formatCsvNumber(row.lowerBand) },
         { header: 'S2I Ratio', value: (row) => formatCsvNumber(row.s2iRatio) },
@@ -360,7 +360,7 @@ export class StockToIncomeChartPageComponent implements AfterViewInit {
 
   protected lastUpdatedText(): string {
     const ts = this.lastUpdated();
-    if (!ts) return 'Adatra vár';
+    if (!ts) return $localize`:Waiting for data@@charts.waitingForData:Waiting for data`;
     return new Date(ts).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
   }
 
@@ -388,10 +388,10 @@ export class StockToIncomeChartPageComponent implements AfterViewInit {
 }
 
 function getS2ISignal(s2i: number): string {
-  if (s2i > 3.5) return 'Eladási zóna';
-  if (s2i > 2.0) return 'Túlértékelt';
-  if (s2i >= 1.0) return 'Valós érték';
-  if (s2i >= 0.5) return 'Alulértékelt';
+  if (s2i > 3.5) return $localize`:Sell zone signal@@charts.signal.sellZone:Sell zone`;
+  if (s2i > 2.0) return $localize`:Overvalued signal@@charts.signal.overvalued:Overvalued`;
+  if (s2i >= 1.0) return $localize`:Fair value signal@@charts.signal.fairValue:Fair value`;
+  if (s2i >= 0.5) return $localize`:Undervalued signal@@charts.signal.undervalued:Undervalued`;
   return 'Deep Undervalue';
 }
 

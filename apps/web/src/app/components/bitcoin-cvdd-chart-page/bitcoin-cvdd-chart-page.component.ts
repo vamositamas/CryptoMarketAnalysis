@@ -34,11 +34,11 @@ interface TimeframeOption {
 }
 
 const TIMEFRAMES: TimeframeOption[] = [
-  { label: '1 hó', value: '1m' },
-  { label: '3 hó', value: '3m' },
-  { label: '6 hó', value: '6m' },
-  { label: '1 év', value: '1y' },
-  { label: '2 év', value: '2y' },
+  { label: $localize`:Timeframe 1 month@@charts.timeframe.1m:1 month`, value: '1m' },
+  { label: $localize`:Timeframe 3 months@@charts.timeframe.3m:3 months`, value: '3m' },
+  { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
+  { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
+  { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
   { label: 'Mind', value: 'all' },
 ];
 
@@ -50,7 +50,7 @@ const HALVING_EVENTS = [
 ];
 
 const CVDD_ALERT_METRICS: AlertMetricOption[] = [
-  { value: 'btc_price', label: 'BTC ár USD' },
+  { value: 'btc_price', label: $localize`:BTC price USD metric@@charts.metric.btcPriceUsd:BTC price USD` },
   { value: 'cvdd', label: 'CVDD' },
 ];
 
@@ -108,14 +108,14 @@ export class BitcoinCvddChartPageComponent implements AfterViewInit {
 
   protected readonly infoCurrentFields = computed<ChartInfoField[]>(() => {
     const point = this.latestPoint();
-    if (!point) return [{ label: 'Aktuális ár', value: 'Adatra vár' }];
+    if (!point) return [{ label: $localize`:Current price metric@@charts.metric.currentPrice:Current price`, value: $localize`:Waiting for data@@charts.waitingForData:Waiting for data` }];
     const cvddNow = cvdd(point.date);
     const ratio = point.priceUsd / cvddNow;
     return [
-      { label: 'BTC ár', value: formatUsd(point.priceUsd) },
+      { label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`, value: formatUsd(point.priceUsd) },
       { label: 'CVDD', value: formatUsd(cvddNow) },
       { label: 'BTC / CVDD Ratio', value: ratio.toFixed(2) + '×' },
-      { label: 'Jelzés', value: getCvddSignal(ratio) },
+      { label: $localize`:Signal metric@@charts.metric.signal:Signal`, value: getCvddSignal(ratio) },
     ];
   });
 
@@ -142,7 +142,7 @@ export class BitcoinCvddChartPageComponent implements AfterViewInit {
       labels: allDates,
       datasets: [
         {
-          label: 'BTC ár',
+          label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`,
           data: [...points.map((p) => p.priceUsd), ...futureNulls],
           borderColor: '#000000',
           backgroundColor: 'transparent',
@@ -293,8 +293,8 @@ export class BitcoinCvddChartPageComponent implements AfterViewInit {
       rows: this.dataPoints(),
       fileName: `bitcoin-cvdd_${getExportDateStamp()}.csv`,
       columns: [
-        { header: 'Dátum', value: (row) => row.date },
-        { header: 'Ár USD', value: (row) => formatCsvNumber(row.priceUsd) },
+        { header: $localize`:Date header@@charts.csv.date:Date`, value: (row) => row.date },
+        { header: $localize`:Price USD header@@charts.csv.priceUsd:Price USD`, value: (row) => formatCsvNumber(row.priceUsd) },
         { header: 'CVDD', value: (row) => formatCsvNumber(cvdd(row.date)) },
         { header: 'BTC/CVDD Ratio', value: (row) => formatCsvNumber(row.priceUsd / cvdd(row.date)) },
       ],
@@ -303,7 +303,7 @@ export class BitcoinCvddChartPageComponent implements AfterViewInit {
 
   protected lastUpdatedText(): string {
     const ts = this.lastUpdated();
-    if (!ts) return 'Adatra vár';
+    if (!ts) return $localize`:Waiting for data@@charts.waitingForData:Waiting for data`;
     return new Date(ts).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
   }
 
@@ -357,7 +357,7 @@ function buildFutureLabels(points: { date: string }[], timeframe: string): strin
 function getCvddSignal(ratio: number): string {
   if (ratio < 1.0) return 'Exceptional — BTC below CVDD';
   if (ratio < 1.5) return 'Historic buy opportunity';
-  if (ratio < 3.0) return 'Akkumulációs zóna';
+  if (ratio < 3.0) return $localize`:Accumulation zone signal@@charts.signal.accumulationZone:Accumulation zone`;
   if (ratio < 6.0) return 'Bull market — elevated';
   return 'Late-cycle excess';
 }

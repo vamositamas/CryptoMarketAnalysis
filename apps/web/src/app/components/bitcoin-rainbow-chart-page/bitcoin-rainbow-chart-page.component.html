@@ -15,7 +15,7 @@
       </p>
     </div>
     <div class="chart-status">
-      <span i18n="Chart last updated label@@charts.lastUpdated">Utoljára frissítve</span>
+      <span i18n="Chart last updated label@@charts.lastUpdated">Last updated</span>
       <strong>{{ lastUpdatedText() }}</strong>
     </div>
   </div>
@@ -35,7 +35,7 @@
       }
     </div>
     <div class="chart-actions">
-      <button type="button" class="secondary-button" (click)="resetZoom()" i18n="Zoom reset label@@charts.zoomReset">Zoom visszaállítása</button>
+      <button type="button" class="secondary-button" (click)="resetZoom()" i18n="Zoom reset label@@charts.zoomReset">Reset zoom</button>
       <div class="export-menu">
         <button type="button" class="secondary-button" (click)="toggleExportMenu()" i18n="Export control label@@charts.exportControl">
           Export
@@ -102,7 +102,7 @@
       @if (isLoading()) {
         <div class="loading-state" role="status">
           <span class="loading-spinner" aria-hidden="true"></span>
-          <span i18n="Chart loading state@@charts.loading">Grafikonadatok betöltése...</span>
+          <span i18n="Chart loading state@@charts.loading">Loading chart data...</span>
         </div>
       }
 
@@ -110,7 +110,7 @@
         <div class="rainbow-legend">
           <span class="rainbow-legend-item">
             <span class="rainbow-legend-price"></span>
-            <span class="rainbow-legend-text">BTC ár</span>
+            <span class="rainbow-legend-text">BTC price</span>
           </span>
           @for (band of reversedBands; track band.label) {
             <span class="rainbow-legend-item">
@@ -135,7 +135,7 @@
 
   @if (infoOpen()) {
     <app-chart-info-panel
-      title="Bitcoin szivárványárgrafikon"
+      title="Bitcoin Rainbow Price Chart"
       [about]="infoAbout"
       [currentFields]="infoCurrentFields()"
       [interpretation]="infoInterpretation()"

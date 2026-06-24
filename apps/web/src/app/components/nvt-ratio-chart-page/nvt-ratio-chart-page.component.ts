@@ -36,23 +36,23 @@ interface TimeframeOption {
 }
 
 const TIMEFRAMES: TimeframeOption[] = [
-  { label: '1 hó', value: '1m' },
-  { label: '3 hó', value: '3m' },
-  { label: '6 hó', value: '6m' },
-  { label: '1 év', value: '1y' },
-  { label: '2 év', value: '2y' },
+  { label: $localize`:Timeframe 1 month@@charts.timeframe.1m:1 month`, value: '1m' },
+  { label: $localize`:Timeframe 3 months@@charts.timeframe.3m:3 months`, value: '3m' },
+  { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
+  { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
+  { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
   { label: 'Mind', value: 'all' },
 ];
 
 const HALVING_EVENTS = [
-  { date: '2012-11-28', label: '2012 felezés' },
-  { date: '2016-07-09', label: '2016 felezés' },
-  { date: '2020-05-11', label: '2020 felezés' },
-  { date: '2024-04-19', label: '2024 felezés' },
+  { date: '2012-11-28', label: $localize`:2012 halving label@@charts.halving.2012:2012 halving` },
+  { date: '2016-07-09', label: $localize`:2016 halving label@@charts.halving.2016:2016 halving` },
+  { date: '2020-05-11', label: $localize`:2020 halving label@@charts.halving.2020:2020 halving` },
+  { date: '2024-04-19', label: $localize`:2024 halving label@@charts.halving.2024:2024 halving` },
 ];
 
 const NVT_RATIO_ALERT_METRICS: AlertMetricOption[] = [
-  { value: 'btc_price', label: 'BTC ár USD' },
+  { value: 'btc_price', label: $localize`:BTC price USD metric@@charts.metric.btcPriceUsd:BTC price USD` },
 ];
 
 @Component({
@@ -97,21 +97,21 @@ export class NvtRatioChartPageComponent implements AfterViewInit {
     const nvtSignal = last.nvtSignal;
     const signalValue =
       nvtSignal !== null && nvtSignal > 150
-        ? 'Túlértékelt'
+        ? $localize`:Overvalued signal@@charts.signal.overvalued:Overvalued`
         : nvtSignal !== null && nvtSignal < 45
-          ? 'Alulértékelt'
+          ? $localize`:Undervalued signal@@charts.signal.undervalued:Undervalued`
           : 'Semleges';
     return [
-      { label: 'BTC ár', value: formatUsd(price) },
-      { label: 'NVT Ratio', value: nvtRatio !== null ? nvtRatio.toFixed(0) : 'Nincs adat' },
-      { label: 'NVT Signal / 90d MA', value: nvtSignal !== null ? nvtSignal.toFixed(0) : 'Nincs adat' },
-      { label: 'Jelzés', value: signalValue },
+      { label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`, value: formatUsd(price) },
+      { label: 'NVT Ratio', value: nvtRatio !== null ? nvtRatio.toFixed(0) : $localize`:No data value@@common.noData:No data` },
+      { label: 'NVT Signal / 90d MA', value: nvtSignal !== null ? nvtSignal.toFixed(0) : $localize`:No data value@@common.noData:No data` },
+      { label: $localize`:Signal metric@@charts.metric.signal:Signal`, value: signalValue },
     ];
   });
 
   protected readonly infoInterpretation = computed(() => {
     const points = this.dataPoints();
-    if (!points.length) return 'Adatra vár.';
+    if (!points.length) return $localize`:Waiting for data sentence@@charts.waitingForDataSentence:Waiting for data.`;
     const last = [...points].reverse().find((p) => p.nvtRatio !== null) ?? points[points.length - 1];
     const nvtSignal = last.nvtSignal;
     if (nvtSignal === null) return 'NVT Signal not yet available (requires sufficient transaction volume history).';
@@ -171,7 +171,7 @@ export class NvtRatioChartPageComponent implements AfterViewInit {
         // BTC Price — dark line, thin, right y axis (log)
         {
           type: 'line' as const,
-          label: 'BTC ár',
+          label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`,
           data: points.map((p) => p.priceUsd),
           borderColor: '#1f2937',
           borderWidth: 1.5,
@@ -363,8 +363,8 @@ export class NvtRatioChartPageComponent implements AfterViewInit {
       rows: this.dataPoints(),
       fileName: `nvt-ratio_${getExportDateStamp()}.csv`,
       columns: [
-        { header: 'Dátum', value: (row) => row.date },
-        { header: 'Ár USD', value: (row) => formatCsvNumber(row.priceUsd) },
+        { header: $localize`:Date header@@charts.csv.date:Date`, value: (row) => row.date },
+        { header: $localize`:Price USD header@@charts.csv.priceUsd:Price USD`, value: (row) => formatCsvNumber(row.priceUsd) },
         { header: 'NVT Ratio', value: (row) => formatCsvNumber(row.nvtRatio) },
         { header: 'NVT Signal', value: (row) => formatCsvNumber(row.nvtSignal) },
       ],
@@ -373,7 +373,7 @@ export class NvtRatioChartPageComponent implements AfterViewInit {
 
   protected lastUpdatedText(): string {
     const ts = this.lastUpdated();
-    if (!ts) return 'Adatra vár';
+    if (!ts) return $localize`:Waiting for data@@charts.waitingForData:Waiting for data`;
     return new Date(ts).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
   }
 

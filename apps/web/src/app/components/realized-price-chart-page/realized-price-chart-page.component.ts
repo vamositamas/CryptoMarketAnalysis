@@ -34,24 +34,24 @@ interface TimeframeOption {
 }
 
 const TIMEFRAMES: TimeframeOption[] = [
-  { label: '1 hó', value: '1m' },
-  { label: '3 hó', value: '3m' },
-  { label: '6 hó', value: '6m' },
-  { label: '1 év', value: '1y' },
-  { label: '2 év', value: '2y' },
+  { label: $localize`:Timeframe 1 month@@charts.timeframe.1m:1 month`, value: '1m' },
+  { label: $localize`:Timeframe 3 months@@charts.timeframe.3m:3 months`, value: '3m' },
+  { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
+  { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
+  { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
   { label: 'Mind', value: 'all' },
 ];
 
 const HALVING_EVENTS = [
-  { date: '2012-11-28', label: '2012 felezés' },
-  { date: '2016-07-09', label: '2016 felezés' },
-  { date: '2020-05-11', label: '2020 felezés' },
-  { date: '2024-04-19', label: '2024 felezés' },
+  { date: '2012-11-28', label: $localize`:2012 halving label@@charts.halving.2012:2012 halving` },
+  { date: '2016-07-09', label: $localize`:2016 halving label@@charts.halving.2016:2016 halving` },
+  { date: '2020-05-11', label: $localize`:2020 halving label@@charts.halving.2020:2020 halving` },
+  { date: '2024-04-19', label: $localize`:2024 halving label@@charts.halving.2024:2024 halving` },
 ];
 
 const REALIZED_PRICE_ALERT_METRICS: AlertMetricOption[] = [
-  { value: 'realized_price', label: 'Realizált ár (USD)' },
-  { value: 'btc_price', label: 'BTC ár USD' },
+  { value: 'realized_price', label: $localize`:Realized price USD metric@@charts.metric.realizedPriceUsd:Realized price USD` },
+  { value: 'btc_price', label: $localize`:BTC price USD metric@@charts.metric.btcPriceUsd:BTC price USD` },
 ];
 
 const HALVING_DATES_MS = [
@@ -112,10 +112,10 @@ export class RealizePriceChartPageComponent implements AfterViewInit {
     const rp = lastRpPoint?.realizedPrice ?? null;
     const mvrv = lastRpPoint?.mvrvRatio ?? null;
     return [
-      { label: 'BTC ár', value: formatUsd(last.priceUsd) },
-      { label: 'Realizált ár', value: rp !== null ? formatUsd(rp) : 'Nincs adat' },
-      { label: 'MVRV arány', value: mvrv !== null ? mvrv.toFixed(2) : 'Nincs adat' },
-      { label: 'Jelzés', value: mvrv !== null ? getMvrvSignal(mvrv) : 'Nincs adat' },
+      { label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`, value: formatUsd(last.priceUsd) },
+      { label: $localize`:Realized price metric@@charts.metric.realizedPrice:Realized price`, value: rp !== null ? formatUsd(rp) : $localize`:No data value@@common.noData:No data` },
+      { label: $localize`:MVRV ratio metric@@charts.metric.mvrvRatio:MVRV ratio`, value: mvrv !== null ? mvrv.toFixed(2) : $localize`:No data value@@common.noData:No data` },
+      { label: $localize`:Signal metric@@charts.metric.signal:Signal`, value: mvrv !== null ? getMvrvSignal(mvrv) : $localize`:No data value@@common.noData:No data` },
     ];
   });
 
@@ -158,7 +158,7 @@ export class RealizePriceChartPageComponent implements AfterViewInit {
       datasets: [
         {
           type: 'line' as const,
-          label: 'BTC ár (USD)',
+          label: $localize`:BTC price USD metric@@charts.metric.btcPriceUsd:BTC price USD`,
           data: points.map((p) => p.priceUsd),
           borderWidth: 2,
           pointRadius: 0,
@@ -172,7 +172,7 @@ export class RealizePriceChartPageComponent implements AfterViewInit {
         },
         {
           type: 'line' as const,
-          label: 'Realizált ár (USD)',
+          label: $localize`:Realized price USD metric@@charts.metric.realizedPriceUsd:Realized price USD`,
           data: points.map((p) => p.realizedPrice),
           borderColor: '#000000',
           borderWidth: 2,
@@ -184,7 +184,7 @@ export class RealizePriceChartPageComponent implements AfterViewInit {
         {
           type: 'line' as const,
           showLine: false,
-          label: 'MVRV arány',
+          label: $localize`:MVRV ratio metric@@charts.metric.mvrvRatio:MVRV ratio`,
           data: points.map((p) => p.mvrvRatio),
           backgroundColor: 'rgba(156, 163, 175, 0.7)',
           pointRadius: 2,
@@ -230,7 +230,7 @@ export class RealizePriceChartPageComponent implements AfterViewInit {
           label: (item) => {
             if (item.dataset.yAxisID === 'y2') {
               const v = item.parsed.y;
-              return `MVRV Ratio: ${v?.toFixed(3) ?? 'Nincs adat'}`;
+              return `MVRV Ratio: ${v?.toFixed(3) ?? $localize`:No data value@@common.noData:No data`}`;
             }
             if (item.datasetIndex === 1) {
               return `Realized Price: ${formatUsd(Number(item.parsed.y))}`;
@@ -330,17 +330,17 @@ export class RealizePriceChartPageComponent implements AfterViewInit {
       rows: this.dataPoints(),
       fileName: `realized-price_${getExportDateStamp()}.csv`,
       columns: [
-        { header: 'Dátum', value: (row) => row.date },
-        { header: 'Ár USD', value: (row) => formatCsvNumber(row.priceUsd) },
-        { header: 'Realizált ár', value: (row) => formatCsvNumber(row.realizedPrice) },
-        { header: 'MVRV arány', value: (row) => formatCsvNumber(row.mvrvRatio) },
+        { header: $localize`:Date header@@charts.csv.date:Date`, value: (row) => row.date },
+        { header: $localize`:Price USD header@@charts.csv.priceUsd:Price USD`, value: (row) => formatCsvNumber(row.priceUsd) },
+        { header: $localize`:Realized price metric@@charts.metric.realizedPrice:Realized price`, value: (row) => formatCsvNumber(row.realizedPrice) },
+        { header: $localize`:MVRV ratio metric@@charts.metric.mvrvRatio:MVRV ratio`, value: (row) => formatCsvNumber(row.mvrvRatio) },
       ],
     });
   }
 
   protected lastUpdatedText(): string {
     const ts = this.lastUpdated();
-    if (!ts) return 'Adatra vár';
+    if (!ts) return $localize`:Waiting for data@@charts.waitingForData:Waiting for data`;
     return new Date(ts).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
   }
 
@@ -365,8 +365,8 @@ export class RealizePriceChartPageComponent implements AfterViewInit {
 }
 
 function getMvrvSignal(value: number): string {
-  if (value > 3.5) return 'Eladási zóna';
-  if (value > 2.0) return 'Túlértékelt';
+  if (value > 3.5) return $localize`:Sell zone signal@@charts.signal.sellZone:Sell zone`;
+  if (value > 2.0) return $localize`:Overvalued signal@@charts.signal.overvalued:Overvalued`;
   if (value >= 1.0) return 'Valósérték-tartomány';
   return 'Realizált ár alatt';
 }

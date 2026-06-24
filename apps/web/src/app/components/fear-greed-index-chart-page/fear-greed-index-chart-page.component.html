@@ -1,13 +1,13 @@
 <section class="content-section rainbow-chart-page">
   <div class="chart-page-header">
     <div>
-      <a class="form-link" routerLink="/charts">Vissza a grafikontárba</a>
-      <p class="eyebrow">Ciklusindikátorok</p>
-      <h2>Félelem és kapzsiság index</h2>
+      <a class="form-link" routerLink="/charts" i18n="Back to chart library@@charts.backToLibrary">Back to chart library</a>
+      <p class="eyebrow" i18n="Chart category label@@charts.category.cycle">Cycle Indicators</p>
+      <h2>Fear & Greed Index</h2>
       <p>Bitcoin market sentiment — from extreme fear to extreme greed</p>
     </div>
     <div class="chart-status">
-      <span>Utoljára frissítve</span>
+      <span i18n="Chart last updated label@@charts.lastUpdated">Last updated</span>
       <strong>{{ lastUpdatedText() }}</strong>
     </div>
   </div>
@@ -27,13 +27,13 @@
       }
     </div>
     <div class="chart-actions">
-      <button type="button" class="secondary-button" (click)="resetZoom()">Zoom visszaállítása</button>
+      <button type="button" class="secondary-button" (click)="resetZoom()" i18n="Zoom reset label@@charts.zoomReset">Reset zoom</button>
       <div class="export-menu">
-        <button type="button" class="secondary-button" (click)="toggleExportMenu()">Export</button>
+        <button type="button" class="secondary-button" (click)="toggleExportMenu()" i18n="Export control label@@charts.exportControl">Export</button>
         @if (exportMenuOpen()) {
           <div class="export-options">
-            <button type="button" (click)="exportPng()">Exportálás PNG-ként</button>
-            <button type="button" (click)="exportCsv()">Exportálás CSV-ként</button>
+            <button type="button" (click)="exportPng()" i18n="Export PNG option@@charts.exportPng">Export as PNG</button>
+            <button type="button" (click)="exportCsv()" i18n="Export CSV option@@charts.exportCsv">Export as CSV</button>
           </div>
         }
       </div>
@@ -41,9 +41,9 @@
         chartId="fear-greed-index"
         (annotationsChanged)="updateUserAnnotations($event)"
       ></app-chart-annotations>
-      <button type="button" class="secondary-button" (click)="openAlertModal()">Riasztás létrehozása</button>
+      <button type="button" class="secondary-button" (click)="openAlertModal()" i18n="Create alert button@@alerts.create">Create alert</button>
       <app-chart-favourite-button [chartId]="'fear-greed-index'"></app-chart-favourite-button>
-      <button type="button" class="secondary-button" (click)="toggleInfo()">Info</button>
+      <button type="button" class="secondary-button" (click)="toggleInfo()" i18n="Info control label@@charts.infoControl">Info</button>
     </div>
   </div>
 
@@ -64,7 +64,7 @@
       @if (isLoading()) {
         <div class="loading-state" role="status">
           <span class="loading-spinner" aria-hidden="true"></span>
-          <span>Grafikonadatok betöltése...</span>
+          <span i18n="Chart loading state@@charts.loading">Loading chart data...</span>
         </div>
       }
 
@@ -76,14 +76,14 @@
           (chartPointSelected)="handleChartPoint($event)"
         ></app-chart-viewer>
       } @else if (!isLoading() && !errorMessage()) {
-        <p class="empty-state">Még nem áll rendelkezésre félelem és kapzsiság index adat.</p>
+        <p class="empty-state" i18n="Chart empty state@@charts.empty.fear.greed.index.data.is.not.available.yet">Fear & Greed Index data is not available yet.</p>
       }
     </div>
   </div>
 
   @if (infoOpen()) {
     <app-chart-info-panel
-      title="Félelem és kapzsiság index"
+      title="Fear & Greed Index"
       [about]="infoAbout"
       [currentFields]="infoCurrentFields()"
       [interpretation]="infoInterpretation()"

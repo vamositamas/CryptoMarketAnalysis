@@ -34,11 +34,11 @@ interface TimeframeOption {
 }
 
 const TIMEFRAMES: TimeframeOption[] = [
-  { label: '1 hó', value: '1m' },
-  { label: '3 hó', value: '3m' },
-  { label: '6 hó', value: '6m' },
-  { label: '1 év', value: '1y' },
-  { label: '2 év', value: '2y' },
+  { label: $localize`:Timeframe 1 month@@charts.timeframe.1m:1 month`, value: '1m' },
+  { label: $localize`:Timeframe 3 months@@charts.timeframe.3m:3 months`, value: '3m' },
+  { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
+  { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
+  { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
   { label: 'Mind', value: 'all' },
 ];
 
@@ -78,10 +78,10 @@ export class PiCycleTopChartPageComponent implements AfterViewInit {
     const ma = lastIdx >= 0 ? this.maAt(lastIdx) : { ma111: null, ma350x2: null };
 
     return [
-      { label: 'Aktuális ár',   value: point ? formatUsd(point.priceUsd) : 'Adatra vár' },
+      { label: $localize`:Current price metric@@charts.metric.currentPrice:Current price`,   value: point ? formatUsd(point.priceUsd) : $localize`:Waiting for data@@charts.waitingForData:Waiting for data` },
       { label: '111 napos MA',      value: ma.ma111   ? formatUsd(ma.ma111)   : 'Előzményekre vár' },
       { label: '350 napos MA x 2',  value: ma.ma350x2 ? formatUsd(ma.ma350x2) : 'Előzményekre vár' },
-      { label: 'Jelzés',          value: point ? getStatusText({ ...point, ...ma }) : 'Adatra vár' },
+      { label: $localize`:Signal metric@@charts.metric.signal:Signal`,          value: point ? getStatusText({ ...point, ...ma }) : $localize`:Waiting for data@@charts.waitingForData:Waiting for data` },
     ];
   });
   protected readonly infoInterpretation = computed(() => {
@@ -134,7 +134,7 @@ export class PiCycleTopChartPageComponent implements AfterViewInit {
       labels: [...points.map((p) => p.date), ...futureLabels],
       datasets: [
         {
-          label: 'Bitcoin ár',
+          label: $localize`:Bitcoin price metric@@charts.metric.bitcoinPrice:Bitcoin price`,
           data: [...points.map((p) => p.priceUsd), ...futureNulls],
           borderColor: '#000000',
           backgroundColor: 'transparent',
@@ -298,8 +298,8 @@ export class PiCycleTopChartPageComponent implements AfterViewInit {
       rows: this.dataPoints(),
       fileName: `pi-cycle-top_${getExportDateStamp()}.csv`,
       columns: [
-        { header: 'Dátum', value: (row) => row.date },
-        { header: 'Ár USD', value: (row) => formatCsvNumber(row.priceUsd) },
+        { header: $localize`:Date header@@charts.csv.date:Date`, value: (row) => row.date },
+        { header: $localize`:Price USD header@@charts.csv.priceUsd:Price USD`, value: (row) => formatCsvNumber(row.priceUsd) },
         { header: '111 napos MA', value: (row) => formatCsvNumber(row.ma111) },
         { header: '350 napos MA x2', value: (row) => formatCsvNumber(row.ma350x2) },
       ],
@@ -310,7 +310,7 @@ export class PiCycleTopChartPageComponent implements AfterViewInit {
     const timestamp = this.lastUpdated();
 
     if (!timestamp) {
-      return 'Adatra vár';
+      return $localize`:Waiting for data@@charts.waitingForData:Waiting for data`;
     }
 
     return new Date(timestamp).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';

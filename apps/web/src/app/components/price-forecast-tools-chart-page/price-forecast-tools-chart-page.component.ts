@@ -34,23 +34,23 @@ interface TimeframeOption {
 }
 
 const TIMEFRAMES: TimeframeOption[] = [
-  { label: '1 hó', value: '1m' },
-  { label: '3 hó', value: '3m' },
-  { label: '6 hó', value: '6m' },
-  { label: '1 év', value: '1y' },
-  { label: '2 év', value: '2y' },
+  { label: $localize`:Timeframe 1 month@@charts.timeframe.1m:1 month`, value: '1m' },
+  { label: $localize`:Timeframe 3 months@@charts.timeframe.3m:3 months`, value: '3m' },
+  { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
+  { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
+  { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
   { label: 'Mind', value: 'all' },
 ];
 
 const HALVING_EVENTS = [
-  { date: '2012-11-28', label: '2012 felezés' },
-  { date: '2016-07-09', label: '2016 felezés' },
-  { date: '2020-05-11', label: '2020 felezés' },
-  { date: '2024-04-19', label: '2024 felezés' },
+  { date: '2012-11-28', label: $localize`:2012 halving label@@charts.halving.2012:2012 halving` },
+  { date: '2016-07-09', label: $localize`:2016 halving label@@charts.halving.2016:2016 halving` },
+  { date: '2020-05-11', label: $localize`:2020 halving label@@charts.halving.2020:2020 halving` },
+  { date: '2024-04-19', label: $localize`:2024 halving label@@charts.halving.2024:2024 halving` },
 ];
 
 const PRICE_FORECAST_ALERT_METRICS: AlertMetricOption[] = [
-  { value: 'btc_price', label: 'BTC ár USD' },
+  { value: 'btc_price', label: $localize`:BTC price USD metric@@charts.metric.btcPriceUsd:BTC price USD` },
 ];
 
 @Component({
@@ -101,7 +101,7 @@ export class PriceForecastToolsChartPageComponent implements AfterViewInit {
     if (cvdd !== null && price < cvdd) {
       signalText = 'Deep Undervalue';
     } else if (balancedPrice !== null && price < balancedPrice) {
-      signalText = 'Alulértékelt';
+      signalText = $localize`:Undervalued signal@@charts.signal.undervalued:Undervalued`;
     } else if (deltaTop !== null && price > deltaTop) {
       signalText = 'Approaching Top';
     } else if (topCap !== null && price > topCap) {
@@ -111,9 +111,9 @@ export class PriceForecastToolsChartPageComponent implements AfterViewInit {
     }
 
     return [
-      { label: 'BTC ár', value: formatUsd(price) },
-      { label: 'Top Cap', value: topCap !== null ? formatUsd(topCap) : 'Nincs adat' },
-      { label: 'Delta Top', value: deltaTop !== null ? formatUsd(deltaTop) : 'Nincs adat' },
+      { label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`, value: formatUsd(price) },
+      { label: 'Top Cap', value: topCap !== null ? formatUsd(topCap) : $localize`:No data value@@common.noData:No data` },
+      { label: 'Delta Top', value: deltaTop !== null ? formatUsd(deltaTop) : $localize`:No data value@@common.noData:No data` },
       { label: 'CVDD', value: cvdd !== null ? formatUsd(cvdd) : 'Loading...' },
       { label: 'Balanced Price', value: balancedPrice !== null ? formatUsd(balancedPrice) : 'Loading...' },
       {
@@ -122,14 +122,14 @@ export class PriceForecastToolsChartPageComponent implements AfterViewInit {
           ? (price > terminalPrice ? `${formatUsd(terminalPrice)} — Sell signal` : formatUsd(terminalPrice))
           : 'Loading...',
       },
-      { label: 'Jelzés', value: signalText },
+      { label: $localize`:Signal metric@@charts.metric.signal:Signal`, value: signalText },
     ];
   });
 
   protected readonly infoInterpretation = computed(() => {
     const points = this.dataPoints();
     const last = points[points.length - 1];
-    if (!last) return 'Adatra vár.';
+    if (!last) return $localize`:Waiting for data sentence@@charts.waitingForDataSentence:Waiting for data.`;
 
     const price = last.priceUsd;
     const cvdd = last.cvdd;
@@ -238,7 +238,7 @@ export class PriceForecastToolsChartPageComponent implements AfterViewInit {
         // BTC Price — near-black, thin, on top
         {
           type: 'line' as const,
-          label: 'BTC ár',
+          label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`,
           data: points.map((p) => p.priceUsd),
           borderColor: '#1f2937',
           borderWidth: 1,
@@ -382,8 +382,8 @@ export class PriceForecastToolsChartPageComponent implements AfterViewInit {
       rows: this.dataPoints(),
       fileName: `price-forecast-tools_${getExportDateStamp()}.csv`,
       columns: [
-        { header: 'Dátum', value: (row) => row.date },
-        { header: 'Ár USD', value: (row) => formatCsvNumber(row.priceUsd) },
+        { header: $localize`:Date header@@charts.csv.date:Date`, value: (row) => row.date },
+        { header: $localize`:Price USD header@@charts.csv.priceUsd:Price USD`, value: (row) => formatCsvNumber(row.priceUsd) },
         { header: 'Top Cap', value: (row) => formatCsvNumber(row.topCap) },
         { header: 'Delta Top', value: (row) => formatCsvNumber(row.deltaTop) },
         { header: 'CVDD', value: (row) => formatCsvNumber(row.cvdd) },
@@ -395,7 +395,7 @@ export class PriceForecastToolsChartPageComponent implements AfterViewInit {
 
   protected lastUpdatedText(): string {
     const ts = this.lastUpdated();
-    if (!ts) return 'Adatra vár';
+    if (!ts) return $localize`:Waiting for data@@charts.waitingForData:Waiting for data`;
     return new Date(ts).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
   }
 

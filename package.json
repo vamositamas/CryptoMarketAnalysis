@@ -7,7 +7,7 @@
     "dev:web": "nx serve web",
     "data:init-historical": "nx run api:data-init-historical",
     "build": "nx run-many --target=build",
-    "build:vercel": "node apps/web/scripts/xliff-to-json.mjs apps/web/src/locale/messages.hu.xlf apps/web/public/assets/i18n/hu.json && node apps/web/scripts/xliff-to-json.mjs apps/web/src/locale/messages.en.xlf apps/web/public/assets/i18n/en.json && npx nx build web --configuration=production && npx esbuild api/_handler.ts --bundle --packages=external --platform=node --target=node20 --outfile=api/_bundle.js --tsconfig=api/tsconfig.json --format=cjs",
+    "build:vercel": "npx nx build web --configuration=production && npx esbuild api/_handler.ts --bundle --packages=external --platform=node --target=node20 --outfile=api/_bundle.js --tsconfig=api/tsconfig.json --format=cjs",
     "test": "nx run-many --target=test"
   },
   "engines": {

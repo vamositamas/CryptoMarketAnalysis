@@ -118,7 +118,7 @@ export class BitcoinHalvingProgressChartPageComponent {
 
   protected readonly infoLastUpdated = computed(() => {
     const ts = this.lastUpdated();
-    if (!ts) return 'Adatra vár';
+    if (!ts) return $localize`:Waiting for data@@charts.waitingForData:Waiting for data`;
     return new Date(ts).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
   });
 
@@ -149,7 +149,7 @@ export class BitcoinHalvingProgressChartPageComponent {
       labels: allDates,
       datasets: [
         {
-          label: 'BTC ár',
+          label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`,
           data: [...points.map((p) => p.priceUsd), ...futureNulls],
           borderColor: '#000000',
           backgroundColor: 'transparent',
@@ -346,8 +346,8 @@ export class BitcoinHalvingProgressChartPageComponent {
       rows: this.dataPoints(),
       fileName: `bitcoin-halving-progress_${getExportDateStamp()}.csv`,
       columns: [
-        { header: 'Dátum', value: (row) => row.date },
-        { header: 'Ár USD', value: (row) => formatCsvNumber(row.priceUsd) },
+        { header: $localize`:Date header@@charts.csv.date:Date`, value: (row) => row.date },
+        { header: $localize`:Price USD header@@charts.csv.priceUsd:Price USD`, value: (row) => formatCsvNumber(row.priceUsd) },
       ],
     });
   }

@@ -36,23 +36,23 @@ interface TimeframeOption {
 }
 
 const TIMEFRAMES: TimeframeOption[] = [
-  { label: '1 hó', value: '1m' },
-  { label: '3 hó', value: '3m' },
-  { label: '6 hó', value: '6m' },
-  { label: '1 év', value: '1y' },
-  { label: '2 év', value: '2y' },
+  { label: $localize`:Timeframe 1 month@@charts.timeframe.1m:1 month`, value: '1m' },
+  { label: $localize`:Timeframe 3 months@@charts.timeframe.3m:3 months`, value: '3m' },
+  { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
+  { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
+  { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
   { label: 'Mind', value: 'all' },
 ];
 
 const HALVING_EVENTS = [
-  { date: '2012-11-28', label: '2012 felezés' },
-  { date: '2016-07-09', label: '2016 felezés' },
-  { date: '2020-05-11', label: '2020 felezés' },
-  { date: '2024-04-19', label: '2024 felezés' },
+  { date: '2012-11-28', label: $localize`:2012 halving label@@charts.halving.2012:2012 halving` },
+  { date: '2016-07-09', label: $localize`:2016 halving label@@charts.halving.2016:2016 halving` },
+  { date: '2020-05-11', label: $localize`:2020 halving label@@charts.halving.2020:2020 halving` },
+  { date: '2024-04-19', label: $localize`:2024 halving label@@charts.halving.2024:2024 halving` },
 ];
 
 const DIFFICULTY_RIBBON_ALERT_METRICS: AlertMetricOption[] = [
-  { value: 'btc_price', label: 'BTC ár USD' },
+  { value: 'btc_price', label: $localize`:BTC price USD metric@@charts.metric.btcPriceUsd:BTC price USD` },
 ];
 
 @Component({
@@ -100,16 +100,16 @@ export class DifficultyRibbonChartPageComponent implements AfterViewInit {
         ? 'Compressed (Miner Stress)'
         : 'Expanded (Healthy)';
     return [
-      { label: 'BTC ár', value: formatUsd(price) },
-      { label: '9d MA', value: ma9 !== null ? formatDifficulty(ma9) : 'Nincs adat' },
-      { label: '200d MA', value: ma200 !== null ? formatDifficulty(ma200) : 'Nincs adat' },
+      { label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`, value: formatUsd(price) },
+      { label: '9d MA', value: ma9 !== null ? formatDifficulty(ma9) : $localize`:No data value@@common.noData:No data` },
+      { label: '200d MA', value: ma200 !== null ? formatDifficulty(ma200) : $localize`:No data value@@common.noData:No data` },
       { label: 'Szalag állapota', value: ribbonStatus },
     ];
   });
 
   protected readonly infoInterpretation = computed(() => {
     const points = this.dataPoints();
-    if (!points.length) return 'Adatra vár.';
+    if (!points.length) return $localize`:Waiting for data sentence@@charts.waitingForDataSentence:Waiting for data.`;
     const last = [...points].reverse().find((p) => p.ma9 !== null) ?? points[points.length - 1];
     const ma9 = last.ma9;
     const ma200 = last.ma200;
@@ -230,7 +230,7 @@ export class DifficultyRibbonChartPageComponent implements AfterViewInit {
         },
         {
           type: 'line' as const,
-          label: 'BTC ár',
+          label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`,
           data: points.map((p) => p.priceUsd),
           borderColor: '#1f2937',
           borderWidth: 1.5,
@@ -390,8 +390,8 @@ export class DifficultyRibbonChartPageComponent implements AfterViewInit {
       rows: this.dataPoints(),
       fileName: `difficulty-ribbon_${getExportDateStamp()}.csv`,
       columns: [
-        { header: 'Dátum', value: (row) => row.date },
-        { header: 'Ár USD', value: (row) => formatCsvNumber(row.priceUsd) },
+        { header: $localize`:Date header@@charts.csv.date:Date`, value: (row) => row.date },
+        { header: $localize`:Price USD header@@charts.csv.priceUsd:Price USD`, value: (row) => formatCsvNumber(row.priceUsd) },
         { header: '9d MA', value: (row) => formatCsvNumber(row.ma9) },
         { header: '14d MA', value: (row) => formatCsvNumber(row.ma14) },
         { header: '25d MA', value: (row) => formatCsvNumber(row.ma25) },
@@ -406,7 +406,7 @@ export class DifficultyRibbonChartPageComponent implements AfterViewInit {
 
   protected lastUpdatedText(): string {
     const ts = this.lastUpdated();
-    if (!ts) return 'Adatra vár';
+    if (!ts) return $localize`:Waiting for data@@charts.waitingForData:Waiting for data`;
     return new Date(ts).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
   }
 
@@ -467,7 +467,7 @@ function formatUsd(value: number): string {
 }
 
 function formatDifficulty(value: number | null): string {
-  if (value === null || !Number.isFinite(value)) return 'Nincs adat';
+  if (value === null || !Number.isFinite(value)) return $localize`:No data value@@common.noData:No data`;
   if (value >= 1e15) return `${(value / 1e15).toFixed(2)}P`;
   if (value >= 1e12) return `${(value / 1e12).toFixed(2)}T`;
   if (value >= 1e9) return `${(value / 1e9).toFixed(2)}B`;

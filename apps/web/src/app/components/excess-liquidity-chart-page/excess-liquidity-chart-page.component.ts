@@ -32,11 +32,11 @@ interface TimeframeOption {
 }
 
 const TIMEFRAMES: TimeframeOption[] = [
-  { label: '1 hó', value: '1m' },
-  { label: '3 hó', value: '3m' },
-  { label: '6 hó', value: '6m' },
-  { label: '1 év', value: '1y' },
-  { label: '2 év', value: '2y' },
+  { label: $localize`:Timeframe 1 month@@charts.timeframe.1m:1 month`, value: '1m' },
+  { label: $localize`:Timeframe 3 months@@charts.timeframe.3m:3 months`, value: '3m' },
+  { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
+  { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
+  { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
   { label: 'Mind', value: 'all' },
 ];
 
@@ -80,26 +80,26 @@ export class ExcessLiquidityChartPageComponent implements AfterViewInit {
     const elVal = lastEL?.excessLiquidityLeading ?? null;
 
     const ycSignal =
-      ycVal === null ? 'Nincs adat'
+      ycVal === null ? $localize`:No data value@@common.noData:No data`
       : ycVal > 0 ? 'Steepening'
       : 'Flattening / Inverted';
 
     const elSignal =
-      elVal === null ? 'Nincs adat'
+      elVal === null ? $localize`:No data value@@common.noData:No data`
       : elVal > 0 ? 'Positive'
       : 'Negative';
 
     return [
-      { label: '3m10y Change (1yr, bps)', value: ycVal !== null ? ycVal.toFixed(1) : 'Nincs adat' },
+      { label: '3m10y Change (1yr, bps)', value: ycVal !== null ? ycVal.toFixed(1) : $localize`:No data value@@common.noData:No data` },
       { label: 'Hozamgörbe', value: ycSignal },
-      { label: 'Excess Liquidity (Leading)', value: elVal !== null ? elVal.toFixed(2) + '%' : 'Nincs adat' },
+      { label: 'Excess Liquidity (Leading)', value: elVal !== null ? elVal.toFixed(2) + '%' : $localize`:No data value@@common.noData:No data` },
       { label: 'Likviditási jelzés', value: elSignal },
     ];
   });
 
   protected readonly infoInterpretation = computed(() => {
     const points = this.dataPoints();
-    if (!points.length) return 'Adatra vár.';
+    if (!points.length) return $localize`:Waiting for data sentence@@charts.waitingForDataSentence:Waiting for data.`;
 
     const lastEL = [...points].reverse().find((p) => p.excessLiquidityLeading !== null);
     const elVal = lastEL?.excessLiquidityLeading ?? null;
@@ -189,7 +189,7 @@ export class ExcessLiquidityChartPageComponent implements AfterViewInit {
           maxTicksLimit: 8,
         },
         grid: { display: false },
-        title: { display: true, text: 'Többletlikviditás (%)', color: 'rgba(161, 120, 5, 1)', font: { size: 11 } },
+        title: { display: true, text: $localize`:Excess liquidity percent axis@@charts.axis.excessLiquidityPercent:Excess liquidity (%)`, color: 'rgba(161, 120, 5, 1)', font: { size: 11 } },
       },
     },
     plugins: {
@@ -286,7 +286,7 @@ export class ExcessLiquidityChartPageComponent implements AfterViewInit {
       rows: this.dataPoints(),
       fileName: `excess-liquidity_${getExportDateStamp()}.csv`,
       columns: [
-        { header: 'Dátum', value: (row) => row.date },
+        { header: $localize`:Date header@@charts.csv.date:Date`, value: (row) => row.date },
         { header: '3m10y 1yr Change (bps)', value: (row) => formatCsvNumber(row.yieldCurve1yChange) },
         { header: 'Excess Liquidity Leading (%)', value: (row) => formatCsvNumber(row.excessLiquidityLeading) },
       ],
@@ -295,7 +295,7 @@ export class ExcessLiquidityChartPageComponent implements AfterViewInit {
 
   protected lastUpdatedText(): string {
     const ts = this.lastUpdated();
-    if (!ts) return 'Adatra vár';
+    if (!ts) return $localize`:Waiting for data@@charts.waitingForData:Waiting for data`;
     return new Date(ts).toLocaleString('en-GB', {
       day: '2-digit', month: 'short', year: 'numeric',
       hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false,

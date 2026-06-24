@@ -32,11 +32,11 @@ interface TimeframeOption {
 }
 
 const TIMEFRAMES: TimeframeOption[] = [
-  { label: '1 hó', value: '1m' },
-  { label: '3 hó', value: '3m' },
-  { label: '6 hó', value: '6m' },
-  { label: '1 év', value: '1y' },
-  { label: '2 év', value: '2y' },
+  { label: $localize`:Timeframe 1 month@@charts.timeframe.1m:1 month`, value: '1m' },
+  { label: $localize`:Timeframe 3 months@@charts.timeframe.3m:3 months`, value: '3m' },
+  { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
+  { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
+  { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
   { label: 'Mind', value: 'all' },
 ];
 
@@ -80,22 +80,22 @@ export class SpxLiquidityChartPageComponent implements AfterViewInit {
     const elVal = lastEL?.excessLiquidityLeading ?? null;
 
     return [
-      { label: 'SPX YoY Change', value: spxVal !== null ? spxVal.toFixed(1) + '%' : 'Nincs adat' },
+      { label: 'SPX YoY Change', value: spxVal !== null ? spxVal.toFixed(1) + '%' : $localize`:No data value@@common.noData:No data` },
       {
         label: 'SPX Trend',
-        value: spxVal === null ? 'Nincs adat' : spxVal > 0 ? 'Positive' : 'Negative',
+        value: spxVal === null ? $localize`:No data value@@common.noData:No data` : spxVal > 0 ? 'Positive' : 'Negative',
       },
-      { label: 'Excess Liquidity (Leading)', value: elVal !== null ? elVal.toFixed(2) + '%' : 'Nincs adat' },
+      { label: 'Excess Liquidity (Leading)', value: elVal !== null ? elVal.toFixed(2) + '%' : $localize`:No data value@@common.noData:No data` },
       {
         label: 'Likviditási jelzés',
-        value: elVal === null ? 'Nincs adat' : elVal > 0 ? 'Positive (supportive)' : 'Negative (headwind)',
+        value: elVal === null ? $localize`:No data value@@common.noData:No data` : elVal > 0 ? 'Positive (supportive)' : 'Negative (headwind)',
       },
     ];
   });
 
   protected readonly infoInterpretation = computed(() => {
     const points = this.dataPoints();
-    if (!points.length) return 'Adatra vár.';
+    if (!points.length) return $localize`:Waiting for data sentence@@charts.waitingForDataSentence:Waiting for data.`;
 
     const lastEL = [...points].reverse().find((p) => p.excessLiquidityLeading !== null);
     const lastSpx = [...points].reverse().find((p) => p.spxYoyChange !== null);
@@ -191,7 +191,7 @@ export class SpxLiquidityChartPageComponent implements AfterViewInit {
           maxTicksLimit: 8,
         },
         grid: { display: false },
-        title: { display: true, text: 'Többletlikviditás (%)', color: '#1d4ed8', font: { size: 11 } },
+        title: { display: true, text: $localize`:Excess liquidity percent axis@@charts.axis.excessLiquidityPercent:Excess liquidity (%)`, color: '#1d4ed8', font: { size: 11 } },
       },
     },
     plugins: {
@@ -284,7 +284,7 @@ export class SpxLiquidityChartPageComponent implements AfterViewInit {
       rows: this.dataPoints(),
       fileName: `spx-liquidity_${getExportDateStamp()}.csv`,
       columns: [
-        { header: 'Dátum', value: (row) => row.date },
+        { header: $localize`:Date header@@charts.csv.date:Date`, value: (row) => row.date },
         { header: 'S&P 500 YoY (%)', value: (row) => formatCsvNumber(row.spxYoyChange) },
         { header: 'Excess Liquidity Leading (%)', value: (row) => formatCsvNumber(row.excessLiquidityLeading) },
       ],
@@ -293,7 +293,7 @@ export class SpxLiquidityChartPageComponent implements AfterViewInit {
 
   protected lastUpdatedText(): string {
     const ts = this.lastUpdated();
-    if (!ts) return 'Adatra vár';
+    if (!ts) return $localize`:Waiting for data@@charts.waitingForData:Waiting for data`;
     return new Date(ts).toLocaleString('en-GB', {
       day: '2-digit', month: 'short', year: 'numeric',
       hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false,

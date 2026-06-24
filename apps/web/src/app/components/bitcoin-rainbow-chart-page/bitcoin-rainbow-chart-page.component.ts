@@ -34,11 +34,11 @@ interface TimeframeOption {
 }
 
 const TIMEFRAMES: TimeframeOption[] = [
-  { label: '1 hó', value: '1m' },
-  { label: '3 hó', value: '3m' },
-  { label: '6 hó', value: '6m' },
-  { label: '1 év', value: '1y' },
-  { label: '2 év', value: '2y' },
+  { label: $localize`:Timeframe 1 month@@charts.timeframe.1m:1 month`, value: '1m' },
+  { label: $localize`:Timeframe 3 months@@charts.timeframe.3m:3 months`, value: '3m' },
+  { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
+  { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
+  { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
   { label: 'Mind', value: 'all' },
 ];
 
@@ -54,7 +54,7 @@ const BAND_BOUNDARIES = [0.10, 0.25, 0.40, 0.65, 1.00, 1.60, 2.50, 4.00, 6.50, 1
 const RAINBOW_BANDS = [
   { label: 'Tűzoltóár!',                color: 'rgba(30,  58, 138, 0.65)' },
   { label: 'VÉTEL!',                      color: 'rgba(37,  99, 235, 0.65)' },
-  { label: 'Akkumuláció',                color: 'rgba(6,  182, 212, 0.65)' },
+  { label: $localize`:Accumulation signal@@charts.signal.accumulation:Accumulation`,                color: 'rgba(6,  182, 212, 0.65)' },
   { label: 'Még olcsó',               color: 'rgba(34, 197,  94, 0.65)' },
   { label: 'HODL',                      color: 'rgba(132,204,  22, 0.65)' },
   { label: 'Ez már buborék?',         color: 'rgba(234,179,   8, 0.65)' },
@@ -64,10 +64,10 @@ const RAINBOW_BANDS = [
 ];
 
 const HALVING_EVENTS = [
-  { date: '2012-11-28', label: '2012 felezés' },
-  { date: '2016-07-09', label: '2016 felezés' },
-  { date: '2020-05-11', label: '2020 felezés' },
-  { date: '2024-04-19', label: '2024 felezés' },
+  { date: '2012-11-28', label: $localize`:2012 halving label@@charts.halving.2012:2012 halving` },
+  { date: '2016-07-09', label: $localize`:2016 halving label@@charts.halving.2016:2016 halving` },
+  { date: '2020-05-11', label: $localize`:2020 halving label@@charts.halving.2020:2020 halving` },
+  { date: '2024-04-19', label: $localize`:2024 halving label@@charts.halving.2024:2024 halving` },
 ];
 
 function rainbowFairValue(dateStr: string): number {
@@ -85,8 +85,8 @@ function rainbowBandFromPrice(priceUsd: number, fv: number): number {
 }
 
 const RAINBOW_ALERT_METRICS: AlertMetricOption[] = [
-  { value: 'rainbow_band', label: 'Szivárványsáv' },
-  { value: 'btc_price', label: 'BTC ár USD' },
+  { value: 'rainbow_band', label: $localize`:Rainbow band metric@@charts.metric.rainbowBand:Rainbow band` },
+  { value: 'btc_price', label: $localize`:BTC price USD metric@@charts.metric.btcPriceUsd:BTC price USD` },
 ];
 
 @Component({
@@ -118,7 +118,7 @@ export class BitcoinRainbowChartPageComponent implements AfterViewInit {
 
     return [
       { label: 'Aktuális pozíció', value: getBandLabel(band) },
-      { label: 'Aktuális ár', value: point ? formatUsd(point.priceUsd) : 'Adatra vár' },
+      { label: $localize`:Current price metric@@charts.metric.currentPrice:Current price`, value: point ? formatUsd(point.priceUsd) : $localize`:Waiting for data@@charts.waitingForData:Waiting for data` },
     ];
   });
   protected readonly infoInterpretation = computed(() => {
@@ -162,7 +162,7 @@ export class BitcoinRainbowChartPageComponent implements AfterViewInit {
       datasets: [
         ...bandDatasets,
         {
-          label: 'Bitcoin ár',
+          label: $localize`:Bitcoin price metric@@charts.metric.bitcoinPrice:Bitcoin price`,
           data: [...points.map((p) => p.priceUsd), ...futureNulls],
           borderColor: '#000000',
           backgroundColor: 'transparent',
@@ -335,9 +335,9 @@ export class BitcoinRainbowChartPageComponent implements AfterViewInit {
       rows: this.dataPoints(),
       fileName: `bitcoin-rainbow-chart_${getExportDateStamp()}.csv`,
       columns: [
-        { header: 'Dátum', value: (row) => row.date },
-        { header: 'Ár USD', value: (row) => formatCsvNumber(row.priceUsd) },
-        { header: 'Szivárványsáv', value: (row) => row.rainbowBand },
+        { header: $localize`:Date header@@charts.csv.date:Date`, value: (row) => row.date },
+        { header: $localize`:Price USD header@@charts.csv.priceUsd:Price USD`, value: (row) => formatCsvNumber(row.priceUsd) },
+        { header: $localize`:Rainbow band metric@@charts.metric.rainbowBand:Rainbow band`, value: (row) => row.rainbowBand },
       ],
     });
   }
@@ -346,7 +346,7 @@ export class BitcoinRainbowChartPageComponent implements AfterViewInit {
     const timestamp = this.lastUpdated();
 
     if (!timestamp) {
-      return 'Adatra vár';
+      return $localize`:Waiting for data@@charts.waitingForData:Waiting for data`;
     }
 
     return new Date(timestamp).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
