@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, LOCALE_ID, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import {
   AuthApiClient,
@@ -16,8 +16,8 @@ type ModalMode = 'edit' | 'delete' | 'restore' | 'force-reset' | null;
   template: `
     <section class="content-section">
       <div class="section-heading">
-        <p class="eyebrow">Admin</p>
-        <h2>User Management <span class="badge">{{ total() }}</span></h2>
+        <p class="eyebrow" i18n="Admin eyebrow@@admin.common.eyebrow">Admin</p>
+        <h2><ng-container i18n="User management title@@adminUsers.title">User Management</ng-container> <span class="badge">{{ total() }}</span></h2>
       </div>
 
       <div class="admin-toolbar">
@@ -26,17 +26,18 @@ type ModalMode = 'edit' | 'delete' | 'restore' | 'force-reset' | null;
           [(ngModel)]="searchQuery"
           (ngModelChange)="onSearchChange()"
           placeholder="Search by name or email"
+          i18n-placeholder="User search placeholder@@adminUsers.searchPlaceholder"
           class="admin-search-input"
         />
         <select [(ngModel)]="roleFilter" (ngModelChange)="loadUsers()" class="admin-filter-select">
-          <option value="">All Roles</option>
-          <option value="free_user">Free User</option>
-          <option value="premium_user">Premium User</option>
-          <option value="administrator">Administrator</option>
+          <option value="" i18n="All roles filter@@adminUsers.allRoles">All Roles</option>
+          <option value="free_user" i18n="Free user role@@roles.freeUser">Free User</option>
+          <option value="premium_user" i18n="Premium user role@@roles.premiumUser">Premium User</option>
+          <option value="administrator" i18n="Administrator role@@roles.administrator">Administrator</option>
         </select>
         <label class="admin-checkbox-label">
           <input type="checkbox" [(ngModel)]="showDeleted" (ngModelChange)="loadUsers()" />
-          Show deleted
+          <ng-container i18n="Show deleted users filter@@adminUsers.showDeleted">Show deleted</ng-container>
         </label>
       </div>
 
@@ -45,15 +46,15 @@ type ModalMode = 'edit' | 'delete' | 'restore' | 'force-reset' | null;
       }
 
       @if (isLoading()) {
-        <p class="loading-text">Loading users…</p>
+        <p class="loading-text" i18n="Loading users state@@adminUsers.loading">Loading users...</p>
       } @else {
         <div class="user-card-list">
           <div class="user-card-header">
-            <span>User</span>
-            <span>Role</span>
-            <span>Verified</span>
-            <span>Registered</span>
-            <span>Last Login</span>
+            <span i18n="User column header@@adminUsers.columns.user">User</span>
+            <span i18n="Role column header@@adminUsers.columns.role">Role</span>
+            <span i18n="Verified column header@@adminUsers.columns.verified">Verified</span>
+            <span i18n="Registered column header@@adminUsers.columns.registered">Registered</span>
+            <span i18n="Last login column header@@adminUsers.columns.lastLogin">Last Login</span>
             <span></span>
           </div>
 
@@ -73,12 +74,12 @@ type ModalMode = 'edit' | 'delete' | 'restore' | 'force-reset' | null;
                 @if (user.emailVerified) {
                   <span class="verified-icon verified-yes">
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6.5" fill="#dcfce7" stroke="#22c55e"/><path d="M4 7l2 2 4-4" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    Verified
+                    <ng-container i18n="Verified status@@adminUsers.verified">Verified</ng-container>
                   </span>
                 } @else {
                   <span class="verified-icon verified-no">
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6.5" fill="#fee2e2" stroke="#ef4444"/><path d="M4.5 4.5l5 5M9.5 4.5l-5 5" stroke="#dc2626" stroke-width="1.5" stroke-linecap="round"/></svg>
-                    Unverified
+                    <ng-container i18n="Unverified status@@adminUsers.unverified">Unverified</ng-container>
                   </span>
                 }
               </div>
@@ -86,23 +87,23 @@ type ModalMode = 'edit' | 'delete' | 'restore' | 'force-reset' | null;
               <div class="user-card-date">{{ user.lastLoginAt ? formatDate(user.lastLoginAt) : '—' }}</div>
               <div class="user-card-actions">
                 @if (user.deletedAt) {
-                  <button class="uact-btn uact-restore" (click)="openModal('restore', user)">Restore</button>
+                  <button class="uact-btn uact-restore" (click)="openModal('restore', user)" i18n="Restore user action@@adminUsers.actions.restore">Restore</button>
                 } @else {
-                  <button class="uact-btn uact-edit" (click)="openModal('edit', user)">Edit</button>
-                  <button class="uact-btn uact-reset" (click)="openModal('force-reset', user)">Reset PW</button>
-                  <button class="uact-btn uact-delete" (click)="openModal('delete', user)">Delete</button>
+                  <button class="uact-btn uact-edit" (click)="openModal('edit', user)" i18n="Edit user action@@adminUsers.actions.edit">Edit</button>
+                  <button class="uact-btn uact-reset" (click)="openModal('force-reset', user)" i18n="Reset password action@@adminUsers.actions.resetPassword">Reset PW</button>
+                  <button class="uact-btn uact-delete" (click)="openModal('delete', user)" i18n="Delete user action@@adminUsers.actions.delete">Delete</button>
                 }
               </div>
             </div>
           } @empty {
-            <div class="user-card-empty">No users found.</div>
+            <div class="user-card-empty" i18n="No users found@@adminUsers.empty">No users found.</div>
           }
         </div>
 
         <div class="pagination">
-          <button class="ghost-link" [disabled]="currentPage() <= 1" (click)="goToPage(currentPage() - 1)">← Prev</button>
-          <span>Page {{ currentPage() }} of {{ totalPages() }}</span>
-          <button class="ghost-link" [disabled]="currentPage() >= totalPages()" (click)="goToPage(currentPage() + 1)">Next →</button>
+          <button class="ghost-link" [disabled]="currentPage() <= 1" (click)="goToPage(currentPage() - 1)" i18n="Previous page@@pagination.prev">← Prev</button>
+          <span><ng-container i18n="Page label@@pagination.page">Page</ng-container> {{ currentPage() }} <ng-container i18n="Page of label@@pagination.of">of</ng-container> {{ totalPages() }}</span>
+          <button class="ghost-link" [disabled]="currentPage() >= totalPages()" (click)="goToPage(currentPage() + 1)" i18n="Next page@@pagination.next">Next →</button>
         </div>
       }
     </section>
@@ -112,39 +113,39 @@ type ModalMode = 'edit' | 'delete' | 'restore' | 'force-reset' | null;
       <div class="modal-overlay" role="dialog" aria-modal="true">
         <div class="modal-panel">
           <button class="modal-close" (click)="closeModal()">✕</button>
-          <h3>Edit User</h3>
+          <h3 i18n="Edit user modal title@@adminUsers.edit.title">Edit User</h3>
           <p class="modal-subtitle">{{ selectedUser()!.email }}</p>
           <form [formGroup]="editForm" (ngSubmit)="saveEdit()" class="admin-form">
             <label>
-              Full Name
+              <ng-container i18n="Full name label@@form.fullName">Full Name</ng-container>
               <input type="text" formControlName="fullName" />
             </label>
             <label>
-              Role
+              <ng-container i18n="Role label@@adminUsers.form.role">Role</ng-container>
               <select formControlName="role">
-                <option value="free_user">Free User</option>
-                <option value="premium_user">Premium User</option>
-                <option value="administrator">Administrator</option>
+                <option value="free_user" i18n="Free user role@@roles.freeUser">Free User</option>
+                <option value="premium_user" i18n="Premium user role@@roles.premiumUser">Premium User</option>
+                <option value="administrator" i18n="Administrator role@@roles.administrator">Administrator</option>
               </select>
             </label>
             <label>
-              Language
+              <ng-container i18n="Language form label@@form.language">Language</ng-container>
               <select formControlName="languagePreference">
-                <option value="en">English</option>
-                <option value="hu">Hungarian</option>
+                <option value="en" i18n="English language option@@language.english">English</option>
+                <option value="hu" i18n="Hungarian language option@@language.hungarian">Hungarian</option>
               </select>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" formControlName="emailVerified" /> Email Verified
+              <input type="checkbox" formControlName="emailVerified" /> <ng-container i18n="Email verified label@@adminUsers.form.emailVerified">Email Verified</ng-container>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" formControlName="onboardingCompleted" /> Onboarding Completed
+              <input type="checkbox" formControlName="onboardingCompleted" /> <ng-container i18n="Onboarding completed label@@adminUsers.form.onboardingCompleted">Onboarding Completed</ng-container>
             </label>
             <div class="modal-actions">
               <button type="submit" class="primary-button" [disabled]="isSaving()">
-                {{ isSaving() ? 'Saving…' : 'Save Changes' }}
+                {{ isSaving() ? savingLabel() : saveChangesLabel() }}
               </button>
-              <button type="button" class="ghost-link" (click)="closeModal()">Cancel</button>
+              <button type="button" class="ghost-link" (click)="closeModal()" i18n="Cancel button@@common.cancel">Cancel</button>
             </div>
           </form>
         </div>
@@ -160,9 +161,9 @@ type ModalMode = 'edit' | 'delete' | 'restore' | 'force-reset' | null;
           <p>{{ confirmMessage() }}</p>
           <div class="modal-actions">
             <button class="primary-button danger" [disabled]="isSaving()" (click)="confirmAction()">
-              {{ isSaving() ? 'Processing…' : confirmButtonLabel() }}
+              {{ isSaving() ? processingLabel() : confirmButtonLabel() }}
             </button>
-            <button class="ghost-link" (click)="closeModal()">Cancel</button>
+            <button class="ghost-link" (click)="closeModal()" i18n="Cancel button@@common.cancel">Cancel</button>
           </div>
         </div>
       </div>
@@ -172,6 +173,7 @@ type ModalMode = 'edit' | 'delete' | 'restore' | 'force-reset' | null;
 export class AdminUsersPageComponent implements OnInit {
   private readonly api = inject(AuthApiClient);
   private readonly fb = inject(FormBuilder);
+  private readonly locale = inject(LOCALE_ID);
 
   protected readonly users = signal<AdminUserRecord[]>([]);
   protected readonly total = signal(0);
@@ -216,7 +218,7 @@ export class AdminUsersPageComponent implements OnInit {
       this.users.set(result.users);
       this.total.set(result.total);
     } catch {
-      this.showMessage('Failed to load users.', false);
+      this.showMessage($localize`:Failed to load users@@adminUsers.messages.loadFailed:Failed to load users.`, false);
     } finally {
       this.isLoading.set(false);
     }
@@ -271,9 +273,9 @@ export class AdminUsersPageComponent implements OnInit {
       const updated = await this.api.adminUpdateUser(user.id, params);
       this.users.update((list) => list.map((u) => (u.id === updated.id ? updated : u)));
       this.closeModal();
-      this.showMessage('User updated successfully.', true);
+      this.showMessage($localize`:User updated success@@adminUsers.messages.updated:User updated successfully.`, true);
     } catch (error) {
-      this.showMessage(error instanceof ApiClientError ? error.message : 'Failed to update user.', false);
+      this.showMessage(error instanceof ApiClientError ? error.message : $localize`:Failed to update user@@adminUsers.messages.updateFailed:Failed to update user.`, false);
     } finally {
       this.isSaving.set(false);
     }
@@ -290,18 +292,18 @@ export class AdminUsersPageComponent implements OnInit {
         await this.api.adminDeleteUser(user.id);
         this.users.update((list) => list.filter((u) => u.id !== user.id));
         this.total.update((t) => t - 1);
-        this.showMessage('User deactivated.', true);
+        this.showMessage($localize`:User deactivated success@@adminUsers.messages.deactivated:User deactivated.`, true);
       } else if (mode === 'restore') {
         const restored = await this.api.adminRestoreUser(user.id);
         this.users.update((list) => list.map((u) => (u.id === restored.id ? restored : u)));
-        this.showMessage('User restored.', true);
+        this.showMessage($localize`:User restored success@@adminUsers.messages.restored:User restored.`, true);
       } else if (mode === 'force-reset') {
         const result = await this.api.adminForcePasswordReset(user.id);
         this.showMessage(result.message, true);
       }
       this.closeModal();
     } catch (error) {
-      this.showMessage(error instanceof ApiClientError ? error.message : 'Action failed.', false);
+      this.showMessage(error instanceof ApiClientError ? error.message : $localize`:Admin action failed@@adminUsers.messages.actionFailed:Action failed.`, false);
     } finally {
       this.isSaving.set(false);
     }
@@ -309,25 +311,37 @@ export class AdminUsersPageComponent implements OnInit {
 
   protected confirmTitle(): string {
     const mode = this.modalMode();
-    if (mode === 'delete') return 'Deactivate User Account?';
-    if (mode === 'restore') return 'Restore User Account?';
-    return 'Force Password Reset?';
+    if (mode === 'delete') return $localize`:Deactivate user title@@adminUsers.confirm.deleteTitle:Deactivate User Account?`;
+    if (mode === 'restore') return $localize`:Restore user title@@adminUsers.confirm.restoreTitle:Restore User Account?`;
+    return $localize`:Force password reset title@@adminUsers.confirm.forceResetTitle:Force Password Reset?`;
   }
 
   protected confirmMessage(): string {
     const user = this.selectedUser();
-    const name = user?.fullName ?? user?.email ?? 'this user';
+    const name = user?.fullName ?? user?.email ?? $localize`:This user fallback@@adminUsers.confirm.thisUser:this user`;
     const mode = this.modalMode();
-    if (mode === 'delete') return `This will deactivate ${name}'s account and invalidate their sessions. The account can be restored later.`;
-    if (mode === 'restore') return `This will restore ${name}'s account and allow them to log in again.`;
-    return `A password reset email will be sent to ${user?.email}. Their current sessions will be invalidated.`;
+    if (mode === 'delete') return $localize`:Deactivate user message@@adminUsers.confirm.deleteMessage:This will deactivate ${name}'s account and invalidate their sessions. The account can be restored later.`;
+    if (mode === 'restore') return $localize`:Restore user message@@adminUsers.confirm.restoreMessage:This will restore ${name}'s account and allow them to log in again.`;
+    return $localize`:Force password reset message@@adminUsers.confirm.forceResetMessage:A password reset email will be sent to ${user?.email}. Their current sessions will be invalidated.`;
   }
 
   protected confirmButtonLabel(): string {
     const mode = this.modalMode();
-    if (mode === 'delete') return 'Deactivate Account';
-    if (mode === 'restore') return 'Restore Account';
-    return 'Send Reset Email';
+    if (mode === 'delete') return $localize`:Deactivate account button@@adminUsers.confirm.deactivateButton:Deactivate Account`;
+    if (mode === 'restore') return $localize`:Restore account button@@adminUsers.confirm.restoreButton:Restore Account`;
+    return $localize`:Send reset email button@@adminUsers.confirm.sendResetButton:Send Reset Email`;
+  }
+
+  protected savingLabel(): string {
+    return $localize`:Saving state@@common.saving:Saving...`;
+  }
+
+  protected saveChangesLabel(): string {
+    return $localize`:Save changes button@@common.saveChanges:Save Changes`;
+  }
+
+  protected processingLabel(): string {
+    return $localize`:Processing state@@common.processing:Processing...`;
   }
 
   protected avatarInitials(user: AdminUserRecord): string {
@@ -338,13 +352,13 @@ export class AdminUsersPageComponent implements OnInit {
   }
 
   protected roleLabel(role: string): string {
-    if (role === 'administrator') return 'Admin';
-    if (role === 'premium_user') return 'Premium';
-    return 'Free';
+    if (role === 'administrator') return $localize`:Admin role short@@roles.adminShort:Admin`;
+    if (role === 'premium_user') return $localize`:Premium role short@@roles.premiumShort:Premium`;
+    return $localize`:Free role short@@roles.freeShort:Free`;
   }
 
   protected formatDate(iso: string): string {
-    return new Date(iso).toLocaleDateString('en-US', { dateStyle: 'medium', timeZone: 'UTC' });
+    return new Date(iso).toLocaleDateString(this.locale, { dateStyle: 'medium', timeZone: 'UTC' });
   }
 
   private showMessage(msg: string, success: boolean): void {
