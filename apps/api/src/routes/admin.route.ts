@@ -20,6 +20,31 @@ import { DonationsService } from '../services/donations.service';
 import { ResendEmailService, sendRawEmail, substituteTemplateVars } from '../services/email.service';
 import { UserManagementError, UserManagementService } from '../services/user-management.service';
 
+/** Adds one day to a YYYY-MM-DD string */
+function addOneDay(date: string): string {
+  const d = new Date(`${date}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + 1);
+  return d.toISOString().slice(0, 10);
+}
+
+/**
+ * Fetches all historical points via fetchAll, then fills any gap between the
+ * last returned date and today using the ranged fetcher. Blockchain.info's
+ * timespan=all endpoint has a lag of several months, causing a visible gap in
+ * charts when a ranged daily-refresh already has today's value.
+ */
+async function fetchAllWithGapFill(
+  fetchAll: () => Promise<{ date: string; value: number }[]>,
+  fetchRange: (start: string, end: string) => Promise<{ date: string; value: number }[]>,
+): Promise<{ date: string; value: number }[]> {
+  const historical = await fetchAll();
+  const today = new Date().toISOString().slice(0, 10);
+  const lastDate = [...historical].sort((a, b) => a.date.localeCompare(b.date)).at(-1)?.date;
+  if (!lastDate || lastDate >= today) return historical;
+  const gap = await fetchRange(addOneDay(lastDate), today).catch(() => []);
+  return [...historical, ...gap];
+}
+
 type DataRefreshConfigurationServiceContract = Pick<
   DataRefreshConfigurationService,
   'getConfiguration' | 'updateConfiguration'
@@ -438,18 +463,16 @@ export function createAdminRouter(
   router.post('/data-configuration/backfill-miner-fees', ...adminOnly, async (_req, res, next) => {
     try {
       const database = getDatabasePool();
-      if (!database) {
-        res.status(503).json({ error: 'Database unavailable' });
-        return;
-      }
+      if (!database) { res.status(503).json({ error: 'Database unavailable' }); return; }
       const client = new BlockchainInfoClient();
-      const points = await client.fetchTransactionFeesAll();
+      const points = await fetchAllWithGapFill(
+        () => client.fetchTransactionFeesAll(),
+        (s, e) => client.fetchTransactionFees(s, e),
+      );
       const records = points.map((p) => ({ date: p.date, metricName: 'miner_fees', metricValue: p.value }));
       await insertBitcoinMetricsDaily(database, records);
       res.status(200).json({ inserted: records.length, firstDate: records[0]?.date, lastDate: records[records.length - 1]?.date });
-    } catch (error) {
-      next(error);
-    }
+    } catch (error) { next(error); }
   });
 
   router.post('/data-configuration/backfill-price-forecast', ...adminOnly, async (_req, res, next) => {
@@ -488,7 +511,11 @@ export function createAdminRouter(
     try {
       const database = getDatabasePool();
       if (!database) { res.status(503).json({ error: 'Database unavailable' }); return; }
-      const points = await new BlockchainInfoClient().fetchHashRateAll();
+      const client = new BlockchainInfoClient();
+      const points = await fetchAllWithGapFill(
+        () => client.fetchHashRateAll(),
+        (s, e) => client.fetchHashRate(s, e),
+      );
       const records = points.map((p) => ({ date: p.date, metricName: 'hash_rate', metricValue: p.value }));
       await insertBitcoinMetricsDaily(database, records);
       res.status(200).json({ inserted: records.length, firstDate: records[0]?.date, lastDate: records[records.length - 1]?.date });
@@ -499,7 +526,11 @@ export function createAdminRouter(
     try {
       const database = getDatabasePool();
       if (!database) { res.status(503).json({ error: 'Database unavailable' }); return; }
-      const points = await new BlockchainInfoClient().fetchDifficultyAll();
+      const client = new BlockchainInfoClient();
+      const points = await fetchAllWithGapFill(
+        () => client.fetchDifficultyAll(),
+        (s, e) => client.fetchDifficulty(s, e),
+      );
       const records = points.map((p) => ({ date: p.date, metricName: 'mining_difficulty', metricValue: p.value }));
       await insertBitcoinMetricsDaily(database, records);
       res.status(200).json({ inserted: records.length, firstDate: records[0]?.date, lastDate: records[records.length - 1]?.date });
@@ -510,7 +541,11 @@ export function createAdminRouter(
     try {
       const database = getDatabasePool();
       if (!database) { res.status(503).json({ error: 'Database unavailable' }); return; }
-      const points = await new BlockchainInfoClient().fetchTransactionVolumeUsdAll();
+      const client = new BlockchainInfoClient();
+      const points = await fetchAllWithGapFill(
+        () => client.fetchTransactionVolumeUsdAll(),
+        (s, e) => client.fetchTransactionVolumeUsd(s, e),
+      );
       const records = points.map((p) => ({ date: p.date, metricName: 'transaction_volume_usd', metricValue: p.value }));
       await insertBitcoinMetricsDaily(database, records);
       res.status(200).json({ inserted: records.length, firstDate: records[0]?.date, lastDate: records[records.length - 1]?.date });
@@ -521,7 +556,11 @@ export function createAdminRouter(
     try {
       const database = getDatabasePool();
       if (!database) { res.status(503).json({ error: 'Database unavailable' }); return; }
-      const points = await new BlockchainInfoClient().fetchMinersRevenueUsdAll();
+      const client = new BlockchainInfoClient();
+      const points = await fetchAllWithGapFill(
+        () => client.fetchMinersRevenueUsdAll(),
+        (s, e) => client.fetchMinersRevenueUsd(s, e),
+      );
       const records = points.map((p) => ({ date: p.date, metricName: 'miners_revenue_usd', metricValue: p.value }));
       await insertBitcoinMetricsDaily(database, records);
       res.status(200).json({ inserted: records.length, firstDate: records[0]?.date, lastDate: records[records.length - 1]?.date });
