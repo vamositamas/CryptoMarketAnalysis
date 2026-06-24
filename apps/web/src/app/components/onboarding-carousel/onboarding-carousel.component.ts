@@ -1,4 +1,5 @@
 import { Component, computed, output, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 interface OnboardingSlide {
   readonly headline: string;
@@ -12,12 +13,17 @@ const SWIPE_THRESHOLD_PX = 48;
 
 @Component({
   selector: 'app-onboarding-carousel',
+  imports: [RouterLink],
   templateUrl: './onboarding-carousel.component.html',
   styleUrl: './onboarding-carousel.component.scss',
 })
 export class OnboardingCarouselComponent {
   readonly skipped = output<void>();
   readonly completed = output<void>();
+
+  protected readonly termsAccepted = signal(false);
+  protected readonly privacyAccepted = signal(false);
+  protected readonly canComplete = computed(() => this.termsAccepted() && this.privacyAccepted());
 
   protected readonly slides: readonly OnboardingSlide[] = [
     {
@@ -79,6 +85,7 @@ export class OnboardingCarouselComponent {
   }
 
   protected complete(): void {
+    if (!this.canComplete()) return;
     this.completed.emit();
   }
 

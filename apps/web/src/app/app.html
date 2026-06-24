@@ -89,6 +89,16 @@
                 i18n="Disclaimer menu item@@nav.disclaimer">
                 Disclaimer
               </a>
+              <a routerLink="/privacy-policy" class="user-menu-item" role="menuitem"
+                (click)="userMenuOpen.set(false)"
+                i18n="Privacy policy menu item@@nav.privacyPolicy">
+                Privacy Policy
+              </a>
+              <a routerLink="/terms-of-use" class="user-menu-item" role="menuitem"
+                (click)="userMenuOpen.set(false)"
+                i18n="Terms of use menu item@@nav.termsOfUse">
+                Terms of Use
+              </a>
               <div class="user-menu-divider"></div>
               <button type="button" class="user-menu-item" role="menuitem" (click)="logout()"
                 i18n="Log out button@@auth.logout">

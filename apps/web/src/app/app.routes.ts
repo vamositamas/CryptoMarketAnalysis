@@ -180,7 +180,11 @@ import { AuthSessionService } from './services/auth-session.service';
           For informational purposes only — not financial advice.
         </p>
       </div>
-      <a routerLink="/disclaimer" i18n="Landing disclaimer link@@landing.disclaimerLink">Disclaimer →</a>
+      <nav class="lp-footer-links" aria-label="Legal">
+        <a routerLink="/disclaimer" i18n="Landing disclaimer link@@landing.disclaimerLink">Disclaimer</a>
+        <a routerLink="/privacy-policy" i18n="Landing privacy policy link@@landing.privacyPolicy">Privacy Policy</a>
+        <a routerLink="/terms-of-use" i18n="Landing terms of use link@@landing.termsOfUse">Terms of Use</a>
+      </nav>
     </footer>
   `,
 })
@@ -259,6 +263,144 @@ export class LandingPage {
   `,
 })
 export class DisclaimerPage {}
+
+@Component({
+  selector: 'app-privacy-policy-page',
+  imports: [RouterLink],
+  template: `
+    <article class="disclaimer-page">
+      <a routerLink="/" class="disclaimer-back" i18n="Privacy policy back link@@privacy.back">← Back</a>
+      <h1 i18n="Privacy policy title@@privacy.title">Privacy Policy</h1>
+      <p class="legal-meta" i18n="Privacy policy date@@privacy.date">Last updated: 24 June 2026</p>
+
+      <h2 i18n="Privacy section 1 title@@privacy.s1.title">1. What we collect</h2>
+      <p i18n="Privacy section 1 body@@privacy.s1.body">
+        When you create an account we collect your email address and, if provided, your full name.
+        During normal use we collect standard server logs (IP address, browser type, pages visited) for
+        security and performance purposes. We do not collect payment information.
+      </p>
+
+      <h2 i18n="Privacy section 2 title@@privacy.s2.title">2. How we use your data</h2>
+      <p i18n="Privacy section 2 body@@privacy.s2.body">
+        Your data is used solely to operate the service: authenticate your account, deliver email
+        notifications and alerts you have configured, and improve the platform. We do not sell, rent, or
+        share your personal data with third parties for marketing purposes.
+      </p>
+
+      <h2 i18n="Privacy section 3 title@@privacy.s3.title">3. Data storage and security</h2>
+      <p i18n="Privacy section 3 body@@privacy.s3.body">
+        Data is stored on servers within the European Union. We use industry-standard encryption (TLS) for
+        data in transit and apply access controls to data at rest. Passwords are stored as
+        one-way cryptographic hashes and are never stored in plain text.
+      </p>
+
+      <h2 i18n="Privacy section 4 title@@privacy.s4.title">4. Cookies and local storage</h2>
+      <p i18n="Privacy section 4 body@@privacy.s4.body">
+        We use a single session cookie to keep you logged in and browser local storage to remember your
+        language preference and dashboard layout. No third-party tracking cookies are used.
+      </p>
+
+      <h2 i18n="Privacy section 5 title@@privacy.s5.title">5. Your rights</h2>
+      <p i18n="Privacy section 5 body@@privacy.s5.body">
+        You may request access to, correction of, or deletion of your personal data at any time by
+        contacting us. Accounts can be deleted on request. We will respond within 30 days.
+      </p>
+
+      <h2 i18n="Privacy section 6 title@@privacy.s6.title">6. Changes to this policy</h2>
+      <p i18n="Privacy section 6 body@@privacy.s6.body">
+        We may update this policy from time to time. Material changes will be communicated via the
+        platform or email. Continued use of the service after changes constitutes acceptance.
+      </p>
+
+      <h2 i18n="Privacy section 7 title@@privacy.s7.title">7. Contact</h2>
+      <p i18n="Privacy section 7 body@@privacy.s7.body">
+        Questions about this policy can be directed to the platform operator via the contact information
+        provided on the platform.
+      </p>
+    </article>
+  `,
+})
+export class PrivacyPolicyPage {}
+
+@Component({
+  selector: 'app-terms-of-use-page',
+  imports: [RouterLink],
+  template: `
+    <article class="disclaimer-page">
+      <a routerLink="/" class="disclaimer-back" i18n="Terms of use back link@@terms.back">← Back</a>
+      <h1 i18n="Terms of use title@@terms.title">Terms of Use</h1>
+      <p class="legal-meta" i18n="Terms of use date@@terms.date">Last updated: 24 June 2026</p>
+
+      <h2 i18n="Terms section 1 title@@terms.s1.title">1. Acceptance of terms</h2>
+      <p i18n="Terms section 1 body@@terms.s1.body">
+        By registering for or using BitWLab you agree to these Terms of Use in full. If you do not agree
+        you must not use the platform. You must be at least 18 years of age to use this service.
+      </p>
+
+      <h2 i18n="Terms section 2 title@@terms.s2.title">2. Description of service</h2>
+      <p i18n="Terms section 2 body@@terms.s2.body">
+        BitWLab provides Bitcoin on-chain analytics, valuation model charts, cycle indicators, and related
+        informational tools. All content is provided for informational purposes only and does not constitute
+        financial advice. See the full Disclaimer for details.
+      </p>
+
+      <h2 i18n="Terms section 3 title@@terms.s3.title">3. Your account</h2>
+      <p i18n="Terms section 3 body@@terms.s3.body">
+        You are responsible for maintaining the confidentiality of your login credentials and for all
+        activity that occurs under your account. You must notify us immediately of any unauthorised use
+        of your account.
+      </p>
+
+      <h2 i18n="Terms section 4 title@@terms.s4.title">4. Acceptable use</h2>
+      <p i18n="Terms section 4 body@@terms.s4.body">
+        You agree not to: attempt to reverse-engineer, scrape, or systematically extract data from the
+        platform; interfere with or disrupt the service or its servers; use the service for any unlawful
+        purpose; or impersonate any person or entity.
+      </p>
+
+      <h2 i18n="Terms section 5 title@@terms.s5.title">5. Intellectual property</h2>
+      <p i18n="Terms section 5 body@@terms.s5.body">
+        All platform content, design, code, and branding are the property of the platform operator and
+        are protected by applicable intellectual-property laws. You may not copy, reproduce, or redistribute
+        any part of the platform without prior written permission.
+      </p>
+
+      <h2 i18n="Terms section 6 title@@terms.s6.title">6. Disclaimer of warranties</h2>
+      <p i18n="Terms section 6 body@@terms.s6.body">
+        The service is provided "as is" and "as available" without warranties of any kind, either express
+        or implied. We do not warrant that the service will be uninterrupted, error-free, or that data
+        will be accurate, complete, or current at all times.
+      </p>
+
+      <h2 i18n="Terms section 7 title@@terms.s7.title">7. Limitation of liability</h2>
+      <p i18n="Terms section 7 body@@terms.s7.body">
+        To the fullest extent permitted by law, the platform operator shall not be liable for any
+        indirect, incidental, special, consequential, or punitive damages, including loss of profits or
+        data, arising from your use of the service or reliance on any information provided.
+      </p>
+
+      <h2 i18n="Terms section 8 title@@terms.s8.title">8. Termination</h2>
+      <p i18n="Terms section 8 body@@terms.s8.body">
+        We reserve the right to suspend or terminate your account at any time if you violate these terms
+        or for any other reason at our sole discretion, with or without notice.
+      </p>
+
+      <h2 i18n="Terms section 9 title@@terms.s9.title">9. Governing law</h2>
+      <p i18n="Terms section 9 body@@terms.s9.body">
+        These terms are governed by the laws of Hungary. Any disputes shall be subject to the exclusive
+        jurisdiction of the courts of Hungary.
+      </p>
+
+      <h2 i18n="Terms section 10 title@@terms.s10.title">10. Changes to terms</h2>
+      <p i18n="Terms section 10 body@@terms.s10.body">
+        We may revise these terms at any time. The updated version will be posted on this page with a new
+        effective date. Continued use of the service after changes constitutes your acceptance of the
+        revised terms.
+      </p>
+    </article>
+  `,
+})
+export class TermsOfUsePage {}
 
 @Component({
   selector: 'app-dashboard-page',
@@ -2602,6 +2744,8 @@ function getErrorMessage(error: unknown): string {
 export const appRoutes: Route[] = [
   { path: '', component: LandingPage },
   { path: 'disclaimer', component: DisclaimerPage },
+  { path: 'privacy-policy', component: PrivacyPolicyPage },
+  { path: 'terms-of-use', component: TermsOfUsePage },
   { path: 'dashboard', component: DashboardPage, canActivate: [authGuard] },
   {
     path: 'charts',

@@ -36,6 +36,29 @@
         <h2>{{ currentSlide().headline }}</h2>
         <p class="subheading">{{ currentSlide().subheading }}</p>
         <p>{{ currentSlide().body }}</p>
+
+        @if (isLastSlide()) {
+          <div class="acceptance-wrap">
+            <label class="acceptance-item">
+              <input
+                type="checkbox"
+                [checked]="termsAccepted()"
+                (change)="termsAccepted.set($any($event.target).checked)"
+              />
+              <span i18n="Terms acceptance label@@onboardingCarousel.acceptTerms">I accept the</span>
+              <a routerLink="/terms-of-use" target="_blank" i18n="Terms link@@onboardingCarousel.termsLink">Terms of Use</a>
+            </label>
+            <label class="acceptance-item">
+              <input
+                type="checkbox"
+                [checked]="privacyAccepted()"
+                (change)="privacyAccepted.set($any($event.target).checked)"
+              />
+              <span i18n="Privacy acceptance label@@onboardingCarousel.acceptPrivacy">I accept the</span>
+              <a routerLink="/privacy-policy" target="_blank" i18n="Privacy link@@onboardingCarousel.privacyLink">Privacy Policy</a>
+            </label>
+          </div>
+        }
       </div>
 
       <div class="slide-visual" aria-hidden="true">
@@ -56,6 +79,7 @@
     <button
       type="button"
       class="nav-button next-button"
+      [disabled]="isLastSlide() && !canComplete()"
       (click)="isLastSlide() ? complete() : next()"
       [attr.aria-label]="isLastSlide() ? completeLabel.textContent : nextLabel.textContent"
     >

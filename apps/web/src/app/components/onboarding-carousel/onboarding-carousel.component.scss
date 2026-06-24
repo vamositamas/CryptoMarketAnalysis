@@ -129,6 +129,41 @@
   min-width: 132px;
 }
 
+.next-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.acceptance-wrap {
+  display: grid;
+  gap: 10px;
+  padding: 14px 0 4px;
+}
+
+.acceptance-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  color: #2d3a35;
+  cursor: pointer;
+  user-select: none;
+}
+
+.acceptance-item input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  accent-color: #145c4b;
+  cursor: pointer;
+}
+
+.acceptance-item a {
+  color: #145c4b;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
