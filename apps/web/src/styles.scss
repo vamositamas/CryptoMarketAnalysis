@@ -2330,6 +2330,68 @@ main .admin-actions {
   gap: 10px;
 }
 
+main .year-selection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #dce2dd;
+  border-radius: 8px;
+  background: #f7faf8;
+  margin-bottom: 16px;
+}
+
+main .year-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+main .year-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: unset;
+  padding: 6px 10px;
+  border: 1px solid #cbd8d1;
+  border-radius: 6px;
+  background: #ffffff;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #344540;
+  user-select: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+main .year-checkbox:has(input:checked) {
+  border-color: #145c4b;
+  background: #eaf4f0;
+}
+
+main .year-checkbox:has(input:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+main .year-checkbox--all {
+  font-weight: 800;
+  font-size: 0.9375rem;
+  border: none;
+  padding: 0;
+  background: transparent;
+}
+
+main .year-checkbox input[type='checkbox'] {
+  min-height: unset;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border-radius: 3px;
+  cursor: pointer;
+  accent-color: #145c4b;
+}
+
 main .secondary-button {
   color: #17202a;
   border-color: #cbd8d1;

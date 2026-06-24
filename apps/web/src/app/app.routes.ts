@@ -1732,20 +1732,49 @@ export class DashboardPage {
       </div>
 
       <div class="admin-backfill-form">
+        <div class="year-selection">
+          <label class="year-checkbox year-checkbox--all">
+            <input
+              type="checkbox"
+              [checked]="allYearsSelected()"
+              [indeterminate]="someYearsSelected()"
+              (change)="toggleAllYears()"
+              [disabled]="isInitializing()"
+            />
+            <span i18n="Select all years@@adminDataConfig.allYears">All ({{ startYear }}–{{ currentYear }})</span>
+          </label>
+          <div class="year-grid">
+            @for (year of availableYears; track year) {
+              <label class="year-checkbox">
+                <input
+                  type="checkbox"
+                  [checked]="selectedYears().has(year)"
+                  (change)="toggleYear(year)"
+                  [disabled]="isInitializing()"
+                />
+                <span>{{ year }}</span>
+              </label>
+            }
+          </div>
+        </div>
+
         <div class="admin-actions">
           <button
             type="button"
             class="secondary-button"
             (click)="initHistorical()"
-            [disabled]="isInitializing()"
+            [disabled]="isInitializing() || selectedYears().size === 0"
           >
             @if (isInitializing()) {
               <ng-container>{{ initProgress() }}</ng-container>
             } @else {
-              <ng-container i18n="Initialize all history button@@adminDataConfig.initButton">Initialize All Historical Data</ng-container>
+              <ng-container i18n="Initialize selected years button@@adminDataConfig.initButton">
+                Initialize Selected ({{ selectedYears().size }} year{{ selectedYears().size === 1 ? '' : 's' }})
+              </ng-container>
             }
           </button>
         </div>
+
         @if (initMessage()) {
           <p class="form-message" [class.success]="initSuccess()">{{ initMessage() }}</p>
         }
@@ -1765,6 +1794,22 @@ export class AdminDataConfigurationPage {
   protected readonly initMessage = signal('');
   protected readonly initSuccess = signal(false);
   protected readonly initProgress = signal('');
+
+  protected readonly startYear = 2013;
+  protected readonly currentYear = new Date().getUTCFullYear();
+  protected readonly availableYears = Array.from(
+    { length: new Date().getUTCFullYear() - 2013 + 1 },
+    (_, i) => 2013 + i,
+  );
+  protected readonly selectedYears = signal(new Set<number>(
+    Array.from({ length: new Date().getUTCFullYear() - 2013 + 1 }, (_, i) => 2013 + i),
+  ));
+  protected readonly allYearsSelected = computed(
+    () => this.selectedYears().size === this.availableYears.length,
+  );
+  protected readonly someYearsSelected = computed(
+    () => this.selectedYears().size > 0 && !this.allYearsSelected(),
+  );
   protected readonly form = this.fb.nonNullable.group({
     refreshFrequency: this.fb.nonNullable.control<RefreshFrequency>('daily', Validators.required),
     historicalDepth: this.fb.nonNullable.control<HistoricalDepth>('all_time', Validators.required),
@@ -1837,14 +1882,26 @@ export class AdminDataConfigurationPage {
     }
   }
 
+  protected toggleYear(year: number): void {
+    const next = new Set(this.selectedYears());
+    if (next.has(year)) next.delete(year); else next.add(year);
+    this.selectedYears.set(next);
+  }
+
+  protected toggleAllYears(): void {
+    this.selectedYears.set(
+      this.allYearsSelected() ? new Set() : new Set(this.availableYears),
+    );
+  }
+
   protected async initHistorical(): Promise<void> {
-    if (this.isInitializing()) return;
+    if (this.isInitializing() || this.selectedYears().size === 0) return;
     this.isInitializing.set(true);
     this.initMessage.set('');
     this.initSuccess.set(false);
 
-    const startYear = 2013;
-    const currentYear = new Date().getUTCFullYear();
+    const yearsToProcess = [...this.selectedYears()].sort((a, b) => a - b);
+    const today = new Date().toISOString().slice(0, 10);
     let totalDays = 0;
     let failedRanges = 0;
 
@@ -1854,11 +1911,9 @@ export class AdminDataConfigurationPage {
     ];
 
     try {
-      for (let year = startYear; year <= currentYear; year++) {
+      for (const year of yearsToProcess) {
         const startDate = `${year}-01-01`;
-        const endDate = year === currentYear
-          ? new Date().toISOString().slice(0, 10)
-          : `${year}-12-31`;
+        const endDate = year === this.currentYear ? today : `${year}-12-31`;
 
         this.initProgress.set(`Loading prices: ${year}...`);
 
