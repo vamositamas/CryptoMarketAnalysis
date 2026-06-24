@@ -2546,13 +2546,6 @@ const AUTH_STYLES = [`
             <p class="auth-msg" [class.success]="isSuccess()">{{ message() }}</p>
           }
 
-          @if (showDevelopmentAdminHelper) {
-            <button type="button" class="auth-dev-btn" (click)="useDevelopmentAdminCredentials()"
-              i18n="Use development admin button@@auth.useDevelopmentAdmin">
-              Use dev admin credentials
-            </button>
-          }
-
           <button type="submit" class="auth-btn-primary" [disabled]="form.invalid || isSubmitting()">
             @if (isSubmitting()) {
               <ng-container i18n="Logging in state@@auth.loggingIn">Signing in...</ng-container>
@@ -2620,7 +2613,6 @@ export class LoginPage {
   protected readonly showOnboarding = signal(false);
   protected readonly message = signal('');
   protected readonly isSuccess = signal(false);
-  protected readonly showDevelopmentAdminHelper = !window.location.hostname.endsWith('bitwlab.com');
   protected readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', Validators.required],
@@ -2628,12 +2620,6 @@ export class LoginPage {
 
   protected setLang(locale: 'en' | 'hu'): void {
     this.langService.switchTo(locale);
-  }
-
-  protected useDevelopmentAdminCredentials(): void {
-    this.form.setValue({ email: 'admin@bitwlab.com', password: 'AdminPass123!' });
-    this.message.set('');
-    this.isSuccess.set(false);
   }
 
   protected async submit(): Promise<void> {
