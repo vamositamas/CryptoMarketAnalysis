@@ -17,6 +17,8 @@ import { OnboardingCarouselComponent } from './components/onboarding-carousel/on
 import { authGuard } from './guards/auth.guard';
 import { roleGuard } from './guards/role.guard';
 import { AuthSessionService } from './services/auth-session.service';
+import { LanguageService } from './services/language.service';
+import { LegalDialogService } from './services/legal-dialog.service';
 
 @Component({
   selector: 'app-landing-page',
@@ -238,9 +240,9 @@ import { AuthSessionService } from './services/auth-session.service';
         </p>
       </div>
       <nav class="lp-footer-links" aria-label="Legal">
-        <a routerLink="/disclaimer" i18n="Landing disclaimer link@@landing.disclaimerLink">Disclaimer</a>
-        <a routerLink="/privacy-policy" i18n="Landing privacy policy link@@landing.privacyPolicy">Privacy Policy</a>
-        <a routerLink="/terms-of-use" i18n="Landing terms of use link@@landing.termsOfUse">Terms of Use</a>
+        <button type="button" (click)="legal.open('disclaimer')" i18n="Landing disclaimer link@@landing.disclaimerLink">Disclaimer</button>
+        <button type="button" (click)="legal.open('privacy-policy')" i18n="Landing privacy policy link@@landing.privacyPolicy">Privacy Policy</button>
+        <button type="button" (click)="legal.open('terms-of-use')" i18n="Landing terms of use link@@landing.termsOfUse">Terms of Use</button>
       </nav>
     </footer>
   `,
@@ -248,6 +250,7 @@ import { AuthSessionService } from './services/auth-session.service';
 export class LandingPage {
   private readonly authSession = inject(AuthSessionService);
   private readonly router = inject(Router);
+  protected readonly legal = inject(LegalDialogService);
 
   constructor() {
     if (this.authSession.currentUser()) {
@@ -560,7 +563,23 @@ export class TermsOfUsePage {}
                 (click)="removeWidget(widget.id)"
               >✕</button>
               <span class="widget-title">{{ getWidgetTitle(widget) }}</span>
-              @if (widget.type !== 'halving_progress') {
+              @if (widget.type === '24h_change') {
+                <strong class="widget-value" [class]="'widget-value--' + widget.trend">
+                  {{ trendIndicator(widget.trend) }}{{ widget.formattedValue }}
+                </strong>
+                @if (livePriceData(); as lp) {
+                  <div class="widget-price-details">
+                    <div class="widget-price-row">
+                      <span class="widget-price-label" i18n="Open price label@@widget.openPrice">Open</span>
+                      <span class="widget-price-val">{{ formatUsdDetailed(lp.openPriceUsd) }}</span>
+                    </div>
+                    <div class="widget-price-row">
+                      <span class="widget-price-label" i18n="Current price label@@widget.currentPrice">Current</span>
+                      <span class="widget-price-val">{{ formatUsdDetailed(lp.priceUsd) }}</span>
+                    </div>
+                  </div>
+                }
+              } @else if (widget.type !== 'halving_progress') {
                 <strong class="widget-value">{{ widget.formattedValue }}</strong>
                 <small class="widget-trend" [class]="'trend-' + widget.trend">
                   {{ trendIndicator(widget.trend) }}
@@ -1528,6 +1547,7 @@ export class DashboardPage {
   protected readonly widgets = signal<DashboardWidget[]>([]);
   protected readonly isLoadingWidgets = signal(true);
   protected readonly isAddWidgetOpen = signal(false);
+  protected readonly livePriceData = signal<{ priceUsd: number; openPriceUsd: number } | null>(null);
   protected readonly widgetTypes = computed(() => this.widgets().map((widget) => widget.type));
   protected readonly draggingId = signal<string | null>(null);
   protected readonly dragOverId = signal<string | null>(null);
@@ -1878,13 +1898,14 @@ export class DashboardPage {
   protected getWidgetTitle(widget: DashboardWidget): string {
     switch (widget.type) {
       case 'btc_price':       return $localize`:@@widget.btcPrice:Current BTC Price`;
+      case '24h_change':      return $localize`:@@widget.24hChange:24h BTC Price Change`;
       case 'mvrv_zscore':     return $localize`:@@widget.mvrvZscore:MVRV Z-Score`;
       case 'stock_to_flow':   return $localize`:@@widget.stockToFlow:Stock-to-Flow Ratio`;
       case 'fear_greed':      return $localize`:@@widget.fearGreed:Fear & Greed Index`;
       case 'realized_price':  return $localize`:@@widget.realizedPrice:Realized Price`;
       case 'ma_200_day':      return $localize`:@@widget.ma200:200-Day Moving Average`;
       case 'market_cap':      return $localize`:@@widget.marketCap:Market Cap`;
-      case 'halving_progress':return $localize`:@@widget.halvingProgress:Halving Progress`;
+      case 'halving_progress':return $localize`:@@widget.halvingProgress:BTC Halving Progress`;
       default:                return widget.title;
     }
   }
@@ -1932,6 +1953,10 @@ export class DashboardPage {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
   }
 
+  protected formatUsdDetailed(value: number): string {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+  }
+
   protected lastUpdatedText(lastUpdated: string | null): string {
     if (!lastUpdated) {
       return $localize`:Widget waiting for data@@dashboard.widgetWaiting:Waiting for data`;
@@ -1955,7 +1980,9 @@ export class DashboardPage {
 
     try {
       const response = await this.auth.getDashboardWidgets();
-      this.widgets.set(response.widgets);
+      this.widgets.set(response.widgets.map((w) =>
+        w.type === '24h_change' ? { ...w, trendPercent: null } : w,
+      ));
     } catch {
       this.widgets.set([]);
     } finally {
@@ -1966,6 +1993,10 @@ export class DashboardPage {
   private async refreshLivePrice(): Promise<void> {
     try {
       const live = await this.auth.getLivePrice();
+      if (live.change24hPercent !== null) {
+        const openPriceUsd = live.priceUsd / (1 + live.change24hPercent / 100);
+        this.livePriceData.set({ priceUsd: live.priceUsd, openPriceUsd });
+      }
       this.widgets.update((ws) =>
         ws.map((w) => {
           if (w.type === 'btc_price') {
@@ -1983,7 +2014,7 @@ export class DashboardPage {
               value: pct,
               formattedValue: `${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%`,
               trend: pct > 0 ? 'up' as const : pct < 0 ? 'down' as const : 'flat' as const,
-              trendPercent: Math.round(pct * 100) / 100,
+              trendPercent: null,
               lastUpdated: live.fetchedAt,
             };
           }
@@ -2345,74 +2376,233 @@ export class OnboardingPage {
   }
 }
 
+const AUTH_STYLES = [`
+  .auth-page {
+    min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: #f2f4f2; padding: 24px 16px; gap: 20px;
+  }
+  .auth-footer {
+    text-align: center;
+  }
+  .auth-footer-brand {
+    font-size: 0.85rem; font-weight: 800; color: #374151; margin: 0 0 4px; letter-spacing: -0.2px;
+  }
+  .auth-footer-copy {
+    font-size: 0.72rem; color: #9ca3af; margin: 0 0 4px;
+  }
+  .auth-footer-disclaimer {
+    font-size: 0.72rem; color: #9ca3af; margin: 0;
+  }
+  .auth-card {
+    background: #fff; border-radius: 16px; padding: 36px 40px 28px;
+    width: 100%; max-width: 400px; box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+  }
+  .auth-lang {
+    display: flex; align-items: center; gap: 6px; margin-bottom: 24px;
+  }
+  .auth-lang-label {
+    font-size: 0.68rem; font-weight: 700; color: #9ca3af;
+    letter-spacing: 0.08em; text-transform: uppercase; margin-right: 4px;
+  }
+  .auth-lang-btn {
+    padding: 4px 12px; border-radius: 20px; border: 1.5px solid #e5ebe7;
+    background: #fff; font-size: 0.78rem; font-weight: 600; color: #6b7280;
+    cursor: pointer; transition: all 0.12s;
+  }
+  .auth-lang-btn.active {
+    background: #1a4731; border-color: #1a4731; color: #fff;
+  }
+  .auth-lang-btn:hover:not(.active) { border-color: #1a4731; color: #1a4731; }
+  .auth-title {
+    font-size: 1.75rem; font-weight: 800; color: #111827; margin: 0 0 6px; letter-spacing: -0.5px;
+  }
+  .auth-sub {
+    font-size: 0.9rem; color: #6b7280; margin: 0 0 28px; line-height: 1.5;
+  }
+  .auth-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+  .auth-field label {
+    font-size: 0.82rem; font-weight: 600; color: #374151;
+  }
+  .auth-field input {
+    padding: 10px 14px; border: 1.5px solid #e5ebe7; border-radius: 10px;
+    font-size: 0.9rem; color: #111827; outline: none; transition: border-color 0.15s;
+    font-family: inherit; background: #fff;
+  }
+  .auth-field input:focus { border-color: #1a4731; }
+  .auth-field input::placeholder { color: #d1d5db; }
+  .auth-forgot {
+    font-size: 0.78rem; color: #6b7280; text-decoration: none; align-self: flex-end; margin-top: -2px;
+  }
+  .auth-forgot:hover { color: #1a4731; }
+  .auth-msg { font-size: 0.82rem; padding: 8px 12px; border-radius: 8px; margin: 0 0 14px;
+    background: #fee2e2; color: #dc2626; }
+  .auth-msg.success { background: #dcfce7; color: #15803d; }
+  .auth-btn-primary {
+    width: 100%; padding: 12px; border: none; border-radius: 10px;
+    background: #6b8f78; color: #fff; font-size: 0.95rem; font-weight: 700;
+    cursor: pointer; transition: background 0.12s; margin-bottom: 16px; font-family: inherit;
+  }
+  .auth-btn-primary:hover:not(:disabled) { background: #1a4731; }
+  .auth-btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+  .auth-switch {
+    text-align: center; font-size: 0.82rem; color: #6b7280; margin: 0 0 16px;
+  }
+  .auth-switch a { color: #1a4731; font-weight: 600; text-decoration: none; }
+  .auth-switch a:hover { text-decoration: underline; }
+  .auth-divider {
+    display: flex; align-items: center; gap: 12px; margin: 4px 0 16px; color: #d1d5db;
+    font-size: 0.78rem;
+  }
+  .auth-divider::before, .auth-divider::after {
+    content: ''; flex: 1; height: 1px; background: #e5e7eb;
+  }
+  .auth-btn-google {
+    width: 100%; padding: 11px 16px; border: 1.5px solid #e5e7eb; border-radius: 10px;
+    background: #fff; font-size: 0.9rem; font-weight: 600; color: #374151;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+    transition: border-color 0.12s, box-shadow 0.12s; margin-bottom: 20px; font-family: inherit;
+  }
+  .auth-btn-google:hover { border-color: #9ca3af; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .auth-terms {
+    display: flex; align-items: center; justify-content: center;
+    gap: 6px; flex-wrap: wrap; margin: 0;
+  }
+  .auth-terms-link {
+    background: none; border: 1px solid #e5ebe7; border-radius: 20px;
+    padding: 4px 12px; font-family: inherit; font-size: 0.75rem; font-weight: 600;
+    color: #6b7280; cursor: pointer; text-decoration: none;
+    transition: border-color 0.12s, color 0.12s;
+    display: inline-flex; align-items: center;
+  }
+  .auth-terms-link:hover { border-color: #1a4731; color: #1a4731; }
+  .auth-captcha-row {
+    display: flex; gap: 8px; align-items: stretch;
+  }
+  .auth-captcha-question {
+    flex: 1; padding: 10px 14px; border: 1.5px solid #e5ebe7; border-radius: 10px;
+    font-size: 0.9rem; color: #374151; background: #f8faf8; font-family: ui-monospace, monospace;
+  }
+  .auth-captcha-new {
+    padding: 10px 14px; border: 1.5px solid #e5ebe7; border-radius: 10px;
+    background: #fff; font-size: 0.8rem; font-weight: 600; color: #6b7280;
+    cursor: pointer; white-space: nowrap; font-family: inherit; transition: border-color 0.12s;
+  }
+  .auth-captcha-new:hover { border-color: #1a4731; color: #1a4731; }
+  .auth-dev-btn {
+    width: 100%; padding: 8px; border: 1.5px dashed #d1d5db; border-radius: 8px;
+    background: #f9fafb; font-size: 0.78rem; color: #9ca3af; cursor: pointer;
+    margin-bottom: 12px; font-family: inherit;
+  }
+  .auth-dev-btn:hover { border-color: #6b7280; color: #374151; }
+  .auth-brand-row {
+    display: inline-flex; align-items: center; gap: 10px; margin-bottom: 28px;
+    text-decoration: none; cursor: pointer;
+  }
+  .auth-brand-mark {
+    display: grid; place-items: center; width: 36px; height: 36px;
+    background: #f7b731; border-radius: 50%; color: #101820;
+    font-size: 1rem; font-weight: 900; flex-shrink: 0;
+  }
+  .auth-brand-name {
+    font-size: 1rem; font-weight: 800; color: #111827; letter-spacing: -0.3px;
+  }
+`];
+
 @Component({
   selector: 'app-login-page',
+  styles: AUTH_STYLES,
   template: `
-    <section class="content-section auth-section">
-      <form class="auth-form" [formGroup]="form" (ngSubmit)="submit()">
-        <h2 i18n="Login title@@auth.login">Login</h2>
-        <label i18n="Email label@@form.email">
-          Email<input type="email" autocomplete="email" formControlName="email" />
-        </label>
-        <label i18n="Password label@@form.password">
-          Password
-          <input type="password" autocomplete="current-password" formControlName="password" />
-        </label>
-        @if (message()) {
-          <p class="form-message" [class.success]="isSuccess()">{{ message() }}</p>
-        }
-        @if (showDevelopmentAdminHelper) {
-          <button
-            type="button"
-            class="secondary-button"
-            (click)="useDevelopmentAdminCredentials()"
-            i18n="Use development admin button@@auth.useDevelopmentAdmin"
-          >
-            Use dev admin
-          </button>
-        }
-        <button type="submit" [disabled]="form.invalid || isSubmitting()">
-          @if (isSubmitting()) {
-            <ng-container i18n="Logging in state@@auth.loggingIn">Logging in...</ng-container>
-          } @else {
-            <ng-container i18n="Login button@@auth.login">Login</ng-container>
-          }
-        </button>
-        <button
-          type="button"
-          class="secondary-button"
-          (click)="continueWithGoogle()"
-          i18n="Continue with Google button@@auth.google"
-        >
-          Continue with Google
-        </button>
-        <a
-          class="form-link"
-          routerLink="/forgot-password"
-          i18n="Forgot password link@@auth.forgotPassword"
-        >
-          Forgot password?
-        </a>
-        <p class="auth-switch" i18n="No account prompt@@auth.noAccount">
-          Don't have an account? <a routerLink="/register">Create one</a>
-        </p>
-      </form>
+    <div class="auth-page">
+      <div class="auth-card">
 
-      @if (showOnboarding()) {
-        <div
-          class="onboarding-overlay"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Onboarding"
-          i18n-aria-label="Onboarding dialog label@@onboarding.dialog"
-        >
-          <app-onboarding-carousel
-            (skipped)="completeOnboarding()"
-            (completed)="completeOnboarding()"
-          ></app-onboarding-carousel>
+        <a class="auth-brand-row" routerLink="/">
+          <span class="auth-brand-mark" aria-hidden="true">₿</span>
+          <span class="auth-brand-name">BitWLab</span>
+        </a>
+
+        <div class="auth-lang">
+          <span class="auth-lang-label" i18n="Language selector label@@auth.languageLabel">Language</span>
+          <button class="auth-lang-btn" [class.active]="lang() === 'en'" (click)="setLang('en')">EN</button>
+          <button class="auth-lang-btn" [class.active]="lang() === 'hu'" (click)="setLang('hu')">HU</button>
         </div>
-      }
-    </section>
+
+        <h1 class="auth-title" i18n="Login title@@auth.welcomeBack">Welcome back</h1>
+        <p class="auth-sub" i18n="Login subtitle@@auth.loginSubtitle">Sign in to your account to continue</p>
+
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="auth-field">
+            <label i18n="Email or username label@@auth.emailOrUsername">Email or Username</label>
+            <input type="email" formControlName="email" autocomplete="email"
+              placeholder="Enter email or username"
+              i18n-placeholder="Email placeholder@@auth.emailPlaceholder" />
+          </div>
+          <div class="auth-field">
+            <label i18n="Password label@@form.password">Password</label>
+            <input type="password" formControlName="password" autocomplete="current-password" placeholder="••••••••" />
+            <a class="auth-forgot" routerLink="/forgot-password" i18n="Forgot password link@@auth.forgotPassword">Forgot password?</a>
+          </div>
+
+          @if (message()) {
+            <p class="auth-msg" [class.success]="isSuccess()">{{ message() }}</p>
+          }
+
+          @if (showDevelopmentAdminHelper) {
+            <button type="button" class="auth-dev-btn" (click)="useDevelopmentAdminCredentials()"
+              i18n="Use development admin button@@auth.useDevelopmentAdmin">
+              Use dev admin credentials
+            </button>
+          }
+
+          <button type="submit" class="auth-btn-primary" [disabled]="form.invalid || isSubmitting()">
+            @if (isSubmitting()) {
+              <ng-container i18n="Logging in state@@auth.loggingIn">Signing in...</ng-container>
+            } @else {
+              <ng-container i18n="Login button@@auth.signIn">Sign in</ng-container>
+            }
+          </button>
+        </form>
+
+        <p class="auth-switch">
+          <ng-container i18n="No account prompt@@auth.noAccount">Don't have an account?</ng-container>
+          <a routerLink="/register" i18n="Create account link@@auth.createAccount"> Create one</a>
+        </p>
+
+        <div class="auth-divider"><span>or</span></div>
+
+        <button type="button" class="auth-btn-google" (click)="continueWithGoogle()">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908C16.658 14.251 17.64 11.942 17.64 9.2z" fill="#4285F4"/>
+            <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+            <path d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z" fill="#FBBC05"/>
+            <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 6.293C4.672 4.166 6.656 3.58 9 3.58z" fill="#EA4335"/>
+          </svg>
+          <ng-container i18n="Sign in with Google@@auth.signInGoogle">Sign in with Google</ng-container>
+        </button>
+
+        <div class="auth-terms">
+          <button type="button" class="auth-terms-link" (click)="legal.open('disclaimer')" i18n="Disclaimer link@@nav.disclaimer">Disclaimer</button>
+          <button type="button" class="auth-terms-link" (click)="legal.open('terms-of-use')" i18n="Terms of use link@@auth.termsOfUse">Terms of Use</button>
+          <button type="button" class="auth-terms-link" (click)="legal.open('privacy-policy')" i18n="Privacy policy link@@auth.privacyPolicy">Privacy Policy</button>
+        </div>
+
+      </div>
+
+      <footer class="auth-footer">
+        <p class="auth-footer-brand">BitWLab</p>
+        <p class="auth-footer-copy" i18n="Footer copyright@@footer.copyright">© 2026 BitWLab. All rights reserved.</p>
+        <p class="auth-footer-disclaimer" i18n="Footer disclaimer@@footer.disclaimer">Not financial advice. Cryptocurrency investments carry risk.</p>
+      </footer>
+    </div>
+
+    @if (showOnboarding()) {
+      <div class="onboarding-overlay" role="dialog" aria-modal="true"
+        aria-label="Onboarding" i18n-aria-label="Onboarding dialog label@@onboarding.dialog">
+        <app-onboarding-carousel
+          (skipped)="completeOnboarding()"
+          (completed)="completeOnboarding()"
+        ></app-onboarding-carousel>
+      </div>
+    }
   `,
   imports: [ReactiveFormsModule, RouterLink, OnboardingCarouselComponent],
 })
@@ -2422,24 +2612,26 @@ export class LoginPage {
   private readonly authSession = inject(AuthSessionService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly langService = inject(LanguageService);
+  protected readonly legal = inject(LegalDialogService);
+  protected readonly lang = this.langService.current;
   protected readonly isSubmitting = signal(false);
   protected readonly isCompletingOnboarding = signal(false);
   protected readonly showOnboarding = signal(false);
   protected readonly message = signal('');
   protected readonly isSuccess = signal(false);
-  protected readonly showDevelopmentAdminHelper = !window.location.hostname.endsWith(
-    'bitwlab.com',
-  );
+  protected readonly showDevelopmentAdminHelper = !window.location.hostname.endsWith('bitwlab.com');
   protected readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', Validators.required],
   });
 
+  protected setLang(locale: 'en' | 'hu'): void {
+    this.langService.switchTo(locale);
+  }
+
   protected useDevelopmentAdminCredentials(): void {
-    this.form.setValue({
-      email: 'admin@bitwlab.com',
-      password: 'AdminPass123!',
-    });
+    this.form.setValue({ email: 'admin@bitwlab.com', password: 'AdminPass123!' });
     this.message.set('');
     this.isSuccess.set(false);
   }
@@ -2449,28 +2641,20 @@ export class LoginPage {
       this.form.markAllAsTouched();
       return;
     }
-
     this.isSubmitting.set(true);
     this.message.set('');
     this.isSuccess.set(false);
-
     try {
       await this.auth.login(this.form.getRawValue());
       const profile = await this.auth.getCurrentUserProfile();
       this.authSession.setCurrentUser(profile);
       this.isSuccess.set(true);
-
       if (!profile.onboardingCompleted) {
         this.showOnboarding.set(true);
-        this.message.set(
-          $localize`:Login onboarding required message@@auth.loginOnboardingRequired:Login successful. Complete the quick orientation to continue.`,
-        );
+        this.message.set($localize`:Login onboarding required message@@auth.loginOnboardingRequired:Login successful. Complete the quick orientation to continue.`);
         return;
       }
-
-      this.message.set(
-        $localize`:Login success message@@auth.loginSuccess:Login successful. Redirecting to dashboard.`,
-      );
+      this.message.set($localize`:Login success message@@auth.loginSuccess:Login successful. Redirecting to dashboard.`);
       await this.router.navigateByUrl(this.route.snapshot.queryParamMap.get('returnUrl') ?? '/dashboard');
     } catch (error) {
       this.message.set(getErrorMessage(error));
@@ -2480,15 +2664,9 @@ export class LoginPage {
   }
 
   protected async completeOnboarding(): Promise<void> {
-    if (this.isCompletingOnboarding()) {
-      return;
-    }
-
+    if (this.isCompletingOnboarding()) return;
     this.isCompletingOnboarding.set(true);
-    this.message.set(
-      $localize`:Completing onboarding state@@onboarding.completing:Completing onboarding...`,
-    );
-
+    this.message.set($localize`:Completing onboarding state@@onboarding.completing:Completing onboarding...`);
     try {
       const profile = await this.auth.completeCurrentUserOnboarding();
       this.authSession.setCurrentUser(profile);
@@ -2689,83 +2867,165 @@ export class ResetPasswordPage {
 
 @Component({
   selector: 'app-register-page',
-  imports: [ReactiveFormsModule],
+  styles: AUTH_STYLES,
+  imports: [ReactiveFormsModule, RouterLink],
   template: `
-    <section class="content-section auth-section">
-      <form class="auth-form" [formGroup]="form" (ngSubmit)="submit()">
-        <h2 i18n="Register title@@auth.register">Register</h2>
-        <label i18n="Full name label@@form.fullName">
-          Full name<input type="text" autocomplete="name" formControlName="fullName" />
-        </label>
-        <label i18n="Email label@@form.email">
-          Email<input type="email" autocomplete="email" formControlName="email" />
-        </label>
-        <label i18n="Password label@@form.password">
-          Password
-          <input type="password" autocomplete="new-password" formControlName="password" />
-        </label>
-        <label i18n="Confirm password label@@form.confirmPassword">
-          Confirm password
-          <input
-            type="password"
-            autocomplete="new-password"
-            formControlName="confirmPassword"
-          />
-        </label>
-        <label>
-          <span i18n="Language form label@@form.language">Language</span>
-          <select formControlName="languagePreference">
-            <option value="en" i18n="English language option@@language.english">English</option>
-            <option value="hu" i18n="Hungarian language option@@language.hungarian">Hungarian</option>
-          </select>
-        </label>
-        @if (passwordMismatch()) {
-          <p class="form-message" i18n="Passwords mismatch@@form.passwordMismatch">
-            Passwords do not match.
-          </p>
-        }
-        @if (message()) {
-          <p class="form-message" [class.success]="isSuccess()">{{ message() }}</p>
-        }
-        <button type="submit" [disabled]="form.invalid || passwordMismatch() || isSubmitting()">
-          @if (isSubmitting()) {
-            <ng-container i18n="Creating account state@@auth.creatingAccount">
-              Creating account...
-            </ng-container>
-          } @else {
-            <ng-container i18n="Create account button@@auth.createAccount">
-              Create account
-            </ng-container>
+    <div class="auth-page">
+      <div class="auth-card">
+
+        <a class="auth-brand-row" routerLink="/">
+          <span class="auth-brand-mark" aria-hidden="true">₿</span>
+          <span class="auth-brand-name">BitWLab</span>
+        </a>
+
+        <div class="auth-lang">
+          <span class="auth-lang-label" i18n="Language selector label@@auth.languageLabel">Language</span>
+          <button class="auth-lang-btn" [class.active]="lang() === 'en'" (click)="setLang('en')">EN</button>
+          <button class="auth-lang-btn" [class.active]="lang() === 'hu'" (click)="setLang('hu')">HU</button>
+        </div>
+
+        <h1 class="auth-title" i18n="Register title@@auth.createAccount">Create account</h1>
+        <p class="auth-sub" i18n="Register subtitle@@auth.registerSubtitle">Fill in your details to get started</p>
+
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="auth-field">
+            <label i18n="Email label@@form.email">Email</label>
+            <input type="email" formControlName="email" autocomplete="email"
+              placeholder="you@example.com"
+              i18n-placeholder="Email placeholder@@register.emailPlaceholder" />
+          </div>
+          <div class="auth-field">
+            <label i18n="Password label@@form.password">Password</label>
+            <input type="password" formControlName="password" autocomplete="new-password"
+              placeholder="Password"
+              i18n-placeholder="Password placeholder@@register.passwordPlaceholder" />
+          </div>
+          <div class="auth-field">
+            <label i18n="Confirm password label@@form.confirmPassword">Confirm password</label>
+            <input type="password" formControlName="confirmPassword" autocomplete="new-password"
+              placeholder="Repeat your password"
+              i18n-placeholder="Confirm password placeholder@@register.confirmPlaceholder" />
+          </div>
+
+          <div class="auth-field">
+            <label i18n="Security check label@@register.securityCheck">Security check</label>
+            <div class="auth-captcha-row">
+              <span class="auth-captcha-question">{{ captchaQuestion() }}</span>
+              <button type="button" class="auth-captcha-new" (click)="newChallenge()"
+                i18n="New challenge button@@register.newChallenge">New challenge</button>
+            </div>
+            <input type="text" formControlName="captcha" inputmode="numeric"
+              placeholder="Enter result"
+              i18n-placeholder="Captcha placeholder@@register.captchaPlaceholder" />
+          </div>
+
+          @if (passwordMismatch()) {
+            <p class="auth-msg" i18n="Passwords mismatch@@form.passwordMismatch">Passwords do not match.</p>
           }
-        </button>
-        <p class="auth-switch" i18n="Have account prompt@@auth.haveAccount">
-          Already have an account? <a routerLink="/login">Sign in</a>
+          @if (message()) {
+            <p class="auth-msg" [class.success]="isSuccess()">{{ message() }}</p>
+          }
+
+          <button type="submit" class="auth-btn-primary"
+            [disabled]="form.invalid || passwordMismatch() || isSubmitting()">
+            @if (isSubmitting()) {
+              <ng-container i18n="Creating account state@@auth.creatingAccount">Creating account...</ng-container>
+            } @else {
+              <ng-container i18n="Create account button@@auth.createAccount">Create account</ng-container>
+            }
+          </button>
+        </form>
+
+        <p class="auth-switch">
+          <ng-container i18n="Have account prompt@@auth.haveAccount">Already have an account?</ng-container>
+          <a routerLink="/login" i18n="Sign in link@@auth.signInLink"> Sign in</a>
         </p>
-      </form>
-    </section>
+
+        <div class="auth-divider"><span>or</span></div>
+
+        <button type="button" class="auth-btn-google" (click)="continueWithGoogle()">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908C16.658 14.251 17.64 11.942 17.64 9.2z" fill="#4285F4"/>
+            <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+            <path d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z" fill="#FBBC05"/>
+            <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 6.293C4.672 4.166 6.656 3.58 9 3.58z" fill="#EA4335"/>
+          </svg>
+          <ng-container i18n="Continue with Google@@auth.continueWithGoogle">Continue with Google</ng-container>
+        </button>
+
+        <div class="auth-terms">
+          <button type="button" class="auth-terms-link" (click)="legal.open('disclaimer')" i18n="Disclaimer link@@nav.disclaimer">Disclaimer</button>
+          <button type="button" class="auth-terms-link" (click)="legal.open('terms-of-use')" i18n="Terms of use link@@auth.termsOfUse">Terms of Use</button>
+          <button type="button" class="auth-terms-link" (click)="legal.open('privacy-policy')" i18n="Privacy policy link@@auth.privacyPolicy">Privacy Policy</button>
+        </div>
+
+      </div>
+
+      <footer class="auth-footer">
+        <p class="auth-footer-brand">BitWLab</p>
+        <p class="auth-footer-copy" i18n="Footer copyright@@footer.copyright">© 2026 BitWLab. All rights reserved.</p>
+        <p class="auth-footer-disclaimer" i18n="Footer disclaimer@@footer.disclaimer">Not financial advice. Cryptocurrency investments carry risk.</p>
+      </footer>
+    </div>
   `,
 })
 export class RegisterPage {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthApiClient);
+  private readonly langService = inject(LanguageService);
+  protected readonly legal = inject(LegalDialogService);
+  protected readonly lang = this.langService.current;
   protected readonly isSubmitting = signal(false);
   protected readonly message = signal('');
   protected readonly isSuccess = signal(false);
+  protected readonly captchaQuestion = signal('');
+  private captchaAnswer = 0;
+
   protected readonly form = this.fb.nonNullable.group({
-    fullName: [''],
     email: ['', [Validators.required, Validators.email]],
     password: ['', Validators.required],
     confirmPassword: ['', Validators.required],
+    captcha: ['', Validators.required],
     languagePreference: this.fb.nonNullable.control<'en' | 'hu'>('en', Validators.required),
   });
+
   protected readonly passwordMismatch = computed(() => {
     const { password, confirmPassword } = this.form.getRawValue();
     return Boolean(password && confirmPassword && password !== confirmPassword);
   });
 
+  constructor() {
+    this.newChallenge();
+  }
+
+  protected setLang(locale: 'en' | 'hu'): void {
+    this.form.patchValue({ languagePreference: locale });
+    this.langService.switchTo(locale);
+  }
+
+  protected newChallenge(): void {
+    const a = Math.floor(Math.random() * 12) + 3;
+    const b = Math.floor(Math.random() * (a - 1)) + 1;
+    const useAdd = Math.random() > 0.5;
+    this.captchaAnswer = useAdd ? a + b : a - b;
+    this.captchaQuestion.set(`${a} ${useAdd ? '+' : '-'} ${b} = ?`);
+    this.form.patchValue({ captcha: '' });
+  }
+
+  protected continueWithGoogle(): void {
+    this.auth.startGoogleLogin();
+  }
+
   protected async submit(): Promise<void> {
     if (this.form.invalid || this.passwordMismatch() || this.isSubmitting()) {
       this.form.markAllAsTouched();
+      return;
+    }
+
+    const captchaGuess = parseInt(this.form.getRawValue().captcha, 10);
+    if (captchaGuess !== this.captchaAnswer) {
+      this.message.set($localize`:Captcha wrong@@register.captchaWrong:Incorrect answer. Please try again.`);
+      this.newChallenge();
       return;
     }
 
@@ -2774,16 +3034,18 @@ export class RegisterPage {
     this.isSuccess.set(false);
 
     try {
-      const response = await this.auth.register(this.form.getRawValue());
+      const { email, password, confirmPassword, languagePreference } = this.form.getRawValue();
+      const response = await this.auth.register({ email, password, confirmPassword, languagePreference });
       this.isSuccess.set(true);
       this.message.set(response.message);
       this.form.reset({
-        fullName: '',
         email: '',
         password: '',
         confirmPassword: '',
+        captcha: '',
         languagePreference: 'en',
       });
+      this.newChallenge();
     } catch (error) {
       this.message.set(getErrorMessage(error));
     } finally {

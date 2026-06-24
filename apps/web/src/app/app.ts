@@ -2,6 +2,7 @@ import { Component, inject, signal, computed, HostListener, ElementRef } from '@
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, startWith } from 'rxjs';
+import { FormsModule } from '@angular/forms';
 import { AuthSessionService } from './services/auth-session.service';
 import { DonateModalComponent } from './components/donate-modal/donate-modal.component';
 import { LanguageService } from './services/language.service';
@@ -9,7 +10,7 @@ import { LegalDialogService, LegalDoc } from './services/legal-dialog.service';
 import { AuthApiClient } from '@crypto-market-analysis/data-access/api-client';
 
 @Component({
-  imports: [RouterModule, DonateModalComponent],
+  imports: [RouterModule, DonateModalComponent, FormsModule],
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: './app.scss',
@@ -27,6 +28,12 @@ export class App {
   protected readonly showDonateModal = signal(false);
   protected readonly mobileMenuOpen = signal(false);
   protected readonly userMenuOpen = signal(false);
+  protected readonly profileModalOpen = signal(false);
+  protected readonly profileSaving = signal(false);
+  protected readonly profileMessage = signal('');
+  protected readonly profileSuccess = signal(false);
+  protected readonly profileLang = signal<'en' | 'hu'>('en');
+  protected profileName = '';
 
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
@@ -73,6 +80,45 @@ export class App {
       }
     }
     this.langService.switchTo(locale);
+  }
+
+  protected openProfileModal(): void {
+    const user = this.currentUser();
+    this.profileName = user?.fullName ?? '';
+    this.profileLang.set(user?.languagePreference ?? this.langService.current());
+    this.profileMessage.set('');
+    this.profileSuccess.set(false);
+    this.userMenuOpen.set(false);
+    this.profileModalOpen.set(true);
+  }
+
+  protected closeProfileModal(): void {
+    this.profileModalOpen.set(false);
+  }
+
+  protected async saveProfile(): Promise<void> {
+    if (this.profileSaving()) return;
+    this.profileSaving.set(true);
+    this.profileMessage.set('');
+    this.profileSuccess.set(false);
+    try {
+      const updated = await this.api.updateCurrentUserProfile({
+        fullName: this.profileName || undefined,
+        languagePreference: this.profileLang(),
+      });
+      this.authSession.updateCurrentUser({
+        fullName: updated.fullName ?? undefined,
+        languagePreference: updated.languagePreference,
+        onboardingCompleted: updated.onboardingCompleted,
+      });
+      this.profileSuccess.set(true);
+      this.profileMessage.set($localize`:Profile saved@@profile.saved:Profile updated successfully.`);
+      this.langService.switchTo(this.profileLang());
+    } catch {
+      this.profileMessage.set($localize`:Profile save failed@@profile.saveFailed:Could not save profile. Please try again.`);
+    } finally {
+      this.profileSaving.set(false);
+    }
   }
 
   protected openLegal(doc: LegalDoc): void {

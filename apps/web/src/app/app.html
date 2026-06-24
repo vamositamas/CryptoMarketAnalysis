@@ -85,6 +85,12 @@
               </div>
               <div class="user-menu-divider"></div>
               <button type="button" class="user-menu-item" role="menuitem"
+                (click)="openProfileModal()"
+                i18n="My account menu item@@nav.myAccount">
+                My Account
+              </button>
+              <div class="user-menu-divider"></div>
+              <button type="button" class="user-menu-item" role="menuitem"
                 (click)="openLegal('disclaimer')"
                 i18n="Disclaimer menu item@@nav.disclaimer">
                 Disclaimer
@@ -123,15 +129,6 @@
     </div>
   </header>
   } <!-- end @if (!isAuthPage()) -->
-
-  @if (isAuthPage()) {
-    <div class="auth-brand">
-      <a class="brand" routerLink="/">
-        <span class="brand-mark" aria-hidden="true">₿</span>
-        <span i18n="Application name@@app.name">BitWLab</span>
-      </a>
-    </div>
-  }
 
   <!-- Mobile slide-out drawer -->
   @if (!isAuthPage() && currentUser() && mobileMenuOpen()) {
@@ -175,6 +172,7 @@
   @if (legalDialog.activeDoc()) {
     <div class="legal-backdrop" (click)="legalDialog.close()" aria-hidden="true"></div>
     <div class="legal-dialog" role="dialog" aria-modal="true">
+      <div class="legal-dialog-inner" (click)="$event.stopPropagation()">
       <div class="legal-dialog-header">
         <h2 class="legal-dialog-title">
           @switch (legalDialog.activeDoc()) {
@@ -351,6 +349,54 @@
         }
 
       </div>
+      </div>
     </div>
   }
 </div>
+
+@if (profileModalOpen()) {
+  <div class="profile-modal-backdrop" (click)="closeProfileModal()">
+    <div class="profile-modal" (click)="$event.stopPropagation()">
+
+      <div class="profile-modal-header">
+        <h2 class="profile-modal-title" i18n="Profile modal title@@profile.title">My Account</h2>
+        <button class="profile-modal-close" (click)="closeProfileModal()" aria-label="Close">&#x2715;</button>
+      </div>
+
+      <div class="profile-modal-body">
+        <div class="profile-field">
+          <label i18n="Full name label@@profile.fullName">Full name</label>
+          <input type="text" [(ngModel)]="profileName" autocomplete="name"
+            placeholder="Enter your name"
+            i18n-placeholder="Name placeholder@@profile.namePlaceholder" />
+        </div>
+
+        <div class="profile-field">
+          <label i18n="Language label@@profile.language">Language</label>
+          <div class="profile-lang-row">
+            <button type="button" class="profile-lang-btn" [class.active]="profileLang() === 'en'"
+              (click)="profileLang.set('en')"
+              i18n="English option@@language.english">English</button>
+            <button type="button" class="profile-lang-btn" [class.active]="profileLang() === 'hu'"
+              (click)="profileLang.set('hu')"
+              i18n="Hungarian option@@language.hungarian">Hungarian</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-modal-footer">
+        @if (profileMessage()) {
+          <p class="profile-modal-msg" [class.success]="profileSuccess()">{{ profileMessage() }}</p>
+        }
+        <button type="button" class="profile-save-btn" [disabled]="profileSaving()" (click)="saveProfile()">
+          @if (profileSaving()) {
+            <ng-container i18n="Saving state@@common.saving">Saving...</ng-container>
+          } @else {
+            <ng-container i18n="Save changes button@@profile.save">Save changes</ng-container>
+          }
+        </button>
+      </div>
+
+    </div>
+  </div>
+}
