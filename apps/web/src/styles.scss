@@ -69,10 +69,6 @@ app-root {
 }
 
 .hero,
-.landing-hero,
-.landing-section,
-.landing-footer,
-.lp-strip,
 .kpi-grid {
   width: min(1180px, calc(100% - 32px));
   margin-inline: auto;
@@ -80,7 +76,11 @@ app-root {
 
 .topbar,
 main .content-section,
-main .content-section--wide {
+main .content-section--wide,
+.landing-hero,
+.landing-section,
+.landing-footer,
+.lp-strip {
   width: min(1800px, calc(100% - 48px));
   margin-inline: auto;
 }
