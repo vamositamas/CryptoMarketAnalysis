@@ -1,11 +1,10 @@
-import { Component, LOCALE_ID, inject, signal, computed, HostListener, ElementRef } from '@angular/core';
+import { Component, inject, signal, computed, HostListener, ElementRef } from '@angular/core';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, startWith } from 'rxjs';
 import { AuthSessionService } from './services/auth-session.service';
 import { DonateModalComponent } from './components/donate-modal/donate-modal.component';
-
-type Language = 'en' | 'hu';
+import { LanguageService } from './services/language.service';
 
 @Component({
   imports: [RouterModule, DonateModalComponent],
@@ -14,12 +13,13 @@ type Language = 'en' | 'hu';
   styleUrl: './app.scss',
 })
 export class App {
-  private readonly locale = inject(LOCALE_ID);
+  private readonly langService = inject(LanguageService);
   private readonly authSession = inject(AuthSessionService);
   private readonly router = inject(Router);
   private readonly elRef = inject(ElementRef);
 
-  protected readonly language = normalizeLanguage(this.locale);
+  protected readonly language = this.langService.current;
+  protected readonly isSwitchingLanguage = this.langService.isSwitching;
   protected readonly currentUser = this.authSession.currentUser;
   protected readonly showDonateModal = signal(false);
   protected readonly mobileMenuOpen = signal(false);
@@ -52,8 +52,8 @@ export class App {
     return user.email[0].toUpperCase();
   }
 
-  protected toggleLanguage(): void {
-    window.location.assign(`/${this.language === 'en' ? 'hu' : 'en'}/`);
+  protected switchLanguage(locale: 'en' | 'hu'): void {
+    void this.langService.switchTo(locale);
   }
 
   protected toggleUserMenu(): void {
@@ -99,8 +99,4 @@ export class App {
     this.mobileMenuOpen.set(false);
     this.userMenuOpen.set(false);
   }
-}
-
-function normalizeLanguage(locale: string): Language {
-  return locale.toLowerCase().startsWith('hu') ? 'hu' : 'en';
 }

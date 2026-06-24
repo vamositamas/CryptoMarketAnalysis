@@ -158,23 +158,52 @@ nav a:hover,
   gap: 8px;
 }
 
-.lang-btn {
-  min-height: 36px;
-  padding: 0 12px;
+.lang-toggle {
+  display: flex;
+  align-items: center;
   border: 1px solid #d7ded8;
   border-radius: 6px;
+  overflow: hidden;
   background: rgba(255, 255, 255, 0.64);
-  color: #4c5b57;
+  transition: opacity 0.15s;
+}
+
+.lang-toggle--switching {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.lang-toggle__option {
+  min-height: 36px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: #8a9e98;
   font: inherit;
   font-size: 0.8rem;
   font-weight: 800;
   letter-spacing: 0.04em;
   cursor: pointer;
+  transition: background 0.12s, color 0.12s;
 }
 
-.lang-btn:hover {
+.lang-toggle__option + .lang-toggle__option {
+  border-left: 1px solid #d7ded8;
+}
+
+.lang-toggle__option--active {
+  background: #145c4b;
+  color: #ffffff;
+}
+
+.lang-toggle__option:not(.lang-toggle__option--active):hover {
   background: rgba(255, 255, 255, 0.9);
-  border-color: #b0bcb7;
+  color: #344540;
+}
+
+.lang-toggle__option:disabled {
+  cursor: not-allowed;
 }
 
 /* User avatar button + dropdown */

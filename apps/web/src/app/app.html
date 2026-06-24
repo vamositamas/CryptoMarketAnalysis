@@ -41,12 +41,22 @@
           <ng-container i18n="Donate navigation label@@nav.donate">Donate</ng-container>
         </button>
       }
-      <button
-        type="button"
-        class="lang-btn"
-        (click)="toggleLanguage()"
-        [title]="language === 'en' ? 'Switch to Hungarian' : 'Switch to English'"
-      >{{ language.toUpperCase() }}</button>
+      <div class="lang-toggle" [class.lang-toggle--switching]="isSwitchingLanguage()" role="group" aria-label="Language">
+        <button
+          type="button"
+          class="lang-toggle__option"
+          [class.lang-toggle__option--active]="language() === 'en'"
+          [disabled]="isSwitchingLanguage()"
+          (click)="switchLanguage('en')"
+        >EN</button>
+        <button
+          type="button"
+          class="lang-toggle__option"
+          [class.lang-toggle__option--active]="language() === 'hu'"
+          [disabled]="isSwitchingLanguage()"
+          (click)="switchLanguage('hu')"
+        >HU</button>
+      </div>
 
       @if (!currentUser()) {
         <a class="ghost-link" routerLink="/login" i18n="Login link@@auth.login">Login</a>

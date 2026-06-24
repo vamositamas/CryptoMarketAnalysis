@@ -51,20 +51,6 @@
           ],
           "outputHashing": "all"
         },
-        "production-en": {
-          "localize": ["en"],
-          "baseHref": "/en/",
-          "outputHashing": "all"
-        },
-        "production-hu": {
-          "localize": ["hu"],
-          "baseHref": "/hu/",
-          "outputHashing": "all"
-        },
-        "production-i18n": {
-          "localize": true,
-          "outputHashing": "all"
-        },
         "development": {
           "optimization": false,
           "extractLicenses": false,
