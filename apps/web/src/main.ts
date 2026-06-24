@@ -1,4 +1,3 @@
-import '@angular/localize/init';
 import { loadTranslations } from '@angular/localize';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { ApplicationRef, LOCALE_ID } from '@angular/core';
