@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { createHmac, randomBytes, timingSafeEqual } from 'crypto';
 import { Router } from 'express';
 import { createAuthRateLimitMiddleware } from '../middleware/rate-limit.middleware';
 import {
@@ -121,7 +121,7 @@ export function createAuthRouter(authService = new AuthService()): Router {
       const state = req.query.state?.toString();
       const cookieState = getCookieValue(req.headers.cookie, 'googleOAuthState');
 
-      if (!state || !cookieState || state !== cookieState) {
+      if (!isValidOAuthState(state, cookieState)) {
         res.status(400).json({ error: 'Invalid OAuth state' });
         return;
       }
@@ -148,7 +148,49 @@ export function createAuthRouter(authService = new AuthService()): Router {
 }
 
 function createOAuthState(): string {
-  return randomUUID();
+  const nonce = randomBytes(32).toString('base64url');
+  const expiresAt = Date.now() + 10 * 60 * 1000;
+  const payload = `${nonce}.${expiresAt}`;
+
+  return `${payload}.${signOAuthState(payload)}`;
+}
+
+function isValidOAuthState(state: string | undefined, cookieState: string | undefined): boolean {
+  if (!state) {
+    return false;
+  }
+
+  const [nonce, expiresAtValue, signature] = state.split('.');
+  if (!nonce || !expiresAtValue || !signature) {
+    return cookieState === state;
+  }
+
+  const expiresAt = Number(expiresAtValue);
+  if (!Number.isSafeInteger(expiresAt) || expiresAt <= Date.now()) {
+    return false;
+  }
+
+  const expectedSignature = signOAuthState(`${nonce}.${expiresAtValue}`);
+  const actualBuffer = Buffer.from(signature);
+  const expectedBuffer = Buffer.from(expectedSignature);
+
+  return (
+    actualBuffer.length === expectedBuffer.length &&
+    timingSafeEqual(actualBuffer, expectedBuffer)
+  );
+}
+
+function signOAuthState(value: string): string {
+  return createHmac('sha256', getOAuthStateSecret()).update(value).digest('base64url');
+}
+
+function getOAuthStateSecret(): string {
+  return (
+    process.env.OAUTH_STATE_SECRET ??
+    process.env.CSRF_SECRET ??
+    process.env.JWT_SECRET ??
+    'local-development-oauth-state-secret'
+  );
 }
 
 function getCookieValue(cookieHeader: string | undefined, name: string): string | undefined {

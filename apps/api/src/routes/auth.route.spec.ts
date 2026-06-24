@@ -63,15 +63,18 @@ function createResponse() {
 describe('auth route', () => {
   const originalGoogleClientId = process.env.GOOGLE_CLIENT_ID;
   const originalFrontendUrl = process.env.FRONTEND_URL;
+  const originalOauthStateSecret = process.env.OAUTH_STATE_SECRET;
 
   beforeEach(() => {
     process.env.GOOGLE_CLIENT_ID = 'google-client-id';
     process.env.FRONTEND_URL = 'http://localhost:4200';
+    process.env.OAUTH_STATE_SECRET = 'test-oauth-state-secret';
   });
 
   afterEach(() => {
     process.env.GOOGLE_CLIENT_ID = originalGoogleClientId;
     process.env.FRONTEND_URL = originalFrontendUrl;
+    process.env.OAUTH_STATE_SECRET = originalOauthStateSecret;
   });
 
   it('returns 201 for successful registration', async () => {
@@ -235,7 +238,7 @@ describe('auth route', () => {
     expect(next).not.toHaveBeenCalled();
   });
 
-  it('redirects to Google OAuth with a state cookie', async () => {
+  it('redirects to Google OAuth with a signed state cookie', async () => {
     const authService = {
       register: jest.fn(),
       login: jest.fn(),
@@ -257,9 +260,12 @@ describe('auth route', () => {
     expect(response.headers.get('Set-Cookie')).toContain('googleOAuthState=');
     expect(response.headers.get('Set-Cookie')).toContain('Path=/;');
     expect(authService.createGoogleAuthorizationUrl).toHaveBeenCalledWith(expect.any(String));
+
+    const state = authService.createGoogleAuthorizationUrl.mock.calls[0][0] as string;
+    expect(state.split('.')).toHaveLength(3);
   });
 
-  it('handles a valid Google OAuth callback', async () => {
+  it('handles a valid Google OAuth callback with matching state cookie', async () => {
     const authService = {
       register: jest.fn(),
       login: jest.fn(),
@@ -296,6 +302,45 @@ describe('auth route', () => {
     );
   });
 
+  it('handles a valid signed Google OAuth callback when the state cookie is missing', async () => {
+    const authService = {
+      register: jest.fn(),
+      login: jest.fn(),
+      verifyEmail: jest.fn(),
+      createGoogleAuthorizationUrl: jest
+        .fn()
+        .mockReturnValue('https://accounts.google.com/o/oauth2/v2/auth'),
+      loginWithGoogleCode: jest.fn().mockResolvedValue({
+        accessToken: 'jwt-token',
+        user: { id: 'user-id', email: 'user@example.com' },
+      }),
+    };
+    const googleHandler = getHandler(authService, '/google');
+    const googleResponse = createResponse();
+    const callbackHandler = getHandler(authService, '/google/callback');
+    const callbackResponse = createResponse();
+    const next = jest.fn();
+
+    await googleHandler({ headers: {} } as Request, googleResponse, next);
+    const state = authService.createGoogleAuthorizationUrl.mock.calls[0][0] as string;
+
+    await callbackHandler(
+      {
+        query: { code: 'auth-code', state },
+        headers: {},
+      } as unknown as Request,
+      callbackResponse,
+      next,
+    );
+
+    expect(authService.loginWithGoogleCode).toHaveBeenCalledWith('auth-code');
+    expect(callbackResponse.statusCode).toBe(302);
+    expect(callbackResponse.redirectLocation).toBe('http://localhost:4200/dashboard');
+    expect(callbackResponse.headers.get('Set-Cookie')).toEqual(
+      expect.arrayContaining([expect.stringContaining('authToken=jwt-token')]),
+    );
+  });
+
   it('rejects Google OAuth callback with invalid state', async () => {
     const authService = {
       register: jest.fn(),
@@ -321,6 +366,40 @@ describe('auth route', () => {
 
     expect(response.statusCode).toBe(400);
     expect(response.body).toEqual({ error: 'Invalid OAuth state' });
+    expect(authService.loginWithGoogleCode).not.toHaveBeenCalled();
+  });
+
+  it('rejects Google OAuth callback with a tampered signed state', async () => {
+    const authService = {
+      register: jest.fn(),
+      login: jest.fn(),
+      verifyEmail: jest.fn(),
+      createGoogleAuthorizationUrl: jest
+        .fn()
+        .mockReturnValue('https://accounts.google.com/o/oauth2/v2/auth'),
+      loginWithGoogleCode: jest.fn(),
+    };
+    const googleHandler = getHandler(authService, '/google');
+    const googleResponse = createResponse();
+    const callbackHandler = getHandler(authService, '/google/callback');
+    const callbackResponse = createResponse();
+    const next = jest.fn();
+
+    await googleHandler({ headers: {} } as Request, googleResponse, next);
+    const state = authService.createGoogleAuthorizationUrl.mock.calls[0][0] as string;
+    const tamperedState = state.replace(/^[^.]+/, 'tampered');
+
+    await callbackHandler(
+      {
+        query: { code: 'auth-code', state: tamperedState },
+        headers: {},
+      } as unknown as Request,
+      callbackResponse,
+      next,
+    );
+
+    expect(callbackResponse.statusCode).toBe(400);
+    expect(callbackResponse.body).toEqual({ error: 'Invalid OAuth state' });
     expect(authService.loginWithGoogleCode).not.toHaveBeenCalled();
   });
 });
