@@ -68,10 +68,26 @@ import { AuthSessionService } from './services/auth-session.service';
       </div>
     </section>
 
-    <section
-      class="landing-section"
-      aria-labelledby="models-title"
-    >
+    <!-- Indicators strip -->
+    <div class="lp-strip" aria-label="Available analytical models" role="list">
+      <span class="lp-strip__label" aria-hidden="true" i18n="Indicators strip label@@landing.stripLabel">Models</span>
+      <ul class="lp-strip__list">
+        <li>MVRV Z-Score</li>
+        <li>Rainbow Band</li>
+        <li>Pi Cycle Top</li>
+        <li>Stock-to-Flow</li>
+        <li>Fear &amp; Greed</li>
+        <li>Puell Multiple</li>
+        <li>Realized Price</li>
+        <li>200-Day MA</li>
+        <li>Hash Ribbons</li>
+        <li>VDD Multiple</li>
+        <li>Mayer Multiple</li>
+        <li>Difficulty Ribbon</li>
+      </ul>
+    </div>
+
+    <section class="landing-section" aria-labelledby="models-title">
       <div class="section-heading">
         <p class="eyebrow" i18n="Landing models eyebrow@@landing.modelsEyebrow">
           Model library
@@ -120,10 +136,13 @@ import { AuthSessionService } from './services/auth-session.service';
     </section>
 
     <footer class="landing-footer">
-      <p i18n="Landing disclaimer notice@@landing.disclaimerNotice">
-        The information on this platform is for informational purposes only and does not constitute financial advice.
-      </p>
-      <a routerLink="/disclaimer" i18n="Landing disclaimer link@@landing.disclaimerLink">Disclaimer</a>
+      <div class="lp-footer-info">
+        <strong>BitWLab</strong>
+        <p i18n="Landing disclaimer notice@@landing.disclaimerNotice">
+          For informational purposes only — not financial advice.
+        </p>
+      </div>
+      <a routerLink="/disclaimer" i18n="Landing disclaimer link@@landing.disclaimerLink">Disclaimer →</a>
     </footer>
   `,
 })

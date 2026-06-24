@@ -452,8 +452,9 @@
       <trans-unit id="s2f.extremeScarcity" datatype="html"><source>Extreme Scarcity</source><target>Extrém szűkösség</target></trans-unit>
       <trans-unit id="auth.logout" datatype="html"><source>Log out</source><target>Kilépés</target></trans-unit>
       <trans-unit id="nav.disclaimer" datatype="html"><source>Disclaimer</source><target>Jogi nyilatkozat</target></trans-unit>
-      <trans-unit id="landing.disclaimerNotice" datatype="html"><source>The information on this platform is for informational purposes only and does not constitute financial advice.</source><target>Az ezen a platformon található információk kizárólag tájékoztató jellegűek, és nem minősülnek pénzügyi tanácsadásnak.</target></trans-unit>
-      <trans-unit id="landing.disclaimerLink" datatype="html"><source>Disclaimer</source><target>Jogi nyilatkozat</target></trans-unit>
+      <trans-unit id="landing.disclaimerNotice" datatype="html"><source>For informational purposes only — not financial advice.</source><target>Kizárólag tájékoztató jellegű — nem pénzügyi tanácsadás.</target></trans-unit>
+      <trans-unit id="landing.disclaimerLink" datatype="html"><source>Disclaimer →</source><target>Jogi nyilatkozat →</target></trans-unit>
+      <trans-unit id="landing.stripLabel" datatype="html"><source>Models</source><target>Modellek</target></trans-unit>
       <trans-unit id="disclaimer.back" datatype="html"><source>← Back</source><target>← Vissza</target></trans-unit>
       <trans-unit id="disclaimer.title" datatype="html"><source>Disclaimer – No Financial Advice</source><target>Jogi nyilatkozat – Nem pénzügyi tanácsadás</target></trans-unit>
       <trans-unit id="disclaimer.intro" datatype="html"><source>The information, data, charts, analytics, metrics, indicators, and blockchain-related content provided on this platform are for informational and educational purposes only.</source><target>Az ezen a platformon megjelenített információk, adatok, grafikonok, elemzések, mutatók, indikátorok és blockchain-nal kapcsolatos tartalmak kizárólag tájékoztató és oktatási célt szolgálnak.</target></trans-unit>
