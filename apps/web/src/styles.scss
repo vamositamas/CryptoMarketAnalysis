@@ -436,45 +436,18 @@ main .auth-form {
   align-items: baseline;
 }
 
-.signal-chart {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  align-items: end;
-  gap: 10px;
-  height: 190px;
-  margin: 20px 0;
-  padding: 16px;
+.lp-chart {
+  margin: 14px 0 10px;
   border-radius: 8px;
-  background: linear-gradient(180deg, #fdfbf4, #edf6f1);
+  overflow: hidden;
+  background: linear-gradient(180deg, #fdfbf4 0%, #edf6f1 100%);
+  line-height: 0;
 }
 
-.bar {
-  border-radius: 6px 6px 2px 2px;
-  background: linear-gradient(180deg, #f7b731, #145c4b);
-}
-
-.bar-one {
-  height: 34%;
-}
-
-.bar-two {
-  height: 56%;
-}
-
-.bar-three {
-  height: 42%;
-}
-
-.bar-four {
-  height: 76%;
-}
-
-.bar-five {
-  height: 62%;
-}
-
-.bar-six {
-  height: 88%;
+.lp-chart svg {
+  display: block;
+  width: 100%;
+  height: 170px;
 }
 
 .kpi-grid {

@@ -53,13 +53,51 @@ import { AuthSessionService } from './services/auth-session.service';
           <span i18n="Landing preview label@@landing.previewLabel">Research preview</span>
           <strong>Members only</strong>
         </div>
-        <div class="signal-chart" aria-hidden="true">
-          <span class="bar bar-one"></span>
-          <span class="bar bar-two"></span>
-          <span class="bar bar-three"></span>
-          <span class="bar bar-four"></span>
-          <span class="bar bar-five"></span>
-          <span class="bar bar-six"></span>
+        <div class="lp-chart" aria-hidden="true">
+          <svg viewBox="0 0 560 180" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+            <!-- Valuation zone bands: top = overheated, bottom = accumulation -->
+            <rect width="560" height="36" fill="rgba(239,68,68,0.13)"/>
+            <rect y="36" width="560" height="36" fill="rgba(249,115,22,0.10)"/>
+            <rect y="72" width="560" height="36" fill="rgba(234,179,8,0.10)"/>
+            <rect y="108" width="560" height="36" fill="rgba(132,204,22,0.08)"/>
+            <rect y="144" width="560" height="36" fill="rgba(20,92,75,0.09)"/>
+            <!-- Zone separators -->
+            <line x1="0" y1="36"  x2="560" y2="36"  stroke="rgba(0,0,0,0.06)" stroke-width="1"/>
+            <line x1="0" y1="72"  x2="560" y2="72"  stroke="rgba(0,0,0,0.06)" stroke-width="1"/>
+            <line x1="0" y1="108" x2="560" y2="108" stroke="rgba(0,0,0,0.06)" stroke-width="1"/>
+            <line x1="0" y1="144" x2="560" y2="144" stroke="rgba(0,0,0,0.06)" stroke-width="1"/>
+            <!-- Vertical time grid -->
+            <line x1="112" y1="0" x2="112" y2="180" stroke="rgba(0,0,0,0.04)" stroke-width="1"/>
+            <line x1="224" y1="0" x2="224" y2="180" stroke="rgba(0,0,0,0.04)" stroke-width="1"/>
+            <line x1="336" y1="0" x2="336" y2="180" stroke="rgba(0,0,0,0.04)" stroke-width="1"/>
+            <line x1="448" y1="0" x2="448" y2="180" stroke="rgba(0,0,0,0.04)" stroke-width="1"/>
+            <!-- Area fill under BTC price line -->
+            <path d="M0,158 C18,154 38,148 62,138 C84,128 100,112 122,88
+                     C136,72 148,32 170,10 C184,6 196,46 216,58
+                     C232,68 242,16 265,10 C282,6 295,24 312,46
+                     C326,64 334,138 356,152 C374,164 392,166 410,158
+                     C428,150 440,132 458,110 C474,90 484,62 504,36
+                     C516,20 530,10 548,8 L560,10
+                     L560,180 L0,180 Z"
+                  fill="rgba(20,92,75,0.09)"/>
+            <!-- BTC price line -->
+            <path d="M0,158 C18,154 38,148 62,138 C84,128 100,112 122,88
+                     C136,72 148,32 170,10 C184,6 196,46 216,58
+                     C232,68 242,16 265,10 C282,6 295,24 312,46
+                     C326,64 334,138 356,152 C374,164 392,166 410,158
+                     C428,150 440,132 458,110 C474,90 484,62 504,36
+                     C516,20 530,10 548,8 L560,10"
+                  stroke="#145c4b" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <!-- 200-day MA — dashed amber -->
+            <path d="M0,158 C25,154 55,148 85,136 C108,126 125,106 148,82
+                     C163,66 174,48 198,40 C218,34 232,54 250,66
+                     C266,77 272,40 295,34 C310,30 322,54 336,90
+                     C350,122 362,152 382,158 C400,164 416,158 434,146
+                     C452,134 464,114 482,90 C496,72 508,46 528,28
+                     C542,16 554,12 560,14"
+                  stroke="#f7b731" stroke-width="1.5" fill="none"
+                  stroke-dasharray="5,4" stroke-linecap="round"/>
+          </svg>
         </div>
         <div class="metric-strip">
           <span><ng-container i18n="Landing preview rainbow@@landing.rainbow">Rainbow</ng-container> <strong>Locked</strong></span>
