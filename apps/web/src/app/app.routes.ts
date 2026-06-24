@@ -152,9 +152,9 @@ export class LandingPage {
               (click)="refreshData()"
             >
               @if (isRefreshing()) {
-                Refreshing...
+                <ng-container i18n="Refreshing state@@dashboard.refreshing">Refreshing...</ng-container>
               } @else {
-                Refresh Data
+                <ng-container i18n="Refresh data button@@dashboard.refreshData">Refresh Data</ng-container>
               }
             </button>
           }
@@ -193,17 +193,17 @@ export class LandingPage {
           </div>
           <!-- Summary -->
           <div class="msi-summary">
-            <span class="msi-zone-badge" [attr.data-zone]="s.overallZone">{{ s.overallLabel }}</span>
+            <span class="msi-zone-badge" [attr.data-zone]="s.overallZone">{{ getZoneLabel(s.overallZone) }}</span>
             <span class="msi-btc">BTC: {{ formatUsd(s.btcPriceUsd) }}</span>
-            <span class="msi-link">View Trade Planner →</span>
+            <span class="msi-link" i18n="View Trade Planner link@@dashboard.viewTradePlanner">View Trade Planner →</span>
           </div>
           <!-- Signal grid -->
           <div class="msi-grid">
             @for (sig of s.signals; track sig.name) {
               <div class="msi-sig" [attr.data-zone]="sig.zone">
-                <span class="msi-sig-label">{{ sig.label }}</span>
+                <span class="msi-sig-label">{{ getSignalLabel(sig.name, sig.label) }}</span>
                 <span class="msi-sig-value">{{ sig.zone === 'no_data' ? 'N/A' : sig.formattedValue }}</span>
-                <span class="msi-sig-zone">{{ sig.zone === 'no_data' ? '—' : sig.zone.replace('_', ' ') }}</span>
+                <span class="msi-sig-zone">{{ sig.zone === 'no_data' ? '—' : getZoneLabel(sig.zone) }}</span>
               </div>
             }
           </div>
@@ -231,7 +231,7 @@ export class LandingPage {
                 aria-label="Remove widget"
                 (click)="removeWidget(widget.id)"
               >✕</button>
-              <span class="widget-title">{{ widget.title }}</span>
+              <span class="widget-title">{{ getWidgetTitle(widget) }}</span>
               @if (widget.type !== 'halving_progress') {
                 <strong class="widget-value">{{ widget.formattedValue }}</strong>
                 <small class="widget-trend" [class]="'trend-' + widget.trend">
@@ -296,20 +296,20 @@ export class LandingPage {
                     </svg>
                     <div class="wi-halving-center-text">
                       <span class="wi-halving-pct">{{ halvingData.pct }}</span>
-                      <span class="wi-halving-of">of cycle</span>
+                      <span class="wi-halving-of" i18n="Halving of cycle label@@dashboard.halvingOfCycle">of cycle</span>
                     </div>
                   </div>
                   <div class="wi-halving-stats">
                     <div class="wi-halving-stat">
-                      <span>Days left</span>
+                      <span i18n="Days left label@@dashboard.halvingDaysLeft">Days left</span>
                       <strong>{{ halvingData.daysRemaining }}</strong>
                     </div>
                     <div class="wi-halving-stat">
-                      <span>Est. next</span>
+                      <span i18n="Est next halving label@@dashboard.halvingEstNext">Est. next</span>
                       <strong>Apr '28</strong>
                     </div>
                     <div class="wi-halving-stat">
-                      <span>Cycle</span>
+                      <span i18n="Cycle label@@dashboard.halvingCycle">Cycle</span>
                       <strong>5 / 2024</strong>
                     </div>
                   </div>
@@ -359,7 +359,7 @@ export class LandingPage {
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
             </svg>
-            Favourites
+            <ng-container i18n="Favourites tab label@@dashboard.favouritesTab">Favourites</ng-container>
             @if (favouriteCharts().length > 0) {
               <span class="charts-tab-count">{{ favouriteCharts().length }}</span>
             }
@@ -376,18 +376,18 @@ export class LandingPage {
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
             </svg>
-            Recently Viewed
+            <ng-container i18n="Recently viewed tab label@@dashboard.recentlyViewedTab">Recently Viewed</ng-container>
           </button>
         </div>
 
         @if (chartTab() === 'favourites') {
           @if (isLoadingFavouriteCharts()) {
-            <p class="recent-charts-loading">Loading...</p>
+            <p class="recent-charts-loading" i18n="Favourites loading@@dashboard.favouritesLoading">Loading...</p>
           } @else if (favouriteCharts().length === 0) {
-            <p class="recent-charts-empty">
+            <p class="recent-charts-empty" i18n="No favourites message@@dashboard.noFavourites">
               No favourite charts yet. Open any chart and click <strong>Save</strong> to bookmark it here.
             </p>
-            <a routerLink="/charts" class="secondary-button">Explore Charts</a>
+            <a routerLink="/charts" class="secondary-button" i18n="Explore charts button@@dashboard.exploreCharts">Explore Charts</a>
           } @else {
             <div class="recent-charts-grid">
               @for (chart of favouriteCharts(); track chart.chartId) {
@@ -1439,11 +1439,11 @@ export class DashboardPage {
   }
 
   protected fearGreedLabel(value: number): string {
-    if (value <= 25) return 'Extreme Fear';
-    if (value <= 46) return 'Fear';
-    if (value <= 54) return 'Neutral';
-    if (value <= 75) return 'Greed';
-    return 'Extreme Greed';
+    if (value <= 25) return $localize`:@@fearGreed.extremeFear:Extreme Fear`;
+    if (value <= 46) return $localize`:@@fearGreed.fear:Fear`;
+    if (value <= 54) return $localize`:@@fearGreed.neutral:Neutral`;
+    if (value <= 75) return $localize`:@@fearGreed.greed:Greed`;
+    return $localize`:@@fearGreed.extremeGreed:Extreme Greed`;
   }
 
   // Realized Price & 200-day MA: BTC premium/discount vs reference price
@@ -1461,10 +1461,10 @@ export class DashboardPage {
       const position = Math.min(100, Math.max(0, (pct + 50) / 200 * 100));
       let zone: string;
       let label: string;
-      if (pct < -20) { zone = 'deep-discount'; label = 'Deep discount'; }
-      else if (pct < 0) { zone = 'discount'; label = 'Below 200-day MA'; }
-      else if (pct < 50) { zone = 'above-ma'; label = 'Above 200-day MA'; }
-      else { zone = 'far-above'; label = 'Far above MA'; }
+      if (pct < -20) { zone = 'deep-discount'; label = $localize`:@@ma200.deepDiscount:Deep discount`; }
+      else if (pct < 0) { zone = 'discount'; label = $localize`:@@ma200.below:Below 200-day MA`; }
+      else if (pct < 50) { zone = 'above-ma'; label = $localize`:@@ma200.above:Above 200-day MA`; }
+      else { zone = 'far-above'; label = $localize`:@@ma200.farAbove:Far above MA`; }
       return { pct, position, zone, label };
     }
 
@@ -1472,10 +1472,10 @@ export class DashboardPage {
     const position = Math.min(100, Math.max(0, (pct + 50) / 250 * 100));
     let zone: string;
     let label: string;
-    if (pct < 0) { zone = 'rp-below'; label = 'Investors at loss'; }
-    else if (pct < 30) { zone = 'rp-fair'; label = 'Near fair value'; }
-    else if (pct < 80) { zone = 'rp-premium'; label = 'In profit'; }
-    else { zone = 'rp-extreme'; label = 'Overheated'; }
+    if (pct < 0) { zone = 'rp-below'; label = $localize`:@@realizedPrice.atLoss:Investors at loss`; }
+    else if (pct < 30) { zone = 'rp-fair'; label = $localize`:@@realizedPrice.nearFair:Near fair value`; }
+    else if (pct < 80) { zone = 'rp-premium'; label = $localize`:@@realizedPrice.inProfit:In profit`; }
+    else { zone = 'rp-extreme'; label = $localize`:@@realizedPrice.overheated:Overheated`; }
     return { pct, position, zone, label };
   }
 
@@ -1493,11 +1493,11 @@ export class DashboardPage {
   }
 
   protected mvrvLabel(value: number): string {
-    if (value < 0)  return 'Buy Zone';
-    if (value < 2)  return 'Undervalued';
-    if (value < 5)  return 'Fair Value';
-    if (value < 7)  return 'Overvalued';
-    return 'Sell Zone';
+    if (value < 0)  return $localize`:@@mvrv.buyZone:Buy Zone`;
+    if (value < 2)  return $localize`:@@mvrv.undervalued:Undervalued`;
+    if (value < 5)  return $localize`:@@mvrv.fairValue:Fair Value`;
+    if (value < 7)  return $localize`:@@mvrv.overvalued:Overvalued`;
+    return $localize`:@@mvrv.sellZone:Sell Zone`;
   }
 
   // Stock-to-Flow: scale 0..200 → 0..100%
@@ -1515,11 +1515,50 @@ export class DashboardPage {
   }
 
   protected s2fLabel(value: number): string {
-    if (value < 28)  return 'Low Scarcity';
-    if (value < 56)  return 'Moderate Scarcity';
-    if (value < 113) return 'High Scarcity';
-    if (value < 170) return 'Very High Scarcity';
-    return 'Extreme Scarcity';
+    if (value < 28)  return $localize`:@@s2f.lowScarcity:Low Scarcity`;
+    if (value < 56)  return $localize`:@@s2f.moderateScarcity:Moderate Scarcity`;
+    if (value < 113) return $localize`:@@s2f.highScarcity:High Scarcity`;
+    if (value < 170) return $localize`:@@s2f.veryHighScarcity:Very High Scarcity`;
+    return $localize`:@@s2f.extremeScarcity:Extreme Scarcity`;
+  }
+
+  protected getZoneLabel(zone: string): string {
+    switch (zone) {
+      case 'very_bullish': return $localize`:@@zone.veryBullish:Very Bullish`;
+      case 'bullish':      return $localize`:@@zone.bullish:Bullish`;
+      case 'neutral':      return $localize`:@@zone.neutral:Neutral`;
+      case 'bearish':      return $localize`:@@zone.bearish:Bearish`;
+      case 'very_bearish': return $localize`:@@zone.veryBearish:Very Bearish`;
+      default:             return zone.replace(/_/g, ' ');
+    }
+  }
+
+  protected getSignalLabel(name: string, fallback: string): string {
+    switch (name) {
+      case 'mvrv_zscore':            return $localize`:@@signal.mvrvZscore:MVRV Z-Score`;
+      case 'vdd_multiple':           return $localize`:@@signal.vddMultiple:VDD Multiple`;
+      case 'pi_cycle_top':           return $localize`:@@signal.piCycleTop:Pi Cycle Top`;
+      case 'rainbow_band':           return $localize`:@@signal.rainbowBand:Rainbow Band`;
+      case 'mayer_multiple':         return $localize`:@@signal.mayerMultiple:Mayer Multiple`;
+      case 'realized_price_premium': return $localize`:@@signal.realizedPricePremium:Realized Price Premium`;
+      case 'puell_multiple':         return $localize`:@@signal.puellMultiple:Puell Multiple`;
+      case 'fear_greed':             return $localize`:@@signal.fearGreed:Fear & Greed`;
+      default:                       return fallback;
+    }
+  }
+
+  protected getWidgetTitle(widget: DashboardWidget): string {
+    switch (widget.type) {
+      case 'btc_price':       return $localize`:@@widget.btcPrice:Current BTC Price`;
+      case 'mvrv_zscore':     return $localize`:@@widget.mvrvZscore:MVRV Z-Score`;
+      case 'stock_to_flow':   return $localize`:@@widget.stockToFlow:Stock-to-Flow Ratio`;
+      case 'fear_greed':      return $localize`:@@widget.fearGreed:Fear & Greed Index`;
+      case 'realized_price':  return $localize`:@@widget.realizedPrice:Realized Price`;
+      case 'ma_200_day':      return $localize`:@@widget.ma200:200-Day Moving Average`;
+      case 'market_cap':      return $localize`:@@widget.marketCap:Market Cap`;
+      case 'halving_progress':return $localize`:@@widget.halvingProgress:Halving Progress`;
+      default:                return widget.title;
+    }
   }
 
   private async loadSignals(): Promise<void> {
