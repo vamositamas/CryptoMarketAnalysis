@@ -3727,6 +3727,8 @@ main .halving-spiral-chart-page {
 }
 .uact-edit    { background: #eff6ff; color: #1e40af; border-color: #bfdbfe; }
 .uact-edit:hover    { background: #dbeafe; }
+.uact-verify  { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+.uact-verify:hover  { background: #d1fae5; }
 .uact-reset   { background: #f5f3ff; color: #6d28d9; border-color: #ddd6fe; }
 .uact-reset:hover   { background: #ede9fe; }
 .uact-delete  { background: #fff1f2; color: #be123c; border-color: #fecdd3; }
@@ -3987,8 +3989,10 @@ main .halving-spiral-chart-page {
 
 .primary-button.danger {
   background: #be123c;
+  color: #ffffff;
 
-  &:hover:not(:disabled) { background: #9f1239; }
+  &:hover:not(:disabled) { background: #9f1239; color: #ffffff; }
+  &:disabled { color: #ffffff; }
 }
 
 /* ── Chart Favourite Button ──────────────────────────────── */

@@ -218,7 +218,7 @@ export interface SpxLiquidityChartResponse {
 export interface MidtermCyclesChartResponse {
   chartId: 'midterm-cycles';
   title: 'Midterm Cycles';
-  dataPoints: { date: string; btcRsi12m: number | null; spxRsi12m: number | null; ismPmi: number | null; }[];
+  dataPoints: { date: string; btcRsi12m: number | null; spxRsi12m: number | null; cfnai: number | null; }[];
   lastUpdated: string | null;
 }
 
@@ -314,7 +314,7 @@ export class ChartDataService {
           date: r.date,
           btcRsi12m: r.btcRsi12m,
           spxRsi12m: r.spxRsi12m,
-          ismPmi: r.ismPmi,
+          cfnai: r.cfnai,
         })),
         lastUpdated,
       };

@@ -1,6 +1,7 @@
 import type { Request } from 'express';
 import { Router } from 'express';
-import { BitcoinDataClient, BlockchainInfoClient, CoinGeckoClient, FearGreedClient } from '@crypto-market-analysis/calculation-engines/data-sources';
+import { BitcoinDataClient, BitcoinDataClientError, BlockchainInfoClient, CoinGeckoClient, FearGreedClient, FredClient } from '@crypto-market-analysis/calculation-engines/data-sources';
+import { computeMonthlyRsi } from '@crypto-market-analysis/calculation-engines/indicators';
 import { getDatabasePool } from '../config/database.config';
 import { DailyDataRefreshService, insertBitcoinMetricsDaily } from '../jobs/daily-data-refresh.controller';
 import { runHistoricalDataInitialization } from '../jobs/init-historical-data';
@@ -62,7 +63,7 @@ type DonationsServiceContract = Pick<
 
 type UserManagementServiceContract = Pick<
   UserManagementService,
-  'listUsers' | 'getUser' | 'updateUser' | 'deleteUser' | 'restoreUser' | 'forcePasswordReset'
+  'listUsers' | 'getUser' | 'updateUser' | 'deleteUser' | 'hardDeleteUser' | 'restoreUser' | 'verifyUserEmail' | 'forcePasswordReset'
 >;
 
 type AuditLogRepositoryContract = Pick<AuditLogRepository, 'create' | 'list'>;
@@ -296,6 +297,104 @@ const DEFAULT_ALERT_TRIGGERED_HU_HTML = `<!DOCTYPE html>
 </body>
 </html>`;
 
+const DEFAULT_EMAIL_VERIFICATION_HTML = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>Verify your email address — BitWLab</title></head>
+<body style="margin:0;padding:0;background:#e8f0e9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#e8f0e9;padding:32px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+        <tr><td style="background:#1a4731;border-radius:12px 12px 0 0;padding:28px 40px;text-align:center;">
+          <p style="margin:0 0 4px;font-size:22px;font-weight:700;color:#ffffff;">BitWLab</p>
+          <p style="margin:0;font-size:13px;color:#86b89a;">Bitcoin Blockchain Analysis</p>
+        </td></tr>
+        <tr><td style="background:#ffffff;padding:40px 40px 32px;border-left:1px solid #dce8dd;border-right:1px solid #dce8dd;">
+          <h2 style="margin:0 0 20px;font-size:24px;font-weight:700;color:#111827;">Welcome to BitWLab!</h2>
+          <p style="margin:0 0 28px;font-size:15px;color:#374151;line-height:1.6;">Thanks for signing up! Please verify your email address by clicking the button below:</p>
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin-bottom:28px;"><tr><td style="background:#1a4731;border-radius:8px;"><a href="{{verificationUrl}}" style="display:inline-block;padding:13px 30px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;">Verify Email Address &#x2192;</a></td></tr></table>
+          <p style="margin:0 0 8px;font-size:13px;color:#6b7280;">This link expires in 24 hours.</p>
+          <p style="margin:0;font-size:13px;color:#6b7280;">If you didn&#39;t create an account, you can safely ignore this email.</p>
+        </td></tr>
+        <tr><td style="background:#d4e8d6;border-radius:0 0 12px 12px;padding:20px 40px;text-align:center;border:1px solid #bdd9bf;border-top:none;">
+          <p style="margin:0 0 4px;font-size:13px;color:#3d6b4a;">This is an automated message. Please do not reply to this email.</p>
+          <p style="margin:0;font-size:12px;color:#5a8a68;"><a href="{{appUrl}}" style="color:#1a4731;text-decoration:none;">BitWLab</a> &nbsp;&middot;&nbsp; Bitcoin Blockchain Analysis</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+const DEFAULT_EMAIL_VERIFICATION_HU_HTML = `<!DOCTYPE html>
+<html lang="hu">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>Erősítsd meg az email-címed — BitWLab</title></head>
+<body style="margin:0;padding:0;background:#e8f0e9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#e8f0e9;padding:32px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+        <tr><td style="background:#1a4731;border-radius:12px 12px 0 0;padding:28px 40px;text-align:center;">
+          <p style="margin:0 0 4px;font-size:22px;font-weight:700;color:#ffffff;">BitWLab</p>
+          <p style="margin:0;font-size:13px;color:#86b89a;">Bitcoin blokklánc elemzés</p>
+        </td></tr>
+        <tr><td style="background:#ffffff;padding:40px 40px 32px;border-left:1px solid #dce8dd;border-right:1px solid #dce8dd;">
+          <h2 style="margin:0 0 20px;font-size:24px;font-weight:700;color:#111827;">Üdvözlünk a BitWLab-ban!</h2>
+          <p style="margin:0 0 28px;font-size:15px;color:#374151;line-height:1.6;">Köszönjük a regisztrációt! Kérjük, erősítsd meg az email-címedet az alábbi gombra kattintva:</p>
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin-bottom:28px;"><tr><td style="background:#1a4731;border-radius:8px;"><a href="{{verificationUrl}}" style="display:inline-block;padding:13px 30px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;">E-mail-cím megerősítése &#x2192;</a></td></tr></table>
+          <p style="margin:0 0 8px;font-size:13px;color:#6b7280;">Ez a link 24 óra múlva lejár.</p>
+          <p style="margin:0;font-size:13px;color:#6b7280;">Ha nem te hoztál létre fiókot, ezt az emailt nyugodtan figyelmen kívül hagyhatod.</p>
+        </td></tr>
+        <tr><td style="background:#d4e8d6;border-radius:0 0 12px 12px;padding:20px 40px;text-align:center;border:1px solid #bdd9bf;border-top:none;">
+          <p style="margin:0 0 4px;font-size:13px;color:#3d6b4a;">Ez egy automatikus üzenet. Kérjük, ne válaszolj erre az emailre.</p>
+          <p style="margin:0;font-size:12px;color:#5a8a68;"><a href="{{appUrl}}" style="color:#1a4731;text-decoration:none;">BitWLab</a> &nbsp;&middot;&nbsp; Bitcoin blokklánc elemzés</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+const DEFAULT_MANUAL_EMAIL_VERIFIED_HTML = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>Your email is verified — BitWLab</title></head>
+<body style="margin:0;padding:0;background:#e8f0e9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#e8f0e9;padding:32px 16px;"><tr><td align="center">
+    <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+      <tr><td style="background:#1a4731;border-radius:12px 12px 0 0;padding:30px 40px;text-align:center;"><p style="margin:0 0 6px;font-size:22px;font-weight:800;color:#ffffff;">BitWLab</p><p style="margin:0;font-size:13px;color:#86b89a;">Bitcoin Blockchain Analysis</p></td></tr>
+      <tr><td style="background:#ffffff;padding:40px;border-left:1px solid #dce8dd;border-right:1px solid #dce8dd;">
+        <p style="margin:0 0 12px;font-size:13px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:0.06em;">Account update</p>
+        <h2 style="margin:0 0 18px;font-size:24px;font-weight:800;color:#111827;">Your email is verified</h2>
+        <p style="margin:0 0 14px;font-size:15px;color:#374151;line-height:1.6;">Hello {{userName}},</p>
+        <p style="margin:0 0 26px;font-size:15px;color:#374151;line-height:1.6;">The BitWLab admin team manually verified <strong style="color:#111827;">{{userEmail}}</strong>. You can now sign in and use your account.</p>
+        <table role="presentation" cellpadding="0" cellspacing="0" style="margin-bottom:26px;"><tr><td style="background:#1a4731;border-radius:8px;"><a href="{{appUrl}}/login" style="display:inline-block;padding:13px 30px;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;">Sign in &#x2192;</a></td></tr></table>
+        <p style="margin:0;font-size:13px;color:#6b7280;line-height:1.6;">If you have any questions about your account, please contact us from the BitWLab application.</p>
+      </td></tr>
+      <tr><td style="background:#d4e8d6;border-radius:0 0 12px 12px;padding:20px 40px;text-align:center;border:1px solid #bdd9bf;border-top:none;"><p style="margin:0 0 4px;font-size:13px;color:#3d6b4a;">This is an automated notification. Please do not reply to this email.</p><p style="margin:0;font-size:12px;color:#5a8a68;"><a href="{{appUrl}}" style="color:#1a4731;text-decoration:none;">BitWLab</a> &nbsp;&middot;&nbsp; Bitcoin Blockchain Analysis</p></td></tr>
+    </table>
+  </td></tr></table>
+</body>
+</html>`;
+
+const DEFAULT_MANUAL_EMAIL_VERIFIED_HU_HTML = `<!DOCTYPE html>
+<html lang="hu">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>Az email-címed megerősítve — BitWLab</title></head>
+<body style="margin:0;padding:0;background:#e8f0e9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#e8f0e9;padding:32px 16px;"><tr><td align="center">
+    <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+      <tr><td style="background:#1a4731;border-radius:12px 12px 0 0;padding:30px 40px;text-align:center;"><p style="margin:0 0 6px;font-size:22px;font-weight:800;color:#ffffff;">BitWLab</p><p style="margin:0;font-size:13px;color:#86b89a;">Bitcoin blokklánc elemzés</p></td></tr>
+      <tr><td style="background:#ffffff;padding:40px;border-left:1px solid #dce8dd;border-right:1px solid #dce8dd;">
+        <p style="margin:0 0 12px;font-size:13px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:0.06em;">Fiók frissítve</p>
+        <h2 style="margin:0 0 18px;font-size:24px;font-weight:800;color:#111827;">Az email-címed megerősítve</h2>
+        <p style="margin:0 0 14px;font-size:15px;color:#374151;line-height:1.6;">Szia {{userName}},</p>
+        <p style="margin:0 0 26px;font-size:15px;color:#374151;line-height:1.6;">A BitWLab admin csapata manuálisan megerősítette a(z) <strong style="color:#111827;">{{userEmail}}</strong> email-címedet. Mostantól be tudsz jelentkezni, és használhatod a fiókodat.</p>
+        <table role="presentation" cellpadding="0" cellspacing="0" style="margin-bottom:26px;"><tr><td style="background:#1a4731;border-radius:8px;"><a href="{{appUrl}}/login" style="display:inline-block;padding:13px 30px;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;">Bejelentkezés &#x2192;</a></td></tr></table>
+        <p style="margin:0;font-size:13px;color:#6b7280;line-height:1.6;">Ha kérdésed van a fiókoddal kapcsolatban, kérjük, vedd fel velünk a kapcsolatot a BitWLab felületén.</p>
+      </td></tr>
+      <tr><td style="background:#d4e8d6;border-radius:0 0 12px 12px;padding:20px 40px;text-align:center;border:1px solid #bdd9bf;border-top:none;"><p style="margin:0 0 4px;font-size:13px;color:#3d6b4a;">Ez egy automatikus értesítés. Kérjük, ne válaszolj erre az emailre.</p><p style="margin:0;font-size:12px;color:#5a8a68;"><a href="{{appUrl}}" style="color:#1a4731;text-decoration:none;">BitWLab</a> &nbsp;&middot;&nbsp; Bitcoin blokklánc elemzés</p></td></tr>
+    </table>
+  </td></tr></table>
+</body>
+</html>`;
+
 const TEMPLATE_DEFINITIONS = [
   {
     key: 'alert_triggered_en_html',
@@ -329,6 +428,70 @@ const TEMPLATE_DEFINITIONS = [
     language: 'hu',
     kind: 'subject',
   },
+  {
+    key: 'email_verification_en_html',
+    label: 'Email Verification — English HTML Body',
+    defaultValue: DEFAULT_EMAIL_VERIFICATION_HTML,
+    variables: ['verificationUrl', 'appUrl'],
+    language: 'en',
+    kind: 'html',
+  },
+  {
+    key: 'email_verification_en_subject',
+    label: 'Email Verification — English Subject Line',
+    defaultValue: 'Verify your email address — BitWLab',
+    variables: [],
+    language: 'en',
+    kind: 'subject',
+  },
+  {
+    key: 'email_verification_hu_html',
+    label: 'E-mail-cím megerősítése — Magyar HTML törzs',
+    defaultValue: DEFAULT_EMAIL_VERIFICATION_HU_HTML,
+    variables: ['verificationUrl', 'appUrl'],
+    language: 'hu',
+    kind: 'html',
+  },
+  {
+    key: 'email_verification_hu_subject',
+    label: 'E-mail-cím megerősítése — Magyar tárgy',
+    defaultValue: 'Erősítsd meg az email-címed — BitWLab',
+    variables: [],
+    language: 'hu',
+    kind: 'subject',
+  },
+  {
+    key: 'manual_email_verified_en_html',
+    label: 'Manual Email Verified — English HTML Body',
+    defaultValue: DEFAULT_MANUAL_EMAIL_VERIFIED_HTML,
+    variables: ['userName', 'userEmail', 'appUrl'],
+    language: 'en',
+    kind: 'html',
+  },
+  {
+    key: 'manual_email_verified_en_subject',
+    label: 'Manual Email Verified — English Subject Line',
+    defaultValue: 'Your email address has been verified — BitWLab',
+    variables: ['userName', 'userEmail'],
+    language: 'en',
+    kind: 'subject',
+  },
+  {
+    key: 'manual_email_verified_hu_html',
+    label: 'Manuális email megerősítés — Magyar HTML törzs',
+    defaultValue: DEFAULT_MANUAL_EMAIL_VERIFIED_HU_HTML,
+    variables: ['userName', 'userEmail', 'appUrl'],
+    language: 'hu',
+    kind: 'html',
+  },
+  {
+    key: 'manual_email_verified_hu_subject',
+    label: 'Manuális email megerősítés — Magyar tárgy',
+    defaultValue: 'Az email-címed megerősítve — BitWLab',
+    variables: ['userName', 'userEmail'],
+    language: 'hu',
+    kind: 'subject',
+  },
 ] as const;
 
 const ALLOWED_TEMPLATE_KEYS = new Set(TEMPLATE_DEFINITIONS.map((t) => t.key));
@@ -348,6 +511,7 @@ const TEMPLATE_SAMPLE_DATA: Record<string, string> = {
   currency: 'USD',
   transactionId: 'TXN-ABC123',
   donationDate: new Date().toLocaleDateString('en-US', { dateStyle: 'long' }),
+  verificationUrl: `${process.env['APP_URL'] ?? 'https://bitwlab.com'}/api/auth/verify?token=sample-verification-token`,
 };
 
 const VALID_CHART_STATUSES = new Set(['draft', 'active', 'inactive'] as const);
@@ -480,6 +644,33 @@ export function createAdminRouter(
     }
   });
 
+  router.delete('/users/:userId/permanent', ...adminOnly, async (req: AuthenticatedRequest, res, next) => {
+    try {
+      const adminUserId = req.user!.userId;
+      const targetUserId = req.params['userId']!;
+
+      await getUserManagementService().hardDeleteUser(targetUserId, adminUserId);
+
+      await getAuditLogRepository().create({
+        adminUserId,
+        actionType: 'user_hard_delete',
+        targetType: 'user',
+        targetId: null,
+        changes: { deletedUserId: targetUserId },
+        ipAddress: getIpAddress(req),
+        userAgent: req.headers['user-agent'] ?? null,
+      });
+
+      res.json({ success: true, message: 'User permanently deleted' });
+    } catch (error) {
+      if (error instanceof UserManagementError) {
+        res.status(error.statusCode).json({ error: error.message });
+        return;
+      }
+      next(error);
+    }
+  });
+
   router.patch('/users/:userId/restore', ...adminOnly, async (req: AuthenticatedRequest, res, next) => {
     try {
       const adminUserId = req.user!.userId;
@@ -492,6 +683,33 @@ export function createAdminRouter(
         actionType: 'user_restore',
         targetType: 'user',
         targetId: targetUserId,
+        ipAddress: getIpAddress(req),
+        userAgent: req.headers['user-agent'] ?? null,
+      });
+
+      res.json(user);
+    } catch (error) {
+      if (error instanceof UserManagementError) {
+        res.status(error.statusCode).json({ error: error.message });
+        return;
+      }
+      next(error);
+    }
+  });
+
+  router.post('/users/:userId/verify-email', ...adminOnly, async (req: AuthenticatedRequest, res, next) => {
+    try {
+      const adminUserId = req.user!.userId;
+      const targetUserId = req.params['userId']!;
+
+      const user = await getUserManagementService().verifyUserEmail(targetUserId);
+
+      await getAuditLogRepository().create({
+        adminUserId,
+        actionType: 'user_verify_email',
+        targetType: 'user',
+        targetId: targetUserId,
+        changes: { emailVerified: true },
         ipAddress: getIpAddress(req),
         userAgent: req.headers['user-agent'] ?? null,
       });
@@ -601,6 +819,10 @@ export function createAdminRouter(
       await insertBitcoinMetricsDaily(database, records);
       res.status(200).json({ inserted: records.length, firstDate: records[0]?.date, lastDate: records[records.length - 1]?.date });
     } catch (error) {
+      if (error instanceof BitcoinDataClientError) {
+        res.status(error.statusCode ?? 502).json({ error: error.message });
+        return;
+      }
       next(error);
     }
   });
@@ -712,6 +934,42 @@ export function createAdminRouter(
     } catch (error) { next(error); }
   });
 
+  router.post('/data-configuration/backfill-midterm-cycles', ...adminOnly, async (_req, res, next) => {
+    try {
+      const database = getDatabasePool();
+      if (!database) { res.status(503).json({ error: 'Database unavailable' }); return; }
+
+      const [sp500, cfnai, btcPrices] = await Promise.all([
+        new FredClient().fetchSP500(),
+        new FredClient().fetchCFNAI(),
+        database.query('SELECT date::text, price_usd FROM bitcoin_price_daily ORDER BY date') as Promise<{ rows: { date: string; price_usd: string }[] }>,
+      ]);
+
+      const spxFiltered = sp500.filter((p) => Number.isFinite(p.value) && p.value > 0);
+      const spxPriceRecords = spxFiltered.map((p) => ({ date: p.date, metricName: 'spx_price', metricValue: p.value }));
+      const spxRsiPoints = computeMonthlyRsi(spxFiltered.map((p) => ({ date: p.date, value: p.value })), 12);
+      const spxRsiRecords = spxRsiPoints.map((p) => ({ date: p.date, metricName: 'spx_rsi_12m', metricValue: p.rsi }));
+
+      const cfnaiRecords = cfnai
+        .filter((p) => Number.isFinite(p.value))
+        .map((p) => ({ date: p.date, metricName: 'cfnai', metricValue: p.value }));
+
+      const btcDailyPrices = btcPrices.rows.map((r) => ({ date: r.date, value: Number(r.price_usd) }));
+      const btcRsiPoints = computeMonthlyRsi(btcDailyPrices, 12);
+      const btcRsiRecords = btcRsiPoints.map((p) => ({ date: p.date, metricName: 'btc_rsi_12m', metricValue: p.rsi }));
+
+      const allRecords = [...spxPriceRecords, ...spxRsiRecords, ...cfnaiRecords, ...btcRsiRecords];
+      await insertBitcoinMetricsDaily(database, allRecords);
+
+      res.status(200).json({
+        spx: spxPriceRecords.length,
+        spxRsi: spxRsiRecords.length,
+        cfnai: cfnaiRecords.length,
+        btcRsi: btcRsiRecords.length,
+      });
+    } catch (error) { next(error); }
+  });
+
   // ── Email Config (summary for UI) ────────────────────────────────────────────
 
   router.get('/email-config', ...adminOnly, async (_req, res, next) => {
@@ -722,11 +980,16 @@ export function createAdminRouter(
       );
       const map = new Map((result?.rows ?? []).map((r) => [r.key, r.value]));
       const hasSmtp = map.has('smtp_host') && (map.has('smtp_password') || !!process.env['SMTP_PASSWORD']);
-      const hasResend = !!process.env['RESEND_API_KEY'];
-      const provider = hasSmtp ? 'SMTP' : hasResend ? 'Resend' : 'None';
-      const fromEmail = map.get('email_from_address') ?? process.env['RESEND_FROM_EMAIL'] ?? null;
+      const hasEnvSmtp = !!process.env['SMTP_HOST'] && !!process.env['SMTP_USER'] && !!process.env['SMTP_PASSWORD'];
+      const provider = hasSmtp || hasEnvSmtp ? 'SMTP' : 'None';
+      const fromEmail =
+        map.get('email_from_address') ??
+        process.env['SMTP_FROM_EMAIL'] ??
+        process.env['EMAIL_FROM_ADDRESS'] ??
+        process.env['RESEND_FROM_EMAIL'] ??
+        null;
       const appUrl = map.get('email_app_url') ?? process.env['APP_URL'] ?? 'https://bitwlab.com';
-      res.json({ provider, apiKeyConfigured: hasSmtp || hasResend, fromEmail, appUrl });
+      res.json({ provider, apiKeyConfigured: provider === 'SMTP', fromEmail, appUrl });
     } catch (error) { next(error); }
   });
 
@@ -743,7 +1006,7 @@ export function createAdminRouter(
       );
       const map = new Map((result?.rows ?? []).map((r) => [r.key, r.value]));
       res.json({
-        fromAddress: map.get('email_from_address') ?? process.env['RESEND_FROM_EMAIL'] ?? '',
+        fromAddress: map.get('email_from_address') ?? process.env['SMTP_FROM_EMAIL'] ?? process.env['EMAIL_FROM_ADDRESS'] ?? process.env['RESEND_FROM_EMAIL'] ?? '',
         appUrl: map.get('email_app_url') ?? process.env['APP_URL'] ?? '',
         adminEmail: map.get('email_admin_email') ?? process.env['ADMIN_ALERT_EMAIL'] ?? '',
         smtpHost: map.get('smtp_host') ?? process.env['SMTP_HOST'] ?? '',

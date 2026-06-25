@@ -25,7 +25,12 @@ import {
   isDatabaseUnavailableError,
   isDevelopmentAdminEmail,
 } from '../config/development-admin.config';
-import { ResendEmailService, type PasswordResetEmailSender } from './email.service';
+import { getDatabasePool } from '../config/database.config';
+import {
+  ResendEmailService,
+  type PasswordResetEmailSender,
+  type EmailVerificationEmailSender,
+} from './email.service';
 
 const PASSWORD_STRENGTH_ERROR =
   'Password must be at least 8 characters with 1 uppercase, 1 number, and 1 special character';
@@ -137,6 +142,7 @@ export class AuthService {
     private readonly passwordResetTokens: PasswordResetTokenStore = new PasswordResetTokenRepository(),
     private readonly tokenInvalidations: TokenInvalidationStore = new TokenBlacklistRepository(),
     private readonly passwordResetEmails: PasswordResetEmailSender = new ResendEmailService(),
+    private readonly emailVerificationEmails: EmailVerificationEmailSender = new ResendEmailService(),
   ) {}
 
   async register(request: RegisterRequest): Promise<RegisterResponse> {
@@ -208,10 +214,17 @@ export class AuthService {
       };
     }
 
+    const verificationToken = createVerificationToken();
     await this.emailVerificationTokens.create({
       userId: user.id,
-      token: createVerificationToken(),
+      token: verificationToken,
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    });
+
+    await this.emailVerificationEmails.sendEmailVerificationEmail({
+      email: normalizedEmail,
+      verificationUrl: `${await getApiBaseUrl()}/api/auth/verify?token=${verificationToken}`,
+      languagePreference: request.languagePreference,
     });
 
     return {
@@ -623,4 +636,20 @@ function createDevelopmentAdminLoginResponse(password: string): LoginResponse {
 
 function getFrontendUrl(): string {
   return process.env.FRONTEND_URL ?? 'http://localhost:4200';
+}
+
+async function getApiBaseUrl(): Promise<string> {
+  const db = getDatabasePool();
+  if (db) {
+    const result = await db.query<{ value: string }>(
+      `SELECT value FROM system_configuration WHERE key = 'email_app_url' LIMIT 1`,
+    );
+    const configuredUrl = result.rows[0]?.value.trim();
+    if (configuredUrl) {
+      return configuredUrl.replace(/\/+$/, '');
+    }
+  }
+
+  const port = process.env.PORT ?? '3000';
+  return (process.env.APP_URL ?? `http://localhost:${port}`).replace(/\/+$/, '');
 }

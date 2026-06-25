@@ -65,7 +65,17 @@ describe('AuthService', () => {
       findByToken: jest.fn(),
       deleteByToken: jest.fn(),
     };
-    const service = new AuthService(users, tokens);
+    const emailVerificationSender = {
+      sendEmailVerificationEmail: jest.fn().mockResolvedValue(undefined),
+    };
+    const service = new AuthService(
+      users,
+      tokens,
+      { create: jest.fn(), findByToken: jest.fn(), deleteByToken: jest.fn() },
+      { invalidateUserTokens: jest.fn() },
+      { sendPasswordResetEmail: jest.fn() },
+      emailVerificationSender,
+    );
 
     const response = await service.register(baseRequest);
 
@@ -87,6 +97,13 @@ describe('AuthService', () => {
         userId: 'user-id',
         token: expect.any(String),
         expiresAt: expect.any(Date),
+      }),
+    );
+    expect(emailVerificationSender.sendEmailVerificationEmail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email: 'user@example.com',
+        verificationUrl: expect.stringContaining('/api/auth/verify?token='),
+        languagePreference: 'en',
       }),
     );
   });

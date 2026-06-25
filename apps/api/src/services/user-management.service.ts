@@ -8,7 +8,7 @@ import {
 } from '../repositories/user-management.repository';
 import { PasswordResetTokenRepository } from '../repositories/password-reset-token.repository';
 import { TokenBlacklistRepository } from '../repositories/token-blacklist.repository';
-import type { PasswordResetEmailSender } from './email.service';
+import type { ManualEmailVerifiedEmailSender, PasswordResetEmailSender } from './email.service';
 import { ResendEmailService } from './email.service';
 
 export class UserManagementError extends Error {
@@ -30,6 +30,7 @@ interface UserManagementServiceOptions {
   userRepo?: UserManagementRepository;
   passwordResetTokens?: { create(input: { userId: string; token: string; expiresAt: Date }): Promise<void> };
   passwordResetEmails?: PasswordResetEmailSender;
+  manualEmailVerifiedEmails?: ManualEmailVerifiedEmailSender;
   tokenBlacklist?: { invalidateUserTokens(userId: string): Promise<void> };
 }
 
@@ -37,6 +38,7 @@ export class UserManagementService {
   private readonly users: UserManagementRepository;
   private readonly passwordResetTokens: { create(input: { userId: string; token: string; expiresAt: Date }): Promise<void> };
   private readonly passwordResetEmails: PasswordResetEmailSender;
+  private readonly manualEmailVerifiedEmails: ManualEmailVerifiedEmailSender;
   private readonly tokenBlacklist: { invalidateUserTokens(userId: string): Promise<void> };
 
   constructor(
@@ -46,6 +48,7 @@ export class UserManagementService {
     this.users = options.userRepo ?? new UserManagementRepository(db!);
     this.passwordResetTokens = options.passwordResetTokens ?? new PasswordResetTokenRepository(db);
     this.passwordResetEmails = options.passwordResetEmails ?? new ResendEmailService();
+    this.manualEmailVerifiedEmails = options.manualEmailVerifiedEmails ?? new ResendEmailService();
     this.tokenBlacklist = options.tokenBlacklist ?? new TokenBlacklistRepository(db);
   }
 
@@ -108,11 +111,46 @@ export class UserManagementService {
     await this.tokenBlacklist.invalidateUserTokens(userId);
   }
 
+  async hardDeleteUser(userId: string, adminUserId: string): Promise<void> {
+    if (!this.db) throw new UserManagementError('Database is not configured', 500);
+    if (userId === adminUserId) {
+      throw new UserManagementError('Administrators cannot permanently delete their own account', 400);
+    }
+
+    const existing = await this.users.getUserById(userId);
+    if (!existing) throw new UserManagementError('User not found', 404);
+    if (!existing.deletedAt) {
+      throw new UserManagementError('Only deactivated users can be permanently deleted', 400);
+    }
+
+    const deleted = await this.users.hardDeleteUser(userId);
+    if (!deleted) throw new UserManagementError('User not found or not deactivated', 404);
+  }
+
   async restoreUser(userId: string): Promise<AdminUserRecord> {
     if (!this.db) throw new UserManagementError('Database is not configured', 500);
     const user = await this.users.restoreUser(userId);
     if (!user) throw new UserManagementError('User not found or not deleted', 404);
     return user;
+  }
+
+  async verifyUserEmail(userId: string): Promise<AdminUserRecord> {
+    if (!this.db) throw new UserManagementError('Database is not configured', 500);
+
+    const existing = await this.users.getUserById(userId);
+    if (!existing || existing.deletedAt) throw new UserManagementError('User not found', 404);
+    if (existing.emailVerified) return existing;
+
+    const updated = await this.users.updateUser(userId, { emailVerified: true });
+    if (!updated) throw new UserManagementError('User not found', 404);
+
+    await this.manualEmailVerifiedEmails.sendManualEmailVerifiedEmail({
+      email: updated.email,
+      fullName: updated.fullName,
+      languagePreference: updated.languagePreference,
+    });
+
+    return updated;
   }
 
   async forcePasswordReset(userId: string): Promise<{ email: string }> {

@@ -178,6 +178,9 @@ import { LegalDialogService } from './services/legal-dialog.service';
         <li tabindex="0" data-tooltip="Compares S&P 500 performance with excess liquidity to show broader macro risk conditions." title="Compares S&P 500 performance with excess liquidity to show broader macro risk conditions.">
           S&amp;P 500 Liquidity
         </li>
+        <li tabindex="0" data-tooltip="Overlays Bitcoin and S&P 500 12-month RSI with the Chicago Fed National Activity Index, aligned to US midterm election cycles." title="Overlays Bitcoin and S&P 500 12-month RSI with the Chicago Fed National Activity Index, aligned to US midterm election cycles.">
+          Midterm Cycles
+        </li>
       </ul>
     </div>
 
@@ -2216,7 +2219,7 @@ export class DashboardPage {
               <ng-container>{{ initProgress() }}</ng-container>
             } @else {
               <ng-container i18n="Initialize selected years button@@adminDataConfig.initButton">
-                Initialize Selected ({{ selectedYears().size }} year{{ selectedYears().size === 1 ? '' : 's' }})
+                Initialize Selected {{ selectedYears().size }} year{{ selectedYears().size === 1 ? '' : 's' }})
               </ng-container>
             }
           </button>

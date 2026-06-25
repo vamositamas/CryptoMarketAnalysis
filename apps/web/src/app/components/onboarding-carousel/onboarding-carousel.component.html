@@ -8,6 +8,9 @@
   <button
     type="button"
     class="skip-button"
+    [class.is-hidden]="isLastSlide()"
+    [attr.aria-hidden]="isLastSlide()"
+    [disabled]="isLastSlide()"
     (click)="skip()"
     i18n="Skip onboarding button@@onboardingCarousel.skip"
   >
@@ -63,13 +66,13 @@
 
       <div class="slide-visual" aria-hidden="true">
         <div class="visual-chart">
-          @for (metric of currentSlide().metrics; track metric; let index = $index) {
+          @for (metric of currentSlide().metrics; track index; let index = $index) {
             <span [style.--bar-index]="index + 1"></span>
           }
         </div>
         <strong>{{ currentSlide().visualLabel }}</strong>
         <div class="metric-list">
-          @for (metric of currentSlide().metrics; track metric) {
+          @for (metric of currentSlide().metrics; track index; let index = $index) {
             <span>{{ metric }}</span>
           }
         </div>

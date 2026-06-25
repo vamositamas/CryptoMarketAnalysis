@@ -159,6 +159,19 @@ export class UserManagementRepository {
     return result.rows[0] ? toRecord(result.rows[0]) : null;
   }
 
+  async hardDeleteUser(id: string): Promise<boolean> {
+    await this.db.query(
+      `UPDATE audit_logs SET target_id = NULL WHERE target_type = 'user' AND target_id = $1`,
+      [id],
+    );
+
+    const result = await this.db.query<{ id: string }>(
+      `DELETE FROM users WHERE id = $1 AND deleted_at IS NOT NULL RETURNING id`,
+      [id],
+    );
+    return (result.rowCount ?? 0) > 0;
+  }
+
   async getUserByEmail(email: string): Promise<{ id: string; email: string } | null> {
     const result = await this.db.query<{ id: string; email: string }>(
       `SELECT id, email FROM users WHERE email = $1 AND deleted_at IS NULL`,

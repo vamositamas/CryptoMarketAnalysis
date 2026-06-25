@@ -89,13 +89,16 @@ export class MidtermCyclesChartPageComponent implements AfterViewInit {
     const pts = this.dataPoints();
     const last = [...pts].reverse().find((p) => p.btcRsi12m !== null);
     const lastSpx = [...pts].reverse().find((p) => p.spxRsi12m !== null);
-    const lastPmi = [...pts].reverse().find((p) => p.ismPmi !== null);
+    const lastCfnai = [...pts].reverse().find((p) => p.cfnai !== null);
     return [
-      { label: 'BTC RSI (12m)', value: last?.btcRsi12m != null ? last.btcRsi12m.toFixed(1) : '—' },
-      { label: 'SPX RSI (12m)', value: lastSpx?.spxRsi12m != null ? lastSpx.spxRsi12m.toFixed(1) : '—' },
-      { label: 'ISM PMI', value: lastPmi?.ismPmi != null ? lastPmi.ismPmi.toFixed(1) : '—' },
+      { label: 'BTC RSI (12m)', value: last?.btcRsi12m != null ? last.btcRsi12m.toFixed(2) : '—' },
+      { label: 'SPX RSI (12m)', value: lastSpx?.spxRsi12m != null ? lastSpx.spxRsi12m.toFixed(2) : '—' },
+      { label: 'CFNAI', value: lastCfnai?.cfnai != null ? lastCfnai.cfnai.toFixed(2) : '—' },
     ];
   });
+
+  private static readonly CFNAI_MIN = -3;
+  private static readonly CFNAI_MAX = 2;
 
   protected readonly chartData = computed<ChartData>(() => {
     const pts = this.dataPoints();
@@ -124,8 +127,8 @@ export class MidtermCyclesChartPageComponent implements AfterViewInit {
           spanGaps: true,
         },
         {
-          label: 'ISM PMI',
-          data: pts.map((p) => p.ismPmi),
+          label: 'CFNAI',
+          data: pts.map((p) => p.cfnai == null ? null : Math.max(MidtermCyclesChartPageComponent.CFNAI_MIN, Math.min(MidtermCyclesChartPageComponent.CFNAI_MAX, p.cfnai))),
           borderColor: '#1a2e5e',
           backgroundColor: 'transparent',
           borderWidth: 2,
@@ -165,9 +168,9 @@ export class MidtermCyclesChartPageComponent implements AfterViewInit {
       },
       y2: {
         position: 'right',
-        min: 26,
-        max: 66,
-        title: { display: true, text: 'ISM PMI', color: '#1a2e5e', font: { size: 11 } },
+        min: MidtermCyclesChartPageComponent.CFNAI_MIN,
+        max: MidtermCyclesChartPageComponent.CFNAI_MAX,
+        title: { display: true, text: 'CFNAI', color: '#1a2e5e', font: { size: 11 } },
         grid: { drawOnChartArea: false },
         ticks: { color: '#1a2e5e' },
       },
@@ -177,6 +180,11 @@ export class MidtermCyclesChartPageComponent implements AfterViewInit {
       tooltip: {
         callbacks: {
           label: (ctx) => {
+            if (ctx.dataset.label === 'CFNAI') {
+              const raw = this.dataPoints()[ctx.dataIndex]?.cfnai;
+              if (raw == null) return '';
+              return `CFNAI: ${raw.toFixed(2)}`;
+            }
             const v = ctx.parsed.y;
             if (v == null) return '';
             return `${ctx.dataset.label}: ${v.toFixed(1)}`;
@@ -187,7 +195,7 @@ export class MidtermCyclesChartPageComponent implements AfterViewInit {
     },
   }));
 
-  protected readonly infoAbout = $localize`:@@charts.midtermCycles.about:Overlays Bitcoin and S&P 500 12-month RSI (Relative Strength Index) against ISM Manufacturing PMI, aligned to US midterm election cycles. Historically, equity and economic conditions around midterms have preceded significant Bitcoin moves. Data: FRED (free, no API key required) + on-chain BTC prices.`;
+  protected readonly infoAbout = $localize`:@@charts.midtermCycles.about:Overlays Bitcoin and S&P 500 12-month RSI (Relative Strength Index) against the Chicago Fed National Activity Index (CFNAI), aligned to US midterm election cycles. CFNAI is a composite of 85 monthly indicators that measures overall US economic activity — positive values indicate above-trend growth, negative values indicate below-trend growth. Data: FRED (free, no API key required) + on-chain BTC prices.`;
 
   protected readonly infoInterpretation = computed<string>(() => {
     const pts = this.dataPoints();
@@ -202,7 +210,7 @@ export class MidtermCyclesChartPageComponent implements AfterViewInit {
   protected readonly infoDataSources = [
     'Bitcoin on-chain prices (blockchain.info)',
     'S&P 500 (FRED: SP500)',
-    'ISM Manufacturing PMI (FRED: NAPM)',
+    'Chicago Fed National Activity Index (FRED: CFNAI)',
   ];
 
   protected readonly infoLastUpdated = computed(() => this.lastUpdatedText());
@@ -253,7 +261,7 @@ export class MidtermCyclesChartPageComponent implements AfterViewInit {
         { header: 'Date', value: (p) => p.date },
         { header: 'BTC RSI 12m', value: (p) => formatCsvNumber(p.btcRsi12m) },
         { header: 'SPX RSI 12m', value: (p) => formatCsvNumber(p.spxRsi12m) },
-        { header: 'ISM PMI', value: (p) => formatCsvNumber(p.ismPmi) },
+        { header: 'CFNAI', value: (p) => formatCsvNumber(p.cfnai) },
       ],
     });
   }

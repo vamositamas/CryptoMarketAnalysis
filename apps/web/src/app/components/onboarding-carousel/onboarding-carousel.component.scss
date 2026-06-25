@@ -19,6 +19,11 @@
   border-color: #d7ded8;
 }
 
+.skip-button.is-hidden {
+  pointer-events: none;
+  opacity: 0;
+}
+
 .slide-shell {
   display: grid;
   grid-template-columns: 48px minmax(0, 1fr) auto;

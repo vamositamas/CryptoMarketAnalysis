@@ -100,7 +100,9 @@ describe('protected route wiring', () => {
       getUser: jest.fn(),
       updateUser: jest.fn(),
       deleteUser: jest.fn(),
+      hardDeleteUser: jest.fn(),
       restoreUser: jest.fn(),
+      verifyUserEmail: jest.fn(),
       forcePasswordReset: jest.fn(),
     };
     const response = createResponse();
@@ -228,7 +230,7 @@ describe('protected route wiring', () => {
     );
 
     expect(response.statusCode).toBe(200);
-    expect((response.body as { templates: unknown[] }).templates).toHaveLength(4);
+    expect((response.body as { templates: unknown[] }).templates).toHaveLength(12);
     expect((response.body as { templates: { key: string }[] }).templates[0].key).toBe('alert_triggered_en_html');
   });
 
@@ -812,7 +814,9 @@ describe('protected route wiring', () => {
       getUser: jest.fn().mockResolvedValue(user),
       updateUser: jest.fn(),
       deleteUser: jest.fn(),
+      hardDeleteUser: jest.fn(),
       restoreUser: jest.fn(),
+      verifyUserEmail: jest.fn(),
       forcePasswordReset: jest.fn(),
     };
     const auditLogRepository = { create: jest.fn(), list: jest.fn() };
@@ -836,7 +840,9 @@ describe('protected route wiring', () => {
       getUser: jest.fn(),
       updateUser: jest.fn().mockRejectedValue(new UserManagementError('User not found', 404)),
       deleteUser: jest.fn(),
+      hardDeleteUser: jest.fn(),
       restoreUser: jest.fn(),
+      verifyUserEmail: jest.fn(),
       forcePasswordReset: jest.fn(),
     };
     const auditLogRepository = { create: jest.fn(), list: jest.fn() };
@@ -859,7 +865,9 @@ describe('protected route wiring', () => {
       getUser: jest.fn(),
       updateUser: jest.fn().mockResolvedValue(updated),
       deleteUser: jest.fn(),
+      hardDeleteUser: jest.fn(),
       restoreUser: jest.fn(),
+      verifyUserEmail: jest.fn(),
       forcePasswordReset: jest.fn(),
     };
     const auditLogRepository = { create: jest.fn().mockResolvedValue(undefined), list: jest.fn() };
@@ -883,7 +891,9 @@ describe('protected route wiring', () => {
       getUser: jest.fn(),
       updateUser: jest.fn(),
       deleteUser: jest.fn().mockResolvedValue(undefined),
+      hardDeleteUser: jest.fn(),
       restoreUser: jest.fn(),
+      verifyUserEmail: jest.fn(),
       forcePasswordReset: jest.fn(),
     };
     const auditLogRepository = { create: jest.fn().mockResolvedValue(undefined), list: jest.fn() };
@@ -901,6 +911,36 @@ describe('protected route wiring', () => {
     expect((response.body as { success: boolean }).success).toBe(true);
   });
 
+  it('allows administrators to permanently delete a deactivated user and logs the action', async () => {
+    const userManagementService = {
+      listUsers: jest.fn(),
+      getUser: jest.fn(),
+      updateUser: jest.fn(),
+      deleteUser: jest.fn(),
+      hardDeleteUser: jest.fn().mockResolvedValue(undefined),
+      restoreUser: jest.fn(),
+      verifyUserEmail: jest.fn(),
+      forcePasswordReset: jest.fn(),
+    };
+    const auditLogRepository = { create: jest.fn().mockResolvedValue(undefined), list: jest.fn() };
+    const response = createResponse();
+
+    await runHandlers(
+      getHandler(createAdminRouter({ userManagementService, auditLogRepository, tokenInvalidations }), '/users/:userId/permanent', 'delete'),
+      { ...createRequest(createToken('administrator')), params: { userId: 'user-1' } } as unknown as import('express').Request,
+      response,
+    );
+
+    expect(userManagementService.hardDeleteUser).toHaveBeenCalledWith('user-1', 'user-id');
+    expect(auditLogRepository.create).toHaveBeenCalledWith(expect.objectContaining({
+      actionType: 'user_hard_delete',
+      changes: { deletedUserId: 'user-1' },
+      targetId: null,
+    }));
+    expect(response.statusCode).toBe(200);
+    expect((response.body as { success: boolean }).success).toBe(true);
+  });
+
   it('allows administrators to restore a deleted user', async () => {
     const restored = { id: 'user-1', deletedAt: null };
     const userManagementService = {
@@ -908,7 +948,9 @@ describe('protected route wiring', () => {
       getUser: jest.fn(),
       updateUser: jest.fn(),
       deleteUser: jest.fn(),
+      hardDeleteUser: jest.fn(),
       restoreUser: jest.fn().mockResolvedValue(restored),
+      verifyUserEmail: jest.fn(),
       forcePasswordReset: jest.fn(),
     };
     const auditLogRepository = { create: jest.fn().mockResolvedValue(undefined), list: jest.fn() };
@@ -925,13 +967,46 @@ describe('protected route wiring', () => {
     expect(response.statusCode).toBe(200);
   });
 
+  it('allows administrators to verify a user email and logs the action', async () => {
+    const verified = { id: 'user-1', email: 'alice@example.com', emailVerified: true };
+    const userManagementService = {
+      listUsers: jest.fn(),
+      getUser: jest.fn(),
+      updateUser: jest.fn(),
+      deleteUser: jest.fn(),
+      hardDeleteUser: jest.fn(),
+      restoreUser: jest.fn(),
+      verifyUserEmail: jest.fn().mockResolvedValue(verified),
+      forcePasswordReset: jest.fn(),
+    };
+    const auditLogRepository = { create: jest.fn().mockResolvedValue(undefined), list: jest.fn() };
+    const response = createResponse();
+
+    await runHandlers(
+      getHandler(createAdminRouter({ userManagementService, auditLogRepository, tokenInvalidations }), '/users/:userId/verify-email', 'post'),
+      { ...createRequest(createToken('administrator')), params: { userId: 'user-1' } } as unknown as import('express').Request,
+      response,
+    );
+
+    expect(userManagementService.verifyUserEmail).toHaveBeenCalledWith('user-1');
+    expect(auditLogRepository.create).toHaveBeenCalledWith(expect.objectContaining({
+      actionType: 'user_verify_email',
+      changes: { emailVerified: true },
+      targetId: 'user-1',
+    }));
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toMatchObject({ emailVerified: true });
+  });
+
   it('allows administrators to force a password reset', async () => {
     const userManagementService = {
       listUsers: jest.fn(),
       getUser: jest.fn(),
       updateUser: jest.fn(),
       deleteUser: jest.fn(),
+      hardDeleteUser: jest.fn(),
       restoreUser: jest.fn(),
+      verifyUserEmail: jest.fn(),
       forcePasswordReset: jest.fn().mockResolvedValue({ email: 'alice@example.com' }),
     };
     const auditLogRepository = { create: jest.fn().mockResolvedValue(undefined), list: jest.fn() };

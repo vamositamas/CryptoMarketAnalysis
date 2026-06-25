@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { OnboardingCarouselComponent } from './onboarding-carousel.component';
 
 describe('OnboardingCarouselComponent', () => {
@@ -8,6 +9,7 @@ describe('OnboardingCarouselComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [OnboardingCarouselComponent],
+      providers: [provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(OnboardingCarouselComponent);
@@ -47,22 +49,43 @@ describe('OnboardingCarouselComponent', () => {
     );
   });
 
-  it('emits skipped and completed events', () => {
+  it('emits skipped before the required acceptance slide', () => {
+    const skipped = jest.fn();
+    fixture.componentInstance.skipped.subscribe(skipped);
+
+    nativeElement.querySelector<HTMLButtonElement>('.skip-button')?.click();
+
+    expect(skipped).toHaveBeenCalledTimes(1);
+  });
+
+  it('requires terms and privacy acceptance before completion', () => {
     const skipped = jest.fn();
     const completed = jest.fn();
     fixture.componentInstance.skipped.subscribe(skipped);
     fixture.componentInstance.completed.subscribe(completed);
 
-    nativeElement.querySelector<HTMLButtonElement>('.skip-button')?.click();
-    clickNext();
     clickNext();
     clickNext();
 
-    expect(skipped).toHaveBeenCalledTimes(1);
+    const skipButton = nativeElement.querySelector<HTMLButtonElement>('.skip-button');
+    expect(skipButton?.disabled).toBe(true);
+
+    clickNext();
+    expect(completed).not.toHaveBeenCalled();
+
+    const checkboxes = nativeElement.querySelectorAll<HTMLInputElement>('.acceptance-item input');
+    checkboxes[0].click();
+    checkboxes[1].click();
+    fixture.detectChanges();
+
+    clickNext();
+
+    expect(skipped).not.toHaveBeenCalled();
     expect(completed).toHaveBeenCalledTimes(1);
   });
 
   function clickNext(): void {
     nativeElement.querySelector<HTMLButtonElement>('.next-button')?.click();
+    fixture.detectChanges();
   }
 });

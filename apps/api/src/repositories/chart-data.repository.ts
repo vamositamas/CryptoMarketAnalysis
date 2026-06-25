@@ -80,7 +80,7 @@ export interface MidtermCyclesDataRow {
   date: string;
   btcRsi12m: number | null;
   spxRsi12m: number | null;
-  ismPmi: number | null;
+  cfnai: number | null;
   lastUpdated: string | null;
 }
 
@@ -176,22 +176,26 @@ export class ChartDataRepository extends BaseRepository {
       `
         WITH dates AS (
           SELECT DISTINCT date FROM bitcoin_metrics_daily
-          WHERE metric_name IN ('btc_rsi_12m', 'spx_rsi_12m', 'ism_pmi')
+          WHERE metric_name IN ('btc_rsi_12m', 'spx_rsi_12m')
         )
         SELECT
           d.date,
-          btc.metric_value  AS btc_rsi_12m,
-          spx.metric_value  AS spx_rsi_12m,
-          pmi.metric_value  AS ism_pmi,
+          btc.metric_value   AS btc_rsi_12m,
+          spx.metric_value   AS spx_rsi_12m,
+          cfnai.metric_value AS cfnai,
           GREATEST(
             COALESCE(btc.created_at, NULL),
             COALESCE(spx.created_at, NULL),
-            COALESCE(pmi.created_at, NULL)
+            COALESCE(cfnai.created_at, NULL)
           ) AS last_updated
         FROM dates d
-        LEFT JOIN bitcoin_metrics_daily btc ON btc.date = d.date AND btc.metric_name = 'btc_rsi_12m'
-        LEFT JOIN bitcoin_metrics_daily spx ON spx.date = d.date AND spx.metric_name = 'spx_rsi_12m'
-        LEFT JOIN bitcoin_metrics_daily pmi ON pmi.date = d.date AND pmi.metric_name = 'ism_pmi'
+        LEFT JOIN bitcoin_metrics_daily btc
+          ON btc.date = d.date AND btc.metric_name = 'btc_rsi_12m'
+        LEFT JOIN bitcoin_metrics_daily spx
+          ON spx.date = d.date AND spx.metric_name = 'spx_rsi_12m'
+        LEFT JOIN bitcoin_metrics_daily cfnai
+          ON DATE_TRUNC('month', cfnai.date) = DATE_TRUNC('month', d.date)
+          AND cfnai.metric_name = 'cfnai'
         ORDER BY d.date ASC
       `,
     );
@@ -200,13 +204,13 @@ export class ChartDataRepository extends BaseRepository {
       date: string | Date;
       btc_rsi_12m: string | number | null;
       spx_rsi_12m: string | number | null;
-      ism_pmi: string | number | null;
+      cfnai: string | number | null;
       last_updated: string | Date | null;
     }>).map((row) => ({
       date: formatDate(row.date),
       btcRsi12m: nullableNumber(row.btc_rsi_12m),
       spxRsi12m: nullableNumber(row.spx_rsi_12m),
-      ismPmi: nullableNumber(row.ism_pmi),
+      cfnai: nullableNumber(row.cfnai),
       lastUpdated: row.last_updated === null ? null : formatTimestamp(row.last_updated),
     }));
   }

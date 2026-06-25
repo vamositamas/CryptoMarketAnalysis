@@ -7,7 +7,7 @@ import {
   type AdminUpdateUserRequest,
 } from '@crypto-market-analysis/data-access/api-client';
 
-type ModalMode = 'edit' | 'delete' | 'restore' | 'force-reset' | null;
+type ModalMode = 'edit' | 'delete' | 'hard-delete' | 'restore' | 'verify' | 'force-reset' | null;
 
 @Component({
   selector: 'app-admin-users-page',
@@ -37,7 +37,7 @@ type ModalMode = 'edit' | 'delete' | 'restore' | 'force-reset' | null;
         </select>
         <label class="admin-checkbox-label">
           <input type="checkbox" [(ngModel)]="showDeleted" (ngModelChange)="loadUsers()" />
-          <ng-container i18n="Show deleted users filter@@adminUsers.showDeleted">Show deleted</ng-container>
+          <ng-container i18n="Show deactivated users filter@@adminUsers.showDeleted">Show deactivated</ng-container>
         </label>
       </div>
 
@@ -88,10 +88,14 @@ type ModalMode = 'edit' | 'delete' | 'restore' | 'force-reset' | null;
               <div class="user-card-actions">
                 @if (user.deletedAt) {
                   <button class="uact-btn uact-restore" (click)="openModal('restore', user)" i18n="Restore user action@@adminUsers.actions.restore">Restore</button>
+                  <button class="uact-btn uact-delete" (click)="openModal('hard-delete', user)" i18n="Permanently delete user action@@adminUsers.actions.hardDelete">Delete permanently</button>
                 } @else {
                   <button class="uact-btn uact-edit" (click)="openModal('edit', user)" i18n="Edit user action@@adminUsers.actions.edit">Edit</button>
+                  @if (!user.emailVerified) {
+                    <button class="uact-btn uact-verify" (click)="openModal('verify', user)" i18n="Verify user action@@adminUsers.actions.verify">Verify</button>
+                  }
                   <button class="uact-btn uact-reset" (click)="openModal('force-reset', user)" i18n="Reset password action@@adminUsers.actions.resetPassword">Reset PW</button>
-                  <button class="uact-btn uact-delete" (click)="openModal('delete', user)" i18n="Delete user action@@adminUsers.actions.delete">Delete</button>
+                  <button class="uact-btn uact-delete" (click)="openModal('delete', user)" i18n="Deactivate user action@@adminUsers.actions.deactivate">Deactivate</button>
                 }
               </div>
             </div>
@@ -153,7 +157,7 @@ type ModalMode = 'edit' | 'delete' | 'restore' | 'force-reset' | null;
     }
 
     <!-- Delete / Restore / Force Reset Modals -->
-    @if ((modalMode() === 'delete' || modalMode() === 'restore' || modalMode() === 'force-reset') && selectedUser()) {
+    @if ((modalMode() === 'delete' || modalMode() === 'hard-delete' || modalMode() === 'restore' || modalMode() === 'verify' || modalMode() === 'force-reset') && selectedUser()) {
       <div class="modal-overlay" role="dialog" aria-modal="true">
         <div class="modal-panel modal-panel--confirm">
           <button class="modal-close" (click)="closeModal()">✕</button>
@@ -293,10 +297,19 @@ export class AdminUsersPageComponent implements OnInit {
         this.users.update((list) => list.filter((u) => u.id !== user.id));
         this.total.update((t) => t - 1);
         this.showMessage($localize`:User deactivated success@@adminUsers.messages.deactivated:User deactivated.`, true);
+      } else if (mode === 'hard-delete') {
+        await this.api.adminHardDeleteUser(user.id);
+        this.users.update((list) => list.filter((u) => u.id !== user.id));
+        this.total.update((t) => t - 1);
+        this.showMessage($localize`:User permanently deleted success@@adminUsers.messages.hardDeleted:User permanently deleted.`, true);
       } else if (mode === 'restore') {
         const restored = await this.api.adminRestoreUser(user.id);
         this.users.update((list) => list.map((u) => (u.id === restored.id ? restored : u)));
         this.showMessage($localize`:User restored success@@adminUsers.messages.restored:User restored.`, true);
+      } else if (mode === 'verify') {
+        const verified = await this.api.adminVerifyUserEmail(user.id);
+        this.users.update((list) => list.map((u) => (u.id === verified.id ? verified : u)));
+        this.showMessage($localize`:User verified success@@adminUsers.messages.verified:User verified.`, true);
       } else if (mode === 'force-reset') {
         const result = await this.api.adminForcePasswordReset(user.id);
         this.showMessage(result.message, true);
@@ -312,7 +325,9 @@ export class AdminUsersPageComponent implements OnInit {
   protected confirmTitle(): string {
     const mode = this.modalMode();
     if (mode === 'delete') return $localize`:Deactivate user title@@adminUsers.confirm.deleteTitle:Deactivate User Account?`;
+    if (mode === 'hard-delete') return $localize`:Permanently delete user title@@adminUsers.confirm.hardDeleteTitle:Permanently Delete User?`;
     if (mode === 'restore') return $localize`:Restore user title@@adminUsers.confirm.restoreTitle:Restore User Account?`;
+    if (mode === 'verify') return $localize`:Verify user title@@adminUsers.confirm.verifyTitle:Verify User Email?`;
     return $localize`:Force password reset title@@adminUsers.confirm.forceResetTitle:Force Password Reset?`;
   }
 
@@ -321,14 +336,18 @@ export class AdminUsersPageComponent implements OnInit {
     const name = user?.fullName ?? user?.email ?? $localize`:This user fallback@@adminUsers.confirm.thisUser:this user`;
     const mode = this.modalMode();
     if (mode === 'delete') return $localize`:Deactivate user message@@adminUsers.confirm.deleteMessage:This will deactivate ${name}'s account and invalidate their sessions. The account can be restored later.`;
+    if (mode === 'hard-delete') return $localize`:Permanently delete user message@@adminUsers.confirm.hardDeleteMessage:This will physically delete ${name}'s deactivated account from the database. This cannot be undone.`;
     if (mode === 'restore') return $localize`:Restore user message@@adminUsers.confirm.restoreMessage:This will restore ${name}'s account and allow them to log in again.`;
+    if (mode === 'verify') return $localize`:Verify user message@@adminUsers.confirm.verifyMessage:This will manually mark ${name}'s email address as verified and allow them to log in.`;
     return $localize`:Force password reset message@@adminUsers.confirm.forceResetMessage:A password reset email will be sent to ${user?.email}. Their current sessions will be invalidated.`;
   }
 
   protected confirmButtonLabel(): string {
     const mode = this.modalMode();
     if (mode === 'delete') return $localize`:Deactivate account button@@adminUsers.confirm.deactivateButton:Deactivate Account`;
+    if (mode === 'hard-delete') return $localize`:Permanently delete account button@@adminUsers.confirm.hardDeleteButton:Delete Permanently`;
     if (mode === 'restore') return $localize`:Restore account button@@adminUsers.confirm.restoreButton:Restore Account`;
+    if (mode === 'verify') return $localize`:Verify email button@@adminUsers.confirm.verifyButton:Verify Email`;
     return $localize`:Send reset email button@@adminUsers.confirm.sendResetButton:Send Reset Email`;
   }
 

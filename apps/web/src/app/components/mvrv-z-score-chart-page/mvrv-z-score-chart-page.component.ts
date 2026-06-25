@@ -89,27 +89,39 @@ export class MvrvZScoreChartPageComponent implements AfterViewInit {
     return out;
   });
 
-  // Z-Score: ln(price / realized) × 4, where realized is actual from bitcoin-data.com
-  // (June 2022+) or the 5yr-EMA proxy (pre-2022). Scale=4 is calibrated to the
-  // traditional MVRV Z-Score scale: major cycle tops give 7–11, putting them inside
-  // the sell-zone annotation (>7). bitcoin-data.com's own mvrvZscore uses a different
-  // normalization (2024 cycle peak ~3.35) that would leave the sell-zone permanently inactive.
-  // Empirical calibration:
-  //   2013 peak  : ln(1200 / 68)  × 4 ≈ 11.5  (reference ~10–12) ✓
-  //   2017 peak  : ln(20000 / 1554) × 4 ≈ 10.2  (reference ~8–10) ✓
-  //   2021 peak  : ln(65000 / 10500) × 4 ≈ 7.3  (reference ~7–8) ✓
-  //   2024 peak  : ln(100000 / 38849) × 4 ≈ 3.8  (caution zone) ✓
-  //   current    : ln(100000 / 52931) × 4 ≈ 2.5  (fair value) ✓
+  // Z-Score: prefer stored DB value (actual on-chain from bitcoin-data.com) when available.
+  // Falls back to proxy ln(price/realized)×4 for historical dates where no DB value exists.
+  // The proxy is calibrated so major cycle tops give 7–11 on the traditional scale:
+  //   2013 peak  : ln(1200 / 68)  × 4 ≈ 11.5  ✓
+  //   2017 peak  : ln(20000 / 1554) × 4 ≈ 10.2  ✓
+  //   2021 peak  : ln(65000 / 10500) × 4 ≈ 7.3   ✓
+  // The last 1-day lag point (today's row, where bitcoin-data.com hasn't published yet)
+  // is patched by carrying forward the most recent stored value.
   private readonly enhancedZScore = computed<(number | null)[]>(() => {
     const points = this.dataPoints();
     const realizedMap = this.enhancedRealizedPrices();
     const scale = 4;
-    return points.map((p) => {
+    const scores = points.map((p) => {
+      if (p.mvrvZScore !== null && p.mvrvZScore !== undefined) {
+        return p.mvrvZScore;
+      }
       const realized = realizedMap.get(p.date);
       return realized != null && realized > 0 && p.priceUsd > 0
         ? Math.log(p.priceUsd / realized) * scale
         : null;
     });
+    // Patch the tail: carry the last stored value forward over the 1-day publication lag.
+    const lastIdx = scores.length - 1;
+    if (lastIdx >= 0 && (points[lastIdx]?.mvrvZScore === null || points[lastIdx]?.mvrvZScore === undefined)) {
+      for (let i = lastIdx - 1; i >= Math.max(0, lastIdx - 2); i--) {
+        const stored = points[i]?.mvrvZScore;
+        if (stored !== null && stored !== undefined) {
+          scores[lastIdx] = stored;
+          break;
+        }
+      }
+    }
+    return scores;
   });
 
   // Realized prices: actual from bitcoin-data.com where available, 5yr EMA proxy otherwise
@@ -131,11 +143,28 @@ export class MvrvZScoreChartPageComponent implements AfterViewInit {
     return result;
   });
 
+  // Prefer stored DB value (actual on-chain MVRV Z-Score) for the current reading.
+  // The proxy formula (enhancedZScore) uses ln(price/realized)×4 which diverges from
+  // the statistical normalization used by bitcoin-data.com, especially when price ≈ realized.
+  // bitcoin-data.com returns yesterday's date so today's chart row has mvrvZScore=null;
+  // scanning back 2 positions covers the structural 1-day lag.
+  private readonly currentZScore = computed<number | null>(() => {
+    const points = this.dataPoints();
+    const lastIdx = points.length - 1;
+    for (let i = lastIdx; i >= Math.max(0, lastIdx - 2); i--) {
+      const stored = points[i]?.mvrvZScore;
+      if (stored !== null && stored !== undefined) {
+        return stored;
+      }
+    }
+    return this.enhancedZScore()[lastIdx] ?? null;
+  });
+
   protected readonly infoCurrentFields = computed<ChartInfoField[]>(() => {
     const points = this.dataPoints();
     const lastIdx = points.length - 1;
     const point = points[lastIdx];
-    const zScore = this.enhancedZScore()[lastIdx] ?? null;
+    const zScore = this.currentZScore();
     const realizedPrice = point ? (this.enhancedRealizedPrices().get(point.date) ?? null) : null;
 
     return [
@@ -147,8 +176,7 @@ export class MvrvZScoreChartPageComponent implements AfterViewInit {
   });
 
   protected readonly infoInterpretation = computed(() => {
-    const zScores = this.enhancedZScore();
-    const zScore = zScores[zScores.length - 1] ?? null;
+    const zScore = this.currentZScore();
 
     if (zScore === null) return 'Waiting for the latest MVRV Z-Score data.';
     if (zScore > 7)  return 'The MVRV Z-Score is in the overheated zone (above 7). Historically, readings above 7 have coincided with major cycle tops. Exercise caution.';
@@ -450,7 +478,7 @@ export class MvrvZScoreChartPageComponent implements AfterViewInit {
         response.dataPoints.map((p) => ({
           date: p.date,
           priceUsd: p.priceUsd,
-          mvrvZScore: null, // always use proxy — see proxyZScore computed above
+          mvrvZScore: p.mvrvZScore, // preserved for info panel display; chart line uses enhancedZScore proxy
         })),
       );
       this.lastUpdated.set(response.lastUpdated);

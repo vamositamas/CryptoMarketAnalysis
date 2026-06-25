@@ -23,6 +23,7 @@ function makeRepo(overrides: Partial<Record<keyof UserManagementRepository, jest
     getUserById: jest.fn(),
     updateUser: jest.fn(),
     softDeleteUser: jest.fn(),
+    hardDeleteUser: jest.fn(),
     restoreUser: jest.fn(),
     getUserByEmail: jest.fn(),
     countActiveAlertsForUser: jest.fn(),
@@ -37,6 +38,7 @@ describe('UserManagementService', () => {
   const tokenBlacklist = { invalidateUserTokens: jest.fn() };
   const passwordResetTokens = { create: jest.fn() };
   const passwordResetEmails = { sendPasswordResetEmail: jest.fn() };
+  const manualEmailVerifiedEmails = { sendManualEmailVerifiedEmail: jest.fn() };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -187,6 +189,39 @@ describe('UserManagementService', () => {
     });
   });
 
+  describe('hardDeleteUser', () => {
+    it('permanently deletes a deactivated user', async () => {
+      const userRepo = makeRepo({
+        getUserById: jest.fn().mockResolvedValue(makeUser({ deletedAt: '2026-06-25T10:00:00.000Z' })),
+        hardDeleteUser: jest.fn().mockResolvedValue(true),
+      });
+      const service = new UserManagementService(db, { userRepo, tokenBlacklist });
+
+      await service.hardDeleteUser('user-1', 'admin-1');
+
+      expect(userRepo.hardDeleteUser).toHaveBeenCalledWith('user-1');
+    });
+
+    it('prevents permanent deletion of active users', async () => {
+      const userRepo = makeRepo({
+        getUserById: jest.fn().mockResolvedValue(makeUser({ deletedAt: null })),
+        hardDeleteUser: jest.fn(),
+      });
+      const service = new UserManagementService(db, { userRepo, tokenBlacklist });
+
+      await expect(service.hardDeleteUser('user-1', 'admin-1')).rejects.toMatchObject({ statusCode: 400 });
+      expect(userRepo.hardDeleteUser).not.toHaveBeenCalled();
+    });
+
+    it('prevents admin from permanently deleting their own account', async () => {
+      const userRepo = makeRepo({ hardDeleteUser: jest.fn() });
+      const service = new UserManagementService(db, { userRepo, tokenBlacklist });
+
+      await expect(service.hardDeleteUser('admin-1', 'admin-1')).rejects.toMatchObject({ statusCode: 400 });
+      expect(userRepo.hardDeleteUser).not.toHaveBeenCalled();
+    });
+  });
+
   describe('restoreUser', () => {
     it('returns restored user record', async () => {
       const restored = makeUser({ deletedAt: null });
@@ -201,6 +236,54 @@ describe('UserManagementService', () => {
       const userRepo = makeRepo({ restoreUser: jest.fn().mockResolvedValue(null) });
       const service = new UserManagementService(db, { userRepo });
       await expect(service.restoreUser('missing')).rejects.toMatchObject({ statusCode: 404 });
+    });
+  });
+
+  describe('verifyUserEmail', () => {
+    it('marks an active unverified user as verified', async () => {
+      const existing = makeUser({ emailVerified: false });
+      const updated = makeUser({ emailVerified: true });
+      const userRepo = makeRepo({
+        getUserById: jest.fn().mockResolvedValue(existing),
+        updateUser: jest.fn().mockResolvedValue(updated),
+      });
+      manualEmailVerifiedEmails.sendManualEmailVerifiedEmail.mockResolvedValue(undefined);
+      const service = new UserManagementService(db, { userRepo, manualEmailVerifiedEmails });
+
+      const result = await service.verifyUserEmail('user-1');
+
+      expect(userRepo.updateUser).toHaveBeenCalledWith('user-1', { emailVerified: true });
+      expect(manualEmailVerifiedEmails.sendManualEmailVerifiedEmail).toHaveBeenCalledWith({
+        email: updated.email,
+        fullName: updated.fullName,
+        languagePreference: updated.languagePreference,
+      });
+      expect(result.emailVerified).toBe(true);
+    });
+
+    it('returns the existing user without updating when already verified', async () => {
+      const existing = makeUser({ emailVerified: true });
+      const userRepo = makeRepo({
+        getUserById: jest.fn().mockResolvedValue(existing),
+        updateUser: jest.fn(),
+      });
+      const service = new UserManagementService(db, { userRepo, manualEmailVerifiedEmails });
+
+      const result = await service.verifyUserEmail('user-1');
+
+      expect(userRepo.updateUser).not.toHaveBeenCalled();
+      expect(manualEmailVerifiedEmails.sendManualEmailVerifiedEmail).not.toHaveBeenCalled();
+      expect(result).toBe(existing);
+    });
+
+    it('throws 404 when user is missing or deleted', async () => {
+      const userRepo = makeRepo({ getUserById: jest.fn().mockResolvedValue(makeUser({ deletedAt: '2024-01-01T00:00:00.000Z' })) });
+      const service = new UserManagementService(db, { userRepo, manualEmailVerifiedEmails });
+
+      await expect(service.verifyUserEmail('deleted')).rejects.toMatchObject({ statusCode: 404 });
+
+      userRepo.getUserById.mockResolvedValue(null);
+      await expect(service.verifyUserEmail('missing')).rejects.toMatchObject({ statusCode: 404 });
     });
   });
 

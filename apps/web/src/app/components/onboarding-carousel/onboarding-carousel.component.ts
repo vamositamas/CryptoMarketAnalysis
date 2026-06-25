@@ -90,6 +90,7 @@ export class OnboardingCarouselComponent {
   }
 
   protected skip(): void {
+    if (this.isLastSlide()) return;
     this.skipped.emit();
   }
 

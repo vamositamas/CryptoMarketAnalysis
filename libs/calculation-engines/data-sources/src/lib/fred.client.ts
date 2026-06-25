@@ -69,9 +69,8 @@ export class FredClient {
     return this.fetchSeries('SP500');
   }
 
-  // NAPM (ISM Manufacturing PMI) requires the FRED API key
-  async fetchNAPM(): Promise<FredDataPoint[]> {
-    return this.fetchSeriesWithApiKey('NAPM');
+  async fetchCFNAI(): Promise<FredDataPoint[]> {
+    return this.fetchSeries('CFNAI');
   }
 }
 

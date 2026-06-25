@@ -336,12 +336,12 @@ export class DailyDataRefreshService {
         });
       }
 
-      // Refresh raw SPX price + ISM PMI + BTC RSI 12m for Midterm Cycles chart — best-effort
+      // Refresh raw SPX price + CFNAI + BTC RSI 12m for Midterm Cycles chart — best-effort
       try {
-        const [sp500, napmResult, btcPrices] = await Promise.all([
+        const [sp500, cfnaiResult, btcPrices] = await Promise.all([
           new FredClient().fetchSP500(),
-          new FredClient({ apiKey: process.env['FRED_API_KEY'] }).fetchNAPM().catch((err: unknown) => {
-            this.logger.warn('ISM PMI (NAPM) fetch failed; skipping PMI data', {
+          new FredClient().fetchCFNAI().catch((err: unknown) => {
+            this.logger.warn('CFNAI fetch failed; skipping CFNAI data', {
               error: err instanceof Error ? err.message : String(err),
             });
             return [] as FredDataPoint[];
@@ -363,9 +363,9 @@ export class DailyDataRefreshService {
           metricValue: p.rsi,
         }));
 
-        const ismPmiRecords = napmResult
-          .filter((p) => Number.isFinite(p.value) && p.value > 0)
-          .map((p) => ({ date: p.date, metricName: 'ism_pmi' as const, metricValue: p.value }));
+        const cfnaiRecords = cfnaiResult
+          .filter((p) => Number.isFinite(p.value))
+          .map((p) => ({ date: p.date, metricName: 'cfnai' as const, metricValue: p.value }));
 
         const btcDailyPrices = btcPrices.rows.map((r) => ({
           date: r.date,
@@ -378,7 +378,7 @@ export class DailyDataRefreshService {
           metricValue: p.rsi,
         }));
 
-        const allRecords = [...spxPriceRecords, ...spxRsiRecords, ...ismPmiRecords, ...btcRsiRecords];
+        const allRecords = [...spxPriceRecords, ...spxRsiRecords, ...cfnaiRecords, ...btcRsiRecords];
         if (allRecords.length > 0) {
           const chunkSize = 500;
           for (let i = 0; i < allRecords.length; i += chunkSize) {
@@ -401,7 +401,7 @@ export class DailyDataRefreshService {
         }
         this.logger.log('Midterm cycles data refreshed', {
           spx: spxPriceRecords.length,
-          pmi: ismPmiRecords.length,
+          cfnai: cfnaiRecords.length,
           rsi: btcRsiRecords.length,
         });
       } catch (error) {

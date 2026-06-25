@@ -40,7 +40,30 @@ interface ChartAnnotationStore {
 }
 
 const MAX_ANNOTATIONS_PER_CHART = 50;
-const SUPPORTED_CHART_IDS = new Set(['bitcoin-rainbow', 'pi-cycle-top', 'stock-to-flow']);
+const SUPPORTED_CHART_IDS = new Set([
+  '200-week-ma-heatmap',
+  '2yr-ma-multiplier',
+  'bitcoin-cvdd',
+  'bitcoin-power-law',
+  'bitcoin-rainbow',
+  'difficulty-ribbon',
+  'excess-liquidity',
+  'fear-greed-index',
+  'halving-progress',
+  'hash-ribbons',
+  'mayer-multiple',
+  'mvrv-z-score',
+  'nvt-ratio',
+  'pi-cycle-top',
+  'price-forecast-tools',
+  'puell-multiple',
+  'realized-price',
+  'spx-liquidity',
+  'stock-to-flow',
+  'stock-to-income',
+  'thermocap-multiple',
+  'vdd-multiple',
+]);
 const HEX_COLOR_PATTERN = /^#[0-9A-Fa-f]{6}$/;
 
 export class ChartAnnotationService {

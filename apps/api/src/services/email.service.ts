@@ -6,6 +6,14 @@ export interface PasswordResetEmailSender {
   sendPasswordResetEmail(input: { email: string; resetUrl: string; languagePreference?: 'en' | 'hu' }): Promise<void>;
 }
 
+export interface EmailVerificationEmailSender {
+  sendEmailVerificationEmail(input: { email: string; verificationUrl: string; languagePreference?: 'en' | 'hu' }): Promise<void>;
+}
+
+export interface ManualEmailVerifiedEmailSender {
+  sendManualEmailVerifiedEmail(input: { email: string; fullName?: string | null; languagePreference?: 'en' | 'hu' }): Promise<void>;
+}
+
 export interface DailyDataRefreshFailureEmailSender {
   sendDailyDataRefreshFailureAlert(input: {
     date: string;
@@ -66,24 +74,47 @@ async function loadSmtpConfig(): Promise<SmtpConfig | null> {
       [KEYS],
     );
     const map = new Map(result.rows.map((r) => [r.key, r.value]));
-    const host = map.get('smtp_host') ?? process.env['SMTP_HOST'] ?? '';
-    const portStr = map.get('smtp_port') ?? process.env['SMTP_PORT'] ?? '';
-    const user = map.get('smtp_user') ?? process.env['SMTP_USER'] ?? '';
-    const password = map.get('smtp_password') ?? process.env['SMTP_PASSWORD'] ?? '';
-    const from = map.get('email_from_address') ?? process.env['RESEND_FROM_EMAIL'] ?? '';
+    const host = map.get('smtp_host') ?? '';
+    const portStr = map.get('smtp_port') ?? '';
+    const user = map.get('smtp_user') ?? '';
+    const password = map.get('smtp_password') ?? '';
+    const from = map.get('email_from_address') ?? '';
     if (host && user && password && from) {
       return { host, port: parseInt(portStr, 10) || 587, user, password, from };
     }
   }
-  // env-only fallback
+
   const host = process.env['SMTP_HOST'] ?? '';
   const user = process.env['SMTP_USER'] ?? '';
   const password = process.env['SMTP_PASSWORD'] ?? '';
-  const from = process.env['RESEND_FROM_EMAIL'] ?? '';
+  const from =
+    process.env['SMTP_FROM_EMAIL'] ??
+    process.env['EMAIL_FROM_ADDRESS'] ??
+    process.env['RESEND_FROM_EMAIL'] ??
+    '';
   if (host && user && password && from) {
     return { host, port: parseInt(process.env['SMTP_PORT'] ?? '587', 10), user, password, from };
   }
   return null;
+}
+
+async function loadEmailAppUrl(): Promise<string> {
+  const db = getDatabasePool();
+  if (db) {
+    try {
+      const result = await db.query<{ value: string }>(
+        `SELECT value FROM system_configuration WHERE key = 'email_app_url' LIMIT 1`,
+      );
+      const configuredUrl = result.rows[0]?.value.trim();
+      if (configuredUrl) {
+        return configuredUrl.replace(/\/+$/, '');
+      }
+    } catch {
+      // Email sending should still work with the built-in fallback URL.
+    }
+  }
+
+  return (process.env['APP_URL'] ?? 'https://bitwlab.com').replace(/\/+$/, '');
 }
 
 function createTransporter(cfg: SmtpConfig): Transporter {
@@ -138,25 +169,8 @@ export async function sendRawEmail(msg: MailMessage): Promise<void> {
     return;
   }
 
-  // Resend HTTP API fallback
-  const apiKey = process.env['RESEND_API_KEY'];
-  const from = process.env['RESEND_FROM_EMAIL'];
-  if (apiKey && from) {
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { authorization: `Bearer ${apiKey}`, 'content-type': 'application/json' },
-      body: JSON.stringify({ from: formatFromAddress(from), ...msg }),
-    });
-    if (!response.ok) {
-      const body = await response.text().catch(() => response.statusText);
-      throw new Error(`Email send failed (${response.status}): ${body}`);
-    }
-    return;
-  }
-
-  // No transport configured
   console.warn(JSON.stringify({ event: 'email.not_configured', to: msg.to, subject: msg.subject, timestamp: new Date().toISOString() }));
-  throw new Error('No email transport configured. Set SMTP credentials or a Resend API key in Email Settings.');
+  throw new Error('No SMTP transport configured. Set SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, and SMTP_FROM_EMAIL.');
 }
 
 // ── Service class ─────────────────────────────────────────────────────────────
@@ -164,10 +178,82 @@ export async function sendRawEmail(msg: MailMessage): Promise<void> {
 export class ResendEmailService
   implements
     PasswordResetEmailSender,
+    EmailVerificationEmailSender,
+    ManualEmailVerifiedEmailSender,
     DailyDataRefreshFailureEmailSender,
     AlertTriggeredEmailSender,
     DonationThankYouEmailSender
 {
+  async sendEmailVerificationEmail(input: { email: string; verificationUrl: string; languagePreference?: 'en' | 'hu' }): Promise<void> {
+    const hu = input.languagePreference === 'hu';
+    const langKey = hu ? 'hu' : 'en';
+    const appUrl = await loadEmailAppUrl();
+    const vars = { verificationUrl: input.verificationUrl, appUrl };
+
+    let htmlTemplate: string | null = null;
+    let subjectTemplate: string | null = null;
+    const db = getDatabasePool();
+    if (db) {
+      try {
+        const htmlDbKey = `email_template_email_verification_${langKey}_html`;
+        const subjectDbKey = `email_template_email_verification_${langKey}_subject`;
+        const result = await db.query<{ key: string; value: string }>(
+          `SELECT key, value FROM system_configuration WHERE key = ANY($1)`,
+          [[htmlDbKey, subjectDbKey]],
+        );
+        const map = new Map(result.rows.map((r) => [r.key, r.value]));
+        htmlTemplate = map.get(htmlDbKey) ?? null;
+        subjectTemplate = map.get(subjectDbKey) ?? null;
+      } catch { /* fall back to built-in */ }
+    }
+
+    const subject = subjectTemplate
+      ? substituteTemplateVars(subjectTemplate, vars)
+      : hu ? 'Erősítsd meg az email-címed — BitWLab' : 'Verify your email address — BitWLab';
+    const html = htmlTemplate
+      ? substituteTemplateVars(htmlTemplate, vars)
+      : buildEmailVerificationHtml(input.verificationUrl, appUrl, hu);
+
+    await sendRawEmail({ to: input.email, subject, html });
+  }
+
+  async sendManualEmailVerifiedEmail(input: { email: string; fullName?: string | null; languagePreference?: 'en' | 'hu' }): Promise<void> {
+    const hu = input.languagePreference === 'hu';
+    const langKey = hu ? 'hu' : 'en';
+    const appUrl = await loadEmailAppUrl();
+    const vars = {
+      userName: escapeHtml(input.fullName?.trim() || input.email),
+      userEmail: escapeHtml(input.email),
+      appUrl,
+    };
+
+    let htmlTemplate: string | null = null;
+    let subjectTemplate: string | null = null;
+    const db = getDatabasePool();
+    if (db) {
+      try {
+        const htmlDbKey = `email_template_manual_email_verified_${langKey}_html`;
+        const subjectDbKey = `email_template_manual_email_verified_${langKey}_subject`;
+        const result = await db.query<{ key: string; value: string }>(
+          `SELECT key, value FROM system_configuration WHERE key = ANY($1)`,
+          [[htmlDbKey, subjectDbKey]],
+        );
+        const map = new Map(result.rows.map((r) => [r.key, r.value]));
+        htmlTemplate = map.get(htmlDbKey) ?? null;
+        subjectTemplate = map.get(subjectDbKey) ?? null;
+      } catch { /* fall back to built-in */ }
+    }
+
+    const subject = subjectTemplate
+      ? substituteTemplateVars(subjectTemplate, vars)
+      : hu ? 'Az email-címed megerősítve — BitWLab' : 'Your email address has been verified — BitWLab';
+    const html = htmlTemplate
+      ? substituteTemplateVars(htmlTemplate, vars)
+      : buildManualEmailVerifiedHtml(vars.userName, vars.userEmail, appUrl, hu);
+
+    await sendRawEmail({ to: input.email, subject, html });
+  }
+
   async sendPasswordResetEmail(input: { email: string; resetUrl: string; languagePreference?: 'en' | 'hu' }): Promise<void> {
     const hu = input.languagePreference === 'hu';
     await sendRawEmail({
@@ -306,6 +392,84 @@ function buildAlertTriggeredHtml(input: AlertTriggeredEmailInput, appUrl: string
         <tr><td style="background:#d4e8d6;border-radius:0 0 12px 12px;padding:20px 40px;text-align:center;border:1px solid #bdd9bf;border-top:none;">
           <p style="margin:0 0 4px;font-size:13px;color:#3d6b4a;">${copy.automated}</p>
           <p style="margin:0;font-size:12px;color:#5a8a68;"><a href="${v.appUrl}" style="color:#1a4731;text-decoration:none;">BitWLab</a> &nbsp;·&nbsp; ${copy.subtitle}</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
+function buildEmailVerificationHtml(verificationUrl: string, appUrl: string, hu: boolean): string {
+  const url = escapeHtml(verificationUrl);
+  const safe = escapeHtml(appUrl);
+  const subtitle = hu ? 'Bitcoin blokklánc elemzés' : 'Bitcoin Blockchain Analysis';
+  return `<!DOCTYPE html>
+<html lang="${hu ? 'hu' : 'en'}">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>${hu ? 'Erősítsd meg az email-címed — BitWLab' : 'Verify your email address — BitWLab'}</title></head>
+<body style="margin:0;padding:0;background:#e8f0e9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#e8f0e9;padding:32px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+        <tr><td style="background:#1a4731;border-radius:12px 12px 0 0;padding:28px 40px;text-align:center;">
+          <p style="margin:0 0 4px;font-size:22px;font-weight:700;color:#ffffff;">BitWLab</p>
+          <p style="margin:0;font-size:13px;color:#86b89a;">${subtitle}</p>
+        </td></tr>
+        <tr><td style="background:#ffffff;padding:40px 40px 32px;border-left:1px solid #dce8dd;border-right:1px solid #dce8dd;">
+          <h2 style="margin:0 0 20px;font-size:24px;font-weight:700;color:#111827;">${hu ? 'Üdvözlünk a BitWLab-ban!' : 'Welcome to BitWLab!'}</h2>
+          <p style="margin:0 0 28px;font-size:15px;color:#374151;line-height:1.6;">${hu ? 'Köszönjük a regisztrációt! Kérjük, erősítsd meg az email-címedet az alábbi gombra kattintva:' : 'Thanks for signing up! Please verify your email address by clicking the button below:'}</p>
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin-bottom:28px;"><tr><td style="background:#1a4731;border-radius:8px;"><a href="${url}" style="display:inline-block;padding:13px 30px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;">${hu ? 'E-mail-cím megerősítése →' : 'Verify Email Address →'}</a></td></tr></table>
+          <p style="margin:0 0 8px;font-size:13px;color:#6b7280;">${hu ? 'Ez a link 24 óra múlva lejár.' : 'This link expires in 24 hours.'}</p>
+          <p style="margin:0;font-size:13px;color:#6b7280;">${hu ? 'Ha nem te hoztál létre fiókot, ezt az emailt nyugodtan figyelmen kívül hagyhatod.' : "If you didn't create an account, you can safely ignore this email."}</p>
+        </td></tr>
+        <tr><td style="background:#d4e8d6;border-radius:0 0 12px 12px;padding:20px 40px;text-align:center;border:1px solid #bdd9bf;border-top:none;">
+          <p style="margin:0 0 4px;font-size:13px;color:#3d6b4a;">${hu ? 'Ez egy automatikus üzenet. Kérjük, ne válaszolj erre az emailre.' : 'This is an automated message. Please do not reply to this email.'}</p>
+          <p style="margin:0;font-size:12px;color:#5a8a68;"><a href="${safe}" style="color:#1a4731;text-decoration:none;">BitWLab</a> &nbsp;·&nbsp; ${subtitle}</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
+function buildManualEmailVerifiedHtml(userName: string, userEmail: string, appUrl: string, hu: boolean): string {
+  const safeAppUrl = escapeHtml(appUrl);
+  const title = hu ? 'Az email-címed megerősítve' : 'Your email is verified';
+  const intro = hu
+    ? `Szia ${userName},`
+    : `Hello ${userName},`;
+  const body = hu
+    ? `A BitWLab admin csapata manuálisan megerősítette a(z) <strong style="color:#111827;">${userEmail}</strong> email-címedet. Mostantól be tudsz jelentkezni, és használhatod a fiókodat.`
+    : `The BitWLab admin team manually verified <strong style="color:#111827;">${userEmail}</strong>. You can now sign in and use your account.`;
+  const cta = hu ? 'Bejelentkezés' : 'Sign in';
+  const footer = hu
+    ? 'Ez egy automatikus értesítés. Kérjük, ne válaszolj erre az emailre.'
+    : 'This is an automated notification. Please do not reply to this email.';
+  const subtitle = hu ? 'Bitcoin blokklánc elemzés' : 'Bitcoin Blockchain Analysis';
+
+  return `<!DOCTYPE html>
+<html lang="${hu ? 'hu' : 'en'}">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>${title} — BitWLab</title></head>
+<body style="margin:0;padding:0;background:#e8f0e9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#e8f0e9;padding:32px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+        <tr><td style="background:#1a4731;border-radius:12px 12px 0 0;padding:30px 40px;text-align:center;">
+          <p style="margin:0 0 6px;font-size:22px;font-weight:800;color:#ffffff;">BitWLab</p>
+          <p style="margin:0;font-size:13px;color:#86b89a;">${subtitle}</p>
+        </td></tr>
+        <tr><td style="background:#ffffff;padding:40px;border-left:1px solid #dce8dd;border-right:1px solid #dce8dd;">
+          <p style="margin:0 0 12px;font-size:13px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:0.06em;">${hu ? 'Fiók frissítve' : 'Account update'}</p>
+          <h2 style="margin:0 0 18px;font-size:24px;font-weight:800;color:#111827;">${title}</h2>
+          <p style="margin:0 0 14px;font-size:15px;color:#374151;line-height:1.6;">${intro}</p>
+          <p style="margin:0 0 26px;font-size:15px;color:#374151;line-height:1.6;">${body}</p>
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin-bottom:26px;"><tr><td style="background:#1a4731;border-radius:8px;"><a href="${safeAppUrl}/login" style="display:inline-block;padding:13px 30px;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;">${cta} &#x2192;</a></td></tr></table>
+          <p style="margin:0;font-size:13px;color:#6b7280;line-height:1.6;">${hu ? 'Ha kérdésed van a fiókoddal kapcsolatban, kérjük, vedd fel velünk a kapcsolatot a BitWLab felületén.' : 'If you have any questions about your account, please contact us from the BitWLab application.'}</p>
+        </td></tr>
+        <tr><td style="background:#d4e8d6;border-radius:0 0 12px 12px;padding:20px 40px;text-align:center;border:1px solid #bdd9bf;border-top:none;">
+          <p style="margin:0 0 4px;font-size:13px;color:#3d6b4a;">${footer}</p>
+          <p style="margin:0;font-size:12px;color:#5a8a68;"><a href="${safeAppUrl}" style="color:#1a4731;text-decoration:none;">BitWLab</a> &nbsp;&middot;&nbsp; ${subtitle}</p>
         </td></tr>
       </table>
     </td></tr>

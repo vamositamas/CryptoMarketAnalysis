@@ -507,7 +507,7 @@
         <note priority="1" from="description">Select all years</note>
       </trans-unit>
       <trans-unit id="adminDataConfig.initButton" datatype="html">
-        <source> Initialize Selected (<x id="INTERPOLATION" equiv-text="{{ selectedYears().size }}"/> year<x id="INTERPOLATION_1" equiv-text="{{ selectedYears().size === 1 ? &apos;&apos; : &apos;s&apos; }}"/>) </source>
+        <source> Initialize Selected <x id="INTERPOLATION" equiv-text="{{ selectedYears().size }}"/> year<x id="INTERPOLATION_1" equiv-text="{{ selectedYears().size === 1 ? &apos;&apos; : &apos;s&apos; }}"/>) </source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
           <context context-type="linenumber">1772,1773</context>

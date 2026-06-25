@@ -225,7 +225,7 @@ const CHARTS: ChartLibraryItem[] = [
     category: 'macro',
     signal: $localize`:Chart midterm-cycles signal@@charts.library.midterm-cycles.signal:BTC & SPX RSI vs election cycles`,
     description:
-      $localize`:Chart midterm-cycles description@@charts.library.midterm-cycles.description:Overlays Bitcoin and S&P 500 12-month RSI against ISM Manufacturing PMI, aligned to US midterm election cycles. Historically, equity and economic conditions around midterms have preceded significant Bitcoin moves.`,
+      $localize`:Chart midterm-cycles description@@charts.library.midterm-cycles.description:Overlays Bitcoin and S&P 500 12-month RSI against the Chicago Fed National Activity Index (CFNAI), aligned to US midterm election cycles. Historically, equity and economic conditions around midterms have preceded significant Bitcoin moves.`,
     thumbnailClass: 'midterm-cycles',
   },
 ];

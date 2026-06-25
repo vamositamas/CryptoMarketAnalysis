@@ -335,7 +335,7 @@ export interface SpxLiquidityChartResponse {
 export interface MidtermCyclesChartResponse {
   chartId: 'midterm-cycles';
   title: string;
-  dataPoints: { date: string; btcRsi12m: number | null; spxRsi12m: number | null; ismPmi: number | null; }[];
+  dataPoints: { date: string; btcRsi12m: number | null; spxRsi12m: number | null; cfnai: number | null; }[];
   lastUpdated: string | null;
 }
 
@@ -1271,8 +1271,23 @@ export class AuthApiClient {
     } catch (error) { throw toApiClientError(error); }
   }
 
+  async adminHardDeleteUser(userId: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const csrfToken = await this.getCsrfToken();
+      return await firstValueFrom(
+        this.http.delete<{ success: boolean; message: string }>(`/api/admin/users/${userId}/permanent`, {
+          headers: { 'x-csrf-token': csrfToken }, withCredentials: true,
+        }),
+      );
+    } catch (error) { throw toApiClientError(error); }
+  }
+
   async adminRestoreUser(userId: string): Promise<AdminUserRecord> {
     return this.patchWithCsrf<AdminUserRecord>(`/api/admin/users/${userId}/restore`, {});
+  }
+
+  async adminVerifyUserEmail(userId: string): Promise<AdminUserRecord> {
+    return this.postWithCsrf<AdminUserRecord>(`/api/admin/users/${userId}/verify-email`, {});
   }
 
   async adminForcePasswordReset(userId: string): Promise<{ success: boolean; message: string }> {
