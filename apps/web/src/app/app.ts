@@ -1,5 +1,5 @@
 import { Component, inject, signal, computed, HostListener, ElementRef } from '@angular/core';
-import { Router, RouterModule, NavigationEnd } from '@angular/router';
+import { Router, RouterLink, RouterModule, NavigationEnd } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, startWith } from 'rxjs';
 import { FormsModule } from '@angular/forms';
@@ -10,7 +10,7 @@ import { LegalDialogService, LegalDoc } from './services/legal-dialog.service';
 import { AuthApiClient } from '@crypto-market-analysis/data-access/api-client';
 
 @Component({
-  imports: [RouterModule, DonateModalComponent, FormsModule],
+  imports: [RouterModule, RouterLink, DonateModalComponent, FormsModule],
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: './app.scss',

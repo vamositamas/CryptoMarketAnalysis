@@ -89,6 +89,11 @@
                 i18n="My account menu item@@nav.myAccount">
                 My Account
               </button>
+              <a class="user-menu-item" role="menuitem" routerLink="/user-guide"
+                (click)="userMenuOpen.set(false)"
+                i18n="User guide menu item@@nav.userGuide">
+                User Guide
+              </a>
               <div class="user-menu-divider"></div>
               <button type="button" class="user-menu-item" role="menuitem"
                 (click)="openLegal('disclaimer')"

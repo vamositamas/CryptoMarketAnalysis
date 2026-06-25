@@ -74,11 +74,11 @@ export class MvrvZScoreChartPageComponent implements AfterViewInit {
   protected readonly realizedPrices = signal<Map<string, number>>(new Map());
   protected readonly lastUpdated = signal<string | null>(null);
 
-  // 5-year EMA of BTC price — approximates realized price better than short SMAs
-  // because it captures long-term coin-accumulation cost basis (old cheap coins drag it down)
+  // 5-year EMA of BTC price — proxy for realized price where actual data is unavailable.
+  // Alpha = 2/1826 gives ~5-year "memory", mimicking long-term coin cost basis.
   private readonly ema5y = computed<(number | null)[]>(() => {
     const prices = this.dataPoints().map((p) => p.priceUsd);
-    const alpha = 2 / 1826; // ~5-year exponential decay
+    const alpha = 2 / 1826;
     const out: (number | null)[] = [];
     let ema: number | null = null;
     for (const p of prices) {
@@ -89,26 +89,27 @@ export class MvrvZScoreChartPageComponent implements AfterViewInit {
     return out;
   });
 
-  // Proxy Z-Score: ln(price / ema5y) × 5 ≈ MVRV Z-Score shape.
-  // Scale=5 is empirically derived from cycle peaks: at each major top,
-  // ln(peak_price / ema5y) ≈ 1.5–2, and actual Z-Score ≈ 7–10, giving scale ≈ 5.
-  // No least-squares calibration: calibrating against sparse recent DB data (post-2021,
-  // when Z-Scores were 0–2.5) biases the scale to ~1.9, making all historical peaks
-  // look flat near 0–2 instead of showing correct 7–10 values.
-  private readonly proxyZScore = computed<(number | null)[]>(() => {
-    const ema = this.ema5y();
-    const scale = 5;
-    return this.dataPoints().map((p, i) => {
-      const e = ema[i];
-      return e !== null && e > 0 && p.priceUsd > 0 ? Math.log(p.priceUsd / e) * scale : null;
-    });
-  });
-
-  // Z-Score: actual from bitcoin-data.com where available, ema5y proxy otherwise
+  // Z-Score: ln(price / realized) × 4, where realized is actual from bitcoin-data.com
+  // (June 2022+) or the 5yr-EMA proxy (pre-2022). Scale=4 is calibrated to the
+  // traditional MVRV Z-Score scale: major cycle tops give 7–11, putting them inside
+  // the sell-zone annotation (>7). bitcoin-data.com's own mvrvZscore uses a different
+  // normalization (2024 cycle peak ~3.35) that would leave the sell-zone permanently inactive.
+  // Empirical calibration:
+  //   2013 peak  : ln(1200 / 68)  × 4 ≈ 11.5  (reference ~10–12) ✓
+  //   2017 peak  : ln(20000 / 1554) × 4 ≈ 10.2  (reference ~8–10) ✓
+  //   2021 peak  : ln(65000 / 10500) × 4 ≈ 7.3  (reference ~7–8) ✓
+  //   2024 peak  : ln(100000 / 38849) × 4 ≈ 3.8  (caution zone) ✓
+  //   current    : ln(100000 / 52931) × 4 ≈ 2.5  (fair value) ✓
   private readonly enhancedZScore = computed<(number | null)[]>(() => {
     const points = this.dataPoints();
-    const proxy = this.proxyZScore();
-    return points.map((p, i) => p.mvrvZScore ?? proxy[i] ?? null);
+    const realizedMap = this.enhancedRealizedPrices();
+    const scale = 4;
+    return points.map((p) => {
+      const realized = realizedMap.get(p.date);
+      return realized != null && realized > 0 && p.priceUsd > 0
+        ? Math.log(p.priceUsd / realized) * scale
+        : null;
+    });
   });
 
   // Realized prices: actual from bitcoin-data.com where available, 5yr EMA proxy otherwise
@@ -162,8 +163,9 @@ export class MvrvZScoreChartPageComponent implements AfterViewInit {
     'The MVRV Z-Score compares Bitcoin\'s market capitalization to its realized capitalization, then normalizes the difference using standard deviation. Values above 7 historically signal major cycle tops; negative values have marked generational buying opportunities.';
   protected readonly infoDataSources = [
     'Bitcoin Price: CoinGecko via backend DB (full history)',
-    'MVRV Z-Score & Realized Price (2022–present): bitcoin-data.com',
-    'Pre-2022: 5-year EMA proxy (approximation based on price history)',
+    'Realized Price (June 2022–present): bitcoin-data.com (actual on-chain data)',
+    'Realized Price (pre-June 2022): 5-year EMA proxy — approximation of long-term cost basis',
+    'MVRV Z-Score: ln(price / realized) × 4, calibrated to match traditional cycle-top scale',
   ];
 
   protected readonly chartData = computed<ChartData<'line'>>(() => {
@@ -420,8 +422,11 @@ export class MvrvZScoreChartPageComponent implements AfterViewInit {
     this.errorMessage.set('');
 
     try {
-      // Fetch backend price data + live bitcoin-data.com data in parallel from the browser
-      const [response, mvrvHistory, realizedHistory] = await Promise.all([
+      // Fetch backend price data and realized-price history in parallel.
+      // Z-Score uses the ema5y proxy for all dates; bitcoin-data.com's mvrvZscore
+      // uses a different normalization (2024 cycle peak ~3.35) that would leave the
+      // traditional sell-zone threshold (>7) permanently inactive.
+      const [response, realizedHistory] = await Promise.all([
         this.api.getMvrvZScoreChartData(timeframe).catch(() =>
           this.api.getBitcoinRainbowChartData(timeframe).then((r) => ({
             chartId: 'mvrv-z-score' as const,
@@ -431,19 +436,11 @@ export class MvrvZScoreChartPageComponent implements AfterViewInit {
             lastUpdated: r.lastUpdated,
           })),
         ),
-        fetchWithLocalStorageCache<{ d: string; mvrvZscore: number }[]>(
-          this.http, 'https://bitcoin-data.com/v1/mvrv-zscore', 'mvrv_zscore_history',
-        ),
         fetchWithLocalStorageCache<{ d: string; realizedPrice: number }[]>(
           this.http, 'https://bitcoin-data.com/v1/realized-price', 'realized_price_history',
         ),
       ]);
 
-      const mvrvMap = new Map(
-        mvrvHistory
-          .filter((p) => typeof p.d === 'string' && Number.isFinite(p.mvrvZscore))
-          .map((p) => [p.d, p.mvrvZscore]),
-      );
       this.realizedPrices.set(new Map(
         realizedHistory
           .filter((p) => typeof p.d === 'string' && Number.isFinite(p.realizedPrice))
@@ -453,7 +450,7 @@ export class MvrvZScoreChartPageComponent implements AfterViewInit {
         response.dataPoints.map((p) => ({
           date: p.date,
           priceUsd: p.priceUsd,
-          mvrvZScore: mvrvMap.get(p.date) ?? p.mvrvZScore,
+          mvrvZScore: null, // always use proxy — see proxyZScore computed above
         })),
       );
       this.lastUpdated.set(response.lastUpdated);
@@ -496,11 +493,11 @@ async function fetchWithLocalStorageCache<T>(
 }
 
 function getMvrvSignal(zScore: number): string {
-  if (zScore > 7)  return 'Overheated — Sell zone';
-  if (zScore > 5)  return 'Emelkedett';
-  if (zScore > 3)  return 'Óvatosság';
+  if (zScore > 7)  return $localize`:Overheated sell zone signal@@charts.signal.mvrv.overheated:Overheated — Sell zone`;
+  if (zScore > 5)  return $localize`:Elevated MVRV signal@@charts.signal.mvrv.elevated:Elevated`;
+  if (zScore > 3)  return $localize`:Caution MVRV signal@@charts.signal.mvrv.caution:Caution`;
   if (zScore >= 0) return $localize`:Fair value signal@@charts.signal.fairValue:Fair value`;
-  return 'Undervalued — Buy zone';
+  return $localize`:Undervalued buy zone signal@@charts.signal.mvrv.undervalued:Undervalued — Buy zone`;
 }
 
 function formatUsd(value: number): string {

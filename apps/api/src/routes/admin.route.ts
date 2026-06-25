@@ -1,6 +1,6 @@
 import type { Request } from 'express';
 import { Router } from 'express';
-import { BitcoinDataClient, BlockchainInfoClient, FearGreedClient } from '@crypto-market-analysis/calculation-engines/data-sources';
+import { BitcoinDataClient, BlockchainInfoClient, CoinGeckoClient, FearGreedClient } from '@crypto-market-analysis/calculation-engines/data-sources';
 import { getDatabasePool } from '../config/database.config';
 import { DailyDataRefreshService, insertBitcoinMetricsDaily } from '../jobs/daily-data-refresh.controller';
 import { runHistoricalDataInitialization } from '../jobs/init-historical-data';
@@ -571,12 +571,16 @@ export function createAdminRouter(
         return;
       }
       const { startDate, endDate } = req.body as { startDate?: string; endDate?: string };
+      // No CoinGecko retries: a 429 rate-limit would otherwise cause 7s of backoff per
+      // chunk, pushing a single-year init past Render's 30s gateway timeout.
+      // Any CoinGecko failure falls through immediately to the Blockchain.info fallback.
       const summary = await runHistoricalDataInitialization({
         database,
         startDate,
         endDate,
         retryAttempts: 1,
         retryDelayMs: 0,
+        coinGeckoClient: new CoinGeckoClient({ retryAttempts: 0 }),
       });
       res.status(200).json(summary);
     } catch (error) {

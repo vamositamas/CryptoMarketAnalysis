@@ -57,7 +57,11 @@ export class BlockchainInfoClient {
   ): Promise<BlockchainInfoMarketPricePoint[]> {
     const points = await this.fetchChart(MARKET_PRICE_CHART, startDate, endDate);
 
-    return points.map((point) => ({ date: point.date, priceUsd: point.value }));
+    // Filter out zero-price rows: blockchain.info returns y=0.0 for 2009 and early 2010
+    // when no exchange price existed yet. First non-zero price: 2010-10-01 at $0.06.
+    return points
+      .filter((point) => point.value > 0)
+      .map((point) => ({ date: point.date, priceUsd: point.value }));
   }
 
   async fetchHashRate(startDate: string, endDate: string): Promise<BlockchainInfoChartPoint[]> {

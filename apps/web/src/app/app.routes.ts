@@ -581,12 +581,18 @@ export class TermsOfUsePage {}
                 }
               } @else if (widget.type !== 'halving_progress') {
                 <strong class="widget-value">{{ widget.formattedValue }}</strong>
-                <small class="widget-trend" [class]="'trend-' + widget.trend">
-                  {{ trendIndicator(widget.trend) }}
-                  @if (widget.trendPercent !== null) {
-                    {{ formatTrendPercent(widget.trendPercent) }}
-                  }
-                </small>
+                @if (widget.type === 'btc_price' && livePriceData(); as lp) {
+                  <small class="widget-trend" [class]="livePriceChangePct(lp) >= 0 ? 'trend-up' : 'trend-down'">
+                    {{ livePriceChangePct(lp) >= 0 ? '↑' : '↓' }}{{ formatTrendPercent(livePriceChangePct(lp)) }}
+                  </small>
+                } @else {
+                  <small class="widget-trend" [class]="'trend-' + widget.trend">
+                    {{ trendIndicator(widget.trend) }}
+                    @if (widget.trendPercent !== null) {
+                      {{ formatTrendPercent(widget.trendPercent) }}
+                    }
+                  </small>
+                }
               }
               @if (widget.type === 'fear_greed' && widget.value !== null) {
                 <div class="wi-gauge">
@@ -1750,6 +1756,10 @@ export class DashboardPage {
     return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
   }
 
+  protected livePriceChangePct(lp: { priceUsd: number; openPriceUsd: number }): number {
+    return (lp.priceUsd - lp.openPriceUsd) / lp.openPriceUsd * 100;
+  }
+
   protected trendIndicator(trend: DashboardWidget['trend']): string {
     if (trend === 'up') {
       return '↑';
@@ -2000,11 +2010,16 @@ export class DashboardPage {
       this.widgets.update((ws) =>
         ws.map((w) => {
           if (w.type === 'btc_price') {
+            const pct = live.change24hPercent;
             return {
               ...w,
               value: live.priceUsd,
               formattedValue: `$${live.priceUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
               lastUpdated: live.fetchedAt,
+              ...(pct !== null ? {
+                trendPercent: pct,
+                trend: pct > 0 ? 'up' as const : pct < 0 ? 'down' as const : 'flat' as const,
+              } : {}),
             };
           }
           if (w.type === '24h_change' && live.change24hPercent !== null) {
@@ -2193,14 +2208,14 @@ export class AdminDataConfigurationPage {
   protected readonly initSuccess = signal(false);
   protected readonly initProgress = signal('');
 
-  protected readonly startYear = 2013;
+  protected readonly startYear = 2010;
   protected readonly currentYear = new Date().getUTCFullYear();
   protected readonly availableYears = Array.from(
-    { length: new Date().getUTCFullYear() - 2013 + 1 },
-    (_, i) => 2013 + i,
+    { length: new Date().getUTCFullYear() - 2010 + 1 },
+    (_, i) => 2010 + i,
   );
   protected readonly selectedYears = signal(new Set<number>(
-    Array.from({ length: new Date().getUTCFullYear() - 2013 + 1 }, (_, i) => 2013 + i),
+    Array.from({ length: new Date().getUTCFullYear() - 2010 + 1 }, (_, i) => 2010 + i),
   ));
   protected readonly allYearsSelected = computed(
     () => this.selectedYears().size === this.availableYears.length,
@@ -3294,6 +3309,14 @@ export const appRoutes: Route[] = [
     loadComponent: () =>
       import('./components/trading-plans-page/trading-plans-page.component').then(
         (m) => m.TradingPlansPageComponent,
+      ),
+  },
+  {
+    path: 'user-guide',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/user-guide-page/user-guide-page.component').then(
+        (m) => m.UserGuidePageComponent,
       ),
   },
   {
