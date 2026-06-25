@@ -1,5 +1,7 @@
-import { Component, computed, signal } from '@angular/core';
+import { Location } from '@angular/common';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 interface FaqItem {
   id: string;
@@ -15,9 +17,42 @@ interface FaqItem {
   imports: [FormsModule],
   styles: [`
     .ug-page {
+      position: relative;
       max-width: 860px;
       margin: 0 auto;
       padding: 36px 24px 72px;
+    }
+
+    .ug-close {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      border: 1.5px solid #d7ded8;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.72);
+      color: #65736f;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s, background 0.15s, box-shadow 0.15s;
+    }
+
+    .ug-close:hover,
+    .ug-close:focus-visible {
+      color: #145c4b;
+      border-color: #145c4b;
+      background: #ffffff;
+      box-shadow: 0 2px 10px rgba(20, 92, 75, 0.10);
+      outline: none;
+    }
+
+    .ug-close svg {
+      width: 18px;
+      height: 18px;
     }
 
     /* ── Header ── */
@@ -232,12 +267,28 @@ interface FaqItem {
     /* ── Responsive ── */
     @media (max-width: 600px) {
       .ug-page { padding: 24px 16px 56px; }
+      .ug-close {
+        top: 14px;
+        right: 14px;
+      }
       .ug-bubble--q, .ug-bubble--a { max-width: 94%; }
       .ug-bubble { padding: 13px 16px; }
     }
   `],
   template: `
     <div class="ug-page">
+      <button
+        type="button"
+        class="ug-close"
+        (click)="closeGuide()"
+        aria-label="Close user guide"
+        i18n-aria-label="Close user guide@@faq.close"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M18 6 6 18M6 6l12 12"></path>
+        </svg>
+      </button>
 
       <!-- Header + search -->
       <header class="ug-header">
@@ -320,6 +371,9 @@ interface FaqItem {
   `,
 })
 export class UserGuidePageComponent {
+  private readonly location = inject(Location);
+  private readonly router = inject(Router);
+
   protected readonly searchQuery = signal('');
 
   protected readonly searchPlaceholder = $localize`:User guide search placeholder@@faq.search.placeholder:Search the guide…`;
@@ -502,4 +556,13 @@ export class UserGuidePageComponent {
     }
     return [...map.values()];
   });
+
+  protected closeGuide(): void {
+    if (window.history.length > 1) {
+      this.location.back();
+      return;
+    }
+
+    void this.router.navigateByUrl('/dashboard');
+  }
 }

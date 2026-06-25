@@ -556,6 +556,32 @@ main button:disabled {
   line-height: 1.7;
 }
 
+.landing-promises {
+  display: grid;
+  gap: 8px;
+  max-width: 660px;
+  margin-top: 22px;
+  padding: 16px 18px;
+  border: 1px solid #d7e6dc;
+  border-left: 3px solid #145c4b;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.62);
+  box-shadow: 0 8px 24px rgba(20, 92, 75, 0.07);
+}
+
+.landing-copy .landing-promises p {
+  max-width: none;
+  margin: 0;
+  color: #344540;
+  font-size: 0.98rem;
+  line-height: 1.55;
+}
+
+.landing-promises strong {
+  color: #145c4b;
+  font-weight: 800;
+}
+
 .eyebrow,
 main .eyebrow {
   margin: 0 0 10px;
@@ -651,6 +677,10 @@ main .content-section p {
 .landing-section .section-heading {
   display: block;
   max-width: none;
+}
+
+.landing-section .section-heading p.eyebrow {
+  margin-bottom: 16px;
 }
 
 .landing-section h2 {

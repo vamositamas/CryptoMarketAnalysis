@@ -821,5 +821,9 @@
   "charts.midtermCycles.overbought": "BTC RSI 70 felett — historikusan emelkedett, potenciális ciklustető területe.",
   "charts.midtermCycles.oversold": "BTC RSI 40 alatt — historikusan túladott, potenciális akkumulációs zóna.",
   "charts.midtermCycles.neutral": "BTC RSI semleges tartományban (40–70).",
-  "charts.empty.no.data.yet.historical.data.will.appear.after.the.first.refresh": "Még nincs adat. A historikus adatok az első frissítés után fognak megjelenni."
+  "charts.empty.no.data.yet.historical.data.will.appear.after.the.first.refresh": "Még nincs adat. A historikus adatok az első frissítés után fognak megjelenni.",
+  "landing.freePromiseLead": "Örökre ingyenes.",
+  "landing.freePromiseBody": " Minden grafikon, riasztás, irányítópult és kutatási eszköz előfizetés, prémium csomag és fizetőfal nélkül elérhető. ",
+  "landing.dataPromiseLead": "Ingyenes adatokra épül.",
+  "landing.dataPromiseBody": " A BitWLab nyilvánosan elérhető és díjmentes adatforrásokat használ, így az elemzés átlátható és mindenki számára hozzáférhető marad. "
 }

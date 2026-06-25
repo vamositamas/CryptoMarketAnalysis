@@ -823,5 +823,9 @@
   "charts.midtermCycles.overbought": "BTC RSI above 70 — historically elevated, potential cycle top territory.",
   "charts.midtermCycles.oversold": "BTC RSI below 40 — historically oversold, potential accumulation zone.",
   "charts.midtermCycles.neutral": "BTC RSI in neutral range (40–70).",
-  "charts.empty.no.data.yet.historical.data.will.appear.after.the.first.refresh": "No data yet. Historical data will appear after the first refresh."
+  "charts.empty.no.data.yet.historical.data.will.appear.after.the.first.refresh": "No data yet. Historical data will appear after the first refresh.",
+  "landing.freePromiseLead": "Free forever.",
+  "landing.freePromiseBody": " Every chart, alert, dashboard, and research tool is available without subscriptions, premium tiers, or paywalls. ",
+  "landing.dataPromiseLead": "Built on free data.",
+  "landing.dataPromiseBody": " BitWLab uses publicly available and no-cost data sources, so the analysis stays transparent and accessible. "
 }
