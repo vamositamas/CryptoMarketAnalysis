@@ -841,8 +841,25 @@ export class TermsOfUsePage {}
                         <line x1="763" y1="0" x2="763" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
                         <path d="M 0,355 C 100,352 140,346 155,342 C 168,306 198,250 212,243 C 228,295 260,308 272,303 C 308,284 345,240 355,228 C 372,175 408,68 424,62 C 440,102 468,238 477,126 C 492,98 505,84 510,85 C 528,108 542,104 555,85 C 574,50 617,12 632,10 C 648,42 677,250 685,68 C 703,46 737,22 763,14 C 776,10 792,12 800,13"
                               stroke="#17202a" stroke-width="2.5" fill="none"/>
-                        <path d="M 0,300 C 50,288 90,175 108,62 C 120,240 148,310 168,298 C 210,272 268,186 300,118 C 318,280 356,312 380,302 C 415,258 448,105 462,55 C 476,188 510,308 528,292 C 548,242 584,95 605,58 C 622,175 652,300 668,286 C 696,254 745,224 778,232 C 790,236 797,240 800,242"
+                      <path d="M 0,300 C 50,288 90,175 108,62 C 120,240 148,310 168,298 C 210,272 268,186 300,118 C 318,280 356,312 380,302 C 415,258 448,105 462,55 C 476,188 510,308 528,292 C 548,242 584,95 605,58 C 622,175 652,300 668,286 C 696,254 745,224 778,232 C 790,236 797,240 800,242"
                               stroke="#f59e0b" stroke-width="2.5" fill="none" opacity="0.95"/>
+                      </svg>
+                    } @else if (chart.chartId === 'sopr-ratio') {
+                      <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
+                        <rect width="800" height="360" fill="#fff"/>
+                        <line x1="0" y1="72" x2="800" y2="72" stroke="#e5e7eb" stroke-width="1"/>
+                        <line x1="0" y1="144" x2="800" y2="144" stroke="#e5e7eb" stroke-width="1"/>
+                        <line x1="0" y1="216" x2="800" y2="216" stroke="#e5e7eb" stroke-width="1"/>
+                        <line x1="0" y1="288" x2="800" y2="288" stroke="#e5e7eb" stroke-width="1"/>
+                        <line x1="0" y1="180" x2="800" y2="180" stroke="rgba(107,114,128,0.65)" stroke-width="1.5" stroke-dasharray="7,5"/>
+                        <path d="M 0,300 C 80,260 120,120 165,160 C 210,205 250,250 310,218 C 370,188 390,108 450,130 C 510,152 540,238 600,218 C 660,198 705,128 760,150 C 780,158 794,168 800,170"
+                              stroke="#16a34a" stroke-width="3" fill="none"/>
+                        <path d="M 0,300 C 90,268 140,160 185,172 C 235,185 280,230 330,214 C 390,196 420,145 470,145 C 530,146 560,210 620,206 C 675,202 712,160 770,164 C 785,166 795,168 800,170"
+                              stroke="#f59e0b" stroke-width="2" fill="none" opacity="0.9"/>
+                        <path d="M 0,295 C 110,270 175,205 245,205 C 330,206 380,178 455,168 C 535,158 600,182 665,180 C 720,178 760,174 800,172"
+                              stroke="#64748b" stroke-width="2" fill="none" opacity="0.9"/>
+                        <path d="M 0,355 C 105,350 150,342 175,336 C 215,300 250,270 300,240 C 350,210 390,150 430,132 C 475,112 520,124 560,94 C 620,48 705,28 800,22"
+                              stroke="#111820" stroke-width="2.5" fill="none"/>
                       </svg>
                     } @else if (chart.chartId === 'puell-multiple') {
                       <svg viewBox="0 0 800 360" preserveAspectRatio="none">
@@ -1001,6 +1018,23 @@ export class TermsOfUsePage {}
                         <circle cx="340" cy="48"  r="3.5" fill="#dc2626"/>
                         <circle cx="570" cy="56"  r="3.5" fill="#dc2626"/>
                         <circle cx="745" cy="104" r="3.5" fill="#dc2626"/>
+                      </svg>
+                    } @else if (chart.chartId === 'compare-bull-markets') {
+                      <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
+                        <rect width="800" height="360" fill="#fff"/>
+                        <line x1="0" y1="60" x2="800" y2="60" stroke="#e5e7eb" stroke-width="1"/>
+                        <line x1="0" y1="130" x2="800" y2="130" stroke="#e5e7eb" stroke-width="1"/>
+                        <line x1="0" y1="200" x2="800" y2="200" stroke="#e5e7eb" stroke-width="1"/>
+                        <line x1="0" y1="270" x2="800" y2="270" stroke="#e5e7eb" stroke-width="1"/>
+                        <line x1="360" y1="0" x2="360" y2="360" stroke="rgba(22,163,74,0.55)" stroke-width="1.5" stroke-dasharray="5,5"/>
+                        <path d="M 0,285 C 45,210 75,82 110,58 C 135,112 155,30 190,22 C 230,36 255,145 300,155 C 360,168 405,130 470,105 C 540,92 595,118 660,82 C 710,62 760,70 800,78"
+                              stroke="#1d75b9" stroke-width="2.4" fill="none"/>
+                        <path d="M 0,300 C 58,292 95,240 142,180 C 188,118 222,74 262,80 C 310,92 330,150 370,190 C 430,230 500,210 555,186 C 625,160 698,174 800,132"
+                              stroke="#f97316" stroke-width="2.4" fill="none"/>
+                        <path d="M 0,292 C 52,252 82,205 125,158 C 170,112 220,134 268,165 C 332,205 390,224 452,205 C 540,178 590,154 650,110 C 710,75 760,62 800,70"
+                              stroke="#16a34a" stroke-width="2.4" fill="none"/>
+                        <path d="M 0,284 C 50,276 92,265 138,254 C 186,242 230,232 275,220 C 328,205 372,188 420,174"
+                              stroke="#dc2626" stroke-width="2.4" fill="none"/>
                       </svg>
                     } @else if (chart.chartId === '2yr-ma-multiplier') {
                       <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
@@ -1258,6 +1292,23 @@ export class TermsOfUsePage {}
                       <path d="M 0,300 C 50,288 90,175 108,62 C 120,240 148,310 168,298 C 210,272 268,186 300,118 C 318,280 356,312 380,302 C 415,258 448,105 462,55 C 476,188 510,308 528,292 C 548,242 584,95 605,58 C 622,175 652,300 668,286 C 696,254 745,224 778,232 C 790,236 797,240 800,242"
                             stroke="#f59e0b" stroke-width="2.5" fill="none" opacity="0.95"/>
                     </svg>
+                  } @else if (chart.chartId === 'sopr-ratio') {
+                    <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
+                      <rect width="800" height="360" fill="#fff"/>
+                      <line x1="0" y1="72" x2="800" y2="72" stroke="#e5e7eb" stroke-width="1"/>
+                      <line x1="0" y1="144" x2="800" y2="144" stroke="#e5e7eb" stroke-width="1"/>
+                      <line x1="0" y1="216" x2="800" y2="216" stroke="#e5e7eb" stroke-width="1"/>
+                      <line x1="0" y1="288" x2="800" y2="288" stroke="#e5e7eb" stroke-width="1"/>
+                      <line x1="0" y1="180" x2="800" y2="180" stroke="rgba(107,114,128,0.65)" stroke-width="1.5" stroke-dasharray="7,5"/>
+                      <path d="M 0,300 C 80,260 120,120 165,160 C 210,205 250,250 310,218 C 370,188 390,108 450,130 C 510,152 540,238 600,218 C 660,198 705,128 760,150 C 780,158 794,168 800,170"
+                            stroke="#16a34a" stroke-width="3" fill="none"/>
+                      <path d="M 0,300 C 90,268 140,160 185,172 C 235,185 280,230 330,214 C 390,196 420,145 470,145 C 530,146 560,210 620,206 C 675,202 712,160 770,164 C 785,166 795,168 800,170"
+                            stroke="#f59e0b" stroke-width="2" fill="none" opacity="0.9"/>
+                      <path d="M 0,295 C 110,270 175,205 245,205 C 330,206 380,178 455,168 C 535,158 600,182 665,180 C 720,178 760,174 800,172"
+                            stroke="#64748b" stroke-width="2" fill="none" opacity="0.9"/>
+                      <path d="M 0,355 C 105,350 150,342 175,336 C 215,300 250,270 300,240 C 350,210 390,150 430,132 C 475,112 520,124 560,94 C 620,48 705,28 800,22"
+                            stroke="#111820" stroke-width="2.5" fill="none"/>
+                    </svg>
                   } @else if (chart.chartId === 'puell-multiple') {
                     <svg viewBox="0 0 800 360" preserveAspectRatio="none">
                       <rect x="0" y="0"   width="800" height="90"  fill="rgba(239,68,68,0.18)"/>
@@ -1415,6 +1466,23 @@ export class TermsOfUsePage {}
                       <circle cx="340" cy="48"  r="3.5" fill="#dc2626"/>
                       <circle cx="570" cy="56"  r="3.5" fill="#dc2626"/>
                       <circle cx="745" cy="104" r="3.5" fill="#dc2626"/>
+                    </svg>
+                  } @else if (chart.chartId === 'compare-bull-markets') {
+                    <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
+                      <rect width="800" height="360" fill="#fff"/>
+                      <line x1="0" y1="60" x2="800" y2="60" stroke="#e5e7eb" stroke-width="1"/>
+                      <line x1="0" y1="130" x2="800" y2="130" stroke="#e5e7eb" stroke-width="1"/>
+                      <line x1="0" y1="200" x2="800" y2="200" stroke="#e5e7eb" stroke-width="1"/>
+                      <line x1="0" y1="270" x2="800" y2="270" stroke="#e5e7eb" stroke-width="1"/>
+                      <line x1="360" y1="0" x2="360" y2="360" stroke="rgba(22,163,74,0.55)" stroke-width="1.5" stroke-dasharray="5,5"/>
+                      <path d="M 0,285 C 45,210 75,82 110,58 C 135,112 155,30 190,22 C 230,36 255,145 300,155 C 360,168 405,130 470,105 C 540,92 595,118 660,82 C 710,62 760,70 800,78"
+                            stroke="#1d75b9" stroke-width="2.4" fill="none"/>
+                      <path d="M 0,300 C 58,292 95,240 142,180 C 188,118 222,74 262,80 C 310,92 330,150 370,190 C 430,230 500,210 555,186 C 625,160 698,174 800,132"
+                            stroke="#f97316" stroke-width="2.4" fill="none"/>
+                      <path d="M 0,292 C 52,252 82,205 125,158 C 170,112 220,134 268,165 C 332,205 390,224 452,205 C 540,178 590,154 650,110 C 710,75 760,62 800,70"
+                            stroke="#16a34a" stroke-width="2.4" fill="none"/>
+                      <path d="M 0,284 C 50,276 92,265 138,254 C 186,242 230,232 275,220 C 328,205 372,188 420,174"
+                            stroke="#dc2626" stroke-width="2.4" fill="none"/>
                     </svg>
                   } @else if (chart.chartId === '2yr-ma-multiplier') {
                     <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
