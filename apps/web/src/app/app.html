@@ -10,25 +10,46 @@
     @if (currentUser()) {
       <nav class="desktop-nav" aria-label="Primary navigation">
         <a routerLink="/dashboard" routerLinkActive="active">
+          <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 13h7V4H4v9Zm9 7h7V4h-7v16ZM4 20h7v-5H4v5Z"></path>
+          </svg>
           <ng-container i18n="Dashboard navigation label@@nav.dashboard">Dashboard</ng-container>
         </a>
         <a routerLink="/charts" routerLinkActive="active">
+          <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 19h16v2H4v-2Zm1-3 4-5 4 3 5-8 2 1.3-6.3 10-4.2-3.1L6.6 18 5 16Z"></path>
+          </svg>
           <ng-container i18n="Charts navigation label@@nav.charts">Charts</ng-container>
         </a>
         <a routerLink="/trading-plans" routerLinkActive="active">
+          <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M5 3h14v18H5V3Zm2 2v14h10V5H7Zm2 3h6v2H9V8Zm0 4h6v2H9v-2Zm0 4h4v2H9v-2Z"></path>
+          </svg>
           <ng-container i18n="Trade planner navigation label@@nav.tradingPlans">Trade Planner</ng-container>
         </a>
         <a routerLink="/alerts" routerLinkActive="active">
+          <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 22a2.4 2.4 0 0 0 2.3-1.7H9.7A2.4 2.4 0 0 0 12 22Zm7-5-1.8-2.4V10a5.2 5.2 0 0 0-4.2-5.1V3h-2v1.9A5.2 5.2 0 0 0 6.8 10v4.6L5 17v1.5h14V17Z"></path>
+          </svg>
           <ng-container i18n="Alerts navigation label@@nav.alerts">Alerts</ng-container>
         </a>
         @if (currentUser()?.role === 'administrator') {
           <a routerLink="/admin/users" routerLinkActive="active">
+            <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm8.5 1a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7ZM2 21v-2.2C2 15.6 4.8 13 8 13s6 2.6 6 5.8V21H2Zm13 0v-2.2a7 7 0 0 0-1.4-4.2 5.6 5.6 0 0 1 2.9-.8c3 0 5.5 2.3 5.5 5.2V21h-7Z"></path>
+            </svg>
             <ng-container i18n="Admin users navigation label@@nav.adminUsers">Users</ng-container>
           </a>
           <a routerLink="/admin/data-configuration" routerLinkActive="active">
+            <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3c4.4 0 8 1.3 8 3v12c0 1.7-3.6 3-8 3s-8-1.3-8-3V6c0-1.7 3.6-3 8-3Zm0 2C8.2 5 6.1 5.9 6 6c.1.1 2.2 1 6 1s5.9-.9 6-1c-.1-.1-2.2-1-6-1ZM6 9v2c.7.5 2.8 1.1 6 1.1s5.3-.6 6-1.1V9c-1.5.7-3.7 1-6 1s-4.5-.3-6-1Zm0 5v2c.7.5 2.8 1.1 6 1.1s5.3-.6 6-1.1v-2c-1.5.7-3.7 1-6 1s-4.5-.3-6-1Z"></path>
+            </svg>
             <ng-container i18n="Admin data navigation label@@nav.adminData">Data</ng-container>
           </a>
           <a routerLink="/admin/email-settings" routerLinkActive="active">
+            <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3 5h18v14H3V5Zm2 3.1V17h14V8.1l-7 5-7-5ZM6.2 7l5.8 4.1L17.8 7H6.2Z"></path>
+            </svg>
             <ng-container i18n="Admin email templates navigation label@@nav.adminEmail">Email</ng-container>
           </a>
         }
@@ -140,26 +161,47 @@
     <div class="mobile-nav-backdrop" (click)="closeMobileMenu()" aria-hidden="true"></div>
     <nav class="mobile-nav" aria-label="Mobile navigation">
       <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMobileMenu()">
+        <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 13h7V4H4v9Zm9 7h7V4h-7v16ZM4 20h7v-5H4v5Z"></path>
+        </svg>
         <ng-container i18n="Dashboard navigation label@@nav.dashboard">Dashboard</ng-container>
       </a>
       <a routerLink="/charts" routerLinkActive="active" (click)="closeMobileMenu()">
+        <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 19h16v2H4v-2Zm1-3 4-5 4 3 5-8 2 1.3-6.3 10-4.2-3.1L6.6 18 5 16Z"></path>
+        </svg>
         <ng-container i18n="Charts navigation label@@nav.charts">Charts</ng-container>
       </a>
       <a routerLink="/trading-plans" routerLinkActive="active" (click)="closeMobileMenu()">
+        <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 3h14v18H5V3Zm2 2v14h10V5H7Zm2 3h6v2H9V8Zm0 4h6v2H9v-2Zm0 4h4v2H9v-2Z"></path>
+        </svg>
         <ng-container i18n="Trade planner navigation label@@nav.tradingPlans">Trade Planner</ng-container>
       </a>
       <a routerLink="/alerts" routerLinkActive="active" (click)="closeMobileMenu()">
+        <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 22a2.4 2.4 0 0 0 2.3-1.7H9.7A2.4 2.4 0 0 0 12 22Zm7-5-1.8-2.4V10a5.2 5.2 0 0 0-4.2-5.1V3h-2v1.9A5.2 5.2 0 0 0 6.8 10v4.6L5 17v1.5h14V17Z"></path>
+        </svg>
         <ng-container i18n="Alerts navigation label@@nav.alerts">Alerts</ng-container>
       </a>
       @if (currentUser()?.role === 'administrator') {
         <div class="mobile-nav-group-label" i18n="Admin nav group label@@nav.adminGroup">Admin</div>
         <a routerLink="/admin/users" routerLinkActive="active" (click)="closeMobileMenu()">
+          <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M8 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm8.5 1a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7ZM2 21v-2.2C2 15.6 4.8 13 8 13s6 2.6 6 5.8V21H2Zm13 0v-2.2a7 7 0 0 0-1.4-4.2 5.6 5.6 0 0 1 2.9-.8c3 0 5.5 2.3 5.5 5.2V21h-7Z"></path>
+          </svg>
           <ng-container i18n="Admin users navigation label@@nav.adminUsers">Users</ng-container>
         </a>
         <a routerLink="/admin/data-configuration" routerLinkActive="active" (click)="closeMobileMenu()">
+          <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3c4.4 0 8 1.3 8 3v12c0 1.7-3.6 3-8 3s-8-1.3-8-3V6c0-1.7 3.6-3 8-3Zm0 2C8.2 5 6.1 5.9 6 6c.1.1 2.2 1 6 1s5.9-.9 6-1c-.1-.1-2.2-1-6-1ZM6 9v2c.7.5 2.8 1.1 6 1.1s5.3-.6 6-1.1V9c-1.5.7-3.7 1-6 1s-4.5-.3-6-1Zm0 5v2c.7.5 2.8 1.1 6 1.1s5.3-.6 6-1.1v-2c-1.5.7-3.7 1-6 1s-4.5-.3-6-1Z"></path>
+          </svg>
           <ng-container i18n="Admin data navigation label@@nav.adminData">Data Config</ng-container>
         </a>
         <a routerLink="/admin/email-settings" routerLinkActive="active" (click)="closeMobileMenu()">
+          <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 5h18v14H3V5Zm2 3.1V17h14V8.1l-7 5-7-5ZM6.2 7l5.8 4.1L17.8 7H6.2Z"></path>
+          </svg>
           <ng-container i18n="Admin email templates navigation label@@nav.adminEmail">Email</ng-container>
         </a>
       }

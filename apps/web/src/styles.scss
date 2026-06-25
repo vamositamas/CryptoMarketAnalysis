@@ -106,6 +106,10 @@ nav a,
 .primary-link,
 main button,
 main a.secondary-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-height: 40px;
   padding: 0 14px;
   border: 1px solid transparent;
@@ -114,6 +118,20 @@ main a.secondary-button {
   font: inherit;
   font-weight: 700;
   text-decoration: none;
+  transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, color 0.18s ease;
+}
+
+nav a {
+  gap: 7px;
+  color: #6f7b76;
+}
+
+nav .nav-icon {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 17px;
+  fill: currentColor;
+  opacity: 0.72;
 }
 
 main a.secondary-button {
@@ -121,11 +139,35 @@ main a.secondary-button {
   align-items: center;
 }
 
-nav a.active,
-nav a:hover,
+nav a:hover {
+  color: #1a4731;
+  border-color: transparent;
+  background: transparent;
+}
+
 .ghost-link {
   border-color: #cdd8d2;
   background: rgba(255, 255, 255, 0.72);
+}
+
+nav a.active {
+  color: #1a4731;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  font-weight: 800;
+}
+
+nav a.active:hover,
+nav a.active:focus-visible {
+  color: #143826;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+nav a.active .nav-icon {
+  opacity: 1;
 }
 
 .topbar-actions {
@@ -4157,8 +4199,13 @@ main .halving-spiral-chart-page {
 
       &.active,
       &:hover {
-        background: #f0f2ed;
-        border-color: #d0d4ce;
+        color: #1a4731;
+        background: transparent;
+        border-color: transparent;
+      }
+
+      &.active {
+        font-weight: 800;
       }
     }
   }
