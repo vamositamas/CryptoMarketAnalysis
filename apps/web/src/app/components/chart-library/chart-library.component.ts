@@ -219,6 +219,15 @@ const CHARTS: ChartLibraryItem[] = [
       $localize`:Chart spx-liquidity description@@charts.library.spx-liquidity.description:Compares the S&P 500 year-over-year change with the excess liquidity lead indicator. Positive turns in excess liquidity have historically led equity market advances by roughly 6 months.`,
     thumbnailClass: 'spx-liquidity',
   },
+  {
+    id: 'midterm-cycles',
+    title: $localize`:Chart midterm-cycles title@@charts.library.midterm-cycles.title:Midterm Cycles`,
+    category: 'macro',
+    signal: $localize`:Chart midterm-cycles signal@@charts.library.midterm-cycles.signal:BTC & SPX RSI vs election cycles`,
+    description:
+      $localize`:Chart midterm-cycles description@@charts.library.midterm-cycles.description:Overlays Bitcoin and S&P 500 12-month RSI against ISM Manufacturing PMI, aligned to US midterm election cycles. Historically, equity and economic conditions around midterms have preceded significant Bitcoin moves.`,
+    thumbnailClass: 'midterm-cycles',
+  },
 ];
 
 const CATEGORY_LABELS: Record<ChartLibraryItem['category'], string> = {

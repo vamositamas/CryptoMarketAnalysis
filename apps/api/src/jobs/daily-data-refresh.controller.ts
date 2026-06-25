@@ -7,12 +7,14 @@ import {
   CoinGeckoClient,
   FearGreedClient,
   FredClient,
+  type FredDataPoint,
   RetryExhaustedError,
 } from '@crypto-market-analysis/calculation-engines/data-sources';
 import { ExcessLiquidityService } from '../services/excess-liquidity.service';
 import { SpxLiquidityService } from '../services/spx-liquidity.service';
 import {
   selectLatestBitcoinDailyIndicators,
+  computeMonthlyRsi,
   type BitcoinDailyIndicatorInput,
 } from '@crypto-market-analysis/calculation-engines/indicators';
 import { insertBitcoinPriceDaily } from './init-historical-data';
@@ -330,6 +332,80 @@ export class DailyDataRefreshService {
         this.logger.log('SPX YoY data refreshed', { records: spxRecords.length });
       } catch (error) {
         this.logger.warn('Failed to refresh SPX YoY data; skipping for this run', {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+
+      // Refresh raw SPX price + ISM PMI + BTC RSI 12m for Midterm Cycles chart — best-effort
+      try {
+        const [sp500, napmResult, btcPrices] = await Promise.all([
+          new FredClient().fetchSP500(),
+          new FredClient({ apiKey: process.env['FRED_API_KEY'] }).fetchNAPM().catch((err: unknown) => {
+            this.logger.warn('ISM PMI (NAPM) fetch failed; skipping PMI data', {
+              error: err instanceof Error ? err.message : String(err),
+            });
+            return [] as FredDataPoint[];
+          }),
+          database.query(
+            'SELECT date::text, price_usd FROM bitcoin_price_daily ORDER BY date',
+          ) as Promise<QueryResult<{ date: string; price_usd: string }>>,
+        ]);
+
+        const spxFiltered = sp500.filter((p) => Number.isFinite(p.value) && p.value > 0);
+
+        const spxPriceRecords = spxFiltered
+          .map((p) => ({ date: p.date, metricName: 'spx_price' as const, metricValue: p.value }));
+
+        const spxRsiPoints = computeMonthlyRsi(spxFiltered.map((p) => ({ date: p.date, value: p.value })), 12);
+        const spxRsiRecords = spxRsiPoints.map((p) => ({
+          date: p.date,
+          metricName: 'spx_rsi_12m' as const,
+          metricValue: p.rsi,
+        }));
+
+        const ismPmiRecords = napmResult
+          .filter((p) => Number.isFinite(p.value) && p.value > 0)
+          .map((p) => ({ date: p.date, metricName: 'ism_pmi' as const, metricValue: p.value }));
+
+        const btcDailyPrices = btcPrices.rows.map((r) => ({
+          date: r.date,
+          value: Number(r.price_usd),
+        }));
+        const btcRsiPoints = computeMonthlyRsi(btcDailyPrices, 12);
+        const btcRsiRecords = btcRsiPoints.map((p) => ({
+          date: p.date,
+          metricName: 'btc_rsi_12m' as const,
+          metricValue: p.rsi,
+        }));
+
+        const allRecords = [...spxPriceRecords, ...spxRsiRecords, ...ismPmiRecords, ...btcRsiRecords];
+        if (allRecords.length > 0) {
+          const chunkSize = 500;
+          for (let i = 0; i < allRecords.length; i += chunkSize) {
+            const chunk = allRecords.slice(i, i + chunkSize);
+            const values: unknown[] = [];
+            const placeholders = chunk.map((rec, idx) => {
+              const base = idx * 3;
+              values.push(rec.date, rec.metricName, rec.metricValue);
+              return `($${base + 1}::date, $${base + 2}, $${base + 3}::numeric)`;
+            });
+            await database.query(
+              `INSERT INTO bitcoin_metrics_daily (id, date, metric_name, metric_value, created_at)
+               SELECT gen_random_uuid(), t.date, t.metric_name, t.metric_value, NOW()
+               FROM (VALUES ${placeholders.join(', ')}) AS t(date, metric_name, metric_value)
+               ON CONFLICT (date, metric_name)
+               DO UPDATE SET metric_value = EXCLUDED.metric_value, created_at = NOW()`,
+              values,
+            );
+          }
+        }
+        this.logger.log('Midterm cycles data refreshed', {
+          spx: spxPriceRecords.length,
+          pmi: ismPmiRecords.length,
+          rsi: btcRsiRecords.length,
+        });
+      } catch (error) {
+        this.logger.warn('Failed to refresh midterm cycles data; skipping for this run', {
           error: error instanceof Error ? error.message : String(error),
         });
       }

@@ -5,7 +5,7 @@ import {
   type ChartTimeframe,
 } from '../repositories/chart-data.repository';
 
-export type ChartId = 'bitcoin-rainbow' | 'pi-cycle-top' | 'stock-to-flow' | 'mvrv-z-score' | 'puell-multiple' | 'vdd-multiple' | 'realized-price' | 'stock-to-income' | '2yr-ma-multiplier' | 'price-forecast-tools' | 'mayer-multiple' | '200-week-ma-heatmap' | 'fear-greed-index' | 'hash-ribbons' | 'difficulty-ribbon' | 'nvt-ratio' | 'thermocap-multiple' | 'excess-liquidity' | 'spx-liquidity';
+export type ChartId = 'bitcoin-rainbow' | 'pi-cycle-top' | 'stock-to-flow' | 'mvrv-z-score' | 'puell-multiple' | 'vdd-multiple' | 'realized-price' | 'stock-to-income' | '2yr-ma-multiplier' | 'price-forecast-tools' | 'mayer-multiple' | '200-week-ma-heatmap' | 'fear-greed-index' | 'hash-ribbons' | 'difficulty-ribbon' | 'nvt-ratio' | 'thermocap-multiple' | 'excess-liquidity' | 'spx-liquidity' | 'midterm-cycles';
 
 export interface BitcoinRainbowChartResponse {
   chartId: 'bitcoin-rainbow';
@@ -215,6 +215,13 @@ export interface SpxLiquidityChartResponse {
   lastUpdated: string | null;
 }
 
+export interface MidtermCyclesChartResponse {
+  chartId: 'midterm-cycles';
+  title: 'Midterm Cycles';
+  dataPoints: { date: string; btcRsi12m: number | null; spxRsi12m: number | null; ismPmi: number | null; }[];
+  lastUpdated: string | null;
+}
+
 export type ChartDataResponse =
   | BitcoinRainbowChartResponse
   | PiCycleTopChartResponse
@@ -234,7 +241,8 @@ export type ChartDataResponse =
   | NvtRatioChartResponse
   | ThermocapMultipleChartResponse
   | ExcessLiquidityChartResponse
-  | SpxLiquidityChartResponse;
+  | SpxLiquidityChartResponse
+  | MidtermCyclesChartResponse;
 
 export class ChartDataRequestError extends Error {
   constructor(
@@ -247,7 +255,7 @@ export class ChartDataRequestError extends Error {
 
 export class ChartDataService {
   constructor(
-    private readonly repository: Pick<ChartDataRepository, 'findBitcoinChartData' | 'findExcessLiquidityData' | 'findSpxLiquidityData'>,
+    private readonly repository: Pick<ChartDataRepository, 'findBitcoinChartData' | 'findExcessLiquidityData' | 'findSpxLiquidityData' | 'findMidtermCyclesData'>,
     private readonly now: () => Date = () => new Date(),
     private readonly bitcoinDataClient: Pick<BitcoinDataClient, 'fetchVddMultipleHistory'> = new BitcoinDataClient(),
   ) {}
@@ -288,6 +296,25 @@ export class ChartDataService {
           date: r.date,
           spxYoyChange: r.spxYoyChange,
           excessLiquidityLeading: r.excessLiquidityLeading,
+        })),
+        lastUpdated,
+      };
+    }
+
+    if (chartId === 'midterm-cycles') {
+      const rows = await this.repository.findMidtermCyclesData();
+      const lastUpdated = rows.reduce<string | null>((acc, r) => {
+        if (!r.lastUpdated) return acc;
+        return !acc || r.lastUpdated > acc ? r.lastUpdated : acc;
+      }, null);
+      return {
+        chartId: 'midterm-cycles',
+        title: 'Midterm Cycles',
+        dataPoints: rows.map((r) => ({
+          date: r.date,
+          btcRsi12m: r.btcRsi12m,
+          spxRsi12m: r.spxRsi12m,
+          ismPmi: r.ismPmi,
         })),
         lastUpdated,
       };

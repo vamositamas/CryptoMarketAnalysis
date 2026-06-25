@@ -499,7 +499,7 @@
         <note priority="1" from="description">Historical data init description</note>
       </trans-unit>
       <trans-unit id="adminDataConfig.allYears" datatype="html">
-        <source>All (<x id="INTERPOLATION" equiv-text="{{ startYear }}"/>–<x id="INTERPOLATION_1" equiv-text="{{ currentYear }}"/>)</source>
+        <source>All<x id="INTERPOLATION" equiv-text="{{ startYear }}"/>–<x id="INTERPOLATION_1" equiv-text="{{ currentYear }}"/>)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
           <context context-type="linenumber">1744,1745</context>

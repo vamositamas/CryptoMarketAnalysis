@@ -76,6 +76,14 @@ export interface SpxLiquidityDataRow {
   lastUpdated: string | null;
 }
 
+export interface MidtermCyclesDataRow {
+  date: string;
+  btcRsi12m: number | null;
+  spxRsi12m: number | null;
+  ismPmi: number | null;
+  lastUpdated: string | null;
+}
+
 export class ChartDataRepository extends BaseRepository {
   constructor(private readonly database: Queryable) {
     super();
@@ -159,6 +167,46 @@ export class ChartDataRepository extends BaseRepository {
       date: formatDate(row.date),
       spxYoyChange: nullableNumber(row.spx_yoy_change),
       excessLiquidityLeading: nullableNumber(row.excess_liquidity_leading),
+      lastUpdated: row.last_updated === null ? null : formatTimestamp(row.last_updated),
+    }));
+  }
+
+  async findMidtermCyclesData(): Promise<MidtermCyclesDataRow[]> {
+    const result = await this.database.query(
+      `
+        WITH dates AS (
+          SELECT DISTINCT date FROM bitcoin_metrics_daily
+          WHERE metric_name IN ('btc_rsi_12m', 'spx_rsi_12m', 'ism_pmi')
+        )
+        SELECT
+          d.date,
+          btc.metric_value  AS btc_rsi_12m,
+          spx.metric_value  AS spx_rsi_12m,
+          pmi.metric_value  AS ism_pmi,
+          GREATEST(
+            COALESCE(btc.created_at, NULL),
+            COALESCE(spx.created_at, NULL),
+            COALESCE(pmi.created_at, NULL)
+          ) AS last_updated
+        FROM dates d
+        LEFT JOIN bitcoin_metrics_daily btc ON btc.date = d.date AND btc.metric_name = 'btc_rsi_12m'
+        LEFT JOIN bitcoin_metrics_daily spx ON spx.date = d.date AND spx.metric_name = 'spx_rsi_12m'
+        LEFT JOIN bitcoin_metrics_daily pmi ON pmi.date = d.date AND pmi.metric_name = 'ism_pmi'
+        ORDER BY d.date ASC
+      `,
+    );
+
+    return (result.rows as unknown as Array<{
+      date: string | Date;
+      btc_rsi_12m: string | number | null;
+      spx_rsi_12m: string | number | null;
+      ism_pmi: string | number | null;
+      last_updated: string | Date | null;
+    }>).map((row) => ({
+      date: formatDate(row.date),
+      btcRsi12m: nullableNumber(row.btc_rsi_12m),
+      spxRsi12m: nullableNumber(row.spx_rsi_12m),
+      ismPmi: nullableNumber(row.ism_pmi),
       lastUpdated: row.last_updated === null ? null : formatTimestamp(row.last_updated),
     }));
   }

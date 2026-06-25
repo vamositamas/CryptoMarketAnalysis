@@ -145,7 +145,7 @@
   "adminDataConfig.refreshNow": "Refresh Now",
   "adminDataConfig.initHistoricalTitle": "Initialize historical data",
   "adminDataConfig.initHistoricalDesc": "Backfills Bitcoin price history year by year via Blockchain.info (free). Data before October 2010 is automatically skipped — no exchange price existed before then.",
-  "adminDataConfig.allYears": "All (",
+  "adminDataConfig.allYears": "All ",
   "adminDataConfig.initButton": "Initialize Selected (",
   "adminDataConfig.never": "Never",
   "adminDataConfig.updated": "Configuration updated successfully",

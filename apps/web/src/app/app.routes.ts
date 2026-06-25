@@ -1113,6 +1113,23 @@ export class TermsOfUsePage {}
                         <path d="M 0,215 C 15,210 25,195 40,185 C 55,175 65,160 80,150 C 95,140 105,148 120,155 C 135,162 145,168 160,162 C 175,156 185,140 200,125 C 215,110 225,100 240,92 C 255,84 265,80 280,75 C 295,70 310,72 325,78 C 340,84 350,88 365,82 C 380,76 390,65 405,52 C 420,39 430,28 445,20 C 460,12 475,15 490,22 C 505,29 515,40 530,52 C 545,64 555,80 570,95 C 585,110 595,128 610,145 C 625,162 640,178 655,188 C 670,198 685,202 700,198 C 715,194 730,182 750,172 C 770,162 785,155 800,150" stroke="#111827" stroke-width="2" fill="none"/>
                         <path d="M 0,155 C 40,148 80,138 120,128 C 160,118 200,108 240,102 C 280,96 320,95 360,98 C 400,101 440,110 480,125 C 520,140 560,158 600,170 C 640,182 680,185 720,178 C 750,172 775,162 800,155" stroke="#2563eb" stroke-width="2.5" fill="none"/>
                       </svg>
+                    } @else if (chart.chartId === 'midterm-cycles') {
+                      <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
+                        <rect width="800" height="360" fill="#fff"/>
+                        <line x1="0" y1="90"  x2="800" y2="90"  stroke="#e5e7eb" stroke-width="1"/>
+                        <line x1="0" y1="180" x2="800" y2="180" stroke="#e5e7eb" stroke-width="1"/>
+                        <line x1="0" y1="270" x2="800" y2="270" stroke="#e5e7eb" stroke-width="1"/>
+                        <line x1="88" y1="20" x2="88" y2="340" stroke="rgba(100,100,120,0.35)" stroke-width="1" stroke-dasharray="4,4"/>
+                        <line x1="196" y1="20" x2="196" y2="340" stroke="rgba(100,100,120,0.35)" stroke-width="1" stroke-dasharray="4,4"/>
+                        <line x1="304" y1="20" x2="304" y2="340" stroke="rgba(100,100,120,0.35)" stroke-width="1" stroke-dasharray="4,4"/>
+                        <line x1="412" y1="20" x2="412" y2="340" stroke="rgba(100,100,120,0.35)" stroke-width="1" stroke-dasharray="4,4"/>
+                        <line x1="520" y1="20" x2="520" y2="340" stroke="rgba(100,100,120,0.35)" stroke-width="1" stroke-dasharray="4,4"/>
+                        <line x1="628" y1="20" x2="628" y2="340" stroke="rgba(100,100,120,0.35)" stroke-width="1" stroke-dasharray="4,4"/>
+                        <line x1="736" y1="20" x2="736" y2="340" stroke="rgba(100,100,120,0.35)" stroke-width="1" stroke-dasharray="4,4"/>
+                        <path d="M 0,270 C 30,260 55,240 80,210 C 100,185 110,150 130,120 C 150,90 165,70 185,65 C 205,75 220,120 240,160 C 255,190 265,230 285,255 C 305,270 320,265 340,240 C 360,215 375,180 395,150 C 415,120 430,95 450,80 C 470,75 485,100 505,140 C 520,170 530,210 550,235 C 570,255 585,258 605,240 C 625,218 640,185 660,155 C 680,125 695,100 715,88 C 730,80 748,90 768,118 C 785,142 795,170 800,185" stroke="#e07b39" stroke-width="2" fill="none"/>
+                        <path d="M 0,255 C 30,248 55,235 80,215 C 100,198 115,175 135,155 C 155,135 170,120 190,118 C 210,125 225,148 245,175 C 262,198 272,225 292,242 C 312,255 327,250 347,232 C 367,212 382,185 402,162 C 422,140 437,122 457,115 C 477,118 492,140 512,168 C 528,192 538,220 558,238 C 578,252 592,252 612,238 C 632,220 647,195 667,172 C 687,150 700,132 720,125 C 738,122 755,132 775,152 C 790,168 797,185 800,195" stroke="#7ab3d4" stroke-width="1.5" fill="none"/>
+                        <path d="M 0,175 C 40,172 80,168 120,165 C 160,162 200,160 240,162 C 280,165 320,170 360,172 C 400,174 440,172 480,168 C 520,164 560,158 600,155 C 640,152 680,152 720,156 C 755,160 780,165 800,168" stroke="#1a2e5e" stroke-width="2" fill="none" opacity="0.7"/>
+                      </svg>
                     }
                   </div>
                   <div class="recent-chart-info">
@@ -1509,6 +1526,23 @@ export class TermsOfUsePage {}
                       <line x1="0" y1="200" x2="800" y2="200" stroke="rgba(107,114,128,0.5)" stroke-width="1.5" stroke-dasharray="6,4"/>
                       <path d="M 0,215 C 15,210 25,195 40,185 C 55,175 65,160 80,150 C 95,140 105,148 120,155 C 135,162 145,168 160,162 C 175,156 185,140 200,125 C 215,110 225,100 240,92 C 255,84 265,80 280,75 C 295,70 310,72 325,78 C 340,84 350,88 365,82 C 380,76 390,65 405,52 C 420,39 430,28 445,20 C 460,12 475,15 490,22 C 505,29 515,40 530,52 C 545,64 555,80 570,95 C 585,110 595,128 610,145 C 625,162 640,178 655,188 C 670,198 685,202 700,198 C 715,194 730,182 750,172 C 770,162 785,155 800,150" stroke="#111827" stroke-width="2" fill="none"/>
                       <path d="M 0,155 C 40,148 80,138 120,128 C 160,118 200,108 240,102 C 280,96 320,95 360,98 C 400,101 440,110 480,125 C 520,140 560,158 600,170 C 640,182 680,185 720,178 C 750,172 775,162 800,155" stroke="#2563eb" stroke-width="2.5" fill="none"/>
+                    </svg>
+                  } @else if (chart.chartId === 'midterm-cycles') {
+                    <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
+                      <rect width="800" height="360" fill="#fff"/>
+                      <line x1="0" y1="90"  x2="800" y2="90"  stroke="#e5e7eb" stroke-width="1"/>
+                      <line x1="0" y1="180" x2="800" y2="180" stroke="#e5e7eb" stroke-width="1"/>
+                      <line x1="0" y1="270" x2="800" y2="270" stroke="#e5e7eb" stroke-width="1"/>
+                      <line x1="88" y1="20" x2="88" y2="340" stroke="rgba(100,100,120,0.35)" stroke-width="1" stroke-dasharray="4,4"/>
+                      <line x1="196" y1="20" x2="196" y2="340" stroke="rgba(100,100,120,0.35)" stroke-width="1" stroke-dasharray="4,4"/>
+                      <line x1="304" y1="20" x2="304" y2="340" stroke="rgba(100,100,120,0.35)" stroke-width="1" stroke-dasharray="4,4"/>
+                      <line x1="412" y1="20" x2="412" y2="340" stroke="rgba(100,100,120,0.35)" stroke-width="1" stroke-dasharray="4,4"/>
+                      <line x1="520" y1="20" x2="520" y2="340" stroke="rgba(100,100,120,0.35)" stroke-width="1" stroke-dasharray="4,4"/>
+                      <line x1="628" y1="20" x2="628" y2="340" stroke="rgba(100,100,120,0.35)" stroke-width="1" stroke-dasharray="4,4"/>
+                      <line x1="736" y1="20" x2="736" y2="340" stroke="rgba(100,100,120,0.35)" stroke-width="1" stroke-dasharray="4,4"/>
+                      <path d="M 0,270 C 30,260 55,240 80,210 C 100,185 110,150 130,120 C 150,90 165,70 185,65 C 205,75 220,120 240,160 C 255,190 265,230 285,255 C 305,270 320,265 340,240 C 360,215 375,180 395,150 C 415,120 430,95 450,80 C 470,75 485,100 505,140 C 520,170 530,210 550,235 C 570,255 585,258 605,240 C 625,218 640,185 660,155 C 680,125 695,100 715,88 C 730,80 748,90 768,118 C 785,142 795,170 800,185" stroke="#e07b39" stroke-width="2" fill="none"/>
+                      <path d="M 0,255 C 30,248 55,235 80,215 C 100,198 115,175 135,155 C 155,135 170,120 190,118 C 210,125 225,148 245,175 C 262,198 272,225 292,242 C 312,255 327,250 347,232 C 367,212 382,185 402,162 C 422,140 437,122 457,115 C 477,118 492,140 512,168 C 528,192 538,220 558,238 C 578,252 592,252 612,238 C 632,220 647,195 667,172 C 687,150 700,132 720,125 C 738,122 755,132 775,152 C 790,168 797,185 800,195" stroke="#7ab3d4" stroke-width="1.5" fill="none"/>
+                      <path d="M 0,175 C 40,172 80,168 120,165 C 160,162 200,160 240,162 C 280,165 320,170 360,172 C 400,174 440,172 480,168 C 520,164 560,158 600,155 C 640,152 680,152 720,156 C 755,160 780,165 800,168" stroke="#1a2e5e" stroke-width="2" fill="none" opacity="0.7"/>
                     </svg>
                   }
                 </div>
@@ -2154,7 +2188,7 @@ export class DashboardPage {
               (change)="toggleAllYears()"
               [disabled]="isInitializing()"
             />
-            <span i18n="Select all years@@adminDataConfig.allYears">All ({{ startYear }}–{{ currentYear }})</span>
+            <span i18n="Select all years@@adminDataConfig.allYears">All {{ startYear }}–{{ currentYear }})</span>
           </label>
           <div class="year-grid">
             @for (year of availableYears; track year) {
@@ -3241,6 +3275,14 @@ export const appRoutes: Route[] = [
     loadComponent: () =>
       import('./components/spx-liquidity-chart-page/spx-liquidity-chart-page.component').then(
         (m) => m.SpxLiquidityChartPageComponent,
+      ),
+  },
+  {
+    path: 'charts/midterm-cycles',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/midterm-cycles-chart-page/midterm-cycles-chart-page.component').then(
+        (m) => m.MidtermCyclesChartPageComponent,
       ),
   },
   {

@@ -332,6 +332,13 @@ export interface SpxLiquidityChartResponse {
   lastUpdated: string | null;
 }
 
+export interface MidtermCyclesChartResponse {
+  chartId: 'midterm-cycles';
+  title: string;
+  dataPoints: { date: string; btcRsi12m: number | null; spxRsi12m: number | null; ismPmi: number | null; }[];
+  lastUpdated: string | null;
+}
+
 export type ChartAnnotation =
   | {
       id: string;
@@ -997,6 +1004,12 @@ export class AuthApiClient {
   async getSpxLiquidityChartData(timeframe: ChartTimeframe): Promise<SpxLiquidityChartResponse> {
     try {
       return await firstValueFrom(this.http.get<SpxLiquidityChartResponse>('/api/charts/spx-liquidity', { params: { timeframe }, withCredentials: true }));
+    } catch (error) { throw toApiClientError(error); }
+  }
+
+  async getMidtermCyclesChartData(): Promise<MidtermCyclesChartResponse> {
+    try {
+      return await firstValueFrom(this.http.get<MidtermCyclesChartResponse>('/api/charts/midterm-cycles', { withCredentials: true }));
     } catch (error) { throw toApiClientError(error); }
   }
 

@@ -68,6 +68,7 @@ const WIDGET_CATALOG: Record<string, WidgetCatalogEntry> = {
   circulating_supply: { title: 'Circulating Supply', decimals: 0 },
   market_cap: { title: 'Market Cap', decimals: 0 },
   halving_progress: { title: 'Halving Progress', decimals: 1 },
+  btc_rsi_12m: { title: 'BTC RSI (12m)', decimals: 1 },
 };
 
 const DEFAULT_WIDGET_TYPES = ['btc_price', '24h_change', 'mvrv_zscore', 'stock_to_flow', 'fear_greed'];
@@ -86,6 +87,7 @@ const METRIC_NAME_BY_WIDGET_TYPE: Record<string, string> = {
   ma_200_day: 'ma_200_day',
   hash_rate: 'hash_rate',
   mining_difficulty: 'mining_difficulty',
+  btc_rsi_12m: 'btc_rsi_12m',
 };
 
 const CURRENCY_WIDGET_TYPES = new Set(['btc_price', 'realized_price', 'ma_200_day', 'market_cap']);
