@@ -41,7 +41,7 @@ const TIMEFRAMES: TimeframeOption[] = [
   { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
   { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
   { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
-  { label: 'Mind', value: 'all' },
+  { label: $localize`:Timeframe All@@charts.timeframe.all:All`, value: 'all' },
 ];
 
 const HALVING_EVENTS = [
@@ -98,18 +98,18 @@ export class TwoHundredWeekMAHeatmapChartPageComponent implements AfterViewInit 
       multiplier === null
         ? $localize`:No data value@@common.noData:No data`
         : multiplier > 5
-          ? 'Historically Overheated'
+          ? $localize`:Historically overheated@@charts.signal.historicallyOverheated:Historically Overheated`
           : multiplier > 3
-            ? 'Emelkedett'
+            ? $localize`:Elevated signal@@charts.signal.elevated:Elevated`
             : multiplier >= 0.9 && multiplier <= 1.1
-              ? 'Near MA'
+              ? $localize`:Near MA@@charts.signal.nearMa:Near MA`
               : multiplier < 1
-                ? 'Below MA'
-                : 'Semleges';
+                ? $localize`:Below MA@@charts.signal.belowMa:Below MA`
+                : $localize`:Neutral signal@@charts.signal.neutral:Neutral`;
     return [
       { label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`, value: formatUsd(price) },
-      { label: '200-Week MA', value: ma200w !== null ? formatUsd(ma200w) : $localize`:No data value@@common.noData:No data` },
-      { label: 'Multiplier', value: multiplier !== null ? `${multiplier.toFixed(2)}×` : $localize`:No data value@@common.noData:No data` },
+      { label: $localize`:200 week MA@@charts.metric.ma200wk:200-Week MA`, value: ma200w !== null ? formatUsd(ma200w) : $localize`:No data value@@common.noData:No data` },
+      { label: $localize`:Multiplier@@charts.metric.multiplier:Multiplier`, value: multiplier !== null ? `${multiplier.toFixed(2)}×` : $localize`:No data value@@common.noData:No data` },
       { label: $localize`:Signal metric@@charts.metric.signal:Signal`, value: signalLabel },
     ];
   });
@@ -269,7 +269,7 @@ export class TwoHundredWeekMAHeatmapChartPageComponent implements AfterViewInit 
             borderWidth: 1.5,
             label: {
               display: true,
-              content: '200w MA (×1.0)',
+              content: $localize`:200w MA line@@charts.annotation.ma200wk.line:200w MA (×1.0)`,
               position: 'end',
               backgroundColor: 'rgba(34,197,94,0.85)',
               color: '#fff',
@@ -305,7 +305,7 @@ export class TwoHundredWeekMAHeatmapChartPageComponent implements AfterViewInit 
             borderWidth: 1.5,
             label: {
               display: true,
-              content: '×5.0 — Historic Tops',
+              content: $localize`:200w MA x5@@charts.annotation.ma200wk.x5:×5.0 — Historic Tops`,
               position: 'end',
               backgroundColor: 'rgba(239,68,68,0.85)',
               color: '#fff',
@@ -390,7 +390,7 @@ export class TwoHundredWeekMAHeatmapChartPageComponent implements AfterViewInit 
     this.exportMenuOpen.set(false);
     await exportChartPng({
       chartImageDataUrl,
-      chartTitle: '200 hetes MA hőtérkép',
+      chartTitle: '200-Week MA Heatmap',
       fileName: `200-week-ma-heatmap_${getExportDateStamp()}.png`,
     });
   }
@@ -463,7 +463,7 @@ function createHalvingAnnotations(startDate: string): Record<string, AnnotationO
 }
 
 function formatUsd(value: number): string {
-  if (!Number.isFinite(value)) return 'nincs adat';
+  if (!Number.isFinite(value)) return $localize`:No data value@@common.noData:No data`;
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',

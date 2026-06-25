@@ -39,7 +39,7 @@ const TIMEFRAMES: TimeframeOption[] = [
   { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
   { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
   { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
-  { label: 'Mind', value: 'all' },
+  { label: $localize`:Timeframe All@@charts.timeframe.all:All`, value: 'all' },
 ];
 
 const HALVING_EVENTS = [
@@ -96,7 +96,7 @@ export class PuellMultipleChartPageComponent implements AfterViewInit {
 
     return [
       { label: $localize`:Current price metric@@charts.metric.currentPrice:Current price`, value: point ? formatUsd(point.priceUsd) : $localize`:Waiting for data@@charts.waitingForData:Waiting for data` },
-      { label: 'Aktuális Puell Multiple', value: puellValue !== null ? puellValue.toFixed(3) : $localize`:Waiting for data@@charts.waitingForData:Waiting for data` },
+      { label: $localize`:Puell multiple@@charts.metric.puellMultiple:Current Puell Multiple`, value: puellValue !== null ? puellValue.toFixed(3) : $localize`:Waiting for data@@charts.waitingForData:Waiting for data` },
       { label: $localize`:Signal metric@@charts.metric.signal:Signal`, value: puellValue !== null ? getPuellSignal(puellValue) : $localize`:Waiting for data@@charts.waitingForData:Waiting for data` },
     ];
   });
@@ -387,8 +387,8 @@ function computePuellMultiple(dataPoints: PuellMultipleChartDataPoint[]): (numbe
 
 function getPuellSignal(value: number): string {
   if (value > 4) return $localize`:Sell zone signal@@charts.signal.sellZone:Sell zone`;
-  if (value < 0.5) return 'Vételi zóna';
-  return 'Semleges';
+  if (value < 0.5) return $localize`:Buy zone@@charts.signal.buyZone:Buy zone`;
+  return $localize`:Neutral signal@@charts.signal.neutral:Neutral`;
 }
 
 function createPuellZoneAnnotations(): Record<string, AnnotationOptions<'box'>> {
@@ -419,7 +419,7 @@ function createPuellZoneAnnotations(): Record<string, AnnotationOptions<'box'>> 
       borderWidth: 0,
       label: {
         display: true,
-        content: 'Semleges',
+        content: $localize`:Neutral signal@@charts.signal.neutral:Neutral`,
         position: { x: 'end', y: 'start' },
         color: 'rgba(234,179,8,0.7)',
         font: { size: 11 },
@@ -435,7 +435,7 @@ function createPuellZoneAnnotations(): Record<string, AnnotationOptions<'box'>> 
       borderWidth: 0,
       label: {
         display: true,
-        content: 'Vételi zóna',
+        content: $localize`:Buy zone@@charts.signal.buyZone:Buy zone`,
         position: { x: 'end', y: 'start' },
         color: 'rgba(34,197,94,0.7)',
         font: { size: 11 },
@@ -468,7 +468,7 @@ function createHalvingAnnotations(): Record<string, AnnotationOptions<'line'>> {
 
 function formatUsd(value: number): string {
   if (!Number.isFinite(value)) {
-    return 'nincs adat';
+    return $localize`:No data value@@common.noData:No data`;
   }
 
   return new Intl.NumberFormat('en-US', {

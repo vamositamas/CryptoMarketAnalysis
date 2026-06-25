@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-label="SOPR Ratio chart thumbnail">
+  <rect width="320" height="180" fill="#ffffff"/>
+  <g stroke="#e5ebe7" stroke-width="1">
+    <line x1="0" y1="36" x2="320" y2="36"/>
+    <line x1="0" y1="72" x2="320" y2="72"/>
+    <line x1="0" y1="108" x2="320" y2="108"/>
+    <line x1="0" y1="144" x2="320" y2="144"/>
+  </g>
+  <line x1="0" y1="90" x2="320" y2="90" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <path d="M0 150 C32 130 48 60 66 80 C84 102 100 126 124 109 C148 94 156 54 180 65 C204 76 216 119 240 109 C264 99 282 64 304 75 C312 79 318 84 320 85" fill="none" stroke="#16a34a" stroke-width="3"/>
+  <path d="M0 150 C36 134 56 80 74 86 C94 92 112 115 132 107 C156 98 168 72 188 72 C212 73 224 105 248 103 C270 101 285 80 308 82 C314 83 318 84 320 85" fill="none" stroke="#f59e0b" stroke-width="2"/>
+  <path d="M0 148 C44 135 70 104 98 104 C132 104 152 89 182 84 C214 79 240 91 266 90 C288 89 304 87 320 86" fill="none" stroke="#64748b" stroke-width="2"/>
+  <path d="M0 174 C42 172 60 168 70 166 C86 150 100 135 120 120 C140 105 156 75 172 66 C190 56 208 62 224 47 C248 24 282 14 320 11" fill="none" stroke="#111820" stroke-width="2.5"/>
+</svg>

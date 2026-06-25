@@ -39,7 +39,7 @@ const TIMEFRAMES: TimeframeOption[] = [
   { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
   { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
   { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
-  { label: 'Mind', value: 'all' },
+  { label: $localize`:Timeframe All@@charts.timeframe.all:All`, value: 'all' },
 ];
 
 const HALVING_EVENTS = [
@@ -102,11 +102,11 @@ export class StockToIncomeChartPageComponent implements AfterViewInit {
     const pctDiff = model !== null && model > 0 ? ((price - model) / model) * 100 : null;
     return [
       { label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`, value: formatUsd(price) },
-      { label: 'S2I Model Price', value: model !== null ? formatUsd(model) : $localize`:No data value@@common.noData:No data` },
-      { label: 'S2I Ratio', value: s2i !== null ? s2i.toFixed(1) : $localize`:No data value@@common.noData:No data` },
+      { label: $localize`:S2I model price@@charts.metric.s2iModelPrice:S2I Model Price`, value: model !== null ? formatUsd(model) : $localize`:No data value@@common.noData:No data` },
+      { label: $localize`:S2I ratio@@charts.metric.s2iRatio:S2I Ratio`, value: s2i !== null ? s2i.toFixed(1) : $localize`:No data value@@common.noData:No data` },
       { label: $localize`:Signal metric@@charts.metric.signal:Signal`, value: s2i !== null ? getS2ISignal(s2i) : $localize`:No data value@@common.noData:No data` },
       {
-        label: 'Current vs Model',
+        label: $localize`:Current vs model@@charts.metric.currentVsModel:Current vs Model`,
         value:
           pctDiff !== null
             ? `${pctDiff > 0 ? '+' : ''}${pctDiff.toFixed(1)}% ${pctDiff >= 0 ? 'above' : 'below'} model`
@@ -392,7 +392,7 @@ function getS2ISignal(s2i: number): string {
   if (s2i > 2.0) return $localize`:Overvalued signal@@charts.signal.overvalued:Overvalued`;
   if (s2i >= 1.0) return $localize`:Fair value signal@@charts.signal.fairValue:Fair value`;
   if (s2i >= 0.5) return $localize`:Undervalued signal@@charts.signal.undervalued:Undervalued`;
-  return 'Deep Undervalue';
+  return $localize`:Deep undervalue@@charts.signal.deepUndervalue:Deep Undervalue`;
 }
 
 function getS2IInterpretation(s2i: number): string {
@@ -439,7 +439,7 @@ function createHalvingAnnotations(startDate: string): Record<string, AnnotationO
 }
 
 function formatUsd(value: number): string {
-  if (!Number.isFinite(value)) return 'nincs adat';
+  if (!Number.isFinite(value)) return $localize`:No data value@@common.noData:No data`;
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',

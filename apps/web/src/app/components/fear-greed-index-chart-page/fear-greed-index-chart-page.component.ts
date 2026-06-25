@@ -41,7 +41,7 @@ const TIMEFRAMES: TimeframeOption[] = [
   { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
   { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
   { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
-  { label: 'Mind', value: 'all' },
+  { label: $localize`:Timeframe All@@charts.timeframe.all:All`, value: 'all' },
 ];
 
 const FEAR_GREED_ALERT_METRICS: AlertMetricOption[] = [
@@ -89,8 +89,8 @@ export class FearGreedIndexChartPageComponent implements AfterViewInit {
     const sentiment = score !== null ? getFearGreedSentiment(score) : $localize`:No data value@@common.noData:No data`;
     return [
       { label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`, value: formatUsd(last.priceUsd) },
-      { label: 'Fear & Greed Score', value: score !== null ? String(score) : $localize`:No data value@@common.noData:No data` },
-      { label: 'Sentiment', value: sentiment },
+      { label: $localize`:Fear Greed Score@@charts.metric.fearGreedScore:Fear & Greed Score`, value: score !== null ? String(score) : $localize`:No data value@@common.noData:No data` },
+      { label: $localize`:Sentiment@@charts.metric.sentiment:Sentiment`, value: sentiment },
     ];
   });
 
@@ -125,7 +125,7 @@ export class FearGreedIndexChartPageComponent implements AfterViewInit {
         // Fear & Greed bars — left y2 axis, linear 0–100
         {
           type: 'bar' as const,
-          label: 'Félelem és kapzsiság index',
+          label: 'Fear & Greed Index',
           data: points.map((p) => p.fearGreedValue),
           backgroundColor: points.map((p) => getFearGreedColor(p.fearGreedValue)),
           borderWidth: 0,
@@ -222,7 +222,7 @@ export class FearGreedIndexChartPageComponent implements AfterViewInit {
             borderWidth: 1.5,
             label: {
               display: true,
-              content: 'Fear',
+              content: $localize`:Fear signal@@charts.signal.fear:Fear`,
               position: 'start',
               backgroundColor: 'rgba(220, 38, 38, 0.75)',
               color: '#fff',
@@ -240,7 +240,7 @@ export class FearGreedIndexChartPageComponent implements AfterViewInit {
             borderWidth: 1.5,
             label: {
               display: true,
-              content: 'Greed',
+              content: $localize`:Greed signal@@charts.signal.greed:Greed`,
               position: 'start',
               backgroundColor: 'rgba(34, 197, 94, 0.75)',
               color: '#fff',
@@ -324,7 +324,7 @@ export class FearGreedIndexChartPageComponent implements AfterViewInit {
     this.exportMenuOpen.set(false);
     await exportChartPng({
       chartImageDataUrl,
-      chartTitle: 'Félelem és kapzsiság index',
+      chartTitle: 'Fear & Greed Index',
       fileName: `fear-greed-index_${getExportDateStamp()}.png`,
     });
   }
@@ -383,15 +383,15 @@ function getFearGreedColor(value: number | null): string {
 }
 
 function getFearGreedSentiment(value: number): string {
-  if (value < 25) return 'Extreme Fear';
-  if (value < 45) return 'Fear';
-  if (value < 56) return 'Semleges';
-  if (value < 75) return 'Greed';
-  return 'Extreme Greed';
+  if (value < 25) return $localize`:Extreme Fear@@charts.signal.extremeFear:Extreme Fear`;
+  if (value < 45) return $localize`:Fear signal@@charts.signal.fear:Fear`;
+  if (value < 56) return $localize`:Neutral signal@@charts.signal.neutral:Neutral`;
+  if (value < 75) return $localize`:Greed signal@@charts.signal.greed:Greed`;
+  return $localize`:Extreme Greed@@charts.signal.extremeGreed:Extreme Greed`;
 }
 
 function formatUsd(value: number): string {
-  if (!Number.isFinite(value)) return 'nincs adat';
+  if (!Number.isFinite(value)) return $localize`:No data value@@common.noData:No data`;
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',

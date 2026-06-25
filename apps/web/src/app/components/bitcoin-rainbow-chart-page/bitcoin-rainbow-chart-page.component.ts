@@ -39,7 +39,7 @@ const TIMEFRAMES: TimeframeOption[] = [
   { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
   { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
   { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
-  { label: 'Mind', value: 'all' },
+  { label: $localize`:Timeframe All@@charts.timeframe.all:All`, value: 'all' },
 ];
 
 // Mirrors rainbow-bands.ts with the corrected Math.pow10 formula
@@ -52,15 +52,15 @@ const BAND_DAYS_OFFSET = 1;
 const BAND_BOUNDARIES = [0.10, 0.25, 0.40, 0.65, 1.00, 1.60, 2.50, 4.00, 6.50, 12.00];
 
 const RAINBOW_BANDS = [
-  { label: 'Tűzoltóár!',                color: 'rgba(30,  58, 138, 0.65)' },
-  { label: 'VÉTEL!',                      color: 'rgba(37,  99, 235, 0.65)' },
+  { label: $localize`:Fire sale band@@charts.rainbowBand.fireSale:Fire sale!`,                color: 'rgba(30,  58, 138, 0.65)' },
+  { label: $localize`:BUY band@@charts.rainbowBand.buy:BUY!`,                      color: 'rgba(37,  99, 235, 0.65)' },
   { label: $localize`:Accumulation signal@@charts.signal.accumulation:Accumulation`,                color: 'rgba(6,  182, 212, 0.65)' },
-  { label: 'Még olcsó',               color: 'rgba(34, 197,  94, 0.65)' },
-  { label: 'HODL',                      color: 'rgba(132,204,  22, 0.65)' },
-  { label: 'Ez már buborék?',         color: 'rgba(234,179,   8, 0.65)' },
-  { label: 'Erősödő FOMO',          color: 'rgba(249,115,  22, 0.65)' },
-  { label: 'Eladás. Komolyan, eladás!',    color: 'rgba(239, 68,  68, 0.65)' },
-  { label: 'Maximális buborékzóna',  color: 'rgba(127, 29,  29, 0.65)' },
+  { label: $localize`:Still cheap band@@charts.rainbowBand.stillCheap:Still cheap`,               color: 'rgba(34, 197,  94, 0.65)' },
+  { label: $localize`:HODL band@@charts.rainbowBand.hodl:HODL`,                      color: 'rgba(132,204,  22, 0.65)' },
+  { label: $localize`:Is bubble band@@charts.rainbowBand.isBubble:Is this a bubble?`,         color: 'rgba(234,179,   8, 0.65)' },
+  { label: $localize`:Growing FOMO band@@charts.rainbowBand.growingFomo:Growing FOMO`,          color: 'rgba(249,115,  22, 0.65)' },
+  { label: $localize`:Sell seriously band@@charts.rainbowBand.sellSeriously:Sell. Seriously, sell!`,    color: 'rgba(239, 68,  68, 0.65)' },
+  { label: $localize`:Max bubble band@@charts.rainbowBand.maxBubble:Maximum bubble zone`,  color: 'rgba(127, 29,  29, 0.65)' },
 ];
 
 const HALVING_EVENTS = [
@@ -117,7 +117,7 @@ export class BitcoinRainbowChartPageComponent implements AfterViewInit {
     const band = point ? rainbowBandFromPrice(point.priceUsd, rainbowFairValue(point.date)) : null;
 
     return [
-      { label: 'Aktuális pozíció', value: getBandLabel(band) },
+      { label: $localize`:Current position@@charts.metric.currentPosition:Current position`, value: getBandLabel(band) },
       { label: $localize`:Current price metric@@charts.metric.currentPrice:Current price`, value: point ? formatUsd(point.priceUsd) : $localize`:Waiting for data@@charts.waitingForData:Waiting for data` },
     ];
   });
@@ -324,7 +324,7 @@ export class BitcoinRainbowChartPageComponent implements AfterViewInit {
     this.exportMenuOpen.set(false);
     await exportChartPng({
       chartImageDataUrl,
-      chartTitle: 'Bitcoin szivárványárgrafikon',
+      chartTitle: 'Bitcoin Rainbow Price Chart',
       fileName: `bitcoin-rainbow-chart_${getExportDateStamp()}.png`,
     });
   }
@@ -417,10 +417,10 @@ function getRainbowInterpretation(band: number | null): string {
 
 function getBandLabel(band: number | null): string {
   if (band === null) {
-    return 'Ismeretlen';
+    return $localize`:Unknown signal@@charts.signal.unknown:Unknown`;
   }
 
-  return RAINBOW_BANDS[band - 1]?.label ?? 'Ismeretlen';
+  return RAINBOW_BANDS[band - 1]?.label ?? $localize`:Unknown signal@@charts.signal.unknown:Unknown`;
 }
 
 function formatUsd(value: number): string {

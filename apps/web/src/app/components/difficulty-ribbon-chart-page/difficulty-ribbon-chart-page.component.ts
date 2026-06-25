@@ -41,7 +41,7 @@ const TIMEFRAMES: TimeframeOption[] = [
   { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
   { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
   { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
-  { label: 'Mind', value: 'all' },
+  { label: $localize`:Timeframe All@@charts.timeframe.all:All`, value: 'all' },
 ];
 
 const HALVING_EVENTS = [
@@ -97,13 +97,13 @@ export class DifficultyRibbonChartPageComponent implements AfterViewInit {
     const ma200 = last.ma200;
     const ribbonStatus =
       ma9 !== null && ma200 !== null && ma9 < ma200
-        ? 'Compressed (Miner Stress)'
-        : 'Expanded (Healthy)';
+        ? $localize`:Ribbon compressed@@charts.signal.ribbonCompressed:Compressed (Miner Stress)`
+        : $localize`:Ribbon expanded@@charts.signal.ribbonExpanded:Expanded (Healthy)`;
     return [
       { label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`, value: formatUsd(price) },
-      { label: '9d MA', value: ma9 !== null ? formatDifficulty(ma9) : $localize`:No data value@@common.noData:No data` },
-      { label: '200d MA', value: ma200 !== null ? formatDifficulty(ma200) : $localize`:No data value@@common.noData:No data` },
-      { label: 'Szalag állapota', value: ribbonStatus },
+      { label: $localize`:9d MA@@charts.metric.ma9d:9d MA`, value: ma9 !== null ? formatDifficulty(ma9) : $localize`:No data value@@common.noData:No data` },
+      { label: $localize`:200d MA@@charts.metric.ma200d:200d MA`, value: ma200 !== null ? formatDifficulty(ma200) : $localize`:No data value@@common.noData:No data` },
+      { label: $localize`:Ribbon status@@charts.metric.ribbonStatus:Ribbon status`, value: ribbonStatus },
     ];
   });
 
@@ -379,7 +379,7 @@ export class DifficultyRibbonChartPageComponent implements AfterViewInit {
     this.exportMenuOpen.set(false);
     await exportChartPng({
       chartImageDataUrl,
-      chartTitle: 'Nehézségi szalag',
+      chartTitle: 'Difficulty Ribbon',
       fileName: `difficulty-ribbon_${getExportDateStamp()}.png`,
     });
   }
@@ -458,7 +458,7 @@ function createHalvingAnnotations(startDate: string): Record<string, AnnotationO
 }
 
 function formatUsd(value: number): string {
-  if (!Number.isFinite(value)) return 'nincs adat';
+  if (!Number.isFinite(value)) return $localize`:No data value@@common.noData:No data`;
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',

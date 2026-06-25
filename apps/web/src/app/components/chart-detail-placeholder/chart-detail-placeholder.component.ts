@@ -2,9 +2,9 @@ import { Component, computed, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
 const CHART_TITLES: Record<string, string> = {
-  'bitcoin-rainbow': 'Bitcoin szivárványárgrafikon',
+  'bitcoin-rainbow': 'Bitcoin Rainbow Price Chart',
   'pi-cycle-top': 'Pi Cycle Top Indicator',
-  'stock-to-flow': 'Stock-to-Flow modell',
+  'stock-to-flow': 'Stock-to-Flow Model',
 };
 
 @Component({

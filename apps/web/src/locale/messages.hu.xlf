@@ -203,8 +203,8 @@
         <target>E-mail<x id="TAG_INPUT" /></target>
       </trans-unit>
       <trans-unit id="form.password" datatype="html">
-        <source>Password <x id="TAG_INPUT" /></source>
-        <target>Jelszó <x id="TAG_INPUT" /></target>
+        <source>Password</source>
+        <target>Jelszó</target>
       </trans-unit>
       <trans-unit id="auth.google" datatype="html">
         <source>Continue with Google</source>
@@ -528,6 +528,29 @@
       <trans-unit id="faq.a.updateProfile" datatype="html"><source>Click your avatar (initials button) in the top-right corner and select "My Account". Update your full name and language preference, then click "Save changes" to apply.</source><target>Kattints az avatarodra (iniciálé gomb) a jobb felső sarokban, és válaszd a „Saját fiók" opciót. Frissítsd a teljes neved és a nyelvi preferenciádat, majd kattints a „Változtatások mentése" gombra az alkalmazáshoz.</target></trans-unit>
       <trans-unit id="faq.q.dataCollect" datatype="html"><source>What data does BitWLab collect about me?</source><target>Milyen adatokat gyűjt a BitWLab rólam?</target></trans-unit>
       <trans-unit id="faq.a.dataCollect" datatype="html"><source>Only your email address and optionally your full name are stored. Standard server logs (IP address, browser type) are kept for security. No payment data is collected and no third-party tracking cookies are used. See Privacy Policy in the user menu for full details.</source><target>Csak az e-mail-cíed és opcionálisan a teljes neved kerül tárolásra. Standard szerver-naplókat (IP-cím, böngészőtípus) biztonsági célból tartunk meg. Fizetési adatokat nem gyűjtünk, és harmadik féltől származó követési sütiket nem használunk. A teljes részletekért lásd az Adatvédelmi tájékoztatót a felhasználói menüben.</target></trans-unit>
+      <trans-unit id="auth.languageLabel" datatype="html"><source>Language</source><target>Nyelv</target></trans-unit>
+      <trans-unit id="auth.welcomeBack" datatype="html"><source>Welcome back</source><target>Üdvözöljük!</target></trans-unit>
+      <trans-unit id="auth.loginSubtitle" datatype="html"><source>Sign in to your account to continue</source><target>Jelentkezz be a folytatáshoz</target></trans-unit>
+      <trans-unit id="auth.emailOrUsername" datatype="html"><source>Email or Username</source><target>E-mail vagy felhasználónév</target></trans-unit>
+      <trans-unit id="auth.emailPlaceholder" datatype="html"><source>Enter email or username</source><target>Add meg az e-mail-t vagy felhasználónevet</target></trans-unit>
+      <trans-unit id="auth.signIn" datatype="html"><source>Sign in</source><target>Bejelentkezés</target></trans-unit>
+      <trans-unit id="auth.signInGoogle" datatype="html"><source>Sign in with Google</source><target>Belépés Google-fiókkal</target></trans-unit>
+      <trans-unit id="auth.termsOfUse" datatype="html"><source>Terms of Use</source><target>Felhasználási feltételek</target></trans-unit>
+      <trans-unit id="auth.privacyPolicy" datatype="html"><source>Privacy Policy</source><target>Adatvédelmi irányelvek</target></trans-unit>
+      <trans-unit id="footer.copyright" datatype="html"><source>© 2026 BitWLab. All rights reserved.</source><target>© 2026 BitWLab. Minden jog fenntartva.</target></trans-unit>
+      <trans-unit id="footer.disclaimer" datatype="html"><source>Not financial advice. Cryptocurrency investments carry risk.</source><target>Ez nem pénzügyi tanács. A kriptovaluta-befektetések kockázatosak.</target></trans-unit>
+      <trans-unit id="auth.registerSubtitle" datatype="html"><source>Fill in your details to get started</source><target>Töltsd ki az adataidat a kezdéshez</target></trans-unit>
+      <trans-unit id="register.emailLabel" datatype="html"><source>Email</source><target>E-mail</target></trans-unit>
+      <trans-unit id="register.emailPlaceholder" datatype="html"><source>you@example.com</source><target>te@pelda.hu</target></trans-unit>
+      <trans-unit id="register.passwordPlaceholder" datatype="html"><source>Password</source><target>Jelszó</target></trans-unit>
+      <trans-unit id="register.confirmLabel" datatype="html"><source>Confirm password</source><target>Jelszó megerősítése</target></trans-unit>
+      <trans-unit id="register.confirmPlaceholder" datatype="html"><source>Repeat your password</source><target>Jelszó megismétlése</target></trans-unit>
+      <trans-unit id="register.securityCheck" datatype="html"><source>Security check</source><target>Biztonsági ellenőrzés</target></trans-unit>
+      <trans-unit id="register.newChallenge" datatype="html"><source>New challenge</source><target>Új feladat</target></trans-unit>
+      <trans-unit id="register.captchaPlaceholder" datatype="html"><source>Enter result</source><target>Add meg az eredményt</target></trans-unit>
+      <trans-unit id="auth.signInLink" datatype="html"><source> Sign in</source><target> Bejelentkezés</target></trans-unit>
+      <trans-unit id="auth.continueWithGoogle" datatype="html"><source>Continue with Google</source><target>Folytatás Google-fiókkal</target></trans-unit>
+      <trans-unit id="register.captchaWrong" datatype="html"><source>Incorrect answer. Please try again.</source><target>Helytelen válasz. Kérjük, próbáld újra.</target></trans-unit>
     </body>
   </file>
 </xliff>

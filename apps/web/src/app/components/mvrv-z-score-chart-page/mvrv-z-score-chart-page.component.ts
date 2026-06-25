@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ViewChild, computed, inject, signal } from '@angular/core';
+import { AfterViewInit, Component, LOCALE_ID, ViewChild, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
@@ -41,11 +41,11 @@ const TIMEFRAMES: TimeframeOption[] = [
   { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
   { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
   { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
-  { label: 'Mind', value: 'all' },
+  { label: $localize`:Timeframe All@@charts.timeframe.all:All`, value: 'all' },
 ];
 
 const MVRV_ALERT_METRICS: AlertMetricOption[] = [
-  { value: 'mvrv_zscore', label: 'MVRV Z-Score' },
+  { value: 'mvrv_zscore', label: $localize`:MVRV Z-Score@@charts.metric.mvrvZScore:MVRV Z-Score` },
   { value: 'btc_price', label: $localize`:BTC price USD metric@@charts.metric.btcPriceUsd:BTC price USD` },
 ];
 
@@ -57,6 +57,7 @@ const MVRV_ALERT_METRICS: AlertMetricOption[] = [
 export class MvrvZScoreChartPageComponent implements AfterViewInit {
   private readonly api = inject(AuthApiClient);
   private readonly http = inject(HttpClient);
+  private readonly locale = inject(LOCALE_ID);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   @ViewChild(ChartViewerComponent) private readonly chartViewer?: ChartViewerComponent;
@@ -170,7 +171,7 @@ export class MvrvZScoreChartPageComponent implements AfterViewInit {
     return [
       { label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`,         value: point ? formatUsd(point.priceUsd) : $localize`:Waiting for data@@charts.waitingForData:Waiting for data` },
       { label: $localize`:Realized price metric@@charts.metric.realizedPrice:Realized price`,     value: realizedPrice !== null ? formatUsd(realizedPrice) : $localize`:Waiting for data@@charts.waitingForData:Waiting for data` },
-      { label: 'MVRV Z-Score',       value: zScore !== null ? zScore.toFixed(2) : $localize`:Waiting for data@@charts.waitingForData:Waiting for data` },
+      { label: $localize`:MVRV Z-Score@@charts.metric.mvrvZScore:MVRV Z-Score`,       value: zScore !== null ? zScore.toFixed(2) : $localize`:Waiting for data@@charts.waitingForData:Waiting for data` },
       { label: $localize`:Signal metric@@charts.metric.signal:Signal`,             value: zScore !== null ? getMvrvSignal(zScore) : $localize`:Waiting for data@@charts.waitingForData:Waiting for data` },
     ];
   });
@@ -178,22 +179,22 @@ export class MvrvZScoreChartPageComponent implements AfterViewInit {
   protected readonly infoInterpretation = computed(() => {
     const zScore = this.currentZScore();
 
-    if (zScore === null) return 'Waiting for the latest MVRV Z-Score data.';
-    if (zScore > 7)  return 'The MVRV Z-Score is in the overheated zone (above 7). Historically, readings above 7 have coincided with major cycle tops. Exercise caution.';
-    if (zScore > 5)  return 'The MVRV Z-Score is elevated (5–7), suggesting the market is overextended relative to realized value. Historically associated with late-cycle conditions.';
-    if (zScore > 3)  return 'The MVRV Z-Score is in the caution zone (3–5). The market is pricing in a moderate premium over realized value.';
-    if (zScore >= 0) return 'The MVRV Z-Score is in the fair value zone (0–3). Bitcoin is trading near or below historical mean valuations relative to realized cap.';
-    return 'The MVRV Z-Score is negative — Bitcoin is trading below its realized value on a statistical basis. Historically this has coincided with strong long-term accumulation opportunities.';
+    if (zScore === null) return $localize`:MVRV waiting interpretation@@charts.mvrv.interpretation.waiting:Waiting for the latest MVRV Z-Score data.`;
+    if (zScore > 7)  return $localize`:MVRV overheated interpretation@@charts.mvrv.interpretation.overheated:The MVRV Z-Score is in the overheated zone (above 7). Historically, readings above 7 have coincided with major cycle tops. Exercise caution.`;
+    if (zScore > 5)  return $localize`:MVRV elevated interpretation@@charts.mvrv.interpretation.elevated:The MVRV Z-Score is elevated (5–7), suggesting the market is overextended relative to realized value. Historically associated with late-cycle conditions.`;
+    if (zScore > 3)  return $localize`:MVRV caution interpretation@@charts.mvrv.interpretation.caution:The MVRV Z-Score is in the caution zone (3–5). The market is pricing in a moderate premium over realized value.`;
+    if (zScore >= 0) return $localize`:MVRV fair value interpretation@@charts.mvrv.interpretation.fairValue:The MVRV Z-Score is in the fair value zone (0–3). Bitcoin is trading near or below historical mean valuations relative to realized cap.`;
+    return $localize`:MVRV undervalued interpretation@@charts.mvrv.interpretation.undervalued:The MVRV Z-Score is negative — Bitcoin is trading below its realized value on a statistical basis. Historically this has coincided with strong long-term accumulation opportunities.`;
   });
 
   protected readonly infoLastUpdated = computed(() => this.lastUpdatedText());
   protected readonly infoAbout =
-    'The MVRV Z-Score compares Bitcoin\'s market capitalization to its realized capitalization, then normalizes the difference using standard deviation. Values above 7 historically signal major cycle tops; negative values have marked generational buying opportunities.';
+    $localize`:MVRV about@@charts.mvrv.about:The MVRV Z-Score compares Bitcoin's market capitalization to its realized capitalization, then normalizes the difference using standard deviation. Values above 7 historically signal major cycle tops; negative values have marked generational buying opportunities.`;
   protected readonly infoDataSources = [
-    'Bitcoin Price: CoinGecko via backend DB (full history)',
-    'Realized Price (June 2022–present): bitcoin-data.com (actual on-chain data)',
-    'Realized Price (pre-June 2022): 5-year EMA proxy — approximation of long-term cost basis',
-    'MVRV Z-Score: ln(price / realized) × 4, calibrated to match traditional cycle-top scale',
+    $localize`:MVRV data source price@@charts.mvrv.dataSource.price:Bitcoin price: CoinGecko via backend DB (full history)`,
+    $localize`:MVRV data source realized current@@charts.mvrv.dataSource.realizedCurrent:Realized price (June 2022-present): bitcoin-data.com (actual on-chain data)`,
+    $localize`:MVRV data source realized proxy@@charts.mvrv.dataSource.realizedProxy:Realized price (pre-June 2022): 5-year EMA proxy - approximation of long-term cost basis`,
+    $localize`:MVRV data source formula@@charts.mvrv.dataSource.formula:MVRV Z-Score: ln(price / realized) x 4, calibrated to match traditional cycle-top scale`,
   ];
 
   protected readonly chartData = computed<ChartData<'line'>>(() => {
@@ -244,7 +245,7 @@ export class MvrvZScoreChartPageComponent implements AfterViewInit {
           order: 3,
         },
         {
-          label: 'Z-Score',
+          label: $localize`:MVRV Z-Score@@charts.metric.mvrvZScore:MVRV Z-Score`,
           data: [...zScores, ...futureNulls],
           borderColor: '#f59e0b',
           backgroundColor: 'transparent',
@@ -308,10 +309,10 @@ export class MvrvZScoreChartPageComponent implements AfterViewInit {
         mode: 'index' as const,
         intersect: false,
         callbacks: {
-          title: (items) => formatDate(String(items[0]?.label ?? '')),
+          title: (items) => formatDate(String(items[0]?.label ?? ''), this.locale),
           label: (item) => {
             if (item.dataset.yAxisID === 'y2') {
-              return `Z-Score: ${Number(item.parsed.y).toFixed(2)}`;
+              return `${$localize`:MVRV Z-Score@@charts.metric.mvrvZScore:MVRV Z-Score`}: ${Number(item.parsed.y).toFixed(2)}`;
             }
             return `${item.dataset.label}: ${formatUsd(Number(item.parsed.y))}`;
           },
@@ -433,7 +434,7 @@ export class MvrvZScoreChartPageComponent implements AfterViewInit {
         { header: $localize`:Date header@@charts.csv.date:Date`,            value: (row) => row.date },
         { header: $localize`:Price USD header@@charts.csv.priceUsd:Price USD`,       value: (row) => formatCsvNumber(row.priceUsd) },
         { header: $localize`:Realized price metric@@charts.metric.realizedPrice:Realized price`,  value: (row) => formatCsvNumber(realizedMap.get(row.date) ?? null) },
-        { header: 'MVRV Z-Score',    value: (row) => formatCsvNumber(row.mvrvZScore) },
+        { header: $localize`:MVRV Z-Score@@charts.metric.mvrvZScore:MVRV Z-Score`,    value: (row) => formatCsvNumber(row.mvrvZScore) },
       ],
     });
   }
@@ -441,7 +442,7 @@ export class MvrvZScoreChartPageComponent implements AfterViewInit {
   protected lastUpdatedText(): string {
     const timestamp = this.lastUpdated();
     if (!timestamp) return $localize`:Waiting for data@@charts.waitingForData:Waiting for data`;
-    return new Date(timestamp).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
+    return new Date(timestamp).toLocaleString(this.locale, { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
   }
 
   private async loadChartData(timeframe: ChartTimeframe): Promise<void> {
@@ -537,9 +538,9 @@ function formatUsd(value: number): string {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(value);
 }
 
-function formatDate(value: string): string {
+function formatDate(value: string, locale: string): string {
   if (!value) return '';
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat(locale, {
     month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC',
   }).format(new Date(`${value}T00:00:00.000Z`));
 }

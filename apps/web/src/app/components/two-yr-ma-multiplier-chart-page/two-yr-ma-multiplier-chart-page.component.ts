@@ -39,7 +39,7 @@ const TIMEFRAMES: TimeframeOption[] = [
   { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
   { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
   { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
-  { label: 'Mind', value: 'all' },
+  { label: $localize`:Timeframe All@@charts.timeframe.all:All`, value: 'all' },
 ];
 
 const HALVING_EVENTS = [
@@ -94,21 +94,21 @@ export class TwoYrMaMultiplierChartPageComponent implements AfterViewInit {
     const ma5 = last.ma730x5;
     const signal =
       ma !== null && price < ma
-        ? 'Buy Zone (Below 2yr MA)'
+        ? $localize`:2yr MA buy zone@@charts.signal.twoYrMa.buyZone:Buy Zone (Below 2yr MA)`
         : ma5 !== null && price > ma5
-          ? 'Sell Zone (Above 2yr MA×5)'
-          : 'Semleges';
+          ? $localize`:2yr MA sell zone@@charts.signal.twoYrMa.sellZone:Sell Zone (Above 2yr MA×5)`
+          : $localize`:Neutral signal@@charts.signal.neutral:Neutral`;
     const distancePct =
       ma !== null && ma > 0
         ? ((price / ma) - 1) * 100
         : null;
     return [
       { label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`, value: formatUsd(price) },
-      { label: '2yr MA', value: ma !== null ? formatUsd(ma) : $localize`:No data value@@common.noData:No data` },
-      { label: '2yr MA × 5', value: ma5 !== null ? formatUsd(ma5) : $localize`:No data value@@common.noData:No data` },
+      { label: $localize`:2yr MA@@charts.metric.ma2yr:2yr MA`, value: ma !== null ? formatUsd(ma) : $localize`:No data value@@common.noData:No data` },
+      { label: $localize`:2yr MA x5@@charts.metric.ma2yrx5:2yr MA × 5`, value: ma5 !== null ? formatUsd(ma5) : $localize`:No data value@@common.noData:No data` },
       { label: $localize`:Signal metric@@charts.metric.signal:Signal`, value: signal },
       {
-        label: 'Távolság az MA-tól',
+        label: $localize`:Distance from MA@@charts.metric.distanceFromMa:Distance from MA`,
         value:
           distancePct !== null
             ? `${distancePct > 0 ? '+' : ''}${distancePct.toFixed(1)}% ${distancePct >= 0 ? 'above' : 'below'} 2yr MA`
@@ -353,7 +353,7 @@ export class TwoYrMaMultiplierChartPageComponent implements AfterViewInit {
     this.exportMenuOpen.set(false);
     await exportChartPng({
       chartImageDataUrl,
-      chartTitle: '2 éves MA szorzó',
+      chartTitle: '2-Year MA Multiplier',
       fileName: `2yr-ma-multiplier_${getExportDateStamp()}.png`,
     });
   }
@@ -429,7 +429,7 @@ function createHalvingAnnotations(startDate: string): Record<string, AnnotationO
 }
 
 function formatUsd(value: number): string {
-  if (!Number.isFinite(value)) return 'nincs adat';
+  if (!Number.isFinite(value)) return $localize`:No data value@@common.noData:No data`;
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',

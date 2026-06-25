@@ -97,9 +97,9 @@ export class BitcoinHalvingProgressChartPageComponent {
     const daysSince = Math.floor((Date.now() - CURRENT_CYCLE_START_MS) / 86_400_000);
     const totalDays = Math.floor((NEXT_HALVING_EST_MS - CURRENT_CYCLE_START_MS) / 86_400_000);
     const fields: ChartInfoField[] = [
-      { label: 'BTC ár (most)', value: fmtUsd(last.priceUsd) },
-      { label: 'Ciklus előrehaladása', value: `${(progress * 100).toFixed(2)}%` },
-      { label: 'Napok a ciklusban', value: `${daysSince} / ~${totalDays} days` },
+      { label: $localize`:BTC price now@@charts.metric.btcPriceNow:BTC price (now)`, value: fmtUsd(last.priceUsd) },
+      { label: $localize`:Cycle progress@@charts.metric.cycleProgress:Cycle progress`, value: `${(progress * 100).toFixed(2)}%` },
+      { label: $localize`:Days in cycle@@charts.metric.daysInCycle:Days in cycle`, value: `${daysSince} / ~${totalDays} days` },
     ];
     for (const c of this.pastCyclePrices()) {
       fields.push({ label: `${c.label} at same stage`, value: c.price !== null ? fmtUsd(c.price) : '—' });
@@ -162,7 +162,7 @@ export class BitcoinHalvingProgressChartPageComponent {
           fill: false as any,
         },
         {
-          label: 'Történelmi csúcs',
+          label: $localize`:All-time high@@charts.metric.allTimeHigh:All-time high`,
           data: athData,
           showLine: false,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -335,7 +335,7 @@ export class BitcoinHalvingProgressChartPageComponent {
     this.exportMenuOpen.set(false);
     await exportChartPng({
       chartImageDataUrl: dataUrl,
-      chartTitle: 'Bitcoin felezési előrehaladás',
+      chartTitle: 'Bitcoin Halving Progress',
       fileName: `bitcoin-halving-progress_${getExportDateStamp()}.png`,
     });
   }

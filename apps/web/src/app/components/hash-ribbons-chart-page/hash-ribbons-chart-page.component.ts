@@ -41,7 +41,7 @@ const TIMEFRAMES: TimeframeOption[] = [
   { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
   { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
   { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
-  { label: 'Mind', value: 'all' },
+  { label: $localize`:Timeframe All@@charts.timeframe.all:All`, value: 'all' },
 ];
 
 const HALVING_EVENTS = [
@@ -96,15 +96,15 @@ export class HashRibbonsChartPageComponent implements AfterViewInit {
     const priceUsd = priceLast.priceUsd;
     const status =
       ma30 !== null && ma60 !== null && ma30 > ma60
-        ? 'Recovery (30d > 60d)'
-        : 'Capitulation (30d < 60d)';
-    const recentSignal = isBuySignal ? 'Buy Signal Active' : 'No Active Signal';
+        ? $localize`:Hash ribbon recovery@@charts.signal.hashRibbon.recovery:Recovery (30d > 60d)`
+        : $localize`:Hash ribbon capitulation@@charts.signal.hashRibbon.capitulation:Capitulation (30d < 60d)`;
+    const recentSignal = isBuySignal ? $localize`:Hash ribbon buy active@@charts.signal.hashRibbon.buyActive:Buy Signal Active` : $localize`:Hash ribbon no signal@@charts.signal.hashRibbon.noSignal:No Active Signal`;
     return [
       { label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`, value: formatUsd(priceUsd) },
-      { label: '30d Hash Rate MA', value: ma30 !== null ? formatHashRate(ma30) : $localize`:No data value@@common.noData:No data` },
-      { label: '60d Hash Rate MA', value: ma60 !== null ? formatHashRate(ma60) : $localize`:No data value@@common.noData:No data` },
-      { label: 'Status', value: status },
-      { label: 'Recent Signal', value: recentSignal },
+      { label: $localize`:30d hash rate@@charts.metric.hashRate30d:30d Hash Rate MA`, value: ma30 !== null ? formatHashRate(ma30) : $localize`:No data value@@common.noData:No data` },
+      { label: $localize`:60d hash rate@@charts.metric.hashRate60d:60d Hash Rate MA`, value: ma60 !== null ? formatHashRate(ma60) : $localize`:No data value@@common.noData:No data` },
+      { label: $localize`:Hash ribbon status@@charts.metric.hashRibbonStatus:Status`, value: status },
+      { label: $localize`:Recent signal@@charts.metric.recentSignal:Recent Signal`, value: recentSignal },
     ];
   });
 
@@ -146,7 +146,7 @@ export class HashRibbonsChartPageComponent implements AfterViewInit {
         // 30-day Hash Rate MA — blue, left axis
         {
           type: 'line' as const,
-          label: '30d Hash Rate MA',
+          label: $localize`:30d hash rate@@charts.metric.hashRate30d:30d Hash Rate MA`,
           data: points.map((p) => p.ma30),
           borderColor: '#3b82f6',
           borderWidth: 2,
@@ -159,7 +159,7 @@ export class HashRibbonsChartPageComponent implements AfterViewInit {
         // 60-day Hash Rate MA — orange, left axis
         {
           type: 'line' as const,
-          label: '60d Hash Rate MA',
+          label: $localize`:60d hash rate@@charts.metric.hashRate60d:60d Hash Rate MA`,
           data: points.map((p) => p.ma60),
           borderColor: '#f97316',
           borderWidth: 2,
@@ -414,7 +414,7 @@ function createHalvingAnnotations(startDate: string): Record<string, AnnotationO
 }
 
 function formatUsd(value: number): string {
-  if (!Number.isFinite(value)) return 'nincs adat';
+  if (!Number.isFinite(value)) return $localize`:No data value@@common.noData:No data`;
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -423,7 +423,7 @@ function formatUsd(value: number): string {
 }
 
 function formatHashRate(value: number): string {
-  if (!Number.isFinite(value)) return 'nincs adat';
+  if (!Number.isFinite(value)) return $localize`:No data value@@common.noData:No data`;
   if (value >= 1e21) return `${(value / 1e21).toFixed(2)} ZH/s`;
   if (value >= 1e18) return `${(value / 1e18).toFixed(2)} EH/s`;
   if (value >= 1e15) return `${(value / 1e15).toFixed(2)} PH/s`;

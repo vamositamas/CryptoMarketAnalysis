@@ -1,10 +1,10 @@
 <div class="annotation-controls" [class.crosshair]="cursorHint() === 'crosshair'">
   @if (mode() === 'off') {
-    <button type="button" class="secondary-button" (click)="startAnnotationMode()">
+    <button type="button" class="secondary-button" (click)="startAnnotationMode()" i18n="Annotate button@@chart.annotate">
       Annotate
     </button>
   } @else {
-    <button type="button" class="secondary-button" (click)="done()">Done</button>
+    <button type="button" class="secondary-button" (click)="done()" i18n="Done button@@chart.done">Done</button>
   }
 </div>
 
@@ -15,18 +15,18 @@
 @if (noteDraft()) {
   <div class="annotation-modal" role="dialog" aria-modal="true">
     <div class="annotation-dialog">
-      <h3>Add Note</h3>
+      <h3 i18n="Add note heading@@chart.addNote">Add Note</h3>
       <label>
-        Note
+        <span i18n="Note label@@chart.noteLabel">Note</span>
         <input [(ngModel)]="noteText" />
       </label>
       <label>
-        Color
+        <span i18n="Color label@@chart.colorLabel">Color</span>
         <input type="color" [(ngModel)]="noteColor" />
       </label>
       <div class="admin-actions">
-        <button type="button" (click)="saveNote()">Save</button>
-        <button type="button" class="secondary-button" (click)="cancelNote()">Cancel</button>
+        <button type="button" (click)="saveNote()" i18n="Save button@@common.save">Save</button>
+        <button type="button" class="secondary-button" (click)="cancelNote()" i18n="Cancel button@@common.cancel">Cancel</button>
       </div>
     </div>
   </div>

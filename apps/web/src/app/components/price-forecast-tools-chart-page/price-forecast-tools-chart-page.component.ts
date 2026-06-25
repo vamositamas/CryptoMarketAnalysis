@@ -39,7 +39,7 @@ const TIMEFRAMES: TimeframeOption[] = [
   { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
   { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
   { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
-  { label: 'Mind', value: 'all' },
+  { label: $localize`:Timeframe All@@charts.timeframe.all:All`, value: 'all' },
 ];
 
 const HALVING_EVENTS = [
@@ -97,27 +97,27 @@ export class PriceForecastToolsChartPageComponent implements AfterViewInit {
     const balancedPrice = last.balancedPrice;
     const terminalPrice = last.terminalPrice;
 
-    let signalText = 'Semleges';
+    let signalText = $localize`:Neutral signal@@charts.signal.neutral:Neutral`;
     if (cvdd !== null && price < cvdd) {
-      signalText = 'Deep Undervalue';
+      signalText = $localize`:Deep undervalue@@charts.signal.deepUndervalue:Deep Undervalue`;
     } else if (balancedPrice !== null && price < balancedPrice) {
       signalText = $localize`:Undervalued signal@@charts.signal.undervalued:Undervalued`;
     } else if (deltaTop !== null && price > deltaTop) {
-      signalText = 'Approaching Top';
+      signalText = $localize`:Approaching top@@charts.signal.approachingTop:Approaching Top`;
     } else if (topCap !== null && price > topCap) {
-      signalText = 'Cycle Top Zone';
+      signalText = $localize`:Cycle top zone@@charts.signal.cycleTopZone:Cycle Top Zone`;
     } else if (terminalPrice !== null && price > terminalPrice) {
-      signalText = 'Sell signal';
+      signalText = $localize`:Sell signal@@charts.signal.sellSignal:Sell signal`;
     }
 
     return [
       { label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`, value: formatUsd(price) },
-      { label: 'Top Cap', value: topCap !== null ? formatUsd(topCap) : $localize`:No data value@@common.noData:No data` },
-      { label: 'Delta Top', value: deltaTop !== null ? formatUsd(deltaTop) : $localize`:No data value@@common.noData:No data` },
-      { label: 'CVDD', value: cvdd !== null ? formatUsd(cvdd) : 'Loading...' },
-      { label: 'Balanced Price', value: balancedPrice !== null ? formatUsd(balancedPrice) : 'Loading...' },
+      { label: $localize`:Top Cap@@charts.metric.topCap:Top Cap`, value: topCap !== null ? formatUsd(topCap) : $localize`:No data value@@common.noData:No data` },
+      { label: $localize`:Delta Top@@charts.metric.deltaCap:Delta Top`, value: deltaTop !== null ? formatUsd(deltaTop) : $localize`:No data value@@common.noData:No data` },
+      { label: $localize`:CVDD metric@@charts.metric.cvdd:CVDD`, value: cvdd !== null ? formatUsd(cvdd) : 'Loading...' },
+      { label: $localize`:Balanced Price@@charts.metric.balancedPrice:Balanced Price`, value: balancedPrice !== null ? formatUsd(balancedPrice) : 'Loading...' },
       {
-        label: 'Terminal Price',
+        label: $localize`:Terminal Price@@charts.metric.terminalPrice:Terminal Price`,
         value: terminalPrice !== null
           ? (price > terminalPrice ? `${formatUsd(terminalPrice)} — Sell signal` : formatUsd(terminalPrice))
           : 'Loading...',
@@ -371,7 +371,7 @@ export class PriceForecastToolsChartPageComponent implements AfterViewInit {
     this.exportMenuOpen.set(false);
     await exportChartPng({
       chartImageDataUrl,
-      chartTitle: 'Ár-előrejelző eszközök',
+      chartTitle: 'Price Forecast Tools',
       fileName: `price-forecast-tools_${getExportDateStamp()}.png`,
     });
   }
@@ -447,7 +447,7 @@ function createHalvingAnnotations(startDate: string): Record<string, AnnotationO
 }
 
 function formatUsd(value: number): string {
-  if (!Number.isFinite(value)) return 'nincs adat';
+  if (!Number.isFinite(value)) return $localize`:No data value@@common.noData:No data`;
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',

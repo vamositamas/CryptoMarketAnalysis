@@ -39,7 +39,7 @@ const TIMEFRAMES: TimeframeOption[] = [
   { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
   { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
   { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
-  { label: 'Mind', value: 'all' },
+  { label: $localize`:Timeframe All@@charts.timeframe.all:All`, value: 'all' },
 ];
 
 const HALVING_EVENTS = [
@@ -367,8 +367,8 @@ export class RealizePriceChartPageComponent implements AfterViewInit {
 function getMvrvSignal(value: number): string {
   if (value > 3.5) return $localize`:Sell zone signal@@charts.signal.sellZone:Sell zone`;
   if (value > 2.0) return $localize`:Overvalued signal@@charts.signal.overvalued:Overvalued`;
-  if (value >= 1.0) return 'Valósérték-tartomány';
-  return 'Realizált ár alatt';
+  if (value >= 1.0) return $localize`:Fair value range@@charts.signal.fairValueRange:Fair value range`;
+  return $localize`:Below realized price@@charts.signal.belowRealizedPrice:Below realized price`;
 }
 
 function createFairValueAnnotation(): Record<string, AnnotationOptions> {
@@ -382,7 +382,7 @@ function createFairValueAnnotation(): Record<string, AnnotationOptions> {
       borderWidth: 1.5,
       label: {
         display: true,
-        content: '1.0 — Fair Value',
+        content: $localize`:Realized price fair value@@charts.annotation.realizedPrice.fairValue:1.0 — Fair Value`,
         position: 'end',
         backgroundColor: 'rgba(239, 68, 68, 0.82)',
         color: '#fff',
@@ -421,7 +421,7 @@ function createHalvingAnnotations(startDate: string): Record<string, AnnotationO
 }
 
 function formatUsd(value: number): string {
-  if (!Number.isFinite(value)) return 'nincs adat';
+  if (!Number.isFinite(value)) return $localize`:No data value@@common.noData:No data`;
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',

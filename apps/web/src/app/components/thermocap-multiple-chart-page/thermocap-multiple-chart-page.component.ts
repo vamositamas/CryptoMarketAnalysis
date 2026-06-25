@@ -41,7 +41,7 @@ const TIMEFRAMES: TimeframeOption[] = [
   { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
   { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
   { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
-  { label: 'Mind', value: 'all' },
+  { label: $localize`:Timeframe All@@charts.timeframe.all:All`, value: 'all' },
 ];
 
 const HALVING_EVENTS = [
@@ -96,15 +96,15 @@ export class ThermocapMultipleChartPageComponent implements AfterViewInit {
     const multiple = last.thermocapMultiple;
     const signal =
       multiple !== null && multiple > 33
-        ? 'Historically Overvalued'
+        ? $localize`:Historically overvalued@@charts.signal.historicallyOvervalued:Historically Overvalued`
         : multiple !== null && multiple > 10
-          ? 'Emelkedett'
+          ? $localize`:Elevated signal@@charts.signal.elevated:Elevated`
           : multiple !== null && multiple < 4
-            ? 'Accumulation Zone'
-            : 'Semleges';
+            ? $localize`:Accumulation zone signal@@charts.signal.accumulationZone:Accumulation zone`
+            : $localize`:Neutral signal@@charts.signal.neutral:Neutral`;
     return [
       { label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`, value: formatUsd(price) },
-      { label: 'Thermocap Multiple', value: multiple !== null ? `${multiple.toFixed(1)}×` : $localize`:No data value@@common.noData:No data` },
+      { label: $localize`:Thermocap Multiple@@charts.metric.thermocapMultiple:Thermocap Multiple`, value: multiple !== null ? `${multiple.toFixed(1)}×` : $localize`:No data value@@common.noData:No data` },
       { label: $localize`:Signal metric@@charts.metric.signal:Signal`, value: signal },
     ];
   });
@@ -240,7 +240,7 @@ export class ThermocapMultipleChartPageComponent implements AfterViewInit {
             borderWidth: 1.5,
             label: {
               display: true,
-              content: 'Historically Overvalued (33×)',
+              content: $localize`:Thermocap overvalued@@charts.annotation.thermocap.overvalued:Historically Overvalued (33×)`,
               position: 'start',
               backgroundColor: 'rgba(239, 68, 68, 0.85)',
               color: '#fff',
@@ -258,7 +258,7 @@ export class ThermocapMultipleChartPageComponent implements AfterViewInit {
             borderWidth: 1.5,
             label: {
               display: true,
-              content: 'Elevated (10×)',
+              content: $localize`:Thermocap elevated@@charts.annotation.thermocap.elevated:Elevated (10×)`,
               position: 'start',
               backgroundColor: 'rgba(249, 115, 22, 0.85)',
               color: '#fff',
@@ -276,7 +276,7 @@ export class ThermocapMultipleChartPageComponent implements AfterViewInit {
             borderWidth: 1.5,
             label: {
               display: true,
-              content: 'Accumulation Zone (4×)',
+              content: $localize`:Thermocap accumulation@@charts.annotation.thermocap.accumulation:Accumulation Zone (4×)`,
               position: 'start',
               backgroundColor: 'rgba(34, 197, 94, 0.85)',
               color: '#fff',
@@ -433,7 +433,7 @@ function createHalvingAnnotations(startDate: string): Record<string, AnnotationO
 }
 
 function formatUsd(value: number): string {
-  if (!Number.isFinite(value)) return 'nincs adat';
+  if (!Number.isFinite(value)) return $localize`:No data value@@common.noData:No data`;
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',

@@ -39,7 +39,7 @@ const TIMEFRAMES: TimeframeOption[] = [
   { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
   { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
   { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
-  { label: 'Mind', value: 'all' },
+  { label: $localize`:Timeframe All@@charts.timeframe.all:All`, value: 'all' },
 ];
 
 const HALVING_EVENTS = [
@@ -99,9 +99,9 @@ export class VddMultipleChartPageComponent implements AfterViewInit {
     const vdd = lastVddPoint?.vddMultiple ?? null;
     return [
       { label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`, value: formatUsd(last.priceUsd) },
-      { label: 'VDD Multiple', value: vdd !== null ? vdd.toFixed(3) : $localize`:No data value@@common.noData:No data` },
+      { label: $localize`:VDD Multiple@@charts.metric.vddMultiple:VDD Multiple`, value: vdd !== null ? vdd.toFixed(3) : $localize`:No data value@@common.noData:No data` },
       { label: $localize`:Signal metric@@charts.metric.signal:Signal`, value: vdd !== null ? getVddSignal(vdd) : $localize`:No data value@@common.noData:No data` },
-      { label: 'Megjelenített előzmény', value: `${(points.length / 365).toFixed(1)} years` },
+      { label: $localize`:History shown@@charts.metric.historyShown:History shown`, value: `${(points.length / 365).toFixed(1)} years` },
     ];
   });
 
@@ -341,7 +341,7 @@ export class VddMultipleChartPageComponent implements AfterViewInit {
 function getVddSignal(value: number): string {
   if (value > VDD_SELL_THRESHOLD) return $localize`:Sell zone cycle top risk@@charts.signal.sellZoneCycleTopRisk:Sell zone - cycle top risk`;
   if (value < VDD_BUY_THRESHOLD) return $localize`:Accumulation zone signal@@charts.signal.accumulationZone:Accumulation zone`;
-  return 'Semleges';
+  return $localize`:Neutral signal@@charts.signal.neutral:Neutral`;
 }
 
 function createVddThresholdAnnotations(): Record<string, AnnotationOptions> {
@@ -413,7 +413,7 @@ function createHalvingAnnotations(startDate: string): Record<string, AnnotationO
 }
 
 function formatUsd(value: number): string {
-  if (!Number.isFinite(value)) return 'nincs adat';
+  if (!Number.isFinite(value)) return $localize`:No data value@@common.noData:No data`;
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',

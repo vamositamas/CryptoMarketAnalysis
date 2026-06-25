@@ -1,0 +1,69 @@
+<section class="content-section rainbow-chart-page">
+  <div class="chart-page-header">
+    <div>
+      <a class="form-link" routerLink="/charts" i18n="Back to chart library@@charts.backToLibrary">Back to chart library</a>
+      <p class="eyebrow" i18n="Chart category label@@charts.category.cycleSingle">Cycle Indicator</p>
+      <h2 i18n="Compare Bull Markets title@@charts.compareBullMarkets.title">Compare Bull Markets</h2>
+      <p i18n="Compare Bull Markets subtitle@@charts.compareBullMarkets.subtitle">Historical Bitcoin bull-market breakouts scaled to the current reward era</p>
+    </div>
+    <div class="chart-status">
+      <span i18n="Chart last updated label@@charts.lastUpdated">Last updated</span>
+      <strong>{{ infoLastUpdated() }}</strong>
+    </div>
+  </div>
+
+  <div class="chart-toolbar" aria-label="Chart controls">
+    <div class="timeframe-selector" role="group">
+      <button type="button" class="timeframe-button active" disabled i18n="Full history timeframe@@charts.fullHistory">Full history</button>
+    </div>
+    <div class="chart-actions">
+      <button type="button" class="secondary-button" (click)="resetZoom()" i18n="Zoom reset label@@charts.zoomReset">Reset zoom</button>
+      <div class="export-menu">
+        <button type="button" class="secondary-button" (click)="toggleExportMenu()" i18n="Export control label@@charts.exportControl">Export</button>
+        @if (exportMenuOpen()) {
+          <div class="export-options">
+            <button type="button" (click)="exportPng()" i18n="Export PNG option@@charts.exportPng">Export as PNG</button>
+            <button type="button" (click)="exportCsv()" i18n="Export CSV option@@charts.exportCsv">Export as CSV</button>
+          </div>
+        }
+      </div>
+      <app-chart-favourite-button [chartId]="'compare-bull-markets'"></app-chart-favourite-button>
+      <button type="button" class="secondary-button" (click)="toggleInfo()" i18n="Info control label@@charts.infoControl">Info</button>
+    </div>
+  </div>
+
+  @if (errorMessage()) {
+    <p class="form-message">{{ errorMessage() }}</p>
+  }
+
+  <div class="chart-workspace info-collapsed">
+    <div class="chart-stage">
+      @if (isLoading()) {
+        <div class="loading-state" role="status">
+          <span class="loading-spinner" aria-hidden="true"></span>
+          <span i18n="Chart loading state@@charts.loading">Loading chart data...</span>
+        </div>
+      }
+
+      @if (series().length > 0) {
+        <app-chart-viewer
+          [chartData]="chartData()"
+          [chartOptions]="chartOptions()"
+        ></app-chart-viewer>
+      } @else if (!isLoading() && !errorMessage()) {
+        <p class="empty-state" i18n="Chart empty state@@charts.empty.no.data.available.yet">No data available yet.</p>
+      }
+    </div>
+  </div>
+
+  @if (infoOpen()) {
+    <app-chart-info-panel
+      [title]="chartTitle"
+      [about]="infoAbout"
+      [currentFields]="infoCurrentFields()"
+      [interpretation]="infoInterpretation()"
+      [dataSources]="infoDataSources"
+      [lastUpdated]="infoLastUpdated()"
+    ></app-chart-info-panel>
+  }
+</section>

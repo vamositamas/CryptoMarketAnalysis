@@ -39,7 +39,7 @@ const TIMEFRAMES: TimeframeOption[] = [
   { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
   { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
   { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
-  { label: 'Mind', value: 'all' },
+  { label: $localize`:Timeframe All@@charts.timeframe.all:All`, value: 'all' },
 ];
 
 const SIGNAL_MESSAGE = 'Historically, this signal has preceded major tops within 3-7 days';
@@ -79,8 +79,8 @@ export class PiCycleTopChartPageComponent implements AfterViewInit {
 
     return [
       { label: $localize`:Current price metric@@charts.metric.currentPrice:Current price`,   value: point ? formatUsd(point.priceUsd) : $localize`:Waiting for data@@charts.waitingForData:Waiting for data` },
-      { label: '111 napos MA',      value: ma.ma111   ? formatUsd(ma.ma111)   : 'Előzményekre vár' },
-      { label: '350 napos MA x 2',  value: ma.ma350x2 ? formatUsd(ma.ma350x2) : 'Előzményekre vár' },
+      { label: $localize`:111 day MA@@charts.metric.ma111d:111-day MA`,      value: ma.ma111   ? formatUsd(ma.ma111)   : $localize`:Awaiting history@@charts.signal.awaitingHistory:Awaiting history` },
+      { label: $localize`:350 day MA x2@@charts.metric.ma350dx2:350-day MA × 2`,  value: ma.ma350x2 ? formatUsd(ma.ma350x2) : $localize`:Awaiting history@@charts.signal.awaitingHistory:Awaiting history` },
       { label: $localize`:Signal metric@@charts.metric.signal:Signal`,          value: point ? getStatusText({ ...point, ...ma }) : $localize`:Waiting for data@@charts.waitingForData:Waiting for data` },
     ];
   });
@@ -382,7 +382,7 @@ function createSignalAnnotations(
         borderWidth: 2,
         label: {
           display: true,
-          content: 'Pi Cycle Top Signal',
+          content: $localize`:Pi Cycle top signal@@charts.annotation.piCycle.topSignal:Pi Cycle Top Signal`,
           position: 'start',
           backgroundColor: 'rgba(239, 68, 68, 0.9)',
         },
@@ -405,17 +405,17 @@ function createSignalAnnotations(
 
 function getStatusText(point: PiCycleTopChartDataPoint): string {
   if (point.ma111 === null || point.ma350x2 === null) {
-    return 'Elég mozgóátlag-előzményre vár';
+    return $localize`:Pi cycle waiting@@charts.signal.piCycle.waiting:Waiting for enough MA history`;
   }
 
   return point.ma111 > point.ma350x2
-    ? 'Pi Cycle Top signal (111-day MA above 350-day MA x 2)'
-    : 'No signal (111-day MA below 350-day MA x 2)';
+    ? $localize`:Pi cycle top signal@@charts.signal.piCycle.topSignal:Pi Cycle Top signal (111-day MA above 350-day MA × 2)`
+    : $localize`:Pi cycle no signal@@charts.signal.piCycle.noSignal:No signal (111-day MA below 350-day MA × 2)`;
 }
 
 function formatUsd(value: number): string {
   if (!Number.isFinite(value)) {
-    return 'nincs adat';
+    return $localize`:No data value@@common.noData:No data`;
   }
 
   return new Intl.NumberFormat('en-US', {

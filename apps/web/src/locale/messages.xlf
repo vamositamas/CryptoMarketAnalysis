@@ -2157,6 +2157,14 @@
         </context-group>
         <note priority="1" from="description">Register subtitle</note>
       </trans-unit>
+      <trans-unit id="register.emailLabel" datatype="html">
+        <source>Email</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">2944,2945</context>
+        </context-group>
+        <note priority="1" from="description">Email label</note>
+      </trans-unit>
       <trans-unit id="register.emailPlaceholder" datatype="html">
         <source>you@example.com</source>
         <context-group purpose="location">
@@ -2180,6 +2188,14 @@
           <context context-type="linenumber">2958,2959</context>
         </context-group>
         <note priority="1" from="description">Confirm password placeholder</note>
+      </trans-unit>
+      <trans-unit id="register.confirmLabel" datatype="html">
+        <source>Confirm password</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/web/src/app/app.routes.ts</context>
+          <context context-type="linenumber">2956,2957</context>
+        </context-group>
+        <note priority="1" from="description">Confirm password label</note>
       </trans-unit>
       <trans-unit id="register.securityCheck" datatype="html">
         <source>Security check</source>

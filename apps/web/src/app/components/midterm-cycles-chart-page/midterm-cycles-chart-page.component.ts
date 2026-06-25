@@ -91,9 +91,9 @@ export class MidtermCyclesChartPageComponent implements AfterViewInit {
     const lastSpx = [...pts].reverse().find((p) => p.spxRsi12m !== null);
     const lastCfnai = [...pts].reverse().find((p) => p.cfnai !== null);
     return [
-      { label: 'BTC RSI (12m)', value: last?.btcRsi12m != null ? last.btcRsi12m.toFixed(2) : '—' },
-      { label: 'SPX RSI (12m)', value: lastSpx?.spxRsi12m != null ? lastSpx.spxRsi12m.toFixed(2) : '—' },
-      { label: 'CFNAI', value: lastCfnai?.cfnai != null ? lastCfnai.cfnai.toFixed(2) : '—' },
+      { label: $localize`:BTC RSI 12m@@charts.metric.btcRsi12m:BTC RSI (12m)`, value: last?.btcRsi12m != null ? last.btcRsi12m.toFixed(2) : '—' },
+      { label: $localize`:SPX RSI 12m@@charts.metric.spxRsi12m:SPX RSI (12m)`, value: lastSpx?.spxRsi12m != null ? lastSpx.spxRsi12m.toFixed(2) : '—' },
+      { label: $localize`:CFNAI@@charts.metric.cfnai:CFNAI`, value: lastCfnai?.cfnai != null ? lastCfnai.cfnai.toFixed(2) : '—' },
     ];
   });
 

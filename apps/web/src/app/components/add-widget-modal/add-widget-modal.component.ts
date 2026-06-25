@@ -21,7 +21,7 @@ const WIDGET_LIBRARY: WidgetLibraryItem[] = [
   {
     type: 'realized_price',
     icon: 'RP',
-    name: 'Realizált ár',
+    name: 'Realized Price',
     description: 'Average cost basis of all bitcoins, based on the price each coin last moved on-chain.',
     category: 'Price Metrics',
     decimals: 2,
@@ -69,7 +69,7 @@ const WIDGET_LIBRARY: WidgetLibraryItem[] = [
   {
     type: 'market_cap',
     icon: 'CAP',
-    name: 'Piaci kapitalizáció',
+    name: 'Market Cap',
     description: 'Current Bitcoin price multiplied by the circulating supply.',
     category: 'Supply Metrics',
     decimals: 0,

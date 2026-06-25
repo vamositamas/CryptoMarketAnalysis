@@ -37,7 +37,7 @@ const TIMEFRAMES: TimeframeOption[] = [
   { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
   { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
   { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
-  { label: 'Mind', value: 'all' },
+  { label: $localize`:Timeframe All@@charts.timeframe.all:All`, value: 'all' },
 ];
 
 @Component({
@@ -81,19 +81,19 @@ export class ExcessLiquidityChartPageComponent implements AfterViewInit {
 
     const ycSignal =
       ycVal === null ? $localize`:No data value@@common.noData:No data`
-      : ycVal > 0 ? 'Steepening'
-      : 'Flattening / Inverted';
+      : ycVal > 0 ? $localize`:Yield curve steepening@@charts.signal.yieldCurveSteepening:Steepening`
+      : $localize`:Yield curve flattening@@charts.signal.yieldCurveFlattening:Flattening / Inverted`;
 
     const elSignal =
       elVal === null ? $localize`:No data value@@common.noData:No data`
-      : elVal > 0 ? 'Positive'
-      : 'Negative';
+      : elVal > 0 ? $localize`:Positive signal@@charts.signal.positive:Positive`
+      : $localize`:Negative signal@@charts.signal.negative:Negative`;
 
     return [
-      { label: '3m10y Change (1yr, bps)', value: ycVal !== null ? ycVal.toFixed(1) : $localize`:No data value@@common.noData:No data` },
-      { label: 'Hozamgörbe', value: ycSignal },
-      { label: 'Excess Liquidity (Leading)', value: elVal !== null ? elVal.toFixed(2) + '%' : $localize`:No data value@@common.noData:No data` },
-      { label: 'Likviditási jelzés', value: elSignal },
+      { label: $localize`:Yield curve change@@charts.metric.yieldCurveChange:3m10y Change (1yr, bps)`, value: ycVal !== null ? ycVal.toFixed(1) : $localize`:No data value@@common.noData:No data` },
+      { label: $localize`:Yield curve@@charts.metric.yieldCurve:Yield curve`, value: ycSignal },
+      { label: $localize`:Excess Liquidity@@charts.metric.excessLiquidityLeading:Excess Liquidity (Leading)`, value: elVal !== null ? elVal.toFixed(2) + '%' : $localize`:No data value@@common.noData:No data` },
+      { label: $localize`:Liquidity signal@@charts.metric.liquiditySignal:Liquidity signal`, value: elSignal },
     ];
   });
 
@@ -136,7 +136,7 @@ export class ExcessLiquidityChartPageComponent implements AfterViewInit {
       datasets: [
         {
           type: 'line' as const,
-          label: 'Többletlikviditási előrejelző indikátor (6 hónappal előre, %)',
+          label: 'Excess Liquidity Leading Indicator (6 months ahead, %)',
           data: points.map((p) => p.excessLiquidityLeading),
           borderColor: 'rgba(234, 179, 8, 0.85)',
           borderWidth: 1.5,
@@ -275,7 +275,7 @@ export class ExcessLiquidityChartPageComponent implements AfterViewInit {
     this.exportMenuOpen.set(false);
     await exportChartPng({
       chartImageDataUrl,
-      chartTitle: 'Többletlikviditási előrejelző indikátor',
+      chartTitle: 'Excess Liquidity Leading Indicator',
       fileName: `excess-liquidity_${getExportDateStamp()}.png`,
     });
   }

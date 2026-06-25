@@ -141,6 +141,14 @@ import { LegalDialogService } from './services/legal-dialog.service';
         <li tabindex="0" data-tooltip="Market sentiment gauge that blends volatility, momentum, social, dominance, and trend inputs.">
           Fear &amp; Greed
         </li>
+        <li
+          tabindex="0"
+          data-tooltip="Compares long-term and short-term holder profit-taking behavior through the LTH/STH SOPR ratio."
+          i18n-data-tooltip="Landing SOPR Ratio tooltip@@landing.model.soprRatio.tooltip"
+          i18n="Landing SOPR Ratio label@@landing.model.soprRatio"
+        >
+          SOPR Ratio
+        </li>
         <li tabindex="0" data-tooltip="Miner revenue multiple used to spot periods of miner stress or cycle euphoria.">
           Puell Multiple
         </li>
@@ -152,6 +160,14 @@ import { LegalDialogService } from './services/legal-dialog.service';
         </li>
         <li tabindex="0" data-tooltip="Polar chart that overlays Bitcoin halving cycles to compare current cycle position with past cycles.">
           Halving Spiral
+        </li>
+        <li
+          tabindex="0"
+          data-tooltip="Aligns Bitcoin bull-market breakouts by days since the prior all-time high and scales previous eras to the current reward era."
+          i18n-data-tooltip="Landing Compare Bull Markets tooltip@@landing.model.compareBullMarkets.tooltip"
+          i18n="Landing Compare Bull Markets label@@landing.model.compareBullMarkets"
+        >
+          Compare Bull Markets
         </li>
         <li tabindex="0" data-tooltip="Average on-chain acquisition price of circulating coins, often used as a cycle support baseline.">
           Realized Price
@@ -2941,7 +2957,7 @@ export class ResetPasswordPage {
 
         <form [formGroup]="form" (ngSubmit)="submit()">
           <div class="auth-field">
-            <label i18n="Email label@@form.email">Email</label>
+            <label i18n="Email label@@register.emailLabel">Email</label>
             <input type="email" formControlName="email" autocomplete="email"
               placeholder="you@example.com"
               i18n-placeholder="Email placeholder@@register.emailPlaceholder" />
@@ -2953,7 +2969,7 @@ export class ResetPasswordPage {
               i18n-placeholder="Password placeholder@@register.passwordPlaceholder" />
           </div>
           <div class="auth-field">
-            <label i18n="Confirm password label@@form.confirmPassword">Confirm password</label>
+            <label i18n="Confirm password label@@register.confirmLabel">Confirm password</label>
             <input type="password" formControlName="confirmPassword" autocomplete="new-password"
               placeholder="Repeat your password"
               i18n-placeholder="Confirm password placeholder@@register.confirmPlaceholder" />
@@ -3159,6 +3175,14 @@ export const appRoutes: Route[] = [
       ),
   },
   {
+    path: 'charts/sopr-ratio',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/sopr-ratio-chart-page/sopr-ratio-chart-page.component').then(
+        (m) => m.SoprRatioChartPageComponent,
+      ),
+  },
+  {
     path: 'charts/puell-multiple',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -3204,6 +3228,14 @@ export const appRoutes: Route[] = [
     loadComponent: () =>
       import('./components/bitcoin-halving-progress-chart-page/bitcoin-halving-progress-chart-page.component').then(
         (m) => m.BitcoinHalvingProgressChartPageComponent,
+      ),
+  },
+  {
+    path: 'charts/compare-bull-markets',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/compare-bull-markets-chart-page/compare-bull-markets-chart-page.component').then(
+        (m) => m.CompareBullMarketsChartPageComponent,
       ),
   },
   {

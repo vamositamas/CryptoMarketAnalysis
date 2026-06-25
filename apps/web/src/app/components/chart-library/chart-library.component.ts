@@ -52,6 +52,16 @@ const CHARTS: ChartLibraryItem[] = [
     thumbnailClass: 'mvrv-z-score',
   },
   {
+    id: 'sopr-ratio',
+    title: $localize`:Chart sopr-ratio title@@charts.library.sopr-ratio.title:SOPR Ratio (LTH/STH)`,
+    category: 'cycle',
+
+    signal: $localize`:Chart sopr-ratio signal@@charts.library.sopr-ratio.signal:Holder profit-taking comparison`,
+    description:
+      $localize`:Chart sopr-ratio description@@charts.library.sopr-ratio.description:Divides long-term holder SOPR by short-term holder SOPR to compare profit-taking behavior between experienced holders and newer market participants.`,
+    thumbnailClass: 'sopr-ratio',
+  },
+  {
     id: 'puell-multiple',
     title: $localize`:Chart puell-multiple title@@charts.library.puell-multiple.title:Puell Multiple`,
     category: 'cycle',
@@ -110,6 +120,15 @@ const CHARTS: ChartLibraryItem[] = [
     description:
       $localize`:Chart halving-progress description@@charts.library.halving-progress.description:Shows Bitcoin price history across all halving cycles on a logarithmic scale. Cycle backgrounds, halving markers, and progress indicators show where the current cycle sits versus prior cycles.`,
     thumbnailClass: 'halving-progress',
+  },
+  {
+    id: 'compare-bull-markets',
+    title: $localize`:Chart compare-bull-markets title@@charts.library.compare-bull-markets.title:Compare Bull Markets`,
+    category: 'cycle',
+    signal: $localize`:Chart compare-bull-markets signal@@charts.library.compare-bull-markets.signal:Breakout-era comparison`,
+    description:
+      $localize`:Chart compare-bull-markets description@@charts.library.compare-bull-markets.description:Aligns Bitcoin bull-market breakouts by days since price cleared the prior all-time high, scaling earlier eras to the current reward era for like-for-like cycle comparison.`,
+    thumbnailClass: 'compare-bull-markets',
   },
   {
     id: '2yr-ma-multiplier',

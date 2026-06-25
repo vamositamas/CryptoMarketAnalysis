@@ -53,7 +53,7 @@
         chartId="stock-to-flow"
         (annotationsChanged)="updateUserAnnotations($event)"
       ></app-chart-annotations>
-      <button type="button" class="secondary-button" (click)="openAlertModal()">
+      <button type="button" class="secondary-button" (click)="openAlertModal()" i18n="Create alert button@@chart.createAlert">
         Create Alert
       </button>
       <app-chart-favourite-button [chartId]="'stock-to-flow'"></app-chart-favourite-button>
@@ -65,7 +65,7 @@
 
   @if (chartAnnotations && chartAnnotations.noteAnnotations().length > 0) {
     <div class="annotation-panel">
-      <span class="annotation-panel-label">Annotations</span>
+      <span class="annotation-panel-label" i18n="Annotations panel label@@chart.annotations">Annotations</span>
       <div class="annotation-panel-list">
         @for (annotation of chartAnnotations.noteAnnotations(); track annotation.id) {
           <div class="annotation-panel-item">
@@ -75,6 +75,7 @@
               type="button"
               class="annotation-delete-button"
               aria-label="Delete annotation"
+              i18n-aria-label="Delete annotation aria@@chart.deleteAnnotation"
               (click)="chartAnnotations.deleteAnnotation(annotation.id)"
             >&times;</button>
           </div>
@@ -115,7 +116,7 @@
             <span class="s2f-scale-label">1400</span>
             <div class="s2f-scale-bar"></div>
             <span class="s2f-scale-label">0</span>
-            <span class="s2f-scale-title">Days until next halving</span>
+            <span class="s2f-scale-title" i18n="S2F halving color scale@@charts.stockToFlow.daysUntilNextHalving">Days until next halving</span>
           </div>
         </div>
       } @else if (!isLoading() && !errorMessage()) {
@@ -130,6 +131,7 @@
   @if (infoOpen()) {
     <app-chart-info-panel
       title="Stock-to-Flow Model"
+      i18n-title="Stock to Flow title@@charts.stockToFlowTitle"
       [about]="infoAbout"
       [currentFields]="infoCurrentFields()"
       [interpretation]="infoInterpretation()"

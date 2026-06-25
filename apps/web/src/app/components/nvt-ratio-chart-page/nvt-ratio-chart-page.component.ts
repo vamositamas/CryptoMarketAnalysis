@@ -41,7 +41,7 @@ const TIMEFRAMES: TimeframeOption[] = [
   { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
   { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
   { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
-  { label: 'Mind', value: 'all' },
+  { label: $localize`:Timeframe All@@charts.timeframe.all:All`, value: 'all' },
 ];
 
 const HALVING_EVENTS = [
@@ -100,11 +100,11 @@ export class NvtRatioChartPageComponent implements AfterViewInit {
         ? $localize`:Overvalued signal@@charts.signal.overvalued:Overvalued`
         : nvtSignal !== null && nvtSignal < 45
           ? $localize`:Undervalued signal@@charts.signal.undervalued:Undervalued`
-          : 'Semleges';
+          : $localize`:Neutral signal@@charts.signal.neutral:Neutral`;
     return [
       { label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`, value: formatUsd(price) },
-      { label: 'NVT Ratio', value: nvtRatio !== null ? nvtRatio.toFixed(0) : $localize`:No data value@@common.noData:No data` },
-      { label: 'NVT Signal / 90d MA', value: nvtSignal !== null ? nvtSignal.toFixed(0) : $localize`:No data value@@common.noData:No data` },
+      { label: $localize`:NVT ratio@@charts.metric.nvtRatio:NVT Ratio`, value: nvtRatio !== null ? nvtRatio.toFixed(0) : $localize`:No data value@@common.noData:No data` },
+      { label: $localize`:NVT signal@@charts.metric.nvtSignal:NVT Signal / 90d MA`, value: nvtSignal !== null ? nvtSignal.toFixed(0) : $localize`:No data value@@common.noData:No data` },
       { label: $localize`:Signal metric@@charts.metric.signal:Signal`, value: signalValue },
     ];
   });
@@ -249,7 +249,7 @@ export class NvtRatioChartPageComponent implements AfterViewInit {
             borderWidth: 1.5,
             label: {
               display: true,
-              content: 'Overvalued (150)',
+              content: $localize`:NVT overvalued@@charts.annotation.nvt.overvalued:Overvalued (150)`,
               position: 'end',
               backgroundColor: 'rgba(239, 68, 68, 0.8)',
               color: '#fff',
@@ -267,7 +267,7 @@ export class NvtRatioChartPageComponent implements AfterViewInit {
             borderWidth: 1.5,
             label: {
               display: true,
-              content: 'Undervalued (45)',
+              content: $localize`:NVT undervalued@@charts.annotation.nvt.undervalued:Undervalued (45)`,
               position: 'end',
               backgroundColor: 'rgba(34, 197, 94, 0.8)',
               color: '#fff',
@@ -425,7 +425,7 @@ function createHalvingAnnotations(startDate: string): Record<string, AnnotationO
 }
 
 function formatUsd(value: number): string {
-  if (!Number.isFinite(value)) return 'nincs adat';
+  if (!Number.isFinite(value)) return $localize`:No data value@@common.noData:No data`;
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',

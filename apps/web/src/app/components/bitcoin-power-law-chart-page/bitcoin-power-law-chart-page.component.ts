@@ -39,7 +39,7 @@ const TIMEFRAMES: TimeframeOption[] = [
   { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
   { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
   { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
-  { label: 'Mind', value: 'all' },
+  { label: $localize`:Timeframe All@@charts.timeframe.all:All`, value: 'all' },
 ];
 
 const GENESIS_MS = Date.UTC(2009, 0, 3);
@@ -60,7 +60,7 @@ const HALVING_EVENTS = [
 
 const POWER_LAW_ALERT_METRICS: AlertMetricOption[] = [
   { value: 'btc_price', label: $localize`:BTC price USD metric@@charts.metric.btcPriceUsd:BTC price USD` },
-  { value: 'power_law_model', label: 'Hatványtörvény modellár' },
+  { value: 'power_law_model', label: 'Power Law model price' },
 ];
 
 function powerLawDays(dateStr: string): number {
@@ -128,9 +128,9 @@ export class BitcoinPowerLawChartPageComponent implements AfterViewInit {
     return [
       { label: $localize`:Current price metric@@charts.metric.currentPrice:Current price`, value: formatUsd(point.priceUsd) },
       { label: $localize`:Model price metric@@charts.metric.modelPrice:Model price`, value: formatUsd(model) },
-      { label: 'Ár vs. modell', value: (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%' },
-      { label: 'Alsó sáv ára', value: formatUsd(floor) },
-      { label: 'Felső sáv ára', value: formatUsd(ceiling) },
+      { label: $localize`:Price vs model@@charts.metric.priceVsModel:Price vs. model`, value: (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%' },
+      { label: $localize`:Lower band price@@charts.metric.lowerBandPrice:Lower band price`, value: formatUsd(floor) },
+      { label: $localize`:Upper band price@@charts.metric.upperBandPrice:Upper band price`, value: formatUsd(ceiling) },
     ];
   });
 
@@ -203,7 +203,7 @@ export class BitcoinPowerLawChartPageComponent implements AfterViewInit {
           fill: false as any,
         },
         {
-          label: 'Alsó sáv ára',
+          label: $localize`:Lower band price@@charts.metric.lowerBandPrice:Lower band price`,
           data: allDates.map((d) => powerLawFloor(d)),
           borderColor: '#60A5FA',
           backgroundColor: 'transparent',
@@ -216,7 +216,7 @@ export class BitcoinPowerLawChartPageComponent implements AfterViewInit {
           fill: false as any,
         },
         {
-          label: 'Felső sáv ára',
+          label: $localize`:Upper band price@@charts.metric.upperBandPrice:Upper band price`,
           data: allDates.map((d) => powerLawCeiling(d)),
           borderColor: '#EF4444',
           backgroundColor: 'transparent',
@@ -365,7 +365,7 @@ export class BitcoinPowerLawChartPageComponent implements AfterViewInit {
     this.exportMenuOpen.set(false);
     await exportChartPng({
       chartImageDataUrl: dataUrl,
-      chartTitle: 'Bitcoin hatványtörvény grafikon',
+      chartTitle: 'Bitcoin Power Law Chart',
       fileName: `bitcoin-power-law-chart_${getExportDateStamp()}.png`,
     });
   }
@@ -379,8 +379,8 @@ export class BitcoinPowerLawChartPageComponent implements AfterViewInit {
         { header: $localize`:Date header@@charts.csv.date:Date`, value: (row) => row.date },
         { header: $localize`:Price USD header@@charts.csv.priceUsd:Price USD`, value: (row) => formatCsvNumber(row.priceUsd) },
         { header: $localize`:Model price metric@@charts.metric.modelPrice:Model price`, value: (row) => formatCsvNumber(powerLawModel(row.date)) },
-        { header: 'Alsó sáv ára', value: (row) => formatCsvNumber(powerLawFloor(row.date)) },
-        { header: 'Felső sáv ára', value: (row) => formatCsvNumber(powerLawCeiling(row.date)) },
+        { header: $localize`:Lower band price@@charts.metric.lowerBandPrice:Lower band price`, value: (row) => formatCsvNumber(powerLawFloor(row.date)) },
+        { header: $localize`:Upper band price@@charts.metric.upperBandPrice:Upper band price`, value: (row) => formatCsvNumber(powerLawCeiling(row.date)) },
       ],
     });
   }

@@ -59,6 +59,7 @@ const SUPPORTED_CHART_IDS = new Set([
   'puell-multiple',
   'realized-price',
   'spx-liquidity',
+  'sopr-ratio',
   'stock-to-flow',
   'stock-to-income',
   'thermocap-multiple',

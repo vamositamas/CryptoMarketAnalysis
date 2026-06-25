@@ -41,7 +41,7 @@ const TIMEFRAMES: TimeframeOption[] = [
   { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
   { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
   { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
-  { label: 'Mind', value: 'all' },
+  { label: $localize`:Timeframe All@@charts.timeframe.all:All`, value: 'all' },
 ];
 
 const HALVING_EVENTS = [
@@ -99,11 +99,11 @@ export class MayerMultipleChartPageComponent implements AfterViewInit {
         ? $localize`:Overheated signal@@charts.signal.overheated:Overheated`
         : multiple !== null && multiple < 0.8
           ? $localize`:Accumulation signal@@charts.signal.accumulation:Accumulation`
-          : 'Semleges';
+          : $localize`:Neutral signal@@charts.signal.neutral:Neutral`;
     return [
       { label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`, value: formatUsd(price) },
-      { label: '200d MA', value: ma200 !== null ? formatUsd(ma200) : $localize`:No data value@@common.noData:No data` },
-      { label: 'Mayer Multiple', value: multiple !== null ? multiple.toFixed(3) : $localize`:No data value@@common.noData:No data` },
+      { label: $localize`:200d MA@@charts.metric.ma200d:200d MA`, value: ma200 !== null ? formatUsd(ma200) : $localize`:No data value@@common.noData:No data` },
+      { label: $localize`:Mayer Multiple@@charts.metric.mayerMultiple:Mayer Multiple`, value: multiple !== null ? multiple.toFixed(3) : $localize`:No data value@@common.noData:No data` },
       { label: $localize`:Signal metric@@charts.metric.signal:Signal`, value: signalValue },
     ];
   });
@@ -144,7 +144,7 @@ export class MayerMultipleChartPageComponent implements AfterViewInit {
         // Mayer Multiple — teal, solid, thick, left axis (y2)
         {
           type: 'line' as const,
-          label: 'Mayer Multiple',
+          label: $localize`:Mayer Multiple@@charts.metric.mayerMultiple:Mayer Multiple`,
           data: points.map((p) => p.mayerMultiple),
           borderColor: '#0d9488',
           borderWidth: 2,
@@ -252,7 +252,7 @@ export class MayerMultipleChartPageComponent implements AfterViewInit {
             borderWidth: 1.5,
             label: {
               display: true,
-              content: 'Overheated (2.4)',
+              content: $localize`:Mayer overheated@@charts.annotation.mayer.overheated:Overheated (2.4)`,
               position: 'start',
               backgroundColor: 'rgba(239, 68, 68, 0.85)',
               color: '#fff',
@@ -270,7 +270,7 @@ export class MayerMultipleChartPageComponent implements AfterViewInit {
             borderWidth: 1.5,
             label: {
               display: true,
-              content: 'Fair Value (1.0)',
+              content: $localize`:Mayer fair value@@charts.annotation.mayer.fairValue:Fair Value (1.0)`,
               position: 'start',
               backgroundColor: 'rgba(161, 123, 5, 0.85)',
               color: '#fff',
@@ -288,7 +288,7 @@ export class MayerMultipleChartPageComponent implements AfterViewInit {
             borderWidth: 1.5,
             label: {
               display: true,
-              content: 'Accumulation (0.8)',
+              content: $localize`:Mayer accumulation@@charts.annotation.mayer.accumulation:Accumulation (0.8)`,
               position: 'start',
               backgroundColor: 'rgba(21, 128, 61, 0.85)',
               color: '#fff',
@@ -446,7 +446,7 @@ function createHalvingAnnotations(startDate: string): Record<string, AnnotationO
 }
 
 function formatUsd(value: number): string {
-  if (!Number.isFinite(value)) return 'nincs adat';
+  if (!Number.isFinite(value)) return $localize`:No data value@@common.noData:No data`;
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',

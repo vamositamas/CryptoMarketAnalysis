@@ -39,7 +39,7 @@ const TIMEFRAMES: TimeframeOption[] = [
   { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
   { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
   { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
-  { label: 'Mind', value: 'all' },
+  { label: $localize`:Timeframe All@@charts.timeframe.all:All`, value: 'all' },
 ];
 
 const HALVING_EVENTS = [
@@ -75,7 +75,7 @@ function halvingDaysToColor(days: number): string {
 }
 
 const STOCK_TO_FLOW_ALERT_METRICS: AlertMetricOption[] = [
-  { value: 'stock_to_flow_ratio', label: 'Stock-to-Flow Ratio' },
+  { value: 'stock_to_flow_ratio', label: $localize`:S2F ratio@@charts.metric.stockToFlowRatio:Stock-to-Flow Ratio` },
   { value: 'btc_price', label: $localize`:BTC price USD metric@@charts.metric.btcPriceUsd:BTC price USD` },
 ];
 
@@ -106,9 +106,9 @@ export class StockToFlowChartPageComponent implements AfterViewInit {
 
     return [
       { label: $localize`:Current price metric@@charts.metric.currentPrice:Current price`, value: point ? formatUsd(point.priceUsd) : $localize`:Waiting for data@@charts.waitingForData:Waiting for data` },
-      { label: $localize`:Model price metric@@charts.metric.modelPrice:Model price`, value: point?.modelPrice ? formatUsd(point.modelPrice) : 'Waiting for model' },
-      { label: 'Stock-to-Flow Ratio', value: point?.stockToFlowRatio ? point.stockToFlowRatio.toFixed(2) : 'Waiting for model' },
-      { label: 'Ár vs. modell', value: point ? formatPremium(point) : $localize`:Waiting for data@@charts.waitingForData:Waiting for data` },
+      { label: $localize`:Model price metric@@charts.metric.modelPrice:Model price`, value: point?.modelPrice ? formatUsd(point.modelPrice) : $localize`:Waiting for model@@charts.waitingForModel:Waiting for model` },
+      { label: $localize`:S2F ratio@@charts.metric.stockToFlowRatio:Stock-to-Flow Ratio`, value: point?.stockToFlowRatio ? point.stockToFlowRatio.toFixed(2) : $localize`:Waiting for model@@charts.waitingForModel:Waiting for model` },
+      { label: $localize`:Price vs model@@charts.metric.priceVsModel:Price vs. model`, value: point ? formatPremium(point) : $localize`:Waiting for data@@charts.waitingForData:Waiting for data` },
     ];
   });
   protected readonly infoInterpretation = computed(() => {
@@ -116,26 +116,26 @@ export class StockToFlowChartPageComponent implements AfterViewInit {
     const divergenceKind = point ? getDivergenceKind(point) : undefined;
 
     if (!point || point.modelPrice === null) {
-      return 'Waiting for the latest Stock-to-Flow model calculation.';
+      return $localize`:S2F waiting interpretation@@charts.stockToFlow.interpretation.waiting:Waiting for the latest Stock-to-Flow model calculation.`;
     }
 
     if (divergenceKind === 'overvalued') {
-      return 'Bitcoin is trading materially above the Stock-to-Flow model price. Treat this as historical context rather than a standalone sell signal.';
+      return $localize`:S2F overvalued interpretation@@charts.stockToFlow.interpretation.overvalued:Bitcoin is trading materially above the Stock-to-Flow model price. Treat this as historical context rather than a standalone sell signal.`;
     }
 
     if (divergenceKind === 'undervalued') {
-      return 'Bitcoin is trading materially below the Stock-to-Flow model price. Historically, this has marked periods where price lagged scarcity-model expectations.';
+      return $localize`:S2F undervalued interpretation@@charts.stockToFlow.interpretation.undervalued:Bitcoin is trading materially below the Stock-to-Flow model price. Historically, this has marked periods where price lagged scarcity-model expectations.`;
     }
 
-    return 'Bitcoin is trading near the Stock-to-Flow model price. The model is best used as long-term scarcity context, not a precise forecast.';
+    return $localize`:S2F neutral interpretation@@charts.stockToFlow.interpretation.neutral:Bitcoin is trading near the Stock-to-Flow model price. The model is best used as long-term scarcity context, not a precise forecast.`;
   });
   protected readonly infoLastUpdated = computed(() => this.lastUpdatedText());
   protected readonly infoAbout =
-    'The Bitcoin Stock-to-Flow model estimates Bitcoin value from scarcity, using the ratio between existing supply and new issuance. It is most useful as long-term historical context around halving cycles.';
+    $localize`:S2F about@@charts.stockToFlow.about:The Bitcoin Stock-to-Flow model estimates Bitcoin value from scarcity, using the ratio between existing supply and new issuance. It is most useful as long-term historical context around halving cycles.`;
   protected readonly infoDataSources = [
-    'Bitcoin Price: CoinGecko API',
-    'Supply schedule: Bitcoin issuance and halving schedule',
-    'Calculation: Stock-to-Flow ratio and model price calculated from Bitcoin supply and issuance flow',
+    $localize`:S2F data source price@@charts.stockToFlow.dataSource.price:Bitcoin price: CoinGecko API`,
+    $localize`:S2F data source supply@@charts.stockToFlow.dataSource.supply:Supply schedule: Bitcoin issuance and halving schedule`,
+    $localize`:S2F data source calculation@@charts.stockToFlow.dataSource.calculation:Calculation: Stock-to-Flow ratio and model price calculated from Bitcoin supply and issuance flow`,
   ];
   // 365-day trailing average in log space — shared by chartData (line) and chartOptions (Y range)
   private readonly smoothedModelPrices = computed(() => {
@@ -173,7 +173,7 @@ export class StockToFlowChartPageComponent implements AfterViewInit {
           segment: { borderColor: (ctx: any) => halvingColors[ctx.p0DataIndex] ?? '#888' },
         },
         {
-          label: 'Stock/Flow (365d avg)',
+          label: $localize`:S2F model average label@@charts.stockToFlow.modelAverage:Stock-to-Flow model (365-day average)`,
           data: [...this.smoothedModelPrices(), ...futureNulls],
           borderColor: '#7f1d1d',
           backgroundColor: 'transparent',
@@ -212,8 +212,8 @@ export class StockToFlowChartPageComponent implements AfterViewInit {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             generateLabels: (): any[] => [
               { text: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`,             pointStyle: 'circle', fillStyle: '#22c55e', strokeStyle: '#22c55e', lineWidth: 0, hidden: false, datasetIndex: 0 },
-              { text: 'Stock/Flow (365d avg)', pointStyle: 'line',   strokeStyle: '#7f1d1d', lineWidth: 2,         hidden: false, datasetIndex: 1 },
-              { text: 'Halving Dates',         pointStyle: 'dash',   strokeStyle: 'rgba(107,114,128,0.7)', lineWidth: 1, hidden: false, datasetIndex: -1 },
+              { text: $localize`:S2F model average label@@charts.stockToFlow.modelAverage:Stock-to-Flow model (365-day average)`, pointStyle: 'line',   strokeStyle: '#7f1d1d', lineWidth: 2,         hidden: false, datasetIndex: 1 },
+              { text: $localize`:Halving dates legend@@charts.halvingDates:Halving dates`,         pointStyle: 'dash',   strokeStyle: 'rgba(107,114,128,0.7)', lineWidth: 1, hidden: false, datasetIndex: -1 },
             ],
           },
         },
@@ -228,8 +228,8 @@ export class StockToFlowChartPageComponent implements AfterViewInit {
               const point = this.dataPoints()[items[0]?.dataIndex ?? -1];
               if (!point) return '';
               return [
-                `S2F Ratio: ${formatRatio(point.stockToFlowRatio)}`,
-                `Premium to Model: ${formatPremium(point)}`,
+                `${$localize`:S2F ratio@@charts.metric.stockToFlowRatio:Stock-to-Flow Ratio`}: ${formatRatio(point.stockToFlowRatio)}`,
+                `${$localize`:Premium to model tooltip@@charts.stockToFlow.premiumToModel:Premium to model`}: ${formatPremium(point)}`,
               ];
             },
           },
@@ -321,7 +321,7 @@ export class StockToFlowChartPageComponent implements AfterViewInit {
     this.exportMenuOpen.set(false);
     await exportChartPng({
       chartImageDataUrl,
-      chartTitle: 'Stock-to-Flow modell',
+      chartTitle: $localize`:Stock to Flow title@@charts.stockToFlowTitle:Stock-to-Flow Model`,
       fileName: `stock-to-flow_${getExportDateStamp()}.png`,
     });
   }
@@ -334,8 +334,8 @@ export class StockToFlowChartPageComponent implements AfterViewInit {
       columns: [
         { header: $localize`:Date header@@charts.csv.date:Date`, value: (row) => row.date },
         { header: $localize`:Price USD header@@charts.csv.priceUsd:Price USD`, value: (row) => formatCsvNumber(row.priceUsd) },
-        { header: 'S2F Model Price', value: (row) => formatCsvNumber(row.modelPrice) },
-        { header: 'S2F Ratio', value: (row) => row.stockToFlowRatio },
+        { header: $localize`:S2F model price CSV header@@charts.stockToFlow.csv.modelPrice:S2F model price`, value: (row) => formatCsvNumber(row.modelPrice) },
+        { header: $localize`:S2F ratio CSV header@@charts.stockToFlow.csv.ratio:S2F ratio`, value: (row) => row.stockToFlowRatio },
       ],
     });
   }
@@ -430,7 +430,7 @@ function getPriceRange(
 
 function formatPremium(point: StockToFlowChartDataPoint): string {
   if (point.modelPrice === null || point.modelPrice <= 0) {
-    return 'nincs adat';
+    return $localize`:No data value@@common.noData:No data`;
   }
 
   const premium = ((point.priceUsd - point.modelPrice) / point.modelPrice) * 100;
@@ -439,12 +439,12 @@ function formatPremium(point: StockToFlowChartDataPoint): string {
 }
 
 function formatRatio(value: number | null): string {
-  return value === null ? 'nincs adat' : value.toFixed(1);
+  return value === null ? $localize`:No data value@@common.noData:No data` : value.toFixed(1);
 }
 
 function formatUsd(value: number): string {
   if (!Number.isFinite(value)) {
-    return 'nincs adat';
+    return $localize`:No data value@@common.noData:No data`;
   }
 
   return new Intl.NumberFormat('en-US', {

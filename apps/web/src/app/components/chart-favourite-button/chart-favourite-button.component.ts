@@ -11,7 +11,7 @@ import { AuthApiClient } from '@crypto-market-analysis/data-access/api-client';
       [class.is-favourite]="isFavourite()"
       [disabled]="isLoading()"
       (click)="toggle()"
-      [title]="isFavourite() ? 'Remove from favourites' : 'Add to favourites'"
+      [title]="isFavourite() ? removeFromFavouritesLabel : addToFavouritesLabel"
       [attr.aria-pressed]="isFavourite()"
     >
       <svg
@@ -27,7 +27,7 @@ import { AuthApiClient } from '@crypto-market-analysis/data-access/api-client';
       >
         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
       </svg>
-      {{ isFavourite() ? 'Saved' : 'Save' }}
+      {{ isFavourite() ? savedLabel : saveLabel }}
     </button>
   `,
 })
@@ -37,6 +37,10 @@ export class ChartFavouriteButtonComponent implements OnInit {
   private readonly api = inject(AuthApiClient);
   protected readonly isFavourite = signal(false);
   protected readonly isLoading = signal(true);
+  protected readonly saveLabel = $localize`:Save button@@common.save:Save`;
+  protected readonly savedLabel = $localize`:Saved state@@chart.saved:Saved`;
+  protected readonly addToFavouritesLabel = $localize`:Add to favourites@@chart.addToFavourites:Add to favourites`;
+  protected readonly removeFromFavouritesLabel = $localize`:Remove from favourites@@chart.removeFromFavourites:Remove from favourites`;
 
   async ngOnInit(): Promise<void> {
     try {

@@ -39,7 +39,7 @@ const TIMEFRAMES: TimeframeOption[] = [
   { label: $localize`:Timeframe 6 months@@charts.timeframe.6m:6 months`, value: '6m' },
   { label: $localize`:Timeframe 1 year@@charts.timeframe.1y:1 year`, value: '1y' },
   { label: $localize`:Timeframe 2 years@@charts.timeframe.2y:2 years`, value: '2y' },
-  { label: 'Mind', value: 'all' },
+  { label: $localize`:Timeframe All@@charts.timeframe.all:All`, value: 'all' },
 ];
 
 const HALVING_EVENTS = [
@@ -113,8 +113,8 @@ export class BitcoinCvddChartPageComponent implements AfterViewInit {
     const ratio = point.priceUsd / cvddNow;
     return [
       { label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`, value: formatUsd(point.priceUsd) },
-      { label: 'CVDD', value: formatUsd(cvddNow) },
-      { label: 'BTC / CVDD Ratio', value: ratio.toFixed(2) + '×' },
+      { label: $localize`:CVDD metric@@charts.metric.cvdd:CVDD`, value: formatUsd(cvddNow) },
+      { label: $localize`:BTC CVDD ratio@@charts.metric.btcCvddRatio:BTC / CVDD Ratio`, value: ratio.toFixed(2) + '×' },
       { label: $localize`:Signal metric@@charts.metric.signal:Signal`, value: getCvddSignal(ratio) },
     ];
   });
@@ -355,11 +355,11 @@ function buildFutureLabels(points: { date: string }[], timeframe: string): strin
 }
 
 function getCvddSignal(ratio: number): string {
-  if (ratio < 1.0) return 'Exceptional — BTC below CVDD';
-  if (ratio < 1.5) return 'Historic buy opportunity';
+  if (ratio < 1.0) return $localize`:CVDD exceptional@@charts.signal.cvdd.exceptional:Exceptional — BTC below CVDD`;
+  if (ratio < 1.5) return $localize`:CVDD historic buy@@charts.signal.cvdd.historicBuy:Historic buy opportunity`;
   if (ratio < 3.0) return $localize`:Accumulation zone signal@@charts.signal.accumulationZone:Accumulation zone`;
-  if (ratio < 6.0) return 'Bull market — elevated';
-  return 'Late-cycle excess';
+  if (ratio < 6.0) return $localize`:CVDD bull elevated@@charts.signal.cvdd.bullElevated:Bull market — elevated`;
+  return $localize`:CVDD late excess@@charts.signal.cvdd.lateExcess:Late-cycle excess`;
 }
 
 function formatUsd(value: number): string {

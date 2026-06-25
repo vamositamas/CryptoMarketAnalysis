@@ -1,16 +1,10 @@
 <section class="content-section rainbow-chart-page">
   <div class="chart-page-header">
     <div>
-      <a class="form-link" routerLink="/charts" i18n="Back to chart library@@charts.backToLibrary">
-        Back to chart library
-      </a>
-      <p class="eyebrow" i18n="MVRV Z-Score eyebrow@@charts.mvrvEyebrow">
-        Valuation model
-      </p>
-      <h2 i18n="MVRV Z-Score title@@charts.mvrvTitle">MVRV Z-Score</h2>
-      <p i18n="MVRV Z-Score subtitle@@charts.mvrvSubtitle">
-        Market value vs realized value to identify statistically extreme cycle positions
-      </p>
+      <a class="form-link" routerLink="/charts" i18n="Back to chart library@@charts.backToLibrary">Back to chart library</a>
+      <p class="eyebrow" i18n="SOPR Ratio eyebrow@@charts.soprRatioEyebrow">On-chain behavior</p>
+      <h2 i18n="SOPR Ratio title@@charts.soprRatioTitle">SOPR Ratio (LTH/STH)</h2>
+      <p i18n="SOPR Ratio subtitle@@charts.soprRatioSubtitle">Long-term holder SOPR divided by short-term holder SOPR</p>
     </div>
     <div class="chart-status">
       <span i18n="Chart last updated label@@charts.lastUpdated">Last updated</span>
@@ -35,41 +29,19 @@
     <div class="chart-actions">
       <button type="button" class="secondary-button" (click)="resetZoom()" i18n="Zoom reset label@@charts.zoomReset">Reset zoom</button>
       <div class="export-menu">
-        <button type="button" class="secondary-button" (click)="toggleExportMenu()" i18n="Export control label@@charts.exportControl">
-          Export
-        </button>
+        <button type="button" class="secondary-button" (click)="toggleExportMenu()" i18n="Export control label@@charts.exportControl">Export</button>
         @if (exportMenuOpen()) {
           <div class="export-options">
-            <button type="button" (click)="exportPng()" i18n="Export PNG option@@charts.exportPng">
-              Export as PNG
-            </button>
-            <button type="button" (click)="exportCsv()" i18n="Export CSV option@@charts.exportCsv">
-              Export as CSV
-            </button>
+            <button type="button" (click)="exportPng()" i18n="Export PNG option@@charts.exportPng">Export as PNG</button>
+            <button type="button" (click)="exportCsv()" i18n="Export CSV option@@charts.exportCsv">Export as CSV</button>
           </div>
         }
       </div>
-      <app-chart-annotations
-        chartId="mvrv-z-score"
-        (annotationsChanged)="updateUserAnnotations($event)"
-      ></app-chart-annotations>
-      <button type="button" class="secondary-button" (click)="openAlertModal()" i18n="Create alert button@@chart.createAlert">
-        Create Alert
-      </button>
-      <app-chart-favourite-button [chartId]="'mvrv-z-score'"></app-chart-favourite-button>
-      <button type="button" class="secondary-button" (click)="toggleInfo()" i18n="Info control label@@charts.infoControl">
-        Info
-      </button>
+      <app-chart-annotations chartId="sopr-ratio" (annotationsChanged)="updateUserAnnotations($event)"></app-chart-annotations>
+      <app-chart-favourite-button [chartId]="'sopr-ratio'"></app-chart-favourite-button>
+      <button type="button" class="secondary-button" (click)="toggleInfo()" i18n="Info control label@@charts.infoControl">Info</button>
     </div>
   </div>
-
-  @if (showAlertModal()) {
-    <app-create-alert-modal
-      chartId="mvrv-z-score"
-      [metrics]="alertMetrics"
-      (closed)="closeAlertModal()"
-    ></app-create-alert-modal>
-  }
 
   @if (errorMessage()) {
     <p class="form-message">{{ errorMessage() }}</p>
@@ -86,23 +58,21 @@
 
       @if (dataPoints().length > 0) {
         <app-chart-viewer
+          chartType="bar"
           [chartData]="chartData()"
           [chartOptions]="chartOptions()"
           (chartPointSelected)="handleChartPoint($event)"
         ></app-chart-viewer>
       } @else if (!isLoading() && !errorMessage()) {
-        <p class="empty-state" i18n="No MVRV chart data message@@charts.mvrv.noData">
-          No MVRV Z-Score chart data is available yet.
-        </p>
+        <p class="empty-state" i18n="SOPR Ratio no data@@charts.soprRatioNoData">SOPR Ratio data is not available yet.</p>
       }
     </div>
-
   </div>
 
   @if (infoOpen()) {
     <app-chart-info-panel
-      title="MVRV Z-Score"
-      i18n-title="MVRV Z-Score title@@charts.mvrvTitle"
+      title="SOPR Ratio (LTH/STH)"
+      i18n-title="SOPR Ratio title@@charts.soprRatioTitle"
       [about]="infoAbout"
       [currentFields]="infoCurrentFields()"
       [interpretation]="infoInterpretation()"
