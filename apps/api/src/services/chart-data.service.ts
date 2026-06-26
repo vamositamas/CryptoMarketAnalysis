@@ -1,4 +1,4 @@
-import { BitcoinDataClient } from '@crypto-market-analysis/calculation-engines/data-sources';
+import { BitcoinDataClient, CoinMetricsClient } from '@crypto-market-analysis/calculation-engines/data-sources';
 import {
   ChartDataRepository,
   type ChartDataRow,
@@ -258,6 +258,7 @@ export class ChartDataService {
     private readonly repository: Pick<ChartDataRepository, 'findBitcoinChartData' | 'findExcessLiquidityData' | 'findSpxLiquidityData' | 'findMidtermCyclesData'>,
     private readonly now: () => Date = () => new Date(),
     private readonly bitcoinDataClient: Pick<BitcoinDataClient, 'fetchVddMultipleHistory'> = new BitcoinDataClient(),
+    private readonly coinMetricsClient: Pick<CoinMetricsClient, 'fetchMvrvRatioAndPriceHistory'> = new CoinMetricsClient(),
   ) {}
 
   async getChartData(chartId: ChartId, timeframeInput: unknown): Promise<ChartDataResponse> {
@@ -560,7 +561,8 @@ export class ChartDataService {
     }
 
     if (chartId === 'realized-price') {
-      const firstRpDate = rows.find((r) => r.realizedPrice !== null)?.date ?? '2010-07-18';
+      const realizedPriceByDate = await this.getRealizedPriceHistory(rows);
+      const firstRpDate = [...realizedPriceByDate.keys()].sort()[0] ?? '2010-07-18';
       const startDate = timeframe === 'all' ? firstRpDate : getTimeframeStartDate(timeframe, this.now());
       return {
         chartId: 'realized-price',
@@ -568,14 +570,17 @@ export class ChartDataService {
         timeframe,
         dataPoints: rows
           .filter((r) => r.date >= startDate)
-          .map((r) => ({
-            date: r.date,
-            priceUsd: r.priceUsd,
-            realizedPrice: r.realizedPrice,
-            mvrvRatio: r.realizedPrice !== null && r.realizedPrice > 0
-              ? r.priceUsd / r.realizedPrice
-              : null,
-          })),
+          .map((r) => {
+            const realizedPrice = realizedPriceByDate.get(r.date) ?? null;
+            return {
+              date: r.date,
+              priceUsd: r.priceUsd,
+              realizedPrice,
+              mvrvRatio: realizedPrice !== null && realizedPrice > 0
+                ? r.priceUsd / realizedPrice
+                : null,
+            };
+          }),
         lastUpdated,
       };
     }
@@ -634,6 +639,32 @@ export class ChartDataService {
       })),
       lastUpdated,
     };
+  }
+
+  private async getRealizedPriceHistory(rows: ChartDataRow[]): Promise<Map<string, number>> {
+    const realizedPriceByDate = new Map(
+      rows
+        .filter((r): r is ChartDataRow & { realizedPrice: number } => r.realizedPrice !== null)
+        .map((r) => [r.date, r.realizedPrice] as const),
+    );
+    const coverageRatio = rows.length === 0 ? 0 : realizedPriceByDate.size / rows.length;
+
+    if (realizedPriceByDate.size > 30 && coverageRatio >= 0.25) {
+      return realizedPriceByDate;
+    }
+
+    try {
+      const history = await this.coinMetricsClient.fetchMvrvRatioAndPriceHistory();
+      for (const point of history) {
+        if (!realizedPriceByDate.has(point.date)) {
+          realizedPriceByDate.set(point.date, point.realizedPrice);
+        }
+      }
+    } catch {
+      // Keep stored database values if the external full-history source is unavailable.
+    }
+
+    return realizedPriceByDate;
   }
 }
 

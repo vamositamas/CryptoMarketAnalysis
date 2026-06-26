@@ -3321,6 +3321,14 @@ export const appRoutes: Route[] = [
       ),
   },
   {
+    path: 'charts/realized-price',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/realized-price-chart-page/realized-price-chart-page.component').then(
+        (m) => m.RealizePriceChartPageComponent,
+      ),
+  },
+  {
     path: 'charts/sopr-ratio',
     canActivate: [authGuard],
     loadComponent: () =>

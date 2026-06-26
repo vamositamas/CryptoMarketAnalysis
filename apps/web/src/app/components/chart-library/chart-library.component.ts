@@ -52,6 +52,16 @@ const CHARTS: ChartLibraryItem[] = [
     thumbnailClass: 'mvrv-z-score',
   },
   {
+    id: 'realized-price',
+    title: $localize`:Chart realized-price title@@charts.library.realized-price.title:Realized Price`,
+    category: 'valuation',
+
+    signal: $localize`:Chart realized-price signal@@charts.library.realized-price.signal:Aggregate on-chain cost basis`,
+    description:
+      $localize`:Chart realized-price description@@charts.library.realized-price.description:Shows BTC market price against the average price where coins last moved on-chain. Price below realized price has historically marked broad holder losses and cycle stress.`,
+    thumbnailClass: 'realized-price',
+  },
+  {
     id: 'sopr-ratio',
     title: $localize`:Chart sopr-ratio title@@charts.library.sopr-ratio.title:SOPR Ratio (LTH/STH)`,
     category: 'cycle',

@@ -42,35 +42,10 @@ const TIMEFRAMES: TimeframeOption[] = [
   { label: $localize`:Timeframe All@@charts.timeframe.all:All`, value: 'all' },
 ];
 
-const HALVING_EVENTS = [
-  { date: '2012-11-28', label: $localize`:2012 halving label@@charts.halving.2012:2012 halving` },
-  { date: '2016-07-09', label: $localize`:2016 halving label@@charts.halving.2016:2016 halving` },
-  { date: '2020-05-11', label: $localize`:2020 halving label@@charts.halving.2020:2020 halving` },
-  { date: '2024-04-19', label: $localize`:2024 halving label@@charts.halving.2024:2024 halving` },
-];
-
 const REALIZED_PRICE_ALERT_METRICS: AlertMetricOption[] = [
   { value: 'realized_price', label: $localize`:Realized price USD metric@@charts.metric.realizedPriceUsd:Realized price USD` },
   { value: 'btc_price', label: $localize`:BTC price USD metric@@charts.metric.btcPriceUsd:BTC price USD` },
 ];
-
-const HALVING_DATES_MS = [
-  Date.parse('2009-01-03T00:00:00Z'),
-  Date.parse('2012-11-28T00:00:00Z'),
-  Date.parse('2016-07-09T00:00:00Z'),
-  Date.parse('2020-05-11T00:00:00Z'),
-  Date.parse('2024-04-19T00:00:00Z'),
-  Date.parse('2028-04-21T00:00:00Z'),
-];
-
-function halvingCycleColor(date: string): string {
-  if (!date) return '#888';
-  const ms = Date.parse(`${date}T00:00:00Z`);
-  const nextHalving = HALVING_DATES_MS.find((h) => h > ms) ?? HALVING_DATES_MS[HALVING_DATES_MS.length - 1];
-  const daysUntil = (nextHalving - ms) / 86_400_000;
-  const hue = Math.max(0, Math.min(240, 240 - (daysUntil / 1400) * 240));
-  return `hsl(${hue.toFixed(0)}, 90%, 52%)`;
-}
 
 @Component({
   selector: 'app-realized-price-chart-page',
@@ -123,31 +98,29 @@ export class RealizePriceChartPageComponent implements AfterViewInit {
     const points = this.dataPoints();
     const lastRpPoint = [...points].reverse().find((p) => p.mvrvRatio !== null);
     const mvrv = lastRpPoint?.mvrvRatio ?? null;
-    if (mvrv === null) return 'Waiting for realized price data to compute the MVRV ratio.';
+    if (mvrv === null) {
+      return $localize`:Realized Price waiting interpretation@@charts.realizedPrice.interpretation.waiting:Waiting for realized price data to compute the MVRV ratio.`;
+    }
     if (mvrv > 3.5) {
-      return `MVRV Ratio is ${mvrv.toFixed(2)} — above 3.5, historically associated with cycle top sell zones. Market value significantly exceeds the aggregate cost basis of all coins.`;
+      return $localize`:Realized Price overheated interpretation@@charts.realizedPrice.interpretation.overheated:MVRV Ratio is ${mvrv.toFixed(2)}:INTERPOLATION:. Market price is far above realized price, so aggregate holders are deeply in profit; historically this has appeared in late-cycle conditions.`;
     }
     if (mvrv > 2.0) {
-      return `MVRV Ratio is ${mvrv.toFixed(2)} — in the overvalued range (2.0–3.5). Price is meaningfully above realized price, suggesting elevated profit levels across the network.`;
+      return $localize`:Realized Price elevated interpretation@@charts.realizedPrice.interpretation.elevated:MVRV Ratio is ${mvrv.toFixed(2)}:INTERPOLATION:. Price is meaningfully above the aggregate on-chain cost basis, so most market participants are holding paper profits.`;
     }
     if (mvrv >= 1.0) {
-      return `MVRV Ratio is ${mvrv.toFixed(2)} — in the fair value range (1.0–2.0). Price is above realized price but within normal historical bounds.`;
+      return $localize`:Realized Price fair interpretation@@charts.realizedPrice.interpretation.fair:MVRV Ratio is ${mvrv.toFixed(2)}:INTERPOLATION:. BTC trades above realized price, meaning the market is in aggregate profit but still close to its on-chain cost basis.`;
     }
-    return `MVRV Ratio is ${mvrv.toFixed(2)} — below realized price. The average coin is underwater, historically associated with bear market accumulation zones.`;
+    return $localize`:Realized Price stress interpretation@@charts.realizedPrice.interpretation.stress:MVRV Ratio is ${mvrv.toFixed(2)}:INTERPOLATION:. BTC trades below realized price, meaning aggregate holders are underwater; historically these periods have clustered near major cycle lows.`;
   });
 
   protected readonly infoLastUpdated = computed(() => this.lastUpdatedText());
 
-  protected readonly infoAbout =
-    'Bitcoin Realized Price is the average price at which each bitcoin last moved on-chain, ' +
-    'weighted by the amount of BTC. It represents the aggregate cost basis of the market. ' +
-    'The MVRV Ratio (Market Value / Realized Value) compares current price to realized price — ' +
-    'values above 3.5 historically signal cycle tops; values below 1.0 signal deep undervaluation.';
+  protected readonly infoAbout = $localize`:Realized Price about@@charts.realizedPrice.about:Bitcoin Realized Price values each coin at the price when it last moved on-chain, then divides that value by circulating supply. This gives an estimate of the market's aggregate cost basis. When BTC price is above realized price, holders are in profit on aggregate; when BTC price is below realized price, the market is carrying aggregate paper losses.`;
 
   protected readonly infoDataSources = [
-    'Bitcoin Price: CoinGecko API (stored daily)',
-    'Realized Price: CoinMetrics community API (CapMVRVCur × PriceUSD) — backfilled via admin',
-    'MVRV Ratio: BTC Price ÷ Realized Price — computed on the fly',
+    $localize`:Realized Price data source BTC price@@charts.realizedPrice.dataSource.price:Bitcoin price: CoinGecko API via backend price history`,
+    $localize`:Realized Price data source realized price@@charts.realizedPrice.dataSource.realized:Realized price: stored DB values plus CoinMetrics community API history derived from PriceUSD / CapMVRVCur`,
+    $localize`:Realized Price data source MVRV ratio@@charts.realizedPrice.dataSource.mvrv:MVRV Ratio: BTC price divided by realized price, computed by the backend`,
   ];
 
   protected readonly chartData = computed<ChartData>(() => {
@@ -158,39 +131,29 @@ export class RealizePriceChartPageComponent implements AfterViewInit {
       datasets: [
         {
           type: 'line' as const,
-          label: $localize`:BTC price USD metric@@charts.metric.btcPriceUsd:BTC price USD`,
+          label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC Price`,
           data: points.map((p) => p.priceUsd),
+          borderColor: '#1f2933',
+          backgroundColor: '#1f2933',
           borderWidth: 2,
           pointRadius: 0,
+          pointHitRadius: 8,
           tension: 0,
           yAxisID: 'y',
           order: 1,
-          segment: {
-            borderColor: (ctx: { p0DataIndex: number }) =>
-              halvingCycleColor(points[ctx.p0DataIndex]?.date ?? ''),
-          },
         },
         {
           type: 'line' as const,
-          label: $localize`:Realized price USD metric@@charts.metric.realizedPriceUsd:Realized price USD`,
+          label: $localize`:Realized price metric@@charts.metric.realizedPrice:Realized Price`,
           data: points.map((p) => p.realizedPrice),
-          borderColor: '#000000',
+          borderColor: '#ff8a1f',
+          backgroundColor: '#ff8a1f',
           borderWidth: 2,
           pointRadius: 0,
+          pointHitRadius: 8,
           tension: 0,
           yAxisID: 'y',
           order: 2,
-        },
-        {
-          type: 'line' as const,
-          showLine: false,
-          label: $localize`:MVRV ratio metric@@charts.metric.mvrvRatio:MVRV ratio`,
-          data: points.map((p) => p.mvrvRatio),
-          backgroundColor: 'rgba(156, 163, 175, 0.7)',
-          pointRadius: 2,
-          pointHoverRadius: 4,
-          yAxisID: 'y2',
-          order: 3,
         },
       ],
     };
@@ -198,6 +161,9 @@ export class RealizePriceChartPageComponent implements AfterViewInit {
 
   protected readonly chartOptions = computed<ChartOptions>(() => ({
     animation: { duration: 280 },
+    layout: {
+      padding: { top: 24, right: 16, bottom: 8, left: 8 },
+    },
     scales: {
       x: {
         ticks: { maxTicksLimit: 10 },
@@ -206,32 +172,36 @@ export class RealizePriceChartPageComponent implements AfterViewInit {
       y: {
         type: 'logarithmic',
         position: 'right',
-        ticks: { callback: (value) => formatUsd(Number(value)) },
-        grid: { drawOnChartArea: false },
-      },
-      y2: {
-        type: 'linear',
-        position: 'left',
-        min: 0,
-        max: 8,
-        ticks: { callback: (value) => Number(value).toFixed(1) },
+        title: {
+          display: true,
+          text: $localize`:BTC price USD axis label@@charts.axis.btcPriceUsd:BTC Price (USD)`,
+          color: '#1f2933',
+          font: { size: 12, weight: 500 },
+        },
+        ticks: {
+          color: '#3f4752',
+          callback: (value) => formatCompactUsd(Number(value)),
+        },
         grid: { color: 'rgba(23, 32, 42, 0.08)' },
       },
     },
     plugins: {
       legend: {
         display: true,
-        position: 'top',
-        labels: { usePointStyle: true },
+        position: 'bottom',
+        align: 'start',
+        labels: {
+          usePointStyle: true,
+          pointStyle: 'line',
+          boxWidth: 28,
+          boxHeight: 3,
+          color: '#1f2933',
+        },
       },
       tooltip: {
         callbacks: {
           title: (items) => formatDate(String(items[0]?.label ?? '')),
           label: (item) => {
-            if (item.dataset.yAxisID === 'y2') {
-              const v = item.parsed.y;
-              return `MVRV Ratio: ${v?.toFixed(3) ?? $localize`:No data value@@common.noData:No data`}`;
-            }
             if (item.datasetIndex === 1) {
               return `Realized Price: ${formatUsd(Number(item.parsed.y))}`;
             }
@@ -241,8 +211,6 @@ export class RealizePriceChartPageComponent implements AfterViewInit {
       },
       annotation: {
         annotations: {
-          ...createFairValueAnnotation(),
-          ...createHalvingAnnotations(this.dataPoints()[0]?.date ?? '2009-01-03'),
           ...this.userAnnotations(),
         },
       },
@@ -371,55 +339,6 @@ function getMvrvSignal(value: number): string {
   return $localize`:Below realized price@@charts.signal.belowRealizedPrice:Below realized price`;
 }
 
-function createFairValueAnnotation(): Record<string, AnnotationOptions> {
-  return {
-    fairValueLine: {
-      type: 'line',
-      yMin: 1,
-      yMax: 1,
-      yScaleID: 'y2',
-      borderColor: 'rgba(239, 68, 68, 0.75)',
-      borderWidth: 1.5,
-      label: {
-        display: true,
-        content: $localize`:Realized price fair value@@charts.annotation.realizedPrice.fairValue:1.0 — Fair Value`,
-        position: 'end',
-        backgroundColor: 'rgba(239, 68, 68, 0.82)',
-        color: '#fff',
-        font: { size: 10, weight: 'bold' as const },
-        padding: { x: 5, y: 2 },
-      },
-    },
-  };
-}
-
-function createHalvingAnnotations(startDate: string): Record<string, AnnotationOptions> {
-  return Object.fromEntries(
-    HALVING_EVENTS
-      .filter((event) => event.date >= startDate)
-      .map((event) => [
-        `halving_${event.date}`,
-        {
-          type: 'line',
-          xMin: event.date,
-          xMax: event.date,
-          borderColor: 'rgba(107, 114, 128, 0.55)',
-          borderDash: [4, 5],
-          borderWidth: 1.5,
-          label: {
-            display: true,
-            content: event.label,
-            position: 'start',
-            backgroundColor: 'rgba(55, 65, 81, 0.88)',
-            color: '#fff',
-            font: { size: 9, weight: 'bold' as const },
-            padding: { x: 4, y: 2 },
-          },
-        } as AnnotationOptions,
-      ]),
-  );
-}
-
 function formatUsd(value: number): string {
   if (!Number.isFinite(value)) return $localize`:No data value@@common.noData:No data`;
   return new Intl.NumberFormat('en-US', {
@@ -427,6 +346,13 @@ function formatUsd(value: number): string {
     currency: 'USD',
     maximumFractionDigits: value >= 1000 ? 0 : 2,
   }).format(value);
+}
+
+function formatCompactUsd(value: number): string {
+  if (!Number.isFinite(value)) return '';
+  if (value >= 1000) return `$${Math.round(value / 1000)}k`;
+  if (value >= 1) return `$${value.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+  return `$${value.toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
 }
 
 function formatDate(value: string): string {

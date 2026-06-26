@@ -2,9 +2,13 @@
   <div class="chart-page-header">
     <div>
       <a class="form-link" routerLink="/charts" i18n="Back to chart library@@charts.backToLibrary">Back to chart library</a>
-      <p class="eyebrow" i18n="Chart category label@@charts.category.onchainValuation">On-chain Valuation</p>
-      <h2>Bitcoin Realized Price</h2>
-      <p>Average price where each BTC last moved on-chain</p>
+      <p class="eyebrow" i18n="Realized Price collection label@@charts.realizedPrice.collection">
+        On-Chain Introduction Collection
+      </p>
+      <h2 i18n="Realized Price chart title@@charts.realizedPrice.title">Bitcoin: Realized Price</h2>
+      <p i18n="Realized Price chart subtitle@@charts.realizedPrice.subtitle">
+        BTC market price compared with the aggregate on-chain cost basis
+      </p>
     </div>
     <div class="chart-status">
       <span i18n="Chart last updated label@@charts.lastUpdated">Last updated</span>
@@ -12,8 +16,8 @@
     </div>
   </div>
 
-  <div class="chart-toolbar" aria-label="Chart controls">
-    <div class="timeframe-selector" role="group">
+  <div class="chart-toolbar" aria-label="Chart controls" i18n-aria-label="Chart controls aria@@charts.controls">
+    <div class="timeframe-selector" role="group" aria-label="Timeframe selector" i18n-aria-label="Timeframe selector aria@@charts.timeframeSelector">
       @for (timeframe of timeframes; track timeframe.value) {
         <button
           type="button"
@@ -41,7 +45,7 @@
         chartId="realized-price"
         (annotationsChanged)="updateUserAnnotations($event)"
       ></app-chart-annotations>
-      <button type="button" class="secondary-button" (click)="openAlertModal()" i18n="Create alert button@@alerts.create">Create alert</button>
+      <button type="button" class="secondary-button" (click)="openAlertModal()" i18n="Create alert button@@chart.createAlert">Create Alert</button>
       <app-chart-favourite-button [chartId]="'realized-price'"></app-chart-favourite-button>
       <button type="button" class="secondary-button" (click)="toggleInfo()" i18n="Info control label@@charts.infoControl">Info</button>
     </div>
@@ -83,7 +87,8 @@
 
   @if (infoOpen()) {
     <app-chart-info-panel
-      title="Bitcoin Realized Price"
+      title="Bitcoin: Realized Price"
+      i18n-title="Realized Price chart title@@charts.realizedPrice.title"
       [about]="infoAbout"
       [currentFields]="infoCurrentFields()"
       [interpretation]="infoInterpretation()"

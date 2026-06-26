@@ -14,6 +14,7 @@ import {
   Chart,
   type ChartConfiguration,
   type ChartData,
+  type LegendItem,
   type ChartOptions,
   type ChartType,
   registerables,
@@ -232,6 +233,10 @@ export class ChartViewerComponent implements AfterViewInit, OnChanges, OnDestroy
   }
 
   private getOptions(): ChartOptions {
+    const sourceLegend = this.chartOptions.plugins?.legend;
+    const sourceLegendLabels = sourceLegend?.labels;
+    const sourceGenerateLabels = sourceLegendLabels?.generateLabels;
+
     return {
       responsive: true,
       maintainAspectRatio: false,
@@ -242,6 +247,31 @@ export class ChartViewerComponent implements AfterViewInit, OnChanges, OnDestroy
       },
       plugins: {
         ...this.chartOptions.plugins,
+        legend: sourceLegend?.display === false
+          ? sourceLegend
+          : {
+              ...sourceLegend,
+              display: true,
+              position: 'bottom',
+              align: 'center',
+              labels: {
+                ...sourceLegendLabels,
+                usePointStyle: true,
+                pointStyle: 'circle',
+                boxWidth: 7,
+                boxHeight: 7,
+                padding: 16,
+                generateLabels: (chart) => {
+                  const generated = sourceGenerateLabels
+                    ? sourceGenerateLabels(chart)
+                    : Chart.defaults.plugins.legend.labels.generateLabels(chart);
+
+                  return generated
+                    .filter((item) => item.text.trim().length > 0)
+                    .map(normalizeLegendItem);
+                },
+              },
+            },
         zoom: {
           pan: {
             enabled: true,
@@ -277,4 +307,16 @@ export class ChartViewerComponent implements AfterViewInit, OnChanges, OnDestroy
       },
     };
   }
+}
+
+function normalizeLegendItem(item: LegendItem): LegendItem {
+  const strokeStyle = item.strokeStyle ?? item.fillStyle;
+
+  return {
+    ...item,
+    pointStyle: 'circle',
+    lineWidth: Math.max(Number(item.lineWidth ?? 0), 2),
+    strokeStyle,
+    fillStyle: strokeStyle,
+  };
 }
