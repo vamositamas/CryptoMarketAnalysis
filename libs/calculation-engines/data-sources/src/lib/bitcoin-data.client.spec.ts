@@ -27,6 +27,24 @@ describe('BitcoinDataClient', () => {
     expect(fetchFn).toHaveBeenCalledWith('https://bitcoin-data.com/v1/realized-price/last');
   });
 
+  it('fetches Balanced Price history with alternate response field names', async () => {
+    const fetchFn = jest.fn().mockResolvedValue(
+      createJsonResponse([
+        { d: '2026-06-14', balanced_price: 52000 },
+        { d: '2026-06-15', balancedPrice: 52100 },
+        { d: '2026-06-16', 'balanced-price': 52200 },
+      ]),
+    );
+    const client = new BitcoinDataClient({ fetchFn: fetchFn as never });
+
+    await expect(client.fetchBalancedPriceHistory()).resolves.toEqual([
+      { date: '2026-06-14', value: 52000 },
+      { date: '2026-06-15', value: 52100 },
+      { date: '2026-06-16', value: 52200 },
+    ]);
+    expect(fetchFn).toHaveBeenCalledWith('https://bitcoin-data.com/v1/balanced-price');
+  });
+
   it('logs request details and throws when the API responds with an error', async () => {
     const logger = { error: jest.fn() };
     const fetchFn = jest.fn().mockResolvedValue({ ok: false, status: 503, json: jest.fn() });

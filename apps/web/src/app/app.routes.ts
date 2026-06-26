@@ -138,6 +138,9 @@ import { LegalDialogService } from './services/legal-dialog.service';
         <li tabindex="0" data-tooltip="Scarcity model comparing Bitcoin supply issuance with market price around halving cycles.">
           Stock-to-Flow
         </li>
+        <li tabindex="0" data-tooltip="Extends Stock-to-Flow by including miner transaction fees in issuance flow for scarcity-model context.">
+          Stock to Income
+        </li>
         <li tabindex="0" data-tooltip="Market sentiment gauge that blends volatility, momentum, social, dominance, and trend inputs.">
           Fear &amp; Greed
         </li>
@@ -160,6 +163,9 @@ import { LegalDialogService } from './services/legal-dialog.service';
         </li>
         <li tabindex="0" data-tooltip="Polar chart that overlays Bitcoin halving cycles to compare current cycle position with past cycles.">
           Halving Spiral
+        </li>
+        <li tabindex="0" data-tooltip="Tracks Bitcoin price history across halving cycles to show current-cycle progress against prior market eras.">
+          Bitcoin Halving Progress
         </li>
         <li
           tabindex="0"

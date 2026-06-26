@@ -86,6 +86,8 @@ export class ThermocapMultipleChartPageComponent implements AfterViewInit {
   protected readonly userAnnotations = signal<Record<string, AnnotationOptions>>({});
   protected readonly dataPoints = signal<ThermocapMultipleDataPoint[]>([]);
   protected readonly lastUpdated = signal<string | null>(null);
+  protected readonly chartTitle = $localize`:Thermocap Multiple title@@charts.thermocap.title:Thermocap Multiple`;
+  protected readonly chartSubtitle = $localize`:Thermocap Multiple subtitle@@charts.thermocap.subtitle:Bitcoin market cap relative to cumulative miner revenue`;
 
   protected readonly infoCurrentFields = computed<ChartInfoField[]>(() => {
     const points = this.dataPoints();
@@ -114,27 +116,27 @@ export class ThermocapMultipleChartPageComponent implements AfterViewInit {
     if (!points.length) return $localize`:Waiting for data sentence@@charts.waitingForDataSentence:Waiting for data.`;
     const last = [...points].reverse().find((p) => p.thermocapMultiple !== null) ?? points[points.length - 1];
     const multiple = last.thermocapMultiple;
-    if (multiple === null) return 'Thermocap Multiple not yet available.';
+    if (multiple === null) return $localize`:Thermocap waiting interpretation@@charts.thermocap.interpretation.waiting:Thermocap Multiple not yet available.`;
     if (multiple > 33) {
-      return `The Thermocap Multiple is ${multiple.toFixed(1)}×, above the historical overvaluation threshold of 33×. This level has historically coincided with cycle tops and suggests elevated risk.`;
+      return $localize`:Thermocap overvalued interpretation@@charts.thermocap.interpretation.overvalued:The Thermocap Multiple is ${multiple.toFixed(1)}×, above the historical overvaluation threshold of 33×. This level has historically coincided with cycle tops and suggests elevated risk.`;
     }
     if (multiple > 10) {
-      return `The Thermocap Multiple is ${multiple.toFixed(1)}×, in the elevated range (above 10×). The market is heating up but has not yet reached historically extreme levels.`;
+      return $localize`:Thermocap elevated interpretation@@charts.thermocap.interpretation.elevated:The Thermocap Multiple is ${multiple.toFixed(1)}×, in the elevated range (above 10×). The market is heating up but has not yet reached historically extreme levels.`;
     }
     if (multiple < 4) {
-      return `The Thermocap Multiple is ${multiple.toFixed(1)}×, below the accumulation threshold of 4×. Historically this has been a deep value zone offering strong long-term entry opportunities.`;
+      return $localize`:Thermocap accumulation interpretation@@charts.thermocap.interpretation.accumulation:The Thermocap Multiple is ${multiple.toFixed(1)}×, below the accumulation threshold of 4×. Historically this has been a deep value zone offering strong long-term entry opportunities.`;
     }
-    return `The Thermocap Multiple is ${multiple.toFixed(1)}×, in the neutral range between 4× and 10×. The market is within historically normal bounds without signalling either extreme.`;
+    return $localize`:Thermocap neutral interpretation@@charts.thermocap.interpretation.neutral:The Thermocap Multiple is ${multiple.toFixed(1)}×, in the neutral range between 4× and 10×. The market is within historically normal bounds without signalling either extreme.`;
   });
 
   protected readonly infoLastUpdated = computed(() => this.lastUpdatedText());
 
   protected readonly infoAbout =
-    'The Thermocap Multiple measures Bitcoin\'s market capitalisation relative to its Thermocap — the cumulative total of all miner revenues in USD, representing the total capital invested to secure the network. Historically, multiples above 33× have marked cycle tops while values below 4× have indicated deep value accumulation zones.';
+    $localize`:Thermocap about@@charts.thermocap.about:The Thermocap Multiple measures Bitcoin's market capitalisation relative to its Thermocap — the cumulative total of all miner revenues in USD, representing the total capital invested to secure the network. Historically, multiples above 33× have marked cycle tops while values below 4× have indicated deep value accumulation zones.`;
 
   protected readonly infoDataSources = [
-    'Miners Revenue: Blockchain.info (full history from 2009)',
-    'BTC Price & Supply: CoinGecko (stored daily)',
+    $localize`:Thermocap miners revenue source@@charts.thermocap.dataSource.minersRevenue:Miners Revenue: Blockchain.info (full history from 2009)`,
+    $localize`:Thermocap BTC source@@charts.thermocap.dataSource.btc:BTC Price & Supply: CoinGecko (stored daily)`,
   ];
 
   protected readonly chartData = computed<ChartData>(() => {
@@ -146,7 +148,7 @@ export class ThermocapMultipleChartPageComponent implements AfterViewInit {
         // Thermocap Multiple — teal line, left log axis
         {
           type: 'line' as const,
-          label: 'Thermocap Multiple',
+          label: $localize`:Thermocap Multiple@@charts.metric.thermocapMultiple:Thermocap Multiple`,
           data: points.map((p) => p.thermocapMultiple),
           borderColor: '#0d9488',
           borderWidth: 2.5,
@@ -374,7 +376,7 @@ export class ThermocapMultipleChartPageComponent implements AfterViewInit {
       columns: [
         { header: $localize`:Date header@@charts.csv.date:Date`, value: (row) => row.date },
         { header: $localize`:Price USD header@@charts.csv.priceUsd:Price USD`, value: (row) => formatCsvNumber(row.priceUsd) },
-        { header: 'Thermocap Multiple', value: (row) => formatCsvNumber(row.thermocapMultiple) },
+        { header: $localize`:Thermocap Multiple@@charts.metric.thermocapMultiple:Thermocap Multiple`, value: (row) => formatCsvNumber(row.thermocapMultiple) },
       ],
     });
   }

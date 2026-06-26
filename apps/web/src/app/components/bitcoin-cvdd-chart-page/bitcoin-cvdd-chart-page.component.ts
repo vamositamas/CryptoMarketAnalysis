@@ -27,6 +27,7 @@ import {
   CreateAlertModalComponent,
   type AlertMetricOption,
 } from '../create-alert-modal/create-alert-modal.component';
+import { calculateCvdd } from './cvdd-model.util';
 
 interface TimeframeOption {
   label: string;
@@ -53,24 +54,6 @@ const CVDD_ALERT_METRICS: AlertMetricOption[] = [
   { value: 'btc_price', label: $localize`:BTC price USD metric@@charts.metric.btcPriceUsd:BTC price USD` },
   { value: 'cvdd', label: 'CVDD' },
 ];
-
-// Power-law model for CVDD, calibrated against Bitcoin Magazine Pro reference chart.
-// Formula: CVDD(day) = 10^(INTERCEPT + EXPONENT × log₁₀(days_since_genesis))
-//
-// Calibration — cross-validated at major cycle lows (the CVDD convergence property):
-//   2015 low  (day 2200): CVDD $202  vs BTC low $152  (BTC briefly dipped below — ✓)
-//   2018 low  (day 3633): CVDD $2728 vs BTC low $3100 (14% above BTC — ✓)
-//   2022 low  (day 5069): CVDD $15170 vs BTC low $15500 (2% — near-perfect ✓)
-//   2026 now  (day 6377): CVDD $50400 vs BTC $65K (BTC trending toward CVDD — ✓)
-const GENESIS_MS = Date.UTC(2009, 0, 3);
-const CVDD_EXPONENT = 5.165;
-const CVDD_INTERCEPT = -14.955;
-
-function cvdd(dateStr: string): number {
-  const ms = new Date(`${dateStr}T00:00:00Z`).getTime();
-  const days = Math.floor((ms - GENESIS_MS) / 86_400_000) + 1;
-  return Math.pow(10, CVDD_INTERCEPT + CVDD_EXPONENT * Math.log10(Math.max(1, days)));
-}
 
 @Component({
   selector: 'app-bitcoin-cvdd-chart-page',
@@ -109,7 +92,7 @@ export class BitcoinCvddChartPageComponent implements AfterViewInit {
   protected readonly infoCurrentFields = computed<ChartInfoField[]>(() => {
     const point = this.latestPoint();
     if (!point) return [{ label: $localize`:Current price metric@@charts.metric.currentPrice:Current price`, value: $localize`:Waiting for data@@charts.waitingForData:Waiting for data` }];
-    const cvddNow = cvdd(point.date);
+    const cvddNow = calculateCvdd(point.date);
     const ratio = point.priceUsd / cvddNow;
     return [
       { label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`, value: formatUsd(point.priceUsd) },
@@ -122,7 +105,7 @@ export class BitcoinCvddChartPageComponent implements AfterViewInit {
   protected readonly infoInterpretation = computed(() => {
     const point = this.latestPoint();
     if (!point) return 'Waiting for the latest price data.';
-    const ratio = point.priceUsd / cvdd(point.date);
+    const ratio = point.priceUsd / calculateCvdd(point.date);
     if (ratio < 1.0) return 'Bitcoin is below CVDD — a historically exceptional buying signal seen only briefly at major cycle lows.';
     if (ratio < 1.5) return 'Bitcoin is within 50% of CVDD. Historically this tight convergence has represented generational buying opportunities.';
     if (ratio < 3.0) return 'Bitcoin is moderately above CVDD, in a typical bear-market recovery or early bull range.';
@@ -156,7 +139,7 @@ export class BitcoinCvddChartPageComponent implements AfterViewInit {
         },
         {
           label: 'CVDD',
-          data: allDates.map((d) => cvdd(d)),
+          data: allDates.map((d) => calculateCvdd(d)),
           borderColor: '#22C55E',
           backgroundColor: 'transparent',
           borderWidth: 2,
@@ -218,7 +201,7 @@ export class BitcoinCvddChartPageComponent implements AfterViewInit {
             label: (item) => {
               const date = String(item.label ?? '');
               const price = Number(item.parsed.y);
-              const cvddVal = cvdd(date);
+              const cvddVal = calculateCvdd(date);
               const ratio = price / cvddVal;
               return [
                 `Price: ${formatUsd(price)}`,
@@ -295,8 +278,8 @@ export class BitcoinCvddChartPageComponent implements AfterViewInit {
       columns: [
         { header: $localize`:Date header@@charts.csv.date:Date`, value: (row) => row.date },
         { header: $localize`:Price USD header@@charts.csv.priceUsd:Price USD`, value: (row) => formatCsvNumber(row.priceUsd) },
-        { header: 'CVDD', value: (row) => formatCsvNumber(cvdd(row.date)) },
-        { header: 'BTC/CVDD Ratio', value: (row) => formatCsvNumber(row.priceUsd / cvdd(row.date)) },
+        { header: 'CVDD', value: (row) => formatCsvNumber(calculateCvdd(row.date)) },
+        { header: 'BTC/CVDD Ratio', value: (row) => formatCsvNumber(row.priceUsd / calculateCvdd(row.date)) },
       ],
     });
   }
@@ -334,7 +317,7 @@ export class BitcoinCvddChartPageComponent implements AfterViewInit {
 
 function computeYRange(points: BitcoinRainbowChartDataPoint[]): { min: number; max: number } {
   if (points.length === 0) return { min: 0.01, max: 200_000 };
-  const firstCvdd = cvdd(points[0].date);
+  const firstCvdd = calculateCvdd(points[0].date);
   const maxPrice = Math.max(...points.map((p) => p.priceUsd));
   return {
     min: Math.max(0.001, firstCvdd * 0.4),

@@ -53,7 +53,7 @@
         chartId="bitcoin-power-law"
         (annotationsChanged)="updateUserAnnotations($event)"
       ></app-chart-annotations>
-      <button type="button" class="secondary-button" (click)="openAlertModal()">
+      <button type="button" class="secondary-button" (click)="openAlertModal()" i18n="Create alert button@@chart.createAlert">
         Create Alert
       </button>
       <app-chart-favourite-button [chartId]="'bitcoin-power-law'"></app-chart-favourite-button>
@@ -121,6 +121,7 @@
   @if (infoOpen()) {
     <app-chart-info-panel
       title="Bitcoin Power Law Chart"
+      i18n-title="Power Law title@@charts.powerLawTitle"
       [about]="infoAbout"
       [currentFields]="infoCurrentFields()"
       [interpretation]="infoInterpretation()"

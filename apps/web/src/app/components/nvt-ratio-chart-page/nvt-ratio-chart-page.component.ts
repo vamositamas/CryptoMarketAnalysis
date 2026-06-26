@@ -114,26 +114,24 @@ export class NvtRatioChartPageComponent implements AfterViewInit {
     if (!points.length) return $localize`:Waiting for data sentence@@charts.waitingForDataSentence:Waiting for data.`;
     const last = [...points].reverse().find((p) => p.nvtRatio !== null) ?? points[points.length - 1];
     const nvtSignal = last.nvtSignal;
-    if (nvtSignal === null) return 'NVT Signal not yet available (requires sufficient transaction volume history).';
+    if (nvtSignal === null) return $localize`:NVT waiting interpretation@@charts.nvt.interpretation.waiting:NVT Signal not yet available (requires sufficient transaction volume history).`;
     if (nvtSignal > 150) {
-      return `NVT Signal is ${nvtSignal.toFixed(0)}, above the overvaluation threshold of 150. This suggests that Bitcoin's network value is high relative to on-chain transaction volume, historically a signal of overvaluation.`;
+      return $localize`:NVT overvalued interpretation@@charts.nvt.interpretation.overvalued:NVT Signal is ${nvtSignal.toFixed(0)}, above the overvaluation threshold of 150. This suggests that Bitcoin's network value is high relative to on-chain transaction volume, historically a signal of overvaluation.`;
     }
     if (nvtSignal < 45) {
-      return `NVT Signal is ${nvtSignal.toFixed(0)}, below the undervaluation threshold of 45. This suggests Bitcoin's network is being heavily utilised relative to its market cap, historically a signal of undervaluation.`;
+      return $localize`:NVT undervalued interpretation@@charts.nvt.interpretation.undervalued:NVT Signal is ${nvtSignal.toFixed(0)}, below the undervaluation threshold of 45. This suggests Bitcoin's network is being heavily utilised relative to its market cap, historically a signal of undervaluation.`;
     }
-    return `NVT Signal is ${nvtSignal.toFixed(0)}, within the neutral range (45–150). Network usage appears proportionate to Bitcoin's current market cap.`;
+    return $localize`:NVT neutral interpretation@@charts.nvt.interpretation.neutral:NVT Signal is ${nvtSignal.toFixed(0)}, within the neutral range (45–150). Network usage appears proportionate to Bitcoin's current market cap.`;
   });
 
   protected readonly infoLastUpdated = computed(() => this.lastUpdatedText());
 
   protected readonly infoAbout =
-    'The NVT Ratio (Network Value to Transactions) is Bitcoin\'s equivalent of a P/E ratio: market cap divided by daily on-chain transaction volume. ' +
-    'The NVT Signal uses a 90-day moving average of NVT to reduce noise. ' +
-    'Values above 150 historically signal overvaluation relative to network usage; values below 45 signal undervaluation.';
+    $localize`:NVT about@@charts.nvt.about:The NVT Ratio (Network Value to Transactions) is Bitcoin's equivalent of a P/E ratio: market cap divided by daily on-chain transaction volume. The NVT Signal uses a 90-day moving average of NVT to reduce noise. Values above 150 historically signal overvaluation relative to network usage; values below 45 signal undervaluation.`;
 
   protected readonly infoDataSources = [
-    'Transaction Volume: Blockchain.info estimated-transaction-volume-usd (full history)',
-    'BTC Price & Supply: CoinGecko (stored daily)',
+    $localize`:NVT transaction volume source@@charts.nvt.dataSource.transactionVolume:Transaction Volume: Blockchain.info estimated-transaction-volume-usd (full history)`,
+    $localize`:NVT BTC source@@charts.nvt.dataSource.btc:BTC Price & Supply: CoinGecko (stored daily)`,
   ];
 
   protected readonly chartData = computed<ChartData>(() => {
@@ -145,7 +143,7 @@ export class NvtRatioChartPageComponent implements AfterViewInit {
         // NVT Ratio — orange, thin, semi-transparent, left y2 axis
         {
           type: 'line' as const,
-          label: 'NVT Ratio',
+          label: $localize`:NVT ratio@@charts.metric.nvtRatio:NVT Ratio`,
           data: points.map((p) => p.nvtRatio),
           borderColor: 'rgba(249, 115, 22, 0.6)',
           borderWidth: 1.5,
@@ -158,7 +156,7 @@ export class NvtRatioChartPageComponent implements AfterViewInit {
         // NVT Signal (90d MA) — red, solid, thicker, left y2 axis
         {
           type: 'line' as const,
-          label: 'NVT Signal (90d MA)',
+          label: $localize`:NVT signal short@@charts.nvt.signal90d:NVT Signal (90d MA)`,
           data: points.map((p) => p.nvtSignal),
           borderColor: '#ef4444',
           borderWidth: 2.5,

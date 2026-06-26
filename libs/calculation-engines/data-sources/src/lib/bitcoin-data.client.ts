@@ -136,8 +136,10 @@ export class BitcoinDataClient {
         if (!response.ok) {
           throw new BitcoinDataClientError(`CVDD history request failed with status ${response.status}`, response.status);
         }
-        const rows = (await response.json()) as { d: string; cvdd: number }[];
-        return rows.filter((r) => typeof r.d === 'string' && Number.isFinite(r.cvdd)).map((r) => ({ date: r.d, value: r.cvdd }));
+        const rows = (await response.json()) as BitcoinDataApiResponse[];
+        return rows
+          .map((r) => normalizeHistoryPoint(r, ['cvdd']))
+          .filter((p): p is BitcoinDataPoint => p !== null);
       },
       this.retryAttempts,
       this.retryBaseDelayMs,
@@ -153,8 +155,10 @@ export class BitcoinDataClient {
         if (!response.ok) {
           throw new BitcoinDataClientError(`Balanced Price history request failed with status ${response.status}`, response.status);
         }
-        const rows = (await response.json()) as { d: string; balancedPrice: number }[];
-        return rows.filter((r) => typeof r.d === 'string' && Number.isFinite(r.balancedPrice)).map((r) => ({ date: r.d, value: r.balancedPrice }));
+        const rows = (await response.json()) as BitcoinDataApiResponse[];
+        return rows
+          .map((r) => normalizeHistoryPoint(r, ['balancedPrice', 'balanced_price', 'balanced-price']))
+          .filter((p): p is BitcoinDataPoint => p !== null);
       },
       this.retryAttempts,
       this.retryBaseDelayMs,
@@ -170,8 +174,10 @@ export class BitcoinDataClient {
         if (!response.ok) {
           throw new BitcoinDataClientError(`Terminal Price history request failed with status ${response.status}`, response.status);
         }
-        const rows = (await response.json()) as { d: string; terminalPrice: number }[];
-        return rows.filter((r) => typeof r.d === 'string' && Number.isFinite(r.terminalPrice)).map((r) => ({ date: r.d, value: r.terminalPrice }));
+        const rows = (await response.json()) as BitcoinDataApiResponse[];
+        return rows
+          .map((r) => normalizeHistoryPoint(r, ['terminalPrice', 'terminal_price', 'terminal-price']))
+          .filter((p): p is BitcoinDataPoint => p !== null);
       },
       this.retryAttempts,
       this.retryBaseDelayMs,
@@ -266,6 +272,24 @@ function normalizeBitcoinDataResponse(
     date: response.d,
     value,
   };
+}
+
+function normalizeHistoryPoint(
+  response: BitcoinDataApiResponse,
+  valueFields: string[],
+): BitcoinDataPoint | null {
+  if (typeof response.d !== 'string') {
+    return null;
+  }
+
+  for (const field of valueFields) {
+    const value = Number(response[field]);
+    if (Number.isFinite(value)) {
+      return { date: response.d, value };
+    }
+  }
+
+  return null;
 }
 
 function ensureTrailingSlash(value: string): string {

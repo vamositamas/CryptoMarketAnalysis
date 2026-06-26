@@ -27,6 +27,7 @@ import {
   CreateAlertModalComponent,
   type AlertMetricOption,
 } from '../create-alert-modal/create-alert-modal.component';
+import { calculateCvdd } from '../bitcoin-cvdd-chart-page/cvdd-model.util';
 
 interface TimeframeOption {
   label: string;
@@ -93,35 +94,23 @@ export class PriceForecastToolsChartPageComponent implements AfterViewInit {
     const price = last.priceUsd;
     const topCap = last.topCap;
     const deltaTop = last.deltaTop;
-    const cvdd = last.cvdd;
-    const balancedPrice = last.balancedPrice;
-    const terminalPrice = last.terminalPrice;
+    const cvdd = cvddValue(last);
+    const noData = $localize`:No data value@@common.noData:No data`;
 
     let signalText = $localize`:Neutral signal@@charts.signal.neutral:Neutral`;
-    if (cvdd !== null && price < cvdd) {
+    if (price < cvdd) {
       signalText = $localize`:Deep undervalue@@charts.signal.deepUndervalue:Deep Undervalue`;
-    } else if (balancedPrice !== null && price < balancedPrice) {
-      signalText = $localize`:Undervalued signal@@charts.signal.undervalued:Undervalued`;
     } else if (deltaTop !== null && price > deltaTop) {
       signalText = $localize`:Approaching top@@charts.signal.approachingTop:Approaching Top`;
     } else if (topCap !== null && price > topCap) {
       signalText = $localize`:Cycle top zone@@charts.signal.cycleTopZone:Cycle Top Zone`;
-    } else if (terminalPrice !== null && price > terminalPrice) {
-      signalText = $localize`:Sell signal@@charts.signal.sellSignal:Sell signal`;
     }
 
     return [
       { label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`, value: formatUsd(price) },
-      { label: $localize`:Top Cap@@charts.metric.topCap:Top Cap`, value: topCap !== null ? formatUsd(topCap) : $localize`:No data value@@common.noData:No data` },
-      { label: $localize`:Delta Top@@charts.metric.deltaCap:Delta Top`, value: deltaTop !== null ? formatUsd(deltaTop) : $localize`:No data value@@common.noData:No data` },
-      { label: $localize`:CVDD metric@@charts.metric.cvdd:CVDD`, value: cvdd !== null ? formatUsd(cvdd) : 'Loading...' },
-      { label: $localize`:Balanced Price@@charts.metric.balancedPrice:Balanced Price`, value: balancedPrice !== null ? formatUsd(balancedPrice) : 'Loading...' },
-      {
-        label: $localize`:Terminal Price@@charts.metric.terminalPrice:Terminal Price`,
-        value: terminalPrice !== null
-          ? (price > terminalPrice ? `${formatUsd(terminalPrice)} — Sell signal` : formatUsd(terminalPrice))
-          : 'Loading...',
-      },
+      { label: $localize`:Top Cap@@charts.metric.topCap:Top Cap`, value: topCap !== null ? formatUsd(topCap) : noData },
+      { label: $localize`:Delta Top@@charts.metric.deltaCap:Delta Top`, value: deltaTop !== null ? formatUsd(deltaTop) : noData },
+      { label: $localize`:CVDD metric@@charts.metric.cvdd:CVDD`, value: formatUsd(cvdd) },
       { label: $localize`:Signal metric@@charts.metric.signal:Signal`, value: signalText },
     ];
   });
@@ -132,36 +121,31 @@ export class PriceForecastToolsChartPageComponent implements AfterViewInit {
     if (!last) return $localize`:Waiting for data sentence@@charts.waitingForDataSentence:Waiting for data.`;
 
     const price = last.priceUsd;
-    const cvdd = last.cvdd;
-    const balancedPrice = last.balancedPrice;
+    const cvdd = cvddValue(last);
     const deltaTop = last.deltaTop;
     const topCap = last.topCap;
 
-    if (cvdd !== null && price < cvdd) {
-      return `BTC price (${formatUsd(price)}) is below CVDD (${formatUsd(cvdd)}). Historically this is a deep undervaluation zone that coincides with bear market lows.`;
-    }
-    if (balancedPrice !== null && price < balancedPrice) {
-      return `BTC price (${formatUsd(price)}) is below the Balanced Price (${formatUsd(balancedPrice)}), suggesting the market is undervalued relative to on-chain cost basis.`;
+    if (price < cvdd) {
+      return $localize`:Price forecast CVDD interpretation@@charts.priceForecast.interpretation.cvdd:BTC price (${formatUsd(price)}) is below CVDD (${formatUsd(cvdd)}). Historically this is a deep undervaluation zone that coincides with bear market lows.`;
     }
     if (topCap !== null && price > topCap) {
-      return `BTC price (${formatUsd(price)}) is above Top Cap (${formatUsd(topCap)}). This has historically marked cycle tops.`;
+      return $localize`:Price forecast top cap interpretation@@charts.priceForecast.interpretation.topCap:BTC price (${formatUsd(price)}) is above Top Cap (${formatUsd(topCap)}). This has historically marked cycle tops.`;
     }
     if (deltaTop !== null && price > deltaTop) {
-      return `BTC price (${formatUsd(price)}) is above Delta Top (${formatUsd(deltaTop)}), approaching the upper range of historical cycle peaks.`;
+      return $localize`:Price forecast delta top interpretation@@charts.priceForecast.interpretation.deltaTop:BTC price (${formatUsd(price)}) is above Delta Top (${formatUsd(deltaTop)}), approaching the upper range of historical cycle peaks.`;
     }
-    return `BTC price (${formatUsd(price)}) is in the neutral range between bear market floor models and cycle top targets.`;
+    return $localize`:Price forecast neutral interpretation@@charts.priceForecast.interpretation.neutral:BTC price (${formatUsd(price)}) is in the neutral range between bear market floor models and cycle top targets.`;
   });
 
   protected readonly infoLastUpdated = computed(() => this.lastUpdatedText());
 
   protected readonly infoAbout =
-    'Price Forecast Tools combines on-chain models to identify historically reliable price targets. ' +
-    'Top Cap and Delta Top have tracked Bitcoin\'s cycle highs; CVDD, Balanced Price, and Terminal Price have tracked cycle lows and local tops.';
+    $localize`:Price forecast about@@charts.priceForecast.about:Price Forecast Tools combines on-chain models to identify historically reliable price targets. Top Cap and Delta Top have tracked Bitcoin's cycle highs; CVDD has tracked major bear-market lows.`;
 
   protected readonly infoDataSources = [
-    'BTC Price & Supply: CoinGecko + halving schedule (stored daily)',
-    'Top Cap & Delta Top: Computed from Average Cap and Realized Cap — full history',
-    'CVDD, Balanced Price, Terminal Price: Bitcoin-data.com (2022-present)',
+    $localize`:Price forecast BTC source@@charts.priceForecast.dataSource.btc:BTC Price & Supply: CoinGecko + halving schedule (stored daily)`,
+    $localize`:Price forecast cap source@@charts.priceForecast.dataSource.cap:Top Cap & Delta Top: Computed from Average Cap and Realized Cap — full history`,
+    $localize`:Price forecast CVDD source@@charts.priceForecast.dataSource.cvdd:CVDD: Power-law model shared with the Bitcoin CVDD chart`,
   ];
 
   protected readonly chartData = computed<ChartData>(() => {
@@ -196,37 +180,11 @@ export class PriceForecastToolsChartPageComponent implements AfterViewInit {
           spanGaps: false,
           order: 4,
         },
-        // Terminal Price — red
-        {
-          type: 'line' as const,
-          label: 'Terminal Price',
-          data: points.map((p) => p.terminalPrice),
-          borderColor: '#ef4444',
-          borderWidth: 1.5,
-          pointRadius: 0,
-          tension: 0,
-          yAxisID: 'y',
-          spanGaps: false,
-          order: 3,
-        },
-        // Balanced Price — amber/gold
-        {
-          type: 'line' as const,
-          label: 'Balanced Price',
-          data: points.map((p) => p.balancedPrice),
-          borderColor: '#f59e0b',
-          borderWidth: 1.5,
-          pointRadius: 0,
-          tension: 0,
-          yAxisID: 'y',
-          spanGaps: false,
-          order: 3,
-        },
         // CVDD — green
         {
           type: 'line' as const,
           label: 'CVDD',
-          data: points.map((p) => p.cvdd),
+          data: points.map((p) => cvddValue(p)),
           borderColor: '#22c55e',
           borderWidth: 1.5,
           pointRadius: 0,
@@ -386,9 +344,7 @@ export class PriceForecastToolsChartPageComponent implements AfterViewInit {
         { header: $localize`:Price USD header@@charts.csv.priceUsd:Price USD`, value: (row) => formatCsvNumber(row.priceUsd) },
         { header: 'Top Cap', value: (row) => formatCsvNumber(row.topCap) },
         { header: 'Delta Top', value: (row) => formatCsvNumber(row.deltaTop) },
-        { header: 'CVDD', value: (row) => formatCsvNumber(row.cvdd) },
-        { header: 'Balanced Price', value: (row) => formatCsvNumber(row.balancedPrice) },
-        { header: 'Terminal Price', value: (row) => formatCsvNumber(row.terminalPrice) },
+        { header: 'CVDD', value: (row) => formatCsvNumber(cvddValue(row)) },
       ],
     });
   }
@@ -463,4 +419,8 @@ function formatDate(value: string): string {
     year: 'numeric',
     timeZone: 'UTC',
   }).format(new Date(`${value}T00:00:00.000Z`));
+}
+
+function cvddValue(point: Pick<PriceForecastDataPoint, 'date'>): number {
+  return calculateCvdd(point.date);
 }

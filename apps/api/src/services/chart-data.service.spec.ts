@@ -85,6 +85,84 @@ describe('ChartDataService', () => {
       ],
     });
   });
+
+  it('fills sparse price forecast model history from bitcoin-data history', async () => {
+    const repository = {
+      findBitcoinChartData: jest.fn().mockResolvedValue([
+        {
+          ...rows[0],
+          date: '2025-06-10',
+          priceUsd: 65000,
+          circulatingSupply: 19_800_000,
+          realizedPrice: 52000,
+          cvdd: null,
+          balancedPrice: null,
+          terminalPrice: null,
+        },
+        {
+          ...rows[0],
+          date: '2025-06-11',
+          priceUsd: 66000,
+          circulatingSupply: 19_800_100,
+          realizedPrice: 52100,
+          cvdd: 14000,
+          balancedPrice: 28000,
+          terminalPrice: 130000,
+        },
+      ]),
+      findExcessLiquidityData: jest.fn().mockResolvedValue([]),
+      findSpxLiquidityData: jest.fn().mockResolvedValue([]),
+      findMidtermCyclesData: jest.fn().mockResolvedValue([]),
+    };
+    const bitcoinDataClient = {
+      fetchVddMultipleHistory: jest.fn(),
+      fetchCvddHistory: jest.fn().mockResolvedValue([
+        { date: '2025-06-10', value: 13500 },
+        { date: '2025-06-11', value: 13600 },
+      ]),
+      fetchBalancedPriceHistory: jest.fn().mockResolvedValue([
+        { date: '2025-06-10', value: 27000 },
+        { date: '2025-06-11', value: 27100 },
+      ]),
+      fetchTerminalPriceHistory: jest.fn().mockResolvedValue([
+        { date: '2025-06-10', value: 128000 },
+        { date: '2025-06-11', value: 129000 },
+      ]),
+    };
+    const coinMetricsClient = {
+      fetchMvrvRatioAndPriceHistory: jest.fn().mockResolvedValue([
+        { date: '2025-06-10', realizedPrice: 51900 },
+        { date: '2025-06-11', realizedPrice: 52000 },
+      ]),
+    };
+
+    await expect(
+      new ChartDataService(
+        repository,
+        () => new Date('2025-06-12T00:00:00.000Z'),
+        bitcoinDataClient,
+        coinMetricsClient,
+      ).getChartData('price-forecast-tools', 'all'),
+    ).resolves.toMatchObject({
+      chartId: 'price-forecast-tools',
+      dataPoints: [
+        {
+          date: '2025-06-10',
+          priceUsd: 65000,
+          cvdd: 13500,
+          balancedPrice: 27000,
+          terminalPrice: 128000,
+        },
+        {
+          date: '2025-06-11',
+          priceUsd: 66000,
+          cvdd: 14000,
+          balancedPrice: 28000,
+          terminalPrice: 130000,
+        },
+      ],
+    });
+  });
 });
 
 describe('parseTimeframe', () => {

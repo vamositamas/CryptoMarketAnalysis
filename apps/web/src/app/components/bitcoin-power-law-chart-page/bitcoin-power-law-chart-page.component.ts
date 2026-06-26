@@ -60,7 +60,7 @@ const HALVING_EVENTS = [
 
 const POWER_LAW_ALERT_METRICS: AlertMetricOption[] = [
   { value: 'btc_price', label: $localize`:BTC price USD metric@@charts.metric.btcPriceUsd:BTC price USD` },
-  { value: 'power_law_model', label: 'Power Law model price' },
+  { value: 'power_law_model', label: $localize`:Power Law model metric@@charts.powerLaw.metric.modelPrice:Power Law model price` },
 ];
 
 function powerLawDays(dateStr: string): number {
@@ -105,15 +105,12 @@ export class BitcoinPowerLawChartPageComponent implements AfterViewInit {
   protected readonly dataPoints = signal<BitcoinRainbowChartDataPoint[]>([]);
   protected readonly lastUpdated = signal<string | null>(null);
 
-  protected readonly infoAbout =
-    'The Bitcoin Power Law Chart models Bitcoin\'s price as a power function of time since genesis (Jan 3, 2009). ' +
-    'Logarithmic regression produces a long-term fair value (Model) line with upper (Ceiling) and lower (Floor) price bounds ' +
-    'that have historically contained Bitcoin\'s price through multiple market cycles.';
+  protected readonly infoAbout = $localize`:Power Law about@@charts.powerLaw.about:The Bitcoin Power Law Chart models Bitcoin's price as a power function of time since genesis (Jan 3, 2009). Logarithmic regression produces a long-term fair value (Model) line with upper (Ceiling) and lower (Floor) price bounds that have historically contained Bitcoin's price through multiple market cycles.`;
 
   protected readonly infoDataSources = [
-    'Bitcoin Price: CoinGecko API',
-    'Model: Power law regression — log₁₀(Price) = 5.845 × log₁₀(days since genesis) − 17.016',
-    'Floor / Ceiling: ×0.25 below / ×10 above Model Price',
+    $localize`:Power Law BTC price data source@@charts.powerLaw.dataSource.price:Bitcoin price: CoinGecko API`,
+    $localize`:Power Law model data source@@charts.powerLaw.dataSource.model:Model: power law regression - log10(Price) = 5.845 x log10(days since genesis) - 17.016`,
+    $localize`:Power Law bounds data source@@charts.powerLaw.dataSource.bounds:Floor / Ceiling: x0.25 below / x10 above model price`,
   ];
 
   protected readonly infoCurrentFields = computed<ChartInfoField[]>(() => {
@@ -136,33 +133,33 @@ export class BitcoinPowerLawChartPageComponent implements AfterViewInit {
 
   protected readonly infoInterpretation = computed(() => {
     const point = this.latestPoint();
-    if (!point) return 'Waiting for the latest price data.';
+    if (!point) return $localize`:Power Law waiting interpretation@@charts.powerLaw.interpretation.waiting:Waiting for the latest price data.`;
     const model = powerLawModel(point.date);
     const floor = powerLawFloor(point.date);
     const ceiling = powerLawCeiling(point.date);
     const price = point.priceUsd;
 
     if (price < floor) {
-      return 'Bitcoin is below the Power Law floor — a historically rare and extremely undervalued condition.';
+      return $localize`:Power Law below floor interpretation@@charts.powerLaw.interpretation.belowFloor:Bitcoin is below the Power Law floor - a historically rare and extremely undervalued condition.`;
     }
     if (price < model) {
       const pct = ((price - floor) / (model - floor)) * 100;
       if (pct < 40) {
-        return 'Bitcoin is trading in the lower range between the floor and model, suggesting historically undervalued conditions.';
+        return $localize`:Power Law lower range interpretation@@charts.powerLaw.interpretation.lowerRange:Bitcoin is trading in the lower range between the floor and model, suggesting historically undervalued conditions.`;
       }
-      return 'Bitcoin is trading below the model price, historically associated with accumulation phases.';
+      return $localize`:Power Law below model interpretation@@charts.powerLaw.interpretation.belowModel:Bitcoin is trading below the model price, historically associated with accumulation phases.`;
     }
     if (price < ceiling) {
       const pct = ((price - model) / (ceiling - model)) * 100;
       if (pct < 33) {
-        return 'Bitcoin is trading near the model price — close to long-term fair value based on the power law.';
+        return $localize`:Power Law near model interpretation@@charts.powerLaw.interpretation.nearModel:Bitcoin is trading near the model price - close to long-term fair value based on the power law.`;
       }
       if (pct < 66) {
-        return 'Bitcoin is trading above the model price, entering elevated territory relative to the long-term trend.';
+        return $localize`:Power Law elevated interpretation@@charts.powerLaw.interpretation.elevated:Bitcoin is trading above the model price, entering elevated territory relative to the long-term trend.`;
       }
-      return 'Bitcoin is approaching the Power Law ceiling, historically associated with cycle-top conditions.';
+      return $localize`:Power Law near ceiling interpretation@@charts.powerLaw.interpretation.nearCeiling:Bitcoin is approaching the Power Law ceiling, historically associated with cycle-top conditions.`;
     }
-    return 'Bitcoin is above the Power Law ceiling — a historically rare event linked to speculative peak conditions.';
+    return $localize`:Power Law above ceiling interpretation@@charts.powerLaw.interpretation.aboveCeiling:Bitcoin is above the Power Law ceiling - a historically rare event linked to speculative peak conditions.`;
   });
 
   protected readonly infoLastUpdated = computed(() => this.lastUpdatedText());

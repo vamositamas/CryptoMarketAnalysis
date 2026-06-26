@@ -3,8 +3,8 @@
     <div>
       <a class="form-link" routerLink="/charts" i18n="Back to chart library@@charts.backToLibrary">Back to chart library</a>
       <p class="eyebrow" i18n="Chart category label@@charts.category.valuation">Valuation Models</p>
-      <h2>Thermocap Multiple</h2>
-      <p>Bitcoin market cap relative to cumulative miner revenue</p>
+      <h2>{{ chartTitle }}</h2>
+      <p>{{ chartSubtitle }}</p>
     </div>
     <div class="chart-status">
       <span i18n="Chart last updated label@@charts.lastUpdated">Last updated</span>
@@ -83,7 +83,7 @@
 
   @if (infoOpen()) {
     <app-chart-info-panel
-      title="Thermocap Multiple"
+      [title]="chartTitle"
       [about]="infoAbout"
       [currentFields]="infoCurrentFields()"
       [interpretation]="infoInterpretation()"

@@ -157,7 +157,7 @@ const CHARTS: ChartLibraryItem[] = [
 
     signal: $localize`:Chart price-forecast-tools signal@@charts.library.price-forecast-tools.signal:Cycle top and bottom targets`,
     description:
-      $localize`:Chart price-forecast-tools description@@charts.library.price-forecast-tools.description:A 6-model price forecast using Top Cap, Delta Top, CVDD, Terminal Price, and Balanced Price to identify historically reliable Bitcoin cycle-top and bear-market-floor targets.`,
+      $localize`:Chart price-forecast-tools description@@charts.library.price-forecast-tools.description:A price forecast chart using BTC price, Top Cap, Delta Top, and CVDD to identify historically reliable Bitcoin cycle-top and bear-market-floor targets.`,
     thumbnailClass: 'price-forecast-tools',
   },
   {

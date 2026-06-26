@@ -257,7 +257,7 @@ export class ChartDataService {
   constructor(
     private readonly repository: Pick<ChartDataRepository, 'findBitcoinChartData' | 'findExcessLiquidityData' | 'findSpxLiquidityData' | 'findMidtermCyclesData'>,
     private readonly now: () => Date = () => new Date(),
-    private readonly bitcoinDataClient: Pick<BitcoinDataClient, 'fetchVddMultipleHistory'> = new BitcoinDataClient(),
+    private readonly bitcoinDataClient: Pick<BitcoinDataClient, 'fetchVddMultipleHistory' | 'fetchCvddHistory' | 'fetchBalancedPriceHistory' | 'fetchTerminalPriceHistory'> = new BitcoinDataClient(),
     private readonly coinMetricsClient: Pick<CoinMetricsClient, 'fetchMvrvRatioAndPriceHistory'> = new CoinMetricsClient(),
   ) {}
 
@@ -419,6 +419,12 @@ export class ChartDataService {
 
     if (chartId === 'price-forecast-tools') {
       const allRows = await this.repository.findBitcoinChartData('all', this.now());
+      const [realizedPriceByDate, cvddByDate, balancedPriceByDate, terminalPriceByDate] = await Promise.all([
+        this.getRealizedPriceHistory(allRows),
+        this.getForecastMetricHistory(allRows, 'cvdd', () => this.bitcoinDataClient.fetchCvddHistory()),
+        this.getForecastMetricHistory(allRows, 'balancedPrice', () => this.bitcoinDataClient.fetchBalancedPriceHistory()),
+        this.getForecastMetricHistory(allRows, 'terminalPrice', () => this.bitcoinDataClient.fetchTerminalPriceHistory()),
+      ]);
       const GENESIS_MS = new Date('2009-01-03T00:00:00Z').getTime();
       let cumulativeMarketCap = 0;
       const allPoints = allRows.map((r) => {
@@ -428,8 +434,9 @@ export class ChartDataService {
         const averageCap = cumulativeMarketCap / ageDays;
         const topCap = supply > 0 ? (averageCap * 35) / supply : null;
         let deltaTop: number | null = null;
-        if (r.realizedPrice !== null && supply > 0) {
-          const deltaCap = r.realizedPrice * supply - averageCap;
+        const realizedPrice = realizedPriceByDate.get(r.date) ?? null;
+        if (realizedPrice !== null && supply > 0) {
+          const deltaCap = realizedPrice * supply - averageCap;
           deltaTop = deltaCap > 0 ? (deltaCap * 7) / supply : null;
         }
         return {
@@ -437,9 +444,9 @@ export class ChartDataService {
           priceUsd: r.priceUsd,
           topCap,
           deltaTop,
-          cvdd: r.cvdd,
-          balancedPrice: r.balancedPrice,
-          terminalPrice: r.terminalPrice,
+          cvdd: cvddByDate.get(r.date) ?? null,
+          balancedPrice: balancedPriceByDate.get(r.date) ?? null,
+          terminalPrice: terminalPriceByDate.get(r.date) ?? null,
         };
       });
       const startDate = timeframe === 'all' ? null : getTimeframeStartDate(timeframe, this.now());
@@ -649,7 +656,7 @@ export class ChartDataService {
     );
     const coverageRatio = rows.length === 0 ? 0 : realizedPriceByDate.size / rows.length;
 
-    if (realizedPriceByDate.size > 30 && coverageRatio >= 0.25) {
+    if (realizedPriceByDate.size > 30 && coverageRatio >= 0.95) {
       return realizedPriceByDate;
     }
 
@@ -665,6 +672,36 @@ export class ChartDataService {
     }
 
     return realizedPriceByDate;
+  }
+
+  private async getForecastMetricHistory(
+    rows: ChartDataRow[],
+    metric: 'cvdd' | 'balancedPrice' | 'terminalPrice',
+    fetchHistory: () => Promise<{ date: string; value: number }[]>,
+  ): Promise<Map<string, number>> {
+    const metricByDate = new Map(
+      rows
+        .filter((r): r is ChartDataRow & Record<typeof metric, number> => r[metric] !== null)
+        .map((r) => [r.date, r[metric]] as const),
+    );
+    const coverageRatio = rows.length === 0 ? 0 : metricByDate.size / rows.length;
+
+    if (metricByDate.size > 30 && coverageRatio >= 0.95) {
+      return metricByDate;
+    }
+
+    try {
+      const history = await fetchHistory();
+      for (const point of history) {
+        if (!metricByDate.has(point.date)) {
+          metricByDate.set(point.date, point.value);
+        }
+      }
+    } catch {
+      // Keep stored database values if the external full-history source is unavailable.
+    }
+
+    return metricByDate;
   }
 }
 
