@@ -328,8 +328,8 @@ export class HavingSpiralChartPageComponent implements AfterViewInit, OnDestroy 
         maintainAspectRatio: false,
         animation: false,
         scales: {
-          x: { display: false, min: -1.22, max: 1.22 },
-          y: { display: false, min: -1.22, max: 1.22 },
+          x: { display: false, min: -1.45, max: 1.45 },
+          y: { display: false, min: -1.35, max: 1.35 },
         },
         plugins: {
           legend: { display: false },
@@ -349,14 +349,14 @@ export class HavingSpiralChartPageComponent implements AfterViewInit, OnDestroy 
       const response = await this.api.getBitcoinRainbowChartData('all');
       this.dataPoints.set(response.dataPoints);
       this.lastUpdated.set(response.lastUpdated);
-      this.updateChart(response.dataPoints);
+      this.isLoading.set(false);
+      requestAnimationFrame(() => this.updateChart(response.dataPoints));
     } catch (error) {
       this.errorMessage.set(
         error instanceof ApiClientError
           ? error.message
           : 'Chart data could not be loaded. Please try again.',
       );
-    } finally {
       this.isLoading.set(false);
     }
   }
