@@ -3,6 +3,7 @@ import {
   Component,
   ElementRef,
   EventEmitter,
+  HostListener,
   Input,
   OnChanges,
   OnDestroy,
@@ -48,6 +49,7 @@ export class ChartViewerComponent implements AfterViewInit, OnChanges, OnDestroy
   private lastTapTime = 0;
   private isResettingZoom = false;
   private originalYBounds: { min: number | undefined; max: number | undefined } = { min: undefined, max: undefined };
+  protected isFullscreen = false;
 
   ngAfterViewInit(): void {
     this.createChart();
@@ -103,6 +105,25 @@ export class ChartViewerComponent implements AfterViewInit, OnChanges, OnDestroy
 
   exportImage(): string | null {
     return this.chart?.toBase64Image('image/png', 1) ?? null;
+  }
+
+  toggleFullscreen(): void {
+    this.isFullscreen = !this.isFullscreen;
+    this.scheduleResize();
+  }
+
+  protected closeFullscreen(): void {
+    if (!this.isFullscreen) {
+      return;
+    }
+
+    this.isFullscreen = false;
+    this.scheduleResize();
+  }
+
+  @HostListener('document:keydown.escape')
+  protected handleEscape(): void {
+    this.closeFullscreen();
   }
 
   protected handleTouchEnd(event: TouchEvent): void {
@@ -222,6 +243,10 @@ export class ChartViewerComponent implements AfterViewInit, OnChanges, OnDestroy
   private destroyChart(): void {
     this.chart?.destroy();
     this.chart = undefined;
+  }
+
+  private scheduleResize(): void {
+    window.setTimeout(() => this.chart?.resize(), 0);
   }
 
   private getConfiguration(): ChartConfiguration<ChartType> {

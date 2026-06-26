@@ -808,15 +808,15 @@ export class TermsOfUsePage {}
                       </svg>
                     } @else if (chart.chartId === 'bitcoin-rainbow') {
                       <svg viewBox="0 0 800 360" preserveAspectRatio="none">
-                        <rect x="0" y="0"   width="800" height="46"  fill="rgba(127,29,29,0.65)"/>
-                        <rect x="0" y="46"  width="800" height="37"  fill="rgba(239,68,68,0.65)"/>
-                        <rect x="0" y="83"  width="800" height="35"  fill="rgba(249,115,22,0.65)"/>
-                        <rect x="0" y="118" width="800" height="34"  fill="rgba(234,179,8,0.65)"/>
-                        <rect x="0" y="152" width="800" height="35"  fill="rgba(132,204,22,0.65)"/>
-                        <rect x="0" y="187" width="800" height="32"  fill="rgba(34,197,94,0.65)"/>
-                        <rect x="0" y="219" width="800" height="37"  fill="rgba(6,182,212,0.65)"/>
-                        <rect x="0" y="256" width="800" height="35"  fill="rgba(37,99,235,0.65)"/>
-                        <rect x="0" y="291" width="800" height="69"  fill="rgba(30,58,138,0.65)"/>
+                        <rect x="0" y="0"   width="800" height="46"  fill="rgba(127,29,29,0.06)"/>
+                        <rect x="0" y="46"  width="800" height="37"  fill="rgba(239,68,68,0.05)"/>
+                        <rect x="0" y="83"  width="800" height="35"  fill="rgba(249,115,22,0.05)"/>
+                        <rect x="0" y="118" width="800" height="34"  fill="rgba(234,179,8,0.05)"/>
+                        <rect x="0" y="152" width="800" height="35"  fill="rgba(132,204,22,0.05)"/>
+                        <rect x="0" y="187" width="800" height="32"  fill="rgba(34,197,94,0.05)"/>
+                        <rect x="0" y="219" width="800" height="37"  fill="rgba(6,182,212,0.05)"/>
+                        <rect x="0" y="256" width="800" height="35"  fill="rgba(37,99,235,0.05)"/>
+                        <rect x="0" y="291" width="800" height="69"  fill="rgba(30,58,138,0.05)"/>
                         <path d="M 0,322 C 80,318 130,312 155,307 C 168,228 200,76 213,70 C 228,285 260,312 272,308 C 308,294 346,264 355,254 C 372,188 408,34 424,28 C 441,90 472,247 507,242 C 522,236 542,230 555,226 C 573,186 617,93 632,96 C 649,165 678,226 685,220 C 703,210 741,198 763,195 C 776,194 792,196 800,196"
                               stroke="#111820" stroke-width="2.5" fill="none"/>
                       </svg>
@@ -839,11 +839,11 @@ export class TermsOfUsePage {}
                       </svg>
                     } @else if (chart.chartId === 'mvrv-z-score') {
                       <svg viewBox="0 0 800 360" preserveAspectRatio="none">
-                        <rect x="0" y="0"   width="800" height="88"  fill="rgba(239,68,68,0.20)"/>
-                        <rect x="0" y="88"  width="800" height="53"  fill="rgba(249,115,22,0.15)"/>
-                        <rect x="0" y="141" width="800" height="53"  fill="rgba(234,179,8,0.13)"/>
-                        <rect x="0" y="194" width="800" height="88"  fill="rgba(34,197,94,0.12)"/>
-                        <rect x="0" y="282" width="800" height="78"  fill="rgba(59,130,246,0.18)"/>
+                        <rect x="0" y="0"   width="800" height="88"  fill="rgba(239,68,68,0.04)"/>
+                        <rect x="0" y="88"  width="800" height="53"  fill="rgba(249,115,22,0.035)"/>
+                        <rect x="0" y="141" width="800" height="53"  fill="rgba(234,179,8,0.03)"/>
+                        <rect x="0" y="194" width="800" height="88"  fill="rgba(34,197,94,0.03)"/>
+                        <rect x="0" y="282" width="800" height="78"  fill="rgba(59,130,246,0.04)"/>
                         <line x1="155" y1="0" x2="155" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
                         <line x1="347" y1="0" x2="347" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
                         <line x1="555" y1="0" x2="555" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
@@ -852,6 +852,18 @@ export class TermsOfUsePage {}
                               stroke="#17202a" stroke-width="2.5" fill="none"/>
                       <path d="M 0,300 C 50,288 90,175 108,62 C 120,240 148,310 168,298 C 210,272 268,186 300,118 C 318,280 356,312 380,302 C 415,258 448,105 462,55 C 476,188 510,308 528,292 C 548,242 584,95 605,58 C 622,175 652,300 668,286 C 696,254 745,224 778,232 C 790,236 797,240 800,242"
                               stroke="#f59e0b" stroke-width="2.5" fill="none" opacity="0.95"/>
+                      </svg>
+                    } @else if (chart.chartId === 'realized-price') {
+                      <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
+                        <rect width="800" height="360" fill="#fff"/>
+                        <line x1="0" y1="72" x2="800" y2="72" stroke="#e5e7eb" stroke-width="1"/>
+                        <line x1="0" y1="144" x2="800" y2="144" stroke="#e5e7eb" stroke-width="1"/>
+                        <line x1="0" y1="216" x2="800" y2="216" stroke="#e5e7eb" stroke-width="1"/>
+                        <line x1="0" y1="288" x2="800" y2="288" stroke="#e5e7eb" stroke-width="1"/>
+                        <path d="M 0,350 C 70,340 105,240 132,225 C 150,214 170,310 196,298 C 245,276 286,238 320,212 C 352,188 378,66 405,72 C 430,78 448,170 472,146 C 506,112 535,106 566,98 C 602,90 620,34 650,32 C 684,30 704,74 728,68 C 754,62 780,50 800,54"
+                              stroke="#1f2933" stroke-width="2.5" fill="none"/>
+                        <path d="M 0,354 C 70,330 112,320 150,310 C 176,304 196,298 230,294 C 276,288 312,280 345,260 C 382,236 398,182 426,176 C 468,166 510,158 548,150 C 590,140 606,112 642,105 C 686,96 725,92 760,86 C 780,82 792,80 800,80"
+                              stroke="#ff8a1f" stroke-width="2.5" fill="none"/>
                       </svg>
                     } @else if (chart.chartId === 'sopr-ratio') {
                       <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
@@ -872,9 +884,9 @@ export class TermsOfUsePage {}
                       </svg>
                     } @else if (chart.chartId === 'puell-multiple') {
                       <svg viewBox="0 0 800 360" preserveAspectRatio="none">
-                        <rect x="0" y="0"   width="800" height="90"  fill="rgba(239,68,68,0.18)"/>
-                        <rect x="0" y="90"  width="800" height="180" fill="rgba(234,179,8,0.07)"/>
-                        <rect x="0" y="270" width="800" height="90"  fill="rgba(34,197,94,0.18)"/>
+                        <rect x="0" y="0"   width="800" height="90"  fill="rgba(239,68,68,0.04)"/>
+                        <rect x="0" y="90"  width="800" height="180" fill="rgba(234,179,8,0.025)"/>
+                        <rect x="0" y="270" width="800" height="90"  fill="rgba(34,197,94,0.04)"/>
                         <line x1="0" y1="90"  x2="800" y2="90"  stroke="#e8eeea" stroke-width="1"/>
                         <line x1="0" y1="270" x2="800" y2="270" stroke="#e8eeea" stroke-width="1"/>
                         <line x1="155" y1="0" x2="155" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
@@ -1002,9 +1014,9 @@ export class TermsOfUsePage {}
                     } @else if (chart.chartId === 'halving-progress') {
                       <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
                         <rect width="800" height="360" fill="#fff"/>
-                        <rect x="0"   y="0" width="160" height="360" fill="rgba(220,252,231,0.5)"/>
-                        <rect x="320" y="0" width="160" height="360" fill="rgba(220,252,231,0.5)"/>
-                        <rect x="640" y="0" width="160" height="360" fill="rgba(219,234,254,0.6)"/>
+                        <rect x="0"   y="0" width="160" height="360" fill="rgba(220,252,231,0.08)"/>
+                        <rect x="320" y="0" width="160" height="360" fill="rgba(220,252,231,0.08)"/>
+                        <rect x="640" y="0" width="160" height="360" fill="rgba(219,234,254,0.08)"/>
                         <line x1="0" y1="60"  x2="800" y2="60"  stroke="#e5e7eb" stroke-width="1"/>
                         <line x1="0" y1="140" x2="800" y2="140" stroke="#e5e7eb" stroke-width="1"/>
                         <line x1="0" y1="220" x2="800" y2="220" stroke="#e5e7eb" stroke-width="1"/>
@@ -1256,15 +1268,15 @@ export class TermsOfUsePage {}
                     </svg>
                   } @else if (chart.chartId === 'bitcoin-rainbow') {
                     <svg viewBox="0 0 800 360" preserveAspectRatio="none">
-                      <rect x="0" y="0"   width="800" height="46"  fill="rgba(127,29,29,0.65)"/>
-                      <rect x="0" y="46"  width="800" height="37"  fill="rgba(239,68,68,0.65)"/>
-                      <rect x="0" y="83"  width="800" height="35"  fill="rgba(249,115,22,0.65)"/>
-                      <rect x="0" y="118" width="800" height="34"  fill="rgba(234,179,8,0.65)"/>
-                      <rect x="0" y="152" width="800" height="35"  fill="rgba(132,204,22,0.65)"/>
-                      <rect x="0" y="187" width="800" height="32"  fill="rgba(34,197,94,0.65)"/>
-                      <rect x="0" y="219" width="800" height="37"  fill="rgba(6,182,212,0.65)"/>
-                      <rect x="0" y="256" width="800" height="35"  fill="rgba(37,99,235,0.65)"/>
-                      <rect x="0" y="291" width="800" height="69"  fill="rgba(30,58,138,0.65)"/>
+                      <rect x="0" y="0"   width="800" height="46"  fill="rgba(127,29,29,0.06)"/>
+                      <rect x="0" y="46"  width="800" height="37"  fill="rgba(239,68,68,0.05)"/>
+                      <rect x="0" y="83"  width="800" height="35"  fill="rgba(249,115,22,0.05)"/>
+                      <rect x="0" y="118" width="800" height="34"  fill="rgba(234,179,8,0.05)"/>
+                      <rect x="0" y="152" width="800" height="35"  fill="rgba(132,204,22,0.05)"/>
+                      <rect x="0" y="187" width="800" height="32"  fill="rgba(34,197,94,0.05)"/>
+                      <rect x="0" y="219" width="800" height="37"  fill="rgba(6,182,212,0.05)"/>
+                      <rect x="0" y="256" width="800" height="35"  fill="rgba(37,99,235,0.05)"/>
+                      <rect x="0" y="291" width="800" height="69"  fill="rgba(30,58,138,0.05)"/>
                       <path d="M 0,322 C 80,318 130,312 155,307 C 168,228 200,76 213,70 C 228,285 260,312 272,308 C 308,294 346,264 355,254 C 372,188 408,34 424,28 C 441,90 472,247 507,242 C 522,236 542,230 555,226 C 573,186 617,93 632,96 C 649,165 678,226 685,220 C 703,210 741,198 763,195 C 776,194 792,196 800,196"
                             stroke="#111820" stroke-width="2.5" fill="none"/>
                     </svg>
@@ -1287,11 +1299,11 @@ export class TermsOfUsePage {}
                     </svg>
                   } @else if (chart.chartId === 'mvrv-z-score') {
                     <svg viewBox="0 0 800 360" preserveAspectRatio="none">
-                      <rect x="0" y="0"   width="800" height="88"  fill="rgba(239,68,68,0.20)"/>
-                      <rect x="0" y="88"  width="800" height="53"  fill="rgba(249,115,22,0.15)"/>
-                      <rect x="0" y="141" width="800" height="53"  fill="rgba(234,179,8,0.13)"/>
-                      <rect x="0" y="194" width="800" height="88"  fill="rgba(34,197,94,0.12)"/>
-                      <rect x="0" y="282" width="800" height="78"  fill="rgba(59,130,246,0.18)"/>
+                      <rect x="0" y="0"   width="800" height="88"  fill="rgba(239,68,68,0.04)"/>
+                      <rect x="0" y="88"  width="800" height="53"  fill="rgba(249,115,22,0.035)"/>
+                      <rect x="0" y="141" width="800" height="53"  fill="rgba(234,179,8,0.03)"/>
+                      <rect x="0" y="194" width="800" height="88"  fill="rgba(34,197,94,0.03)"/>
+                      <rect x="0" y="282" width="800" height="78"  fill="rgba(59,130,246,0.04)"/>
                       <line x1="155" y1="0" x2="155" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
                       <line x1="347" y1="0" x2="347" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
                       <line x1="555" y1="0" x2="555" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
@@ -1300,6 +1312,18 @@ export class TermsOfUsePage {}
                             stroke="#17202a" stroke-width="2.5" fill="none"/>
                       <path d="M 0,300 C 50,288 90,175 108,62 C 120,240 148,310 168,298 C 210,272 268,186 300,118 C 318,280 356,312 380,302 C 415,258 448,105 462,55 C 476,188 510,308 528,292 C 548,242 584,95 605,58 C 622,175 652,300 668,286 C 696,254 745,224 778,232 C 790,236 797,240 800,242"
                             stroke="#f59e0b" stroke-width="2.5" fill="none" opacity="0.95"/>
+                    </svg>
+                  } @else if (chart.chartId === 'realized-price') {
+                    <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
+                      <rect width="800" height="360" fill="#fff"/>
+                      <line x1="0" y1="72" x2="800" y2="72" stroke="#e5e7eb" stroke-width="1"/>
+                      <line x1="0" y1="144" x2="800" y2="144" stroke="#e5e7eb" stroke-width="1"/>
+                      <line x1="0" y1="216" x2="800" y2="216" stroke="#e5e7eb" stroke-width="1"/>
+                      <line x1="0" y1="288" x2="800" y2="288" stroke="#e5e7eb" stroke-width="1"/>
+                      <path d="M 0,350 C 70,340 105,240 132,225 C 150,214 170,310 196,298 C 245,276 286,238 320,212 C 352,188 378,66 405,72 C 430,78 448,170 472,146 C 506,112 535,106 566,98 C 602,90 620,34 650,32 C 684,30 704,74 728,68 C 754,62 780,50 800,54"
+                            stroke="#1f2933" stroke-width="2.5" fill="none"/>
+                      <path d="M 0,354 C 70,330 112,320 150,310 C 176,304 196,298 230,294 C 276,288 312,280 345,260 C 382,236 398,182 426,176 C 468,166 510,158 548,150 C 590,140 606,112 642,105 C 686,96 725,92 760,86 C 780,82 792,80 800,80"
+                            stroke="#ff8a1f" stroke-width="2.5" fill="none"/>
                     </svg>
                   } @else if (chart.chartId === 'sopr-ratio') {
                     <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
@@ -1320,9 +1344,9 @@ export class TermsOfUsePage {}
                     </svg>
                   } @else if (chart.chartId === 'puell-multiple') {
                     <svg viewBox="0 0 800 360" preserveAspectRatio="none">
-                      <rect x="0" y="0"   width="800" height="90"  fill="rgba(239,68,68,0.18)"/>
-                      <rect x="0" y="90"  width="800" height="180" fill="rgba(234,179,8,0.07)"/>
-                      <rect x="0" y="270" width="800" height="90"  fill="rgba(34,197,94,0.18)"/>
+                      <rect x="0" y="0"   width="800" height="90"  fill="rgba(239,68,68,0.04)"/>
+                      <rect x="0" y="90"  width="800" height="180" fill="rgba(234,179,8,0.025)"/>
+                      <rect x="0" y="270" width="800" height="90"  fill="rgba(34,197,94,0.04)"/>
                       <line x1="0" y1="90"  x2="800" y2="90"  stroke="#e8eeea" stroke-width="1"/>
                       <line x1="0" y1="270" x2="800" y2="270" stroke="#e8eeea" stroke-width="1"/>
                       <line x1="155" y1="0" x2="155" y2="360" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,5"/>
@@ -1450,9 +1474,9 @@ export class TermsOfUsePage {}
                   } @else if (chart.chartId === 'halving-progress') {
                     <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
                       <rect width="800" height="360" fill="#fff"/>
-                      <rect x="0"   y="0" width="160" height="360" fill="rgba(220,252,231,0.5)"/>
-                      <rect x="320" y="0" width="160" height="360" fill="rgba(220,252,231,0.5)"/>
-                      <rect x="640" y="0" width="160" height="360" fill="rgba(219,234,254,0.6)"/>
+                      <rect x="0"   y="0" width="160" height="360" fill="rgba(220,252,231,0.08)"/>
+                      <rect x="320" y="0" width="160" height="360" fill="rgba(220,252,231,0.08)"/>
+                      <rect x="640" y="0" width="160" height="360" fill="rgba(219,234,254,0.08)"/>
                       <line x1="0" y1="60"  x2="800" y2="60"  stroke="#e5e7eb" stroke-width="1"/>
                       <line x1="0" y1="140" x2="800" y2="140" stroke="#e5e7eb" stroke-width="1"/>
                       <line x1="0" y1="220" x2="800" y2="220" stroke="#e5e7eb" stroke-width="1"/>

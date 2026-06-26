@@ -1692,7 +1692,7 @@ main .recent-chart-thumb {
   aspect-ratio: 16 / 9;
   border-radius: 4px;
   overflow: hidden;
-  background: linear-gradient(135deg, #e8f0fe, #c5cae9);
+  background: #fff;
 
   img, svg {
     width: 100%;
@@ -2319,7 +2319,7 @@ main .chart-card:focus-visible {
 main .chart-card-thumb {
   position: relative;
   overflow: hidden;
-  background: #f4f6f4;
+  background: #fff;
 }
 
 main .chart-card-thumb svg {
