@@ -43,6 +43,11 @@ export class PriceProjectionsService {
         balanced_price: string | null;
         cvdd: string | null;
         ma_200_day: string | null;
+        ma_365_day: string | null;
+        stddev_365_day: string | null;
+        ath_price: string | null;
+        btc_rsi_12m: string | null;
+        rainbow_band: string | null;
         stock_to_flow_model: string | null;
       }>(`
         SELECT
@@ -51,6 +56,11 @@ export class PriceProjectionsService {
           (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'balanced_price'        ORDER BY date DESC LIMIT 1) AS balanced_price,
           (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'cvdd'                  ORDER BY date DESC LIMIT 1) AS cvdd,
           (SELECT AVG(price_usd) FROM (SELECT price_usd FROM bitcoin_price_daily ORDER BY date DESC LIMIT 200) r) AS ma_200_day,
+          (SELECT AVG(price_usd) FROM (SELECT price_usd FROM bitcoin_price_daily ORDER BY date DESC LIMIT 365) r) AS ma_365_day,
+          (SELECT STDDEV_POP(price_usd) FROM (SELECT price_usd FROM bitcoin_price_daily ORDER BY date DESC LIMIT 365) r) AS stddev_365_day,
+          (SELECT MAX(price_usd) FROM bitcoin_price_daily) AS ath_price,
+          (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'btc_rsi_12m'            ORDER BY date DESC LIMIT 1) AS btc_rsi_12m,
+          (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'rainbow_band'           ORDER BY date DESC LIMIT 1) AS rainbow_band,
           (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'stock_to_flow_ratio'   ORDER BY date DESC LIMIT 1) AS stock_to_flow_model
       `),
       db.query<{ date: string; price_usd: string }>(`
@@ -69,6 +79,11 @@ export class PriceProjectionsService {
     const balancedPrice = parseNum(m?.balanced_price);
     const cvdd = parseNum(m?.cvdd);
     const ma200 = parseNum(m?.ma_200_day);
+    const ma365 = parseNum(m?.ma_365_day);
+    const stddev365 = parseNum(m?.stddev_365_day);
+    const athPrice = parseNum(m?.ath_price);
+    const btcRsi12m = parseNum(m?.btc_rsi_12m);
+    const rainbowBand = parseNum(m?.rainbow_band);
     const s2fRatio = parseNum(m?.stock_to_flow_model);
     // S2F model price: PlanB calibration — 0.4 * ratio^3
     const s2fModel = s2fRatio !== null ? 0.4 * Math.pow(s2fRatio, 3) : null;
@@ -77,7 +92,19 @@ export class PriceProjectionsService {
       .map((r) => ({ date: r.date, priceUsd: parseNum(r.price_usd) ?? 0 }))
       .reverse();
 
-    const scenarios = buildScenarios(btc, { realizedPrice, terminalPrice, balancedPrice, cvdd, ma200, s2fModel });
+    const scenarios = buildScenarios(btc, {
+      realizedPrice,
+      terminalPrice,
+      balancedPrice,
+      cvdd,
+      ma200,
+      ma365,
+      stddev365,
+      athPrice,
+      btcRsi12m,
+      rainbowBand,
+      s2fModel,
+    });
 
     return { btcPriceUsd: btc, scenarios, historicalPoints, lastUpdated };
   }
@@ -94,6 +121,11 @@ interface Models {
   balancedPrice: number | null;
   cvdd: number | null;
   ma200: number | null;
+  ma365: number | null;
+  stddev365: number | null;
+  athPrice: number | null;
+  btcRsi12m: number | null;
+  rainbowBand: number | null;
   s2fModel: number | null;
 }
 
@@ -106,6 +138,8 @@ function buildScenarios(btc: number | null, m: Models): ProjectionScenario[] {
   if (m.cvdd)           bearTargets.push({ label: 'CVDD floor',     model: 'CVDD',           priceUsd: m.cvdd,           description: 'Cumulative value days destroyed floor', timeframe: '3–12 months' });
   if (m.balancedPrice)  bearTargets.push({ label: 'Balanced Price', model: 'Balanced Price', priceUsd: m.balancedPrice, description: 'Delta Cap / Realized Cap model floor',  timeframe: '3–12 months' });
   if (m.realizedPrice)  bearTargets.push({ label: 'Realized Price', model: 'Realized Price', priceUsd: m.realizedPrice, description: 'Average cost basis of all coins',         timeframe: '3–12 months' });
+  const volatilityFloor = m.ma365 !== null && m.stddev365 !== null ? Math.max(0, m.ma365 - m.stddev365) : null;
+  if (volatilityFloor)  bearTargets.push({ label: '365d mean -1σ',  model: 'Volatility Band', priceUsd: Math.round(volatilityFloor), description: 'One standard deviation below the 365-day mean', timeframe: '1–6 months' });
   if (bearTargets.length > 0) {
     scenarios.push({ scenario: 'bear', label: 'Bear Case', color: '#ef4444', targets: bearTargets });
   }
@@ -113,6 +147,8 @@ function buildScenarios(btc: number | null, m: Models): ProjectionScenario[] {
   // Base: 200-day MA × 1.5 and S2F model
   const baseTargets: PriceTarget[] = [];
   if (m.ma200)    baseTargets.push({ label: '200-day MA ×1.5', model: 'Mayer Multiple', priceUsd: Math.round(m.ma200 * 1.5), description: 'Mayer Multiple 1.5 — historically fair value', timeframe: '6–12 months' });
+  if (m.ma365 && m.stddev365) baseTargets.push({ label: '365d mean +1σ', model: 'Volatility Band', priceUsd: Math.round(m.ma365 + m.stddev365), description: 'One standard deviation above the 365-day mean', timeframe: '3–9 months' });
+  if (m.athPrice && (!btc || m.athPrice > btc)) baseTargets.push({ label: 'ATH retest', model: 'Market Structure', priceUsd: Math.round(m.athPrice), description: 'Retest of the highest stored daily close', timeframe: '6–18 months' });
   if (m.s2fModel) baseTargets.push({ label: 'S2F model price', model: 'Stock-to-Flow', priceUsd: Math.round(m.s2fModel),    description: 'Stock-to-Flow scarcity model fair value',   timeframe: '6–18 months' });
   if (baseTargets.length > 0) {
     scenarios.push({ scenario: 'base', label: 'Base Case', color: '#f59e0b', targets: baseTargets });
@@ -123,6 +159,8 @@ function buildScenarios(btc: number | null, m: Models): ProjectionScenario[] {
   if (m.s2fModel)      bullTargets.push({ label: 'S2F ×1.5',       model: 'Stock-to-Flow', priceUsd: Math.round(m.s2fModel * 1.5), description: 'S2F model with euphoria premium',      timeframe: '12–24 months' });
   if (m.terminalPrice) bullTargets.push({ label: 'Terminal Price', model: 'Terminal Price', priceUsd: Math.round(m.terminalPrice),   description: 'Upper bound fair value from realized cap', timeframe: '12–24 months' });
   if (m.ma200)         bullTargets.push({ label: '200-day MA ×2.4', model: 'Mayer Multiple', priceUsd: Math.round(m.ma200 * 2.4),   description: 'Mayer Multiple 2.4 — historical bull top',  timeframe: '12–24 months' });
+  if (m.athPrice)      bullTargets.push({ label: 'ATH ×1.272',     model: 'Fib Extension',  priceUsd: Math.round(m.athPrice * 1.272), description: 'First breakout extension above prior all-time high', timeframe: '9–24 months' });
+  if (m.ma365 && m.stddev365) bullTargets.push({ label: '365d mean +2σ', model: 'Volatility Band', priceUsd: Math.round(m.ma365 + (m.stddev365 * 2)), description: 'Two standard deviations above the 365-day mean', timeframe: '9–24 months' });
   if (bullTargets.length > 0) {
     scenarios.push({ scenario: 'bull', label: 'Bull Case', color: '#22c55e', targets: bullTargets });
   }
@@ -131,6 +169,18 @@ function buildScenarios(btc: number | null, m: Models): ProjectionScenario[] {
   const ultraTargets: PriceTarget[] = [];
   if (m.terminalPrice) ultraTargets.push({ label: 'Terminal ×1.5', model: 'Terminal Price', priceUsd: Math.round(m.terminalPrice * 1.5), description: 'Parabolic extension beyond terminal price', timeframe: '18–36 months' });
   if (m.s2fModel)      ultraTargets.push({ label: 'S2F ×3',        model: 'Stock-to-Flow', priceUsd: Math.round(m.s2fModel * 3),         description: 'Cycle euphoria peak — historical pattern',   timeframe: '18–36 months' });
+  if (m.athPrice)      ultraTargets.push({ label: 'ATH ×1.618',    model: 'Fib Extension', priceUsd: Math.round(m.athPrice * 1.618),     description: 'Golden-ratio extension above prior all-time high', timeframe: '18–36 months' });
+  if (m.athPrice)      ultraTargets.push({ label: 'ATH ×2',        model: 'Cycle Extension', priceUsd: Math.round(m.athPrice * 2),       description: 'Prior high doubling scenario for euphoric cycles', timeframe: '24–48 months' });
+  if (btc && m.btcRsi12m !== null && m.rainbowBand !== null) {
+    const heatMultiplier = m.btcRsi12m >= 80 || m.rainbowBand >= 8 ? 1.25 : 1.5;
+    ultraTargets.push({
+      label: 'Cycle heat extension',
+      model: 'RSI + Rainbow',
+      priceUsd: Math.round(btc * heatMultiplier),
+      description: 'Current price extended by cycle heat from 12m RSI and Rainbow band',
+      timeframe: '12–30 months',
+    });
+  }
   if (ultraTargets.length > 0) {
     scenarios.push({ scenario: 'ultra_bull', label: 'Ultra Bull', color: '#a855f7', targets: ultraTargets });
   }

@@ -49,7 +49,7 @@
                 (change)="termsAccepted.set($any($event.target).checked)"
               />
               <span i18n="Terms acceptance label@@onboardingCarousel.acceptTerms">I accept the</span>
-              <a routerLink="/terms-of-use" target="_blank" i18n="Terms link@@onboardingCarousel.termsLink">Terms of Use</a>
+              <button type="button" class="acceptance-link" (click)="$event.stopPropagation(); legal.open('terms-of-use')" i18n="Terms link@@onboardingCarousel.termsLink">Terms of Use</button>
             </label>
             <label class="acceptance-item">
               <input
@@ -58,7 +58,16 @@
                 (change)="privacyAccepted.set($any($event.target).checked)"
               />
               <span i18n="Privacy acceptance label@@onboardingCarousel.acceptPrivacy">I accept the</span>
-              <a routerLink="/privacy-policy" target="_blank" i18n="Privacy link@@onboardingCarousel.privacyLink">Privacy Policy</a>
+              <button type="button" class="acceptance-link" (click)="$event.stopPropagation(); legal.open('privacy-policy')" i18n="Privacy link@@onboardingCarousel.privacyLink">Privacy Policy</button>
+            </label>
+            <label class="acceptance-item">
+              <input
+                type="checkbox"
+                [checked]="disclaimerAccepted()"
+                (change)="disclaimerAccepted.set($any($event.target).checked)"
+              />
+              <span i18n="Disclaimer acceptance label@@onboardingCarousel.acceptDisclaimer">I accept the</span>
+              <button type="button" class="acceptance-link" (click)="$event.stopPropagation(); legal.open('disclaimer')" i18n="Disclaimer link@@onboardingCarousel.disclaimerLink">Disclaimer</button>
             </label>
           </div>
         }

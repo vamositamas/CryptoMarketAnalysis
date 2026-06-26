@@ -69,6 +69,11 @@ const WIDGET_CATALOG: Record<string, WidgetCatalogEntry> = {
   market_cap: { title: 'Market Cap', decimals: 0 },
   halving_progress: { title: 'Halving Progress', decimals: 1 },
   btc_rsi_12m: { title: 'BTC RSI (12m)', decimals: 1 },
+  realized_price_premium: { title: 'Realized Price Premium', decimals: 1 },
+  s2f_model_price: { title: 'S2F Model Price', decimals: 0 },
+  base_case_target: { title: 'Base Case Target', decimals: 0 },
+  bull_case_target: { title: 'Bull Case Target', decimals: 0 },
+  market_signal_score: { title: 'Market Signal Score', decimals: 0 },
 };
 
 const DEFAULT_WIDGET_TYPES = ['btc_price', '24h_change', 'mvrv_zscore', 'stock_to_flow', 'fear_greed'];
@@ -90,7 +95,16 @@ const METRIC_NAME_BY_WIDGET_TYPE: Record<string, string> = {
   btc_rsi_12m: 'btc_rsi_12m',
 };
 
-const CURRENCY_WIDGET_TYPES = new Set(['btc_price', 'realized_price', 'ma_200_day', 'market_cap']);
+const CURRENCY_WIDGET_TYPES = new Set([
+  'btc_price',
+  'realized_price',
+  'ma_200_day',
+  'market_cap',
+  's2f_model_price',
+  'base_case_target',
+  'bull_case_target',
+]);
+const PERCENT_WIDGET_TYPES = new Set(['24h_change', 'realized_price_premium']);
 const SUPPLY_WIDGET_TYPES = new Set(['total_supply', 'circulating_supply']);
 
 export class DashboardService {
@@ -291,6 +305,11 @@ export class DashboardService {
       };
     }
 
+    const computedResponse = await this.buildComputedWidgetResponse(widget, config);
+    if (computedResponse) {
+      return computedResponse;
+    }
+
     const points = await this.getMetricPoints(widget.widgetType);
     const latest = points[0] ?? null;
     const previous = points[1] ?? null;
@@ -343,6 +362,75 @@ export class DashboardService {
     }
 
     return this.metricsRepository.getLatestMetricValues(metricName);
+  }
+
+  private async buildComputedWidgetResponse(
+    widget: DashboardWidgetRecord,
+    config: WidgetConfig,
+  ): Promise<DashboardWidgetResponse | null> {
+    if (
+      ![
+        'realized_price_premium',
+        's2f_model_price',
+        'base_case_target',
+        'bull_case_target',
+        'market_signal_score',
+      ].includes(widget.widgetType)
+    ) {
+      return null;
+    }
+
+    const [prices, realized, stockToFlow, ma200, mvrv, fearGreed] = await Promise.all([
+      this.metricsRepository.getLatestPrices(),
+      this.metricsRepository.getLatestMetricValues('realized_price'),
+      this.metricsRepository.getLatestMetricValues('stock_to_flow_ratio'),
+      this.metricsRepository.getLatestMetricValues('ma_200_day'),
+      this.metricsRepository.getLatestMetricValues('mvrv_zscore'),
+      this.metricsRepository.getLatestMetricValues('fear_greed_index'),
+    ]);
+
+    const latestPrice = prices[0] ?? null;
+    const latestDate =
+      latestPrice?.date ??
+      realized[0]?.date ??
+      stockToFlow[0]?.date ??
+      ma200[0]?.date ??
+      mvrv[0]?.date ??
+      fearGreed[0]?.date ??
+      null;
+
+    const value = computeDashboardSignalValue(widget.widgetType, {
+      btcPrice: latestPrice?.value ?? null,
+      realizedPrice: realized[0]?.value ?? null,
+      stockToFlowRatio: stockToFlow[0]?.value ?? null,
+      ma200: ma200[0]?.value ?? null,
+      mvrvZscore: mvrv[0]?.value ?? null,
+      fearGreedIndex: fearGreed[0]?.value ?? null,
+    });
+
+    if (value === null || latestDate === null) {
+      return {
+        id: widget.id,
+        type: widget.widgetType,
+        title: config.title,
+        value: null,
+        formattedValue: 'Waiting for data',
+        trend: 'flat',
+        trendPercent: null,
+        lastUpdated: null,
+      };
+    }
+
+    return {
+      id: widget.id,
+      type: widget.widgetType,
+      title: config.title,
+      value,
+      formattedValue: formatWidgetValue(widget.widgetType, value, config.decimals),
+      trend: value > 0 ? 'up' : value < 0 ? 'down' : 'flat',
+      trendPercent: null,
+      lastUpdated: `${latestDate}T00:00:00.000Z`,
+    };
   }
 
   private async buildCustomWidgetResponse(
@@ -416,8 +504,12 @@ function formatWidgetValue(widgetType: string, value: number, decimals: number):
     })}`;
   }
 
-  if (widgetType === '24h_change') {
+  if (PERCENT_WIDGET_TYPES.has(widgetType)) {
     return `${value >= 0 ? '+' : ''}${value.toFixed(decimals)}%`;
+  }
+
+  if (widgetType === 'market_signal_score') {
+    return `${value.toFixed(decimals)}/100`;
   }
 
   if (SUPPLY_WIDGET_TYPES.has(widgetType)) {
@@ -431,6 +523,87 @@ function formatWidgetValue(widgetType: string, value: number, decimals: number):
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   });
+}
+
+interface DashboardSignalInputs {
+  btcPrice: number | null;
+  realizedPrice: number | null;
+  stockToFlowRatio: number | null;
+  ma200: number | null;
+  mvrvZscore: number | null;
+  fearGreedIndex: number | null;
+}
+
+function computeDashboardSignalValue(widgetType: string, inputs: DashboardSignalInputs): number | null {
+  switch (widgetType) {
+    case 'realized_price_premium':
+      if (!inputs.btcPrice || !inputs.realizedPrice) return null;
+      return ((inputs.btcPrice - inputs.realizedPrice) / inputs.realizedPrice) * 100;
+    case 's2f_model_price':
+      return inputs.stockToFlowRatio !== null ? 0.4 * Math.pow(inputs.stockToFlowRatio, 3) : null;
+    case 'base_case_target': {
+      const targets = [
+        inputs.ma200 !== null ? inputs.ma200 * 1.5 : null,
+        inputs.stockToFlowRatio !== null ? 0.4 * Math.pow(inputs.stockToFlowRatio, 3) : null,
+      ].filter((v): v is number => v !== null);
+      return targets.length ? Math.round(targets.reduce((sum, v) => sum + v, 0) / targets.length) : null;
+    }
+    case 'bull_case_target': {
+      const targets = [
+        inputs.ma200 !== null ? inputs.ma200 * 2.4 : null,
+        inputs.stockToFlowRatio !== null ? 0.4 * Math.pow(inputs.stockToFlowRatio, 3) * 1.5 : null,
+      ].filter((v): v is number => v !== null);
+      return targets.length ? Math.round(Math.max(...targets)) : null;
+    }
+    case 'market_signal_score':
+      return computeCompactSignalScore(inputs);
+    default:
+      return null;
+  }
+}
+
+function computeCompactSignalScore(inputs: DashboardSignalInputs): number | null {
+  const scores = [
+    scoreMvrvForDashboard(inputs.mvrvZscore),
+    scoreFearGreedForDashboard(inputs.fearGreedIndex),
+    scoreRealizedPremiumForDashboard(
+      inputs.btcPrice && inputs.realizedPrice
+        ? ((inputs.btcPrice - inputs.realizedPrice) / inputs.realizedPrice) * 100
+        : null,
+    ),
+  ].filter((v): v is number => v !== null);
+
+  if (scores.length === 0) return null;
+
+  const average = scores.reduce((sum, value) => sum + value, 0) / scores.length;
+  return Math.round(Math.min(100, Math.max(0, average)));
+}
+
+function scoreMvrvForDashboard(value: number | null): number | null {
+  if (value === null) return null;
+  if (value < 0) return 95;
+  if (value < 2) return 75;
+  if (value < 4) return 55;
+  if (value < 7) return 35;
+  return 10;
+}
+
+function scoreFearGreedForDashboard(value: number | null): number | null {
+  if (value === null) return null;
+  if (value <= 20) return 90;
+  if (value <= 40) return 70;
+  if (value <= 60) return 50;
+  if (value <= 80) return 30;
+  return 10;
+}
+
+function scoreRealizedPremiumForDashboard(value: number | null): number | null {
+  if (value === null) return null;
+  if (value < 0) return 95;
+  if (value < 30) return 75;
+  if (value < 100) return 50;
+  if (value < 250) return 30;
+  return 10;
 }
 
 function formatCustomValue(value: number): string {

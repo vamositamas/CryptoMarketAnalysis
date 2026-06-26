@@ -508,20 +508,18 @@ export class TermsOfUsePage {}
           <h2 i18n="Dashboard title@@dashboard.title">Bitcoin cycle dashboard</h2>
         </div>
         <div class="dashboard-heading-actions">
-          @if (authSession.hasRole(['administrator'])) {
-            <button
-              type="button"
-              class="secondary-button"
-              [disabled]="isRefreshing()"
-              (click)="refreshData()"
-            >
-              @if (isRefreshing()) {
-                <ng-container i18n="Refreshing state@@dashboard.refreshing">Refreshing...</ng-container>
-              } @else {
-                <ng-container i18n="Refresh data button@@dashboard.refreshData">Refresh Data</ng-container>
-              }
-            </button>
-          }
+          <button
+            type="button"
+            class="secondary-button"
+            [disabled]="isRefreshing()"
+            (click)="refreshData()"
+          >
+            @if (isRefreshing()) {
+              <ng-container i18n="Refreshing state@@dashboard.refreshing">Refreshing...</ng-container>
+            } @else {
+              <ng-container i18n="Refresh data button@@dashboard.refreshData">Refresh Data</ng-container>
+            }
+          </button>
           <button
             type="button"
             class="secondary-button"
@@ -3147,7 +3145,7 @@ export class RegisterPage {
     confirmPassword: ['', Validators.required],
     captcha: ['', Validators.required],
     verificationCode: [''],
-    languagePreference: this.fb.nonNullable.control<'en' | 'hu'>('en', Validators.required),
+    languagePreference: this.fb.nonNullable.control<'en' | 'hu'>(this.langService.current(), Validators.required),
   });
 
   protected readonly passwordMismatch = computed(() => {
@@ -3209,7 +3207,7 @@ export class RegisterPage {
         confirmPassword: '',
         captcha: '',
         verificationCode: '',
-        languagePreference: 'en',
+        languagePreference,
       });
       this.newChallenge();
     } catch (error) {

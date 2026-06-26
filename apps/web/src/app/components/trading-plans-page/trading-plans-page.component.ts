@@ -68,7 +68,8 @@ type Tab = 'signals' | 'projections' | 'plans';
     .proj-targets { padding: 0.75rem 1.25rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; }
     .proj-target { padding: 0.75rem; background: var(--color-background, #fff); border: 1px solid var(--color-border, #e5e7eb); border-radius: 8px; }
     .proj-target-price { font-size: 1.1rem; font-weight: 700; }
-    .proj-target-label { font-size: 0.75rem; font-weight: 600; color: var(--color-text-muted, #6b7280); margin-bottom: 2px; }
+    .proj-target-label-row { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 2px; }
+    .proj-target-label { font-size: 0.75rem; font-weight: 600; color: var(--color-text-muted, #6b7280); min-width: 0; }
     .proj-target-model { font-size: 0.7rem; color: var(--color-text-muted, #6b7280); }
     .proj-target-timeframe { font-size: 0.7rem; color: var(--color-text-muted, #6b7280); margin-top: 2px; font-style: italic; }
     .proj-target-pct { font-size: 0.8rem; font-weight: 600; margin-top: 4px; }
@@ -223,7 +224,15 @@ type Tab = 'signals' | 'projections' | 'plans';
                 <div class="proj-targets">
                   @for (target of scenario.targets; track target.label) {
                     <div class="proj-target">
-                      <div class="proj-target-label">{{ projectionLabel(target.label) }}</div>
+                      <div class="proj-target-label-row">
+                        <div class="proj-target-label">{{ projectionLabel(target.label) }}</div>
+                        <button
+                          type="button"
+                          class="proj-info"
+                          [attr.data-tooltip]="projectionDescription(target.description)"
+                          [attr.aria-label]="projectionInfoLabel(target)"
+                        >i</button>
+                      </div>
                       <div class="proj-target-price" [style.color]="scenario.color">{{ formatUsd(target.priceUsd) }}</div>
                       <div class="proj-target-model">{{ projectionModel(target.model) }}</div>
                       @if (p.btcPriceUsd) {
@@ -769,6 +778,14 @@ export class TradingPlansPageComponent {
     return this.translatePhrase(timeframe);
   }
 
+  protected projectionDescription(description: string): string {
+    return this.translatePhrase(description);
+  }
+
+  protected projectionInfoLabel(target: { label: string; description: string }): string {
+    return `${this.projectionLabel(target.label)}: ${this.projectionDescription(target.description)}`;
+  }
+
   protected formatUsd(value: number): string {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
   }
@@ -804,6 +821,24 @@ export class TradingPlansPageComponent {
       'Far from crossover — early/mid cycle': $localize`:Far crossover interpretation@@trading.interpretation.farCrossover:Far from crossover - early/mid cycle`,
       'Below 200-day MA — accumulation zone': $localize`:Below 200 day MA interpretation@@trading.interpretation.below200Day:Below 200-day MA - accumulation zone`,
       'Below average miner revenue — accumulation zone': $localize`:Below average miner revenue interpretation@@trading.interpretation.belowMinerRevenue:Below average miner revenue - accumulation zone`,
+      'Cumulative value days destroyed floor': $localize`:CVDD floor description@@trading.projection.description.cvddFloor:Cumulative value days destroyed floor`,
+      'Delta Cap / Realized Cap model floor': $localize`:Balanced price description@@trading.projection.description.balancedPrice:Delta Cap / Realized Cap model floor`,
+      'Average cost basis of all coins': $localize`:Realized price description@@trading.projection.description.realizedPrice:Average cost basis of all coins`,
+      'One standard deviation below the 365-day mean': $localize`:Volatility lower band description@@trading.projection.description.volatilityLower:One standard deviation below the 365-day mean`,
+      'Mayer Multiple 1.5 — historically fair value': $localize`:Mayer fair value description@@trading.projection.description.mayer15:Mayer Multiple 1.5 - historically fair value`,
+      'One standard deviation above the 365-day mean': $localize`:Volatility upper one band description@@trading.projection.description.volatilityUpperOne:One standard deviation above the 365-day mean`,
+      'Retest of the highest stored daily close': $localize`:ATH retest description@@trading.projection.description.athRetest:Retest of the highest stored daily close`,
+      'Stock-to-Flow scarcity model fair value': $localize`:S2F fair value description@@trading.projection.description.s2fFairValue:Stock-to-Flow scarcity model fair value`,
+      'S2F model with euphoria premium': $localize`:S2F euphoria premium description@@trading.projection.description.s2fPremium:S2F model with euphoria premium`,
+      'Upper bound fair value from realized cap': $localize`:Terminal price description@@trading.projection.description.terminalPrice:Upper bound fair value from realized cap`,
+      'Mayer Multiple 2.4 — historical bull top': $localize`:Mayer bull top description@@trading.projection.description.mayer24:Mayer Multiple 2.4 - historical bull top`,
+      'First breakout extension above prior all-time high': $localize`:ATH first extension description@@trading.projection.description.ath1272:First breakout extension above prior all-time high`,
+      'Two standard deviations above the 365-day mean': $localize`:Volatility upper two band description@@trading.projection.description.volatilityUpperTwo:Two standard deviations above the 365-day mean`,
+      'Parabolic extension beyond terminal price': $localize`:Terminal extension description@@trading.projection.description.terminal15:Parabolic extension beyond terminal price`,
+      'Cycle euphoria peak — historical pattern': $localize`:S2F euphoria peak description@@trading.projection.description.s2f3:Cycle euphoria peak - historical pattern`,
+      'Golden-ratio extension above prior all-time high': $localize`:ATH golden extension description@@trading.projection.description.ath1618:Golden-ratio extension above prior all-time high`,
+      'Prior high doubling scenario for euphoric cycles': $localize`:ATH double description@@trading.projection.description.ath2:Prior high doubling scenario for euphoric cycles`,
+      'Current price extended by cycle heat from 12m RSI and Rainbow band': $localize`:Cycle heat description@@trading.projection.description.cycleHeat:Current price extended by cycle heat from 12m RSI and Rainbow band`,
       'Bear Case': $localize`:Bear case scenario@@trading.scenario.bear:Bear Case`,
       'Base Case': $localize`:Base case scenario@@trading.scenario.base:Base Case`,
       'Bull Case': $localize`:Bull case scenario@@trading.scenario.bull:Bull Case`,
@@ -813,6 +848,14 @@ export class TradingPlansPageComponent {
       'Realized Price': $localize`:Realized price projection@@trading.projection.realizedPrice:Realized Price`,
       '200-day MA ×1.5': $localize`:200 day MA x1.5 projection@@trading.projection.200day15:200-day MA ×1.5`,
       '200-day MA ×2.4': $localize`:200 day MA x2.4 projection@@trading.projection.200day24:200-day MA ×2.4`,
+      '365d mean -1σ': $localize`:365 day mean minus one sigma projection@@trading.projection.365meanMinus1:365d mean -1σ`,
+      '365d mean +1σ': $localize`:365 day mean plus one sigma projection@@trading.projection.365meanPlus1:365d mean +1σ`,
+      '365d mean +2σ': $localize`:365 day mean plus two sigma projection@@trading.projection.365meanPlus2:365d mean +2σ`,
+      'ATH retest': $localize`:ATH retest projection@@trading.projection.athRetest:ATH retest`,
+      'ATH ×1.272': $localize`:ATH x1.272 projection@@trading.projection.ath1272:ATH ×1.272`,
+      'ATH ×1.618': $localize`:ATH x1.618 projection@@trading.projection.ath1618:ATH ×1.618`,
+      'ATH ×2': $localize`:ATH x2 projection@@trading.projection.ath2:ATH ×2`,
+      'Cycle heat extension': $localize`:Cycle heat extension projection@@trading.projection.cycleHeatExtension:Cycle heat extension`,
       'S2F model price': $localize`:S2F model price projection@@trading.projection.s2fModel:S2F model price`,
       'S2F ×1.5': $localize`:S2F x1.5 projection@@trading.projection.s2f15:S2F ×1.5`,
       'S2F ×3': $localize`:S2F x3 projection@@trading.projection.s2f3:S2F ×3`,
@@ -821,11 +864,21 @@ export class TradingPlansPageComponent {
       'Mayer Multiple': 'Mayer Multiple',
       'Stock-to-Flow': 'Stock-to-Flow',
       'CVDD': 'CVDD',
+      'Volatility Band': $localize`:Volatility band model@@trading.model.volatilityBand:Volatility Band`,
+      'Market Structure': $localize`:Market structure model@@trading.model.marketStructure:Market Structure`,
+      'Fib Extension': $localize`:Fib extension model@@trading.model.fibExtension:Fib Extension`,
+      'Cycle Extension': $localize`:Cycle extension model@@trading.model.cycleExtension:Cycle Extension`,
+      'RSI + Rainbow': 'RSI + Rainbow',
+      '1–6 months': $localize`:1 to 6 months timeframe@@trading.timeframe.1to6:1-6 months`,
+      '3–9 months': $localize`:3 to 9 months timeframe@@trading.timeframe.3to9:3-9 months`,
       '3–12 months': $localize`:3 to 12 months timeframe@@trading.timeframe.3to12:3-12 months`,
       '6–12 months': $localize`:6 to 12 months timeframe@@trading.timeframe.6to12:6-12 months`,
       '6–18 months': $localize`:6 to 18 months timeframe@@trading.timeframe.6to18:6-18 months`,
+      '9–24 months': $localize`:9 to 24 months timeframe@@trading.timeframe.9to24:9-24 months`,
       '12–24 months': $localize`:12 to 24 months timeframe@@trading.timeframe.12to24:12-24 months`,
+      '12–30 months': $localize`:12 to 30 months timeframe@@trading.timeframe.12to30:12-30 months`,
       '18–36 months': $localize`:18 to 36 months timeframe@@trading.timeframe.18to36:18-36 months`,
+      '24–48 months': $localize`:24 to 48 months timeframe@@trading.timeframe.24to48:24-48 months`,
     };
 
     if (exact[value]) return exact[value];

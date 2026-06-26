@@ -5,7 +5,7 @@ import {
   type DashboardWidget,
 } from '@crypto-market-analysis/data-access/api-client';
 
-type WidgetLibraryCategory = 'Price Metrics' | 'On-chain Metrics' | 'Supply Metrics' | 'Cycle Indicators';
+type WidgetLibraryCategory = 'Price Metrics' | 'On-chain Metrics' | 'Supply Metrics' | 'Cycle Indicators' | 'Signals & Forecasts';
 type ModalView = 'library' | 'custom';
 
 interface WidgetLibraryItem {
@@ -82,9 +82,57 @@ const WIDGET_LIBRARY: WidgetLibraryItem[] = [
     category: 'Cycle Indicators',
     decimals: 1,
   },
+  {
+    type: 'btc_rsi_12m',
+    icon: 'RSI',
+    name: 'BTC RSI (12m)',
+    description: 'Long-term momentum gauge from the 12-month Bitcoin RSI.',
+    category: 'Signals & Forecasts',
+    decimals: 1,
+  },
+  {
+    type: 'realized_price_premium',
+    icon: 'R%',
+    name: 'Realized Price Premium',
+    description: 'Shows how far spot price trades above or below the aggregate on-chain cost basis.',
+    category: 'Signals & Forecasts',
+    decimals: 1,
+  },
+  {
+    type: 'market_signal_score',
+    icon: 'SIG',
+    name: 'Market Signal Score',
+    description: 'Compact 0-100 score from MVRV, sentiment, and realized-price valuation signals.',
+    category: 'Signals & Forecasts',
+    decimals: 0,
+  },
+  {
+    type: 's2f_model_price',
+    icon: 'S2F',
+    name: 'S2F Model Price',
+    description: 'Model-implied Bitcoin price from the current Stock-to-Flow ratio.',
+    category: 'Signals & Forecasts',
+    decimals: 0,
+  },
+  {
+    type: 'base_case_target',
+    icon: 'BASE',
+    name: 'Base Case Target',
+    description: 'Balanced price target using the 200-day moving average and S2F model context.',
+    category: 'Signals & Forecasts',
+    decimals: 0,
+  },
+  {
+    type: 'bull_case_target',
+    icon: 'BULL',
+    name: 'Bull Case Target',
+    description: 'Upside target based on elevated Mayer Multiple and S2F expansion scenarios.',
+    category: 'Signals & Forecasts',
+    decimals: 0,
+  },
 ];
 
-const CATEGORIES: WidgetLibraryCategory[] = ['Price Metrics', 'On-chain Metrics', 'Supply Metrics', 'Cycle Indicators'];
+const CATEGORIES: WidgetLibraryCategory[] = ['Price Metrics', 'On-chain Metrics', 'Supply Metrics', 'Cycle Indicators', 'Signals & Forecasts'];
 
 export const FORMULA_VARIABLES = [
   { name: '{{btc_price}}', description: 'Bitcoin price (USD)' },

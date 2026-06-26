@@ -10,6 +10,10 @@ describe('DashboardPage', () => {
     getDashboardWidgets: jest.Mock;
     reorderDashboardWidgets: jest.Mock;
     getRecentCharts: jest.Mock;
+    getFavouriteCharts: jest.Mock;
+    getTradingSignals: jest.Mock;
+    getLivePrice: jest.Mock;
+    triggerDashboardRefresh: jest.Mock;
   };
 
   function setUp(): void {
@@ -31,6 +35,13 @@ describe('DashboardPage', () => {
       getDashboardWidgets: jest.fn().mockResolvedValue({ widgets: [] }),
       reorderDashboardWidgets: jest.fn().mockResolvedValue(undefined),
       getRecentCharts: jest.fn().mockResolvedValue({ recentCharts: [] }),
+      getFavouriteCharts: jest.fn().mockResolvedValue({ favouriteCharts: [] }),
+      getTradingSignals: jest.fn().mockResolvedValue(null),
+      getLivePrice: jest.fn().mockResolvedValue(null),
+      triggerDashboardRefresh: jest.fn().mockResolvedValue({
+        date: '2026-06-26',
+        dataPoints: 1,
+      }),
     };
   });
 
@@ -39,6 +50,13 @@ describe('DashboardPage', () => {
     const compiled = fixture.nativeElement as HTMLElement;
 
     expect(compiled.textContent).toContain('Loading...');
+  });
+
+  it('shows the data refresh action to non-admin dashboard users', () => {
+    setUp();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('Refresh Data');
   });
 
   it('renders widget cards with title, formatted value, trend indicator, and last updated time', async () => {

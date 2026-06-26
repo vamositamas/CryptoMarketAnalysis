@@ -163,10 +163,16 @@
   cursor: pointer;
 }
 
-.acceptance-item a {
+.acceptance-link {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
   color: #145c4b;
   font-weight: 600;
+  font: inherit;
   text-decoration: underline;
+  cursor: pointer;
 }
 
 .visually-hidden {

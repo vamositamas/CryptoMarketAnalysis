@@ -19,16 +19,20 @@ describe('AddWidgetModalComponent', () => {
     fixture.detectChanges();
   }
 
-  it('renders all 3 categories with their widgets', () => {
+  it('renders all widget categories with their widgets', () => {
     setUp();
     const compiled = fixture.nativeElement as HTMLElement;
 
     expect(compiled.textContent).toContain('Price Metrics');
     expect(compiled.textContent).toContain('On-chain Metrics');
     expect(compiled.textContent).toContain('Supply Metrics');
+    expect(compiled.textContent).toContain('Cycle Indicators');
+    expect(compiled.textContent).toContain('Signals & Forecasts');
     expect(compiled.textContent).toContain('Realized Price');
-    expect(compiled.textContent).toContain('Hash Rate');
+    expect(compiled.textContent).toContain('Hash rate');
     expect(compiled.textContent).toContain('Market Cap');
+    expect(compiled.textContent).toContain('Market Signal Score');
+    expect(compiled.textContent).toContain('Bull Case Target');
   });
 
   it('filters widgets by name or description case-insensitively in real time', () => {
@@ -39,7 +43,7 @@ describe('AddWidgetModalComponent', () => {
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.textContent).toContain('Hash Rate');
+    expect(compiled.textContent).toContain('Hash rate');
     expect(compiled.textContent).not.toContain('Realized Price');
     expect(compiled.textContent).not.toContain('Market Cap');
   });

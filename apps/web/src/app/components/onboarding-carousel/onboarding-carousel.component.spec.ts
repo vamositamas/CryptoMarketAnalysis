@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { OnboardingCarouselComponent } from './onboarding-carousel.component';
+import { LegalDialogService } from '../../services/legal-dialog.service';
 
 describe('OnboardingCarouselComponent', () => {
   let fixture: ComponentFixture<OnboardingCarouselComponent>;
@@ -58,7 +59,7 @@ describe('OnboardingCarouselComponent', () => {
     expect(skipped).toHaveBeenCalledTimes(1);
   });
 
-  it('requires terms and privacy acceptance before completion', () => {
+  it('requires terms, privacy, and disclaimer acceptance before completion', () => {
     const skipped = jest.fn();
     const completed = jest.fn();
     fixture.componentInstance.skipped.subscribe(skipped);
@@ -79,9 +80,31 @@ describe('OnboardingCarouselComponent', () => {
     fixture.detectChanges();
 
     clickNext();
+    expect(completed).not.toHaveBeenCalled();
+
+    checkboxes[2].click();
+    fixture.detectChanges();
+
+    clickNext();
 
     expect(skipped).not.toHaveBeenCalled();
     expect(completed).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens legal documents in the shared dialog without accepting the checkbox', () => {
+    const legal = TestBed.inject(LegalDialogService);
+
+    clickNext();
+    clickNext();
+
+    const firstCheckbox = nativeElement.querySelector<HTMLInputElement>('.acceptance-item input');
+    const termsButton = nativeElement.querySelector<HTMLButtonElement>('.acceptance-link');
+
+    termsButton?.click();
+    fixture.detectChanges();
+
+    expect(legal.activeDoc()).toBe('terms-of-use');
+    expect(firstCheckbox?.checked).toBe(false);
   });
 
   function clickNext(): void {

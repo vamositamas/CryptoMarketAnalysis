@@ -213,6 +213,64 @@ describe('DashboardService', () => {
     expect(response.widgets[1]).toMatchObject({ type: 'market_cap', formattedValue: '$1,320,000,000,000' });
   });
 
+  it('builds prediction and signal widgets from existing price and indicator data', async () => {
+    const widgetRepository = {
+      ...createWidgetRepositoryStub(),
+      listForUser: jest.fn().mockResolvedValue([
+        widgetRecord('13', 'realized_price_premium', { title: 'Realized Price Premium', decimals: 1 }, 0),
+        widgetRecord('14', 's2f_model_price', { title: 'S2F Model Price', decimals: 0 }, 1),
+        widgetRecord('15', 'base_case_target', { title: 'Base Case Target', decimals: 0 }, 2),
+        widgetRecord('16', 'bull_case_target', { title: 'Bull Case Target', decimals: 0 }, 3),
+        widgetRecord('17', 'market_signal_score', { title: 'Market Signal Score', decimals: 0 }, 4),
+      ]),
+    };
+    const metricsRepository = {
+      ...createMetricsRepositoryStub(),
+      getLatestPrices: jest.fn().mockResolvedValue([{ date: '2026-06-10', value: 90_000 }]),
+      getLatestMetricValues: jest.fn((metricName: string) => {
+        const points: Record<string, { date: string; value: number }[]> = {
+          realized_price: [{ date: '2026-06-10', value: 60_000 }],
+          stock_to_flow_ratio: [{ date: '2026-06-10', value: 60 }],
+          ma_200_day: [{ date: '2026-06-10', value: 80_000 }],
+          mvrv_zscore: [{ date: '2026-06-10', value: 1.5 }],
+          fear_greed_index: [{ date: '2026-06-10', value: 35 }],
+        };
+        return Promise.resolve(points[metricName] ?? []);
+      }),
+    };
+    const service = new DashboardService(widgetRepository, metricsRepository);
+
+    const response = await service.getWidgets('user-1');
+
+    expect(response.widgets).toEqual([
+      expect.objectContaining({
+        type: 'realized_price_premium',
+        value: 50,
+        formattedValue: '+50.0%',
+      }),
+      expect.objectContaining({
+        type: 's2f_model_price',
+        value: 86_400,
+        formattedValue: '$86,400',
+      }),
+      expect.objectContaining({
+        type: 'base_case_target',
+        value: 103_200,
+        formattedValue: '$103,200',
+      }),
+      expect.objectContaining({
+        type: 'bull_case_target',
+        value: 192_000,
+        formattedValue: '$192,000',
+      }),
+      expect.objectContaining({
+        type: 'market_signal_score',
+        value: 65,
+        formattedValue: '65/100',
+      }),
+    ]);
+  });
+
   it('adds a widget at the next position after the current max', async () => {
     const widgetRepository = {
       ...createWidgetRepositoryStub(),
