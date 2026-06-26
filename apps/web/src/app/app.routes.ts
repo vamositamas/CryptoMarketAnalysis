@@ -514,6 +514,9 @@ export class TermsOfUsePage {}
             [disabled]="isRefreshing()"
             (click)="refreshData()"
           >
+            <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M17.7 6.3A8 8 0 1 0 20 12h-2a6 6 0 1 1-1.8-4.3L13 11h8V3l-3.3 3.3Z"></path>
+            </svg>
             @if (isRefreshing()) {
               <ng-container i18n="Refreshing state@@dashboard.refreshing">Refreshing...</ng-container>
             } @else {
@@ -524,9 +527,11 @@ export class TermsOfUsePage {}
             type="button"
             class="secondary-button"
             (click)="openAddWidget()"
-            i18n="Add widget button@@dashboard.openAddWidget"
           >
-            Add Widget
+            <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z"></path>
+            </svg>
+            <ng-container i18n="Add widget button@@dashboard.openAddWidget">Add Widget</ng-container>
           </button>
         </div>
         @if (refreshMessage()) {
