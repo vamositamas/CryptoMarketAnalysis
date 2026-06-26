@@ -44,6 +44,24 @@ export interface RegisterResponse {
   message: string;
 }
 
+export interface RequestEmailVerificationRequest {
+  email: string;
+}
+
+export interface RequestEmailVerificationResponse {
+  message: string;
+  verificationUrl?: string;
+}
+
+export interface VerifyEmailCodeRequest {
+  email: string;
+  code: string;
+}
+
+export interface VerifyEmailCodeResponse {
+  message: string;
+}
+
 export interface LoginRequest {
   email: string;
   password: string;

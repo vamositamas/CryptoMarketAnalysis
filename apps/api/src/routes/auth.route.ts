@@ -62,6 +62,29 @@ export function createAuthRouter(authService = new AuthService()): Router {
     }
   });
 
+  router.post('/verify/resend', authRateLimit, async (req, res, next) => {
+    try {
+      const response = await authService.requestEmailVerification(req.body);
+      res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post('/verify/code', authRateLimit, async (req, res, next) => {
+    try {
+      const response = await authService.verifyEmailCode(req.body);
+      res.status(200).json(response);
+    } catch (error) {
+      if (error instanceof VerificationError) {
+        res.status(error.statusCode).json({ error: error.message });
+        return;
+      }
+
+      next(error);
+    }
+  });
+
   router.post('/password-reset/request', authRateLimit, async (req, res, next) => {
     try {
       const response = await authService.requestPasswordReset(req.body);

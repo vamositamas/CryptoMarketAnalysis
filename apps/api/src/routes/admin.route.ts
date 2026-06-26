@@ -299,26 +299,20 @@ const DEFAULT_ALERT_TRIGGERED_HU_HTML = `<!DOCTYPE html>
 
 const DEFAULT_EMAIL_VERIFICATION_HTML = `<!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>Verify your email address — BitWLab</title></head>
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>Your BitWLab code</title></head>
 <body style="margin:0;padding:0;background:#e8f0e9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#e8f0e9;padding:32px 16px;">
     <tr><td align="center">
       <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
-        <tr><td style="background:#1a4731;border-radius:12px 12px 0 0;padding:28px 40px;text-align:center;">
-          <p style="margin:0 0 4px;font-size:22px;font-weight:700;color:#ffffff;">BitWLab</p>
-          <p style="margin:0;font-size:13px;color:#86b89a;">Bitcoin Blockchain Analysis</p>
-        </td></tr>
+        <tr><td style="background:#1a4731;border-radius:12px 12px 0 0;padding:28px 40px;text-align:center;"><p style="margin:0 0 4px;font-size:22px;font-weight:700;color:#ffffff;">BitWLab</p><p style="margin:0;font-size:13px;color:#86b89a;">Bitcoin Blockchain Analysis</p></td></tr>
         <tr><td style="background:#ffffff;padding:40px 40px 32px;border-left:1px solid #dce8dd;border-right:1px solid #dce8dd;">
-          <h2 style="margin:0 0 20px;font-size:24px;font-weight:700;color:#111827;">Welcome to BitWLab!</h2>
-          <p style="margin:0 0 28px;font-size:15px;color:#374151;line-height:1.6;">Thanks for signing up! Please verify your email address by clicking the button below:</p>
-          <table role="presentation" cellpadding="0" cellspacing="0" style="margin-bottom:28px;"><tr><td style="background:#1a4731;border-radius:8px;"><a href="{{verificationUrl}}" style="display:inline-block;padding:13px 30px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;">Verify Email Address &#x2192;</a></td></tr></table>
-          <p style="margin:0 0 8px;font-size:13px;color:#6b7280;">This link expires in 24 hours.</p>
-          <p style="margin:0;font-size:13px;color:#6b7280;">If you didn&#39;t create an account, you can safely ignore this email.</p>
+          <h2 style="margin:0 0 20px;font-size:24px;font-weight:700;color:#111827;">Your BitWLab code</h2>
+          <p style="margin:0 0 18px;font-size:15px;color:#374151;line-height:1.6;">Thanks for using BitWLab. Enter this code to continue:</p>
+          <p style="margin:0 0 20px;padding:16px 18px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:6px;font-size:28px;line-height:1.2;letter-spacing:6px;font-weight:800;text-align:center;color:#111827;">{{verificationCode}}</p>
+          <p style="margin:0 0 8px;font-size:13px;color:#6b7280;">This code expires in 24 hours.</p>
+          <p style="margin:0;font-size:13px;color:#6b7280;">If you did not request this code, you can ignore this email.</p>
         </td></tr>
-        <tr><td style="background:#d4e8d6;border-radius:0 0 12px 12px;padding:20px 40px;text-align:center;border:1px solid #bdd9bf;border-top:none;">
-          <p style="margin:0 0 4px;font-size:13px;color:#3d6b4a;">This is an automated message. Please do not reply to this email.</p>
-          <p style="margin:0;font-size:12px;color:#5a8a68;"><a href="{{appUrl}}" style="color:#1a4731;text-decoration:none;">BitWLab</a> &nbsp;&middot;&nbsp; Bitcoin Blockchain Analysis</p>
-        </td></tr>
+        <tr><td style="background:#d4e8d6;border-radius:0 0 12px 12px;padding:20px 40px;text-align:center;border:1px solid #bdd9bf;border-top:none;"><p style="margin:0 0 4px;font-size:13px;color:#3d6b4a;">This is an automated message. Please do not reply to this email.</p><p style="margin:0;font-size:12px;color:#5a8a68;"><a href="{{appUrl}}" style="color:#1a4731;text-decoration:none;">BitWLab</a> &nbsp;&middot;&nbsp; Bitcoin Blockchain Analysis</p></td></tr>
       </table>
     </td></tr>
   </table>
@@ -327,26 +321,20 @@ const DEFAULT_EMAIL_VERIFICATION_HTML = `<!DOCTYPE html>
 
 const DEFAULT_EMAIL_VERIFICATION_HU_HTML = `<!DOCTYPE html>
 <html lang="hu">
-<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>Erősítsd meg az email-címed — BitWLab</title></head>
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>BitWLab kódod</title></head>
 <body style="margin:0;padding:0;background:#e8f0e9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#e8f0e9;padding:32px 16px;">
     <tr><td align="center">
       <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
-        <tr><td style="background:#1a4731;border-radius:12px 12px 0 0;padding:28px 40px;text-align:center;">
-          <p style="margin:0 0 4px;font-size:22px;font-weight:700;color:#ffffff;">BitWLab</p>
-          <p style="margin:0;font-size:13px;color:#86b89a;">Bitcoin blokklánc elemzés</p>
-        </td></tr>
+        <tr><td style="background:#1a4731;border-radius:12px 12px 0 0;padding:28px 40px;text-align:center;"><p style="margin:0 0 4px;font-size:22px;font-weight:700;color:#ffffff;">BitWLab</p><p style="margin:0;font-size:13px;color:#86b89a;">Bitcoin blokklánc elemzés</p></td></tr>
         <tr><td style="background:#ffffff;padding:40px 40px 32px;border-left:1px solid #dce8dd;border-right:1px solid #dce8dd;">
-          <h2 style="margin:0 0 20px;font-size:24px;font-weight:700;color:#111827;">Üdvözlünk a BitWLab-ban!</h2>
-          <p style="margin:0 0 28px;font-size:15px;color:#374151;line-height:1.6;">Köszönjük a regisztrációt! Kérjük, erősítsd meg az email-címedet az alábbi gombra kattintva:</p>
-          <table role="presentation" cellpadding="0" cellspacing="0" style="margin-bottom:28px;"><tr><td style="background:#1a4731;border-radius:8px;"><a href="{{verificationUrl}}" style="display:inline-block;padding:13px 30px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;">E-mail-cím megerősítése &#x2192;</a></td></tr></table>
-          <p style="margin:0 0 8px;font-size:13px;color:#6b7280;">Ez a link 24 óra múlva lejár.</p>
-          <p style="margin:0;font-size:13px;color:#6b7280;">Ha nem te hoztál létre fiókot, ezt az emailt nyugodtan figyelmen kívül hagyhatod.</p>
+          <h2 style="margin:0 0 20px;font-size:24px;font-weight:700;color:#111827;">BitWLab kódod</h2>
+          <p style="margin:0 0 18px;font-size:15px;color:#374151;line-height:1.6;">Köszönjük, hogy használod a BitWLab-ot. Írd be ezt a kódot a folytatáshoz:</p>
+          <p style="margin:0 0 20px;padding:16px 18px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:6px;font-size:28px;line-height:1.2;letter-spacing:6px;font-weight:800;text-align:center;color:#111827;">{{verificationCode}}</p>
+          <p style="margin:0 0 8px;font-size:13px;color:#6b7280;">Ez a kód 24 óra múlva lejár.</p>
+          <p style="margin:0;font-size:13px;color:#6b7280;">Ha nem te kérted ezt a kódot, ezt az emailt figyelmen kívül hagyhatod.</p>
         </td></tr>
-        <tr><td style="background:#d4e8d6;border-radius:0 0 12px 12px;padding:20px 40px;text-align:center;border:1px solid #bdd9bf;border-top:none;">
-          <p style="margin:0 0 4px;font-size:13px;color:#3d6b4a;">Ez egy automatikus üzenet. Kérjük, ne válaszolj erre az emailre.</p>
-          <p style="margin:0;font-size:12px;color:#5a8a68;"><a href="{{appUrl}}" style="color:#1a4731;text-decoration:none;">BitWLab</a> &nbsp;&middot;&nbsp; Bitcoin blokklánc elemzés</p>
-        </td></tr>
+        <tr><td style="background:#d4e8d6;border-radius:0 0 12px 12px;padding:20px 40px;text-align:center;border:1px solid #bdd9bf;border-top:none;"><p style="margin:0 0 4px;font-size:13px;color:#3d6b4a;">Ez egy automatikus üzenet. Kérjük, ne válaszolj erre az emailre.</p><p style="margin:0;font-size:12px;color:#5a8a68;"><a href="{{appUrl}}" style="color:#1a4731;text-decoration:none;">BitWLab</a> &nbsp;&middot;&nbsp; Bitcoin blokklánc elemzés</p></td></tr>
       </table>
     </td></tr>
   </table>
@@ -432,14 +420,14 @@ const TEMPLATE_DEFINITIONS = [
     key: 'email_verification_en_html',
     label: 'Email Verification — English HTML Body',
     defaultValue: DEFAULT_EMAIL_VERIFICATION_HTML,
-    variables: ['verificationUrl', 'appUrl'],
+    variables: ['verificationCode', 'appUrl'],
     language: 'en',
     kind: 'html',
   },
   {
     key: 'email_verification_en_subject',
     label: 'Email Verification — English Subject Line',
-    defaultValue: 'Verify your email address — BitWLab',
+    defaultValue: 'Your BitWLab code',
     variables: [],
     language: 'en',
     kind: 'subject',
@@ -448,14 +436,14 @@ const TEMPLATE_DEFINITIONS = [
     key: 'email_verification_hu_html',
     label: 'E-mail-cím megerősítése — Magyar HTML törzs',
     defaultValue: DEFAULT_EMAIL_VERIFICATION_HU_HTML,
-    variables: ['verificationUrl', 'appUrl'],
+    variables: ['verificationCode', 'appUrl'],
     language: 'hu',
     kind: 'html',
   },
   {
     key: 'email_verification_hu_subject',
     label: 'E-mail-cím megerősítése — Magyar tárgy',
-    defaultValue: 'Erősítsd meg az email-címed — BitWLab',
+    defaultValue: 'BitWLab kódod',
     variables: [],
     language: 'hu',
     kind: 'subject',
@@ -471,7 +459,7 @@ const TEMPLATE_DEFINITIONS = [
   {
     key: 'manual_email_verified_en_subject',
     label: 'Manual Email Verified — English Subject Line',
-    defaultValue: 'Your email address has been verified — BitWLab',
+    defaultValue: 'BitWLab account update',
     variables: ['userName', 'userEmail'],
     language: 'en',
     kind: 'subject',
@@ -487,7 +475,7 @@ const TEMPLATE_DEFINITIONS = [
   {
     key: 'manual_email_verified_hu_subject',
     label: 'Manuális email megerősítés — Magyar tárgy',
-    defaultValue: 'Az email-címed megerősítve — BitWLab',
+    defaultValue: 'BitWLab fiók frissítés',
     variables: ['userName', 'userEmail'],
     language: 'hu',
     kind: 'subject',
@@ -512,6 +500,7 @@ const TEMPLATE_SAMPLE_DATA: Record<string, string> = {
   transactionId: 'TXN-ABC123',
   donationDate: new Date().toLocaleDateString('en-US', { dateStyle: 'long' }),
   verificationUrl: `${process.env['APP_URL'] ?? 'https://bitwlab.com'}/api/auth/verify?token=sample-verification-token`,
+  verificationCode: '123456',
 };
 
 const VALID_CHART_STATUSES = new Set(['draft', 'active', 'inactive'] as const);
@@ -1165,12 +1154,23 @@ export function createAdminRouter(
       const testBanner = `<div style="background:#fff3cd;border:1px solid #ffc107;padding:8px 16px;margin-bottom:16px;font-size:13px">⚠️ ${testBannerText}</div>`;
       const html = testBanner + rendered;
       const subjectPrefix = isHungarian ? '[TESZT]' : '[TEST]';
+      const subject = `${subjectPrefix} BitWLab email preview`;
+      const text = isHungarian
+        ? `Ez egy BitWLab teszt email.\n\nSablon: ${def.label}`
+        : `This is a BitWLab test email.\n\nTemplate: ${def.label}`;
+      const shouldSendHtml = key.startsWith('alert_triggered_');
 
-      await sendRawEmail({ to: recipientEmail, subject: `${subjectPrefix} ${def.label}`, html });
+      const delivery = await sendRawEmail({
+        to: recipientEmail,
+        subject,
+        text,
+        ...(shouldSendHtml ? { html } : {}),
+      });
 
       res.json({
         success: true,
         message: isHungarian ? `Teszt email elküldve ide: ${recipientEmail}` : `Test email sent to ${recipientEmail}`,
+        delivery,
       });
     } catch (error) {
       next(error);

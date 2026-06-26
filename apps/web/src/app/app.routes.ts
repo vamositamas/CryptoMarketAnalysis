@@ -3061,6 +3061,27 @@ export class ResetPasswordPage {
           @if (message()) {
             <p class="auth-msg" [class.success]="isSuccess()">{{ message() }}</p>
           }
+          @if (verificationUrl()) {
+            <p class="auth-msg success">
+              <a [href]="verificationUrl()" i18n="Open verification link@@register.openVerificationLink">Open verification link</a>
+            </p>
+          }
+          @if (pendingVerificationEmail()) {
+            <div class="auth-field">
+              <label i18n="Verification code label@@register.verificationCode">Verification code</label>
+              <input type="text" formControlName="verificationCode" inputmode="numeric" autocomplete="one-time-code"
+                placeholder="123456"
+                i18n-placeholder="Verification code placeholder@@register.verificationCodePlaceholder" />
+            </div>
+            <button type="button" class="auth-captcha-new" (click)="verifyCode()" [disabled]="isSubmitting()">
+              <ng-container i18n="Verify code button@@register.verifyCode">Verify code</ng-container>
+            </button>
+          }
+          @if (canResendVerification()) {
+            <button type="button" class="auth-captcha-new" (click)="resendVerification()" [disabled]="isSubmitting()">
+              <ng-container i18n="Resend verification email@@register.resendVerification">Resend verification email</ng-container>
+            </button>
+          }
 
           <button type="submit" class="auth-btn-primary"
             [disabled]="form.invalid || passwordMismatch() || isSubmitting()">
@@ -3114,6 +3135,9 @@ export class RegisterPage {
   protected readonly isSubmitting = signal(false);
   protected readonly message = signal('');
   protected readonly isSuccess = signal(false);
+  protected readonly canResendVerification = signal(false);
+  protected readonly verificationUrl = signal('');
+  protected readonly pendingVerificationEmail = signal('');
   protected readonly captchaQuestion = signal('');
   private captchaAnswer = 0;
 
@@ -3122,6 +3146,7 @@ export class RegisterPage {
     password: ['', Validators.required],
     confirmPassword: ['', Validators.required],
     captcha: ['', Validators.required],
+    verificationCode: [''],
     languagePreference: this.fb.nonNullable.control<'en' | 'hu'>('en', Validators.required),
   });
 
@@ -3168,20 +3193,70 @@ export class RegisterPage {
     this.isSubmitting.set(true);
     this.message.set('');
     this.isSuccess.set(false);
+    this.canResendVerification.set(false);
+    this.verificationUrl.set('');
+    this.pendingVerificationEmail.set('');
 
     try {
       const { email, password, confirmPassword, languagePreference } = this.form.getRawValue();
       const response = await this.auth.register({ email, password, confirmPassword, languagePreference });
       this.isSuccess.set(true);
       this.message.set(response.message);
+      this.pendingVerificationEmail.set(email);
       this.form.reset({
-        email: '',
+        email,
         password: '',
         confirmPassword: '',
         captcha: '',
+        verificationCode: '',
         languagePreference: 'en',
       });
       this.newChallenge();
+    } catch (error) {
+      const message = getErrorMessage(error);
+      this.message.set(message);
+      this.canResendVerification.set(message === 'Email already registered');
+    } finally {
+      this.isSubmitting.set(false);
+    }
+  }
+
+  protected async resendVerification(): Promise<void> {
+    const email = this.form.getRawValue().email;
+    if (!email || this.isSubmitting()) {
+      return;
+    }
+
+    this.isSubmitting.set(true);
+    try {
+      const response = await this.auth.requestEmailVerification({ email });
+      this.isSuccess.set(true);
+      this.canResendVerification.set(false);
+      this.pendingVerificationEmail.set(email);
+      this.message.set(response.message);
+      this.verificationUrl.set(response.verificationUrl ?? '');
+    } catch (error) {
+      this.message.set(getErrorMessage(error));
+    } finally {
+      this.isSubmitting.set(false);
+    }
+  }
+
+  protected async verifyCode(): Promise<void> {
+    const { email, verificationCode } = this.form.getRawValue();
+    const targetEmail = this.pendingVerificationEmail() || email;
+    if (!targetEmail || !verificationCode || this.isSubmitting()) {
+      return;
+    }
+
+    this.isSubmitting.set(true);
+    try {
+      const response = await this.auth.verifyEmailCode({ email: targetEmail, code: verificationCode });
+      this.isSuccess.set(true);
+      this.message.set(response.message);
+      this.pendingVerificationEmail.set('');
+      this.verificationUrl.set('');
+      this.form.patchValue({ verificationCode: '' });
     } catch (error) {
       this.message.set(getErrorMessage(error));
     } finally {

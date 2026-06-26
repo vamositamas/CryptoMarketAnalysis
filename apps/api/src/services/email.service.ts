@@ -7,7 +7,7 @@ export interface PasswordResetEmailSender {
 }
 
 export interface EmailVerificationEmailSender {
-  sendEmailVerificationEmail(input: { email: string; verificationUrl: string; languagePreference?: 'en' | 'hu' }): Promise<void>;
+  sendEmailVerificationEmail(input: { email: string; verificationUrl: string; verificationCode?: string; languagePreference?: 'en' | 'hu' }): Promise<void>;
 }
 
 export interface ManualEmailVerifiedEmailSender {
@@ -144,6 +144,15 @@ interface MailMessage {
   headers?: Record<string, string>;
 }
 
+export interface EmailSendResult {
+  provider: 'smtp';
+  accepted: string[];
+  rejected: string[];
+  pending?: string[];
+  response?: string;
+  messageId?: string;
+}
+
 function buildDeliverabilityHeaders(from: string): Record<string, string> {
   const appUrl = process.env['APP_URL'] ?? 'https://bitwlab.com';
   const email = from.includes('<') ? (from.match(/<(.+)>/)?.[1] ?? from) : from;
@@ -155,7 +164,7 @@ function buildDeliverabilityHeaders(from: string): Record<string, string> {
   };
 }
 
-export async function sendRawEmail(msg: MailMessage): Promise<void> {
+export async function sendRawEmail(msg: MailMessage): Promise<EmailSendResult> {
   const smtp = await loadSmtpConfig();
   if (smtp) {
     const from = formatFromAddress(smtp.from);
@@ -166,7 +175,14 @@ export async function sendRawEmail(msg: MailMessage): Promise<void> {
       ...msg,
     });
     console.info(JSON.stringify({ event: 'email.sent_smtp', to: msg.to, subject: msg.subject, messageId: info.messageId, response: info.response }));
-    return;
+    return {
+      provider: 'smtp',
+      accepted: info.accepted ?? [],
+      rejected: info.rejected ?? [],
+      pending: info.pending,
+      response: info.response,
+      messageId: info.messageId,
+    };
   }
 
   console.warn(JSON.stringify({ event: 'email.not_configured', to: msg.to, subject: msg.subject, timestamp: new Date().toISOString() }));
@@ -184,11 +200,11 @@ export class ResendEmailService
     AlertTriggeredEmailSender,
     DonationThankYouEmailSender
 {
-  async sendEmailVerificationEmail(input: { email: string; verificationUrl: string; languagePreference?: 'en' | 'hu' }): Promise<void> {
+  async sendEmailVerificationEmail(input: { email: string; verificationUrl: string; verificationCode?: string; languagePreference?: 'en' | 'hu' }): Promise<void> {
     const hu = input.languagePreference === 'hu';
     const langKey = hu ? 'hu' : 'en';
     const appUrl = await loadEmailAppUrl();
-    const vars = { verificationUrl: input.verificationUrl, appUrl };
+    const vars = { verificationUrl: input.verificationUrl, verificationCode: input.verificationCode ?? '', appUrl };
 
     let htmlTemplate: string | null = null;
     let subjectTemplate: string | null = null;
@@ -209,12 +225,12 @@ export class ResendEmailService
 
     const subject = subjectTemplate
       ? substituteTemplateVars(subjectTemplate, vars)
-      : hu ? 'Erősítsd meg az email-címed — BitWLab' : 'Verify your email address — BitWLab';
-    const html = htmlTemplate
-      ? substituteTemplateVars(htmlTemplate, vars)
-      : buildEmailVerificationHtml(input.verificationUrl, appUrl, hu);
+      : hu ? 'BitWLab kódod' : 'Your BitWLab code';
+    const text = hu
+      ? `Köszönjük a regisztrációt a BitWLab-ban.\n\nMegerősítő kódod: ${input.verificationCode ?? input.verificationUrl}\n\nEz a kód 24 óra múlva lejár.\n\nHa nem te hoztál létre fiókot, ezt az emailt figyelmen kívül hagyhatod.`
+      : `Thanks for using BitWLab.\n\nYour BitWLab code: ${input.verificationCode ?? input.verificationUrl}\n\nThis code expires in 24 hours.\n\nIf you did not request this code, you can ignore this email.`;
 
-    await sendRawEmail({ to: input.email, subject, html });
+    await sendRawEmail({ to: input.email, text, subject });
   }
 
   async sendManualEmailVerifiedEmail(input: { email: string; fullName?: string | null; languagePreference?: 'en' | 'hu' }): Promise<void> {
@@ -246,12 +262,12 @@ export class ResendEmailService
 
     const subject = subjectTemplate
       ? substituteTemplateVars(subjectTemplate, vars)
-      : hu ? 'Az email-címed megerősítve — BitWLab' : 'Your email address has been verified — BitWLab';
-    const html = htmlTemplate
-      ? substituteTemplateVars(htmlTemplate, vars)
-      : buildManualEmailVerifiedHtml(vars.userName, vars.userEmail, appUrl, hu);
+      : hu ? 'BitWLab fiók frissítés' : 'BitWLab account update';
+    const text = hu
+      ? `Szia ${input.fullName?.trim() || input.email},\n\nA BitWLab fiókod frissült ehhez az email-címhez: ${input.email}.\n\nMostantól be tudsz jelentkezni, és használhatod a fiókodat.\n\nBitWLab`
+      : `Hello ${input.fullName?.trim() || input.email},\n\nYour BitWLab account was updated for ${input.email}.\n\nYou can now sign in and use your account.\n\nBitWLab`;
 
-    await sendRawEmail({ to: input.email, subject, html });
+    await sendRawEmail({ to: input.email, subject, text });
   }
 
   async sendPasswordResetEmail(input: { email: string; resetUrl: string; languagePreference?: 'en' | 'hu' }): Promise<void> {
@@ -400,13 +416,20 @@ function buildAlertTriggeredHtml(input: AlertTriggeredEmailInput, appUrl: string
 </html>`;
 }
 
-function buildEmailVerificationHtml(verificationUrl: string, appUrl: string, hu: boolean): string {
-  const url = escapeHtml(verificationUrl);
+function buildEmailVerificationHtml(verificationUrl: string, appUrl: string, hu: boolean, verificationCode?: string): string {
+  const code = escapeHtml(verificationCode ?? verificationUrl);
   const safe = escapeHtml(appUrl);
   const subtitle = hu ? 'Bitcoin blokklánc elemzés' : 'Bitcoin Blockchain Analysis';
+  const intro = hu
+    ? 'Köszönjük, hogy használod a BitWLab-ot. Írd be ezt a kódot a folytatáshoz:'
+    : 'Thanks for using BitWLab. Enter this code to continue:';
+  const expires = hu ? 'Ez a kód 24 óra múlva lejár.' : 'This code expires in 24 hours.';
+  const ignore = hu
+    ? 'Ha nem te kérted ezt a kódot, ezt az emailt figyelmen kívül hagyhatod.'
+    : 'If you did not request this code, you can ignore this email.';
   return `<!DOCTYPE html>
 <html lang="${hu ? 'hu' : 'en'}">
-<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>${hu ? 'Erősítsd meg az email-címed — BitWLab' : 'Verify your email address — BitWLab'}</title></head>
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>${hu ? 'BitWLab kódod' : 'Your BitWLab code'}</title></head>
 <body style="margin:0;padding:0;background:#e8f0e9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#e8f0e9;padding:32px 16px;">
     <tr><td align="center">
@@ -416,11 +439,11 @@ function buildEmailVerificationHtml(verificationUrl: string, appUrl: string, hu:
           <p style="margin:0;font-size:13px;color:#86b89a;">${subtitle}</p>
         </td></tr>
         <tr><td style="background:#ffffff;padding:40px 40px 32px;border-left:1px solid #dce8dd;border-right:1px solid #dce8dd;">
-          <h2 style="margin:0 0 20px;font-size:24px;font-weight:700;color:#111827;">${hu ? 'Üdvözlünk a BitWLab-ban!' : 'Welcome to BitWLab!'}</h2>
-          <p style="margin:0 0 28px;font-size:15px;color:#374151;line-height:1.6;">${hu ? 'Köszönjük a regisztrációt! Kérjük, erősítsd meg az email-címedet az alábbi gombra kattintva:' : 'Thanks for signing up! Please verify your email address by clicking the button below:'}</p>
-          <table role="presentation" cellpadding="0" cellspacing="0" style="margin-bottom:28px;"><tr><td style="background:#1a4731;border-radius:8px;"><a href="${url}" style="display:inline-block;padding:13px 30px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;">${hu ? 'E-mail-cím megerősítése →' : 'Verify Email Address →'}</a></td></tr></table>
-          <p style="margin:0 0 8px;font-size:13px;color:#6b7280;">${hu ? 'Ez a link 24 óra múlva lejár.' : 'This link expires in 24 hours.'}</p>
-          <p style="margin:0;font-size:13px;color:#6b7280;">${hu ? 'Ha nem te hoztál létre fiókot, ezt az emailt nyugodtan figyelmen kívül hagyhatod.' : "If you didn't create an account, you can safely ignore this email."}</p>
+          <h2 style="margin:0 0 20px;font-size:24px;font-weight:700;color:#111827;">${hu ? 'BitWLab kódod' : 'Your BitWLab code'}</h2>
+          <p style="margin:0 0 18px;font-size:15px;color:#374151;line-height:1.6;">${intro}</p>
+          <p style="margin:0 0 20px;padding:16px 18px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:6px;font-size:28px;line-height:1.2;letter-spacing:6px;font-weight:800;text-align:center;color:#111827;">${code}</p>
+          <p style="margin:0 0 8px;font-size:13px;color:#6b7280;">${expires}</p>
+          <p style="margin:0;font-size:13px;color:#6b7280;">${ignore}</p>
         </td></tr>
         <tr><td style="background:#d4e8d6;border-radius:0 0 12px 12px;padding:20px 40px;text-align:center;border:1px solid #bdd9bf;border-top:none;">
           <p style="margin:0 0 4px;font-size:13px;color:#3d6b4a;">${hu ? 'Ez egy automatikus üzenet. Kérjük, ne válaszolj erre az emailre.' : 'This is an automated message. Please do not reply to this email.'}</p>
@@ -435,13 +458,13 @@ function buildEmailVerificationHtml(verificationUrl: string, appUrl: string, hu:
 
 function buildManualEmailVerifiedHtml(userName: string, userEmail: string, appUrl: string, hu: boolean): string {
   const safeAppUrl = escapeHtml(appUrl);
-  const title = hu ? 'Az email-címed megerősítve' : 'Your email is verified';
+  const title = hu ? 'BitWLab fiók frissítés' : 'BitWLab account update';
   const intro = hu
     ? `Szia ${userName},`
     : `Hello ${userName},`;
   const body = hu
-    ? `A BitWLab admin csapata manuálisan megerősítette a(z) <strong style="color:#111827;">${userEmail}</strong> email-címedet. Mostantól be tudsz jelentkezni, és használhatod a fiókodat.`
-    : `The BitWLab admin team manually verified <strong style="color:#111827;">${userEmail}</strong>. You can now sign in and use your account.`;
+    ? `A BitWLab fiókod frissült ehhez az email-címhez: <strong style="color:#111827;">${userEmail}</strong>. Mostantól be tudsz jelentkezni, és használhatod a fiókodat.`
+    : `Your BitWLab account was updated for <strong style="color:#111827;">${userEmail}</strong>. You can now sign in and use your account.`;
   const cta = hu ? 'Bejelentkezés' : 'Sign in';
   const footer = hu
     ? 'Ez egy automatikus értesítés. Kérjük, ne válaszolj erre az emailre.'

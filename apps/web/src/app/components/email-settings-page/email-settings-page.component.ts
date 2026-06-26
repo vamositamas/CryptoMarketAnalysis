@@ -203,7 +203,11 @@ export class EmailSettingsPageComponent implements OnInit {
     this.isSendingTest.set(true);
     try {
       const result = await this.api.adminSendTestEmail(this.testTemplateKey, this.testRecipient);
-      this.showMessage(result.message || $localize`:Test email sent@@emailSettings.messages.testSent:Test email sent to ${this.testRecipient}.`, true);
+      const delivery = result.delivery;
+      const detail = delivery
+        ? ` SMTP ${delivery.response ?? 'accepted'}; accepted: ${delivery.accepted.join(', ') || 'none'}; rejected: ${delivery.rejected.join(', ') || 'none'}${delivery.messageId ? `; id: ${delivery.messageId}` : ''}`
+        : '';
+      this.showMessage((result.message || $localize`:Test email sent@@emailSettings.messages.testSent:Test email sent to ${this.testRecipient}.`) + detail, true);
     } catch (error) {
       this.showMessage(error instanceof ApiClientError ? error.message : $localize`:Test email failed@@emailSettings.messages.testFailed:Could not send test email.`, false);
     } finally {

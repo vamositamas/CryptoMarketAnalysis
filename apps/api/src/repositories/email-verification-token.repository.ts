@@ -49,6 +49,12 @@ export class EmailVerificationTokenRepository extends BaseRepository {
     await pool.query('DELETE FROM email_verification_tokens WHERE token = $1', [token]);
   }
 
+  async deleteByUserId(userId: string): Promise<void> {
+    const pool = this.requirePool();
+
+    await pool.query('DELETE FROM email_verification_tokens WHERE user_id = $1', [userId]);
+  }
+
   private requirePool(): Pick<Pool, 'query'> {
     if (!this.pool) {
       throw new Error('Database is not configured');

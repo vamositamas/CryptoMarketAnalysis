@@ -7,10 +7,14 @@ import {
   type LoginResponse,
   type RequestPasswordResetRequest,
   type RequestPasswordResetResponse,
+  type RequestEmailVerificationRequest,
+  type RequestEmailVerificationResponse,
   type ResetPasswordRequest,
   type ResetPasswordResponse,
   type RegisterRequest,
   type RegisterResponse,
+  type VerifyEmailCodeRequest,
+  type VerifyEmailCodeResponse,
   type UserRole,
   type LanguagePreference,
   type ValidatePasswordResetTokenResponse,
@@ -123,6 +127,7 @@ interface EmailVerificationTokenStore {
   create(input: { userId: string; token: string; expiresAt: Date }): Promise<void>;
   findByToken(token: string): Promise<{ userId: string; expiresAt: Date } | undefined>;
   deleteByToken(token: string): Promise<void>;
+  deleteByUserId?(userId: string): Promise<void>;
 }
 
 interface PasswordResetTokenStore {
@@ -214,7 +219,7 @@ export class AuthService {
       };
     }
 
-    const verificationToken = createVerificationToken();
+    const verificationToken = createEmailVerificationCode();
     await this.emailVerificationTokens.create({
       userId: user.id,
       token: verificationToken,
@@ -224,6 +229,7 @@ export class AuthService {
     await this.emailVerificationEmails.sendEmailVerificationEmail({
       email: normalizedEmail,
       verificationUrl: `${await getApiBaseUrl()}/api/auth/verify?token=${verificationToken}`,
+      verificationCode: verificationToken,
       languagePreference: request.languagePreference,
     });
 
@@ -248,6 +254,72 @@ export class AuthService {
 
     await this.users.markEmailVerified(verificationToken.userId);
     await this.emailVerificationTokens.deleteByToken(token);
+  }
+
+  async requestEmailVerification(
+    request: RequestEmailVerificationRequest,
+  ): Promise<RequestEmailVerificationResponse> {
+    const response = {
+      message: "If that email needs verification, we've sent a new verification code",
+    };
+    const normalizedEmail = normalizeEmail(request.email);
+    if (!isValidEmail(normalizedEmail)) {
+      return response;
+    }
+
+    const user = await this.users.findByEmail(normalizedEmail);
+    if (!user || user.emailVerified || !user.passwordHash) {
+      return response;
+    }
+
+    const verificationToken = createEmailVerificationCode();
+    await this.emailVerificationTokens.deleteByUserId?.(user.id);
+    await this.emailVerificationTokens.create({
+      userId: user.id,
+      token: verificationToken,
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    });
+
+    const verificationUrl = `${await getApiBaseUrl()}/api/auth/verify?token=${verificationToken}`;
+    await this.emailVerificationEmails.sendEmailVerificationEmail({
+      email: user.email,
+      verificationUrl,
+      verificationCode: verificationToken,
+      languagePreference: user.languagePreference,
+    });
+
+    if (shouldExposeVerificationUrl()) {
+      return { ...response, verificationUrl };
+    }
+
+    return response;
+  }
+
+  async verifyEmailCode(request: VerifyEmailCodeRequest): Promise<VerifyEmailCodeResponse> {
+    const normalizedEmail = normalizeEmail(request.email);
+    const code = request.code.trim();
+    if (!isValidEmail(normalizedEmail) || !/^\d{6}$/.test(code)) {
+      throw new VerificationError(400, 'Invalid verification code');
+    }
+
+    const user = await this.users.findByEmail(normalizedEmail);
+    if (!user || user.emailVerified) {
+      throw new VerificationError(400, 'Invalid verification code');
+    }
+
+    const verificationToken = await this.emailVerificationTokens.findByToken(code);
+    if (!verificationToken || verificationToken.userId !== user.id) {
+      throw new VerificationError(400, 'Invalid verification code');
+    }
+
+    if (verificationToken.expiresAt.getTime() <= Date.now()) {
+      throw new VerificationError(400, 'Verification code has expired');
+    }
+
+    await this.users.markEmailVerified(user.id);
+    await this.emailVerificationTokens.deleteByToken(code);
+
+    return { message: 'Email verified! You can now log in.' };
   }
 
   async login(request: LoginRequest): Promise<LoginResponse> {
@@ -491,6 +563,10 @@ function createVerificationToken(): string {
   return randomBytes(32).toString('base64url');
 }
 
+function createEmailVerificationCode(): string {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+
 function getJwtSecret(): string {
   const secret = process.env.JWT_SECRET;
 
@@ -636,6 +712,10 @@ function createDevelopmentAdminLoginResponse(password: string): LoginResponse {
 
 function getFrontendUrl(): string {
   return process.env.FRONTEND_URL ?? 'http://localhost:4200';
+}
+
+function shouldExposeVerificationUrl(): boolean {
+  return process.env.NODE_ENV !== 'production';
 }
 
 async function getApiBaseUrl(): Promise<string> {

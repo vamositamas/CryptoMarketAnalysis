@@ -38,6 +38,24 @@ export interface RequestPasswordResetResponse {
   message: string;
 }
 
+export interface RequestEmailVerificationRequest {
+  email: string;
+}
+
+export interface RequestEmailVerificationResponse {
+  message: string;
+  verificationUrl?: string;
+}
+
+export interface VerifyEmailCodeRequest {
+  email: string;
+  code: string;
+}
+
+export interface VerifyEmailCodeResponse {
+  message: string;
+}
+
 export interface ValidatePasswordResetTokenResponse {
   valid: boolean;
 }
@@ -474,6 +492,21 @@ export interface EmailTemplatesResponse {
   templates: EmailTemplate[];
 }
 
+export interface EmailTestDelivery {
+  provider: 'smtp';
+  accepted: string[];
+  rejected: string[];
+  pending?: string[];
+  response?: string;
+  messageId?: string;
+}
+
+export interface SendTestEmailResponse {
+  success: boolean;
+  message: string;
+  delivery?: EmailTestDelivery;
+}
+
 export interface RecentChart {
   chartId: string;
   title: string;
@@ -706,6 +739,19 @@ export class AuthApiClient {
 
   async register(request: RegisterRequest): Promise<RegisterResponse> {
     return this.postWithCsrf<RegisterResponse>('/api/auth/register', request);
+  }
+
+  async requestEmailVerification(
+    request: RequestEmailVerificationRequest,
+  ): Promise<RequestEmailVerificationResponse> {
+    return this.postWithCsrf<RequestEmailVerificationResponse>(
+      '/api/auth/verify/resend',
+      request,
+    );
+  }
+
+  async verifyEmailCode(request: VerifyEmailCodeRequest): Promise<VerifyEmailCodeResponse> {
+    return this.postWithCsrf<VerifyEmailCodeResponse>('/api/auth/verify/code', request);
   }
 
   async login(request: LoginRequest): Promise<LoginResponse> {
@@ -1354,8 +1400,8 @@ export class AuthApiClient {
     return this.postWithCsrf<{ html: string }>(`/api/admin/email-templates/${key}/preview`, { sampleData });
   }
 
-  async adminSendTestEmail(key: string, recipientEmail: string, sampleData?: Record<string, string>): Promise<{ success: boolean; message: string }> {
-    return this.postWithCsrf<{ success: boolean; message: string }>(
+  async adminSendTestEmail(key: string, recipientEmail: string, sampleData?: Record<string, string>): Promise<SendTestEmailResponse> {
+    return this.postWithCsrf<SendTestEmailResponse>(
       `/api/admin/email-templates/${key}/send-test`, { recipientEmail, sampleData },
     );
   }
