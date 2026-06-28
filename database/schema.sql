@@ -12,3 +12,4 @@
 \i database/migrations/009_create_alerts_schema.sql
 \i database/migrations/013_trading_plans.sql
 \i database/migrations/014_create_favourite_charts.sql
+\i database/migrations/015_expand_dashboard_widget_limit.sql

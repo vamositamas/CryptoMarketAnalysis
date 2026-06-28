@@ -51,7 +51,7 @@ interface WidgetCatalogEntry {
   [key: string]: unknown;
 }
 
-const MAX_WIDGETS_PER_DASHBOARD = 20;
+const MAX_WIDGETS_PER_DASHBOARD = 40;
 const TOTAL_BITCOIN_SUPPLY = 21_000_000;
 
 const WIDGET_CATALOG: Record<string, WidgetCatalogEntry> = {
@@ -175,7 +175,7 @@ export class DashboardService {
     const existingCount = await this.widgetRepository.countForUser(userId);
 
     if (existingCount >= MAX_WIDGETS_PER_DASHBOARD) {
-      throw new DashboardError('Maximum 20 widgets per dashboard', 400);
+      throw new DashboardError(`Maximum ${MAX_WIDGETS_PER_DASHBOARD} widgets per dashboard`, 400);
     }
 
     const maxPosition = await this.widgetRepository.getMaxPosition(userId);
@@ -251,7 +251,7 @@ export class DashboardService {
     const existingCount = await this.widgetRepository.countForUser(userId);
 
     if (existingCount >= MAX_WIDGETS_PER_DASHBOARD) {
-      throw new DashboardError('Maximum 20 widgets per dashboard', 400);
+      throw new DashboardError(`Maximum ${MAX_WIDGETS_PER_DASHBOARD} widgets per dashboard`, 400);
     }
 
     const maxPosition = await this.widgetRepository.getMaxPosition(userId);

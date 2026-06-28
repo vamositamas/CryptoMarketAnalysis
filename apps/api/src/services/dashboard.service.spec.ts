@@ -333,16 +333,16 @@ describe('DashboardService', () => {
     expect(widgetRepository.create).not.toHaveBeenCalled();
   });
 
-  it('rejects adding a widget once the dashboard already has 20 widgets', async () => {
+  it('rejects adding a widget once the dashboard already has 40 widgets', async () => {
     const widgetRepository = {
       ...createWidgetRepositoryStub(),
-      countForUser: jest.fn().mockResolvedValue(20),
+      countForUser: jest.fn().mockResolvedValue(40),
     };
     const service = new DashboardService(widgetRepository, createMetricsRepositoryStub());
 
     await expect(service.addWidget('user-1', { widgetType: 'hash_rate' })).rejects.toMatchObject({
       statusCode: 400,
-      message: 'Maximum 20 widgets per dashboard',
+      message: 'Maximum 40 widgets per dashboard',
     } satisfies Partial<DashboardError>);
     expect(widgetRepository.create).not.toHaveBeenCalled();
   });
@@ -564,10 +564,19 @@ describe('DashboardService — reorderWidgets', () => {
     });
   });
 
-  it('rejects a list that exceeds the 20-widget cap', async () => {
-    const service = new DashboardService(createWidgetRepositoryStub(), createMetricsRepositoryStub());
-    const ids = Array.from({ length: 21 }, (_, i) => `id-${i}`);
+  it('allows reordering 40 widgets and rejects a list above the cap', async () => {
+    const widgetRepository = {
+      ...createWidgetRepositoryStub(),
+      reorderWidgets: jest.fn().mockResolvedValue(undefined),
+    };
+    const service = new DashboardService(widgetRepository, createMetricsRepositoryStub());
+    const validIds = Array.from({ length: 40 }, (_, i) => `id-${i}`);
+    const tooManyIds = Array.from({ length: 41 }, (_, i) => `id-${i}`);
 
-    await expect(service.reorderWidgets('user-1', ids)).rejects.toMatchObject({ statusCode: 400 });
+    await service.reorderWidgets('user-1', validIds);
+    await expect(service.reorderWidgets('user-1', tooManyIds)).rejects.toMatchObject({
+      statusCode: 400,
+      message: 'Maximum 40 widgets per dashboard',
+    });
   });
 });

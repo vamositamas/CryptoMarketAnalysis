@@ -838,6 +838,24 @@ export class TermsOfUsePage {}
                   </div>
                 }
               }
+              @let context = widgetContext(widget);
+              @if (context !== null) {
+                <div class="widget-context" [attr.data-zone]="context.zone">
+                  <div class="widget-context-top">
+                    <span>{{ context.label }}</span>
+                    <strong>{{ context.detail }}</strong>
+                  </div>
+                  @if (context.position !== null) {
+                    <div class="widget-context-bar" [attr.data-zone]="context.zone">
+                      <span [style.left.%]="context.position"></span>
+                    </div>
+                    <div class="widget-context-scale">
+                      <span>{{ context.minLabel }}</span>
+                      <span>{{ context.maxLabel }}</span>
+                    </div>
+                  }
+                </div>
+              }
               @if (widget.type !== 'halving_progress') {
                 <small class="widget-updated">{{ lastUpdatedText(widget.lastUpdated) }}</small>
               }
@@ -2253,6 +2271,153 @@ export class DashboardPage {
     if (value < 113) return $localize`:@@s2f.highScarcity:High Scarcity`;
     if (value < 170) return $localize`:@@s2f.veryHighScarcity:Very High Scarcity`;
     return $localize`:@@s2f.extremeScarcity:Extreme Scarcity`;
+  }
+
+  protected widgetContext(widget: DashboardWidget): {
+    label: string;
+    detail: string;
+    zone: string;
+    position: number | null;
+    minLabel: string;
+    maxLabel: string;
+  } | null {
+    if (widget.value === null) return null;
+
+    switch (widget.type) {
+      case 'hash_rate':
+        return this.rangedWidgetContext(widget.value, 300_000_000, 1_200_000_000, [
+          [500_000_000, $localize`:@@widgetContext.hashLow:Below recent network pace`, 'caution'],
+          [800_000_000, $localize`:@@widgetContext.hashFirm:Firm security trend`, 'neutral'],
+          [Number.POSITIVE_INFINITY, $localize`:@@widgetContext.hashHigh:Very strong network security`, 'good'],
+        ], '300M', '1.2B');
+      case 'mining_difficulty':
+        return this.rangedWidgetContext(widget.value, 50_000_000_000_000, 150_000_000_000_000, [
+          [90_000_000_000_000, $localize`:@@widgetContext.diffLow:Lower miner competition`, 'good'],
+          [125_000_000_000_000, $localize`:@@widgetContext.diffHigh:High miner competition`, 'neutral'],
+          [Number.POSITIVE_INFINITY, $localize`:@@widgetContext.diffExtreme:Extremely competitive mining`, 'caution'],
+        ], '50T', '150T');
+      case 'circulating_supply': {
+        const pct = widget.value / 21_000_000 * 100;
+        return {
+          label: $localize`:@@widgetContext.supplyIssued:Issued supply`,
+          detail: `${pct.toFixed(1)}% of 21M`,
+          zone: 'neutral',
+          position: Math.min(100, Math.max(0, pct)),
+          minLabel: '0%',
+          maxLabel: '100%',
+        };
+      }
+      case 'total_supply':
+        return {
+          label: $localize`:@@widgetContext.fixedCap:Fixed terminal supply`,
+          detail: $localize`:@@widgetContext.noRange:No range: protocol cap`,
+          zone: 'neutral',
+          position: null,
+          minLabel: '',
+          maxLabel: '',
+        };
+      case 'market_cap':
+        return this.priceRelativeContext(widget.value, [
+          [500_000_000_000, $localize`:@@widgetContext.capMid:Mid-cycle scale`, 'neutral'],
+          [1_500_000_000_000, $localize`:@@widgetContext.capLarge:Large asset scale`, 'good'],
+          [Number.POSITIVE_INFINITY, $localize`:@@widgetContext.capMega:Mega-cap regime`, 'caution'],
+        ], 0, 2_500_000_000_000, '$0', '$2.5T');
+      case 'global_m2_yoy':
+        return this.rangedWidgetContext(widget.value, -10, 20, [
+          [0, $localize`:@@widgetContext.m2Contracting:Liquidity contracting`, 'danger'],
+          [5, $localize`:@@widgetContext.m2Recovering:Liquidity recovering`, 'neutral'],
+          [Number.POSITIVE_INFINITY, $localize`:@@widgetContext.m2Expanding:Liquidity expanding`, 'good'],
+        ], '-10%', '+20%');
+      case 'btc_rsi_12m':
+        return this.rangedWidgetContext(widget.value, 0, 100, [
+          [30, $localize`:@@widgetContext.rsiOversold:Long-term oversold`, 'good'],
+          [50, $localize`:@@widgetContext.rsiWeak:Weak momentum`, 'neutral'],
+          [70, $localize`:@@widgetContext.rsiStrong:Strong momentum`, 'good'],
+          [Number.POSITIVE_INFINITY, $localize`:@@widgetContext.rsiHot:Overheated momentum`, 'caution'],
+        ], '0', '100');
+      case 'realized_price_premium':
+        return this.rangedWidgetContext(widget.value, -50, 200, [
+          [0, $localize`:@@widgetContext.rpDiscount:Spot below cost basis`, 'good'],
+          [30, $localize`:@@widgetContext.rpNearFair:Near aggregate cost basis`, 'neutral'],
+          [80, $localize`:@@widgetContext.rpProfit:Market in profit`, 'good'],
+          [Number.POSITIVE_INFINITY, $localize`:@@widgetContext.rpStretched:Profit premium stretched`, 'caution'],
+        ], '-50%', '+200%');
+      case 'market_signal_score':
+        return this.rangedWidgetContext(widget.value, 0, 100, [
+          [35, $localize`:@@widgetContext.signalBearish:Bearish composite`, 'danger'],
+          [60, $localize`:@@widgetContext.signalNeutral:Mixed composite`, 'neutral'],
+          [80, $localize`:@@widgetContext.signalBullish:Bullish composite`, 'good'],
+          [Number.POSITIVE_INFINITY, $localize`:@@widgetContext.signalVeryBullish:Very bullish composite`, 'caution'],
+        ], '0', '100');
+      case 's2f_model_price':
+      case 'base_case_target':
+      case 'bull_case_target':
+        return this.targetContext(widget.value);
+      default:
+        return null;
+    }
+  }
+
+  private rangedWidgetContext(
+    value: number,
+    min: number,
+    max: number,
+    bands: Array<[number, string, string]>,
+    minLabel: string,
+    maxLabel: string,
+  ) {
+    const band = bands.find(([limit]) => value < limit) ?? bands[bands.length - 1];
+    return {
+      label: band[1],
+      detail: $localize`:@@widgetContext.rangeLabel:Range ${minLabel}:INTERPOLATION: to ${maxLabel}:INTERPOLATION_1:`,
+      zone: band[2],
+      position: Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100)),
+      minLabel,
+      maxLabel,
+    };
+  }
+
+  private priceRelativeContext(
+    value: number,
+    bands: Array<[number, string, string]>,
+    min: number,
+    max: number,
+    minLabel: string,
+    maxLabel: string,
+  ) {
+    return this.rangedWidgetContext(value, min, max, bands, minLabel, maxLabel);
+  }
+
+  private targetContext(target: number) {
+    const btc = this.widgets().find((w) => w.type === 'btc_price')?.value ?? null;
+    if (btc === null || btc <= 0) {
+      return {
+        label: $localize`:@@widgetContext.modelTarget:Model target`,
+        detail: $localize`:@@widgetContext.needsBtc:Compare after BTC price loads`,
+        zone: 'neutral',
+        position: null,
+        minLabel: '',
+        maxLabel: '',
+      };
+    }
+
+    const upside = ((target - btc) / btc) * 100;
+    const ratio = target / btc;
+    let label: string;
+    let zone: string;
+    if (upside < 0) { label = $localize`:@@widgetContext.targetBelow:Below current BTC price`; zone = 'danger'; }
+    else if (upside < 50) { label = $localize`:@@widgetContext.targetNear:Near current price`; zone = 'neutral'; }
+    else if (upside < 150) { label = $localize`:@@widgetContext.targetUpside:Upside scenario`; zone = 'good'; }
+    else { label = $localize`:@@widgetContext.targetAggressive:Aggressive upside scenario`; zone = 'caution'; }
+
+    return {
+      label,
+      detail: `${upside >= 0 ? '+' : ''}${upside.toFixed(0)}% vs BTC spot`,
+      zone,
+      position: Math.min(100, Math.max(0, (ratio / 5) * 100)),
+      minLabel: '0x',
+      maxLabel: '5x',
+    };
   }
 
   protected getZoneLabel(zone: string): string {

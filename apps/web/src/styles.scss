@@ -1461,6 +1461,77 @@ main .dashboard-widget-grid .widget-trend.trend-flat {
   color: #65736f;
 }
 
+main .dashboard-widget-grid .widget-context {
+  display: grid;
+  gap: 5px;
+  width: 100%;
+  margin-top: 2px;
+  padding-top: 8px;
+  border-top: 1px solid #edf0ee;
+}
+
+main .dashboard-widget-grid .widget-context-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  color: #65736f;
+  font-size: 0.74rem;
+}
+
+main .dashboard-widget-grid .widget-context-top span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+main .dashboard-widget-grid .widget-context-top strong {
+  flex: 0 0 auto;
+  color: #3f4d48;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+main .dashboard-widget-grid .widget-context-bar {
+  position: relative;
+  height: 10px;
+  border-radius: 5px;
+  background: linear-gradient(to right, #5b8dd9, #27ae60, #f1c40f, #e67e22, #c0392b);
+}
+
+main .dashboard-widget-grid .widget-context-bar span {
+  position: absolute;
+  top: -3px;
+  width: 4px;
+  height: 16px;
+  background: #111;
+  border-radius: 2px;
+  transform: translateX(-50%);
+}
+
+main .dashboard-widget-grid .widget-context-scale {
+  display: flex;
+  justify-content: space-between;
+  color: #8a948f;
+  font-size: 0.64rem;
+}
+
+main .dashboard-widget-grid .widget-context[data-zone='good'] .widget-context-top span {
+  color: #1e8e3e;
+}
+
+main .dashboard-widget-grid .widget-context[data-zone='neutral'] .widget-context-top span {
+  color: #65736f;
+}
+
+main .dashboard-widget-grid .widget-context[data-zone='caution'] .widget-context-top span {
+  color: #b45309;
+}
+
+main .dashboard-widget-grid .widget-context[data-zone='danger'] .widget-context-top span {
+  color: #c0392b;
+}
+
 main .dashboard-widget-grid .widget-updated {
   color: #8a948f;
   font-size: 0.75rem;

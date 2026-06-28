@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS user_dashboard_widgets (
   CONSTRAINT user_dashboard_widgets_widget_type_not_blank_check CHECK (
     length(trim(widget_type)) > 0
   ),
-  CONSTRAINT user_dashboard_widgets_position_check CHECK (position >= 0 AND position <= 19)
+  CONSTRAINT user_dashboard_widgets_position_check CHECK (position >= 0 AND position <= 39)
 );
 
 CREATE INDEX IF NOT EXISTS idx_dashboard_widgets_user

@@ -577,7 +577,7 @@ describe('protected route wiring', () => {
   it('returns 400 when adding a widget fails validation', async () => {
     const dashboardService = {
       getWidgets: jest.fn(),
-      addWidget: jest.fn().mockRejectedValue(new DashboardError('Maximum 20 widgets per dashboard', 400)),
+      addWidget: jest.fn().mockRejectedValue(new DashboardError('Maximum 40 widgets per dashboard', 400)),
       reorderWidgets: jest.fn(),
       removeWidget: jest.fn(),
     };
@@ -590,7 +590,7 @@ describe('protected route wiring', () => {
     );
 
     expect(response.statusCode).toBe(400);
-    expect(response.body).toEqual({ error: 'Maximum 20 widgets per dashboard' });
+    expect(response.body).toEqual({ error: 'Maximum 40 widgets per dashboard' });
   });
 
   it('reorders dashboard widgets for the authenticated user', async () => {

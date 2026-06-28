@@ -85,7 +85,44 @@ describe('DashboardPage', () => {
     expect(compiled.textContent).toContain('Current BTC Price');
     expect(compiled.textContent).toContain('$67,234.50');
     expect(compiled.querySelector('.widget-trend.trend-up')?.textContent).toContain('↑');
-    expect(compiled.textContent).toContain('2026-06-10 00:00:00 UTC');
+    expect(compiled.textContent).toContain('10 Jun 2026 UTC');
+  });
+
+  it('adds contextual ranges to sparse metric widgets', async () => {
+    auth.getDashboardWidgets.mockResolvedValue({
+      widgets: [
+        {
+          id: 'widget-hash',
+          type: 'hash_rate',
+          title: 'Hash Rate',
+          value: 962_619_200,
+          formattedValue: '962,619,200',
+          trend: 'down',
+          trendPercent: -10.4,
+          lastUpdated: '2026-06-23T00:00:00.000Z',
+        },
+        {
+          id: 'widget-rsi',
+          type: 'btc_rsi_12m',
+          title: 'BTC RSI (12m)',
+          value: 39.1,
+          formattedValue: '39.1',
+          trend: 'up',
+          trendPercent: 0.2,
+          lastUpdated: '2026-06-25T00:00:00.000Z',
+        },
+      ],
+    });
+    setUp();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('Very strong network security');
+    expect(compiled.textContent).toContain('300M');
+    expect(compiled.textContent).toContain('1.2B');
+    expect(compiled.textContent).toContain('Weak momentum');
+    expect(compiled.querySelectorAll('.widget-context-bar')).toHaveLength(2);
   });
 
   it('renders a waiting-for-data state when a widget has no last-updated timestamp', async () => {
