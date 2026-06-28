@@ -160,6 +160,17 @@
   @if (!isAuthPage() && currentUser() && mobileMenuOpen()) {
     <div class="mobile-nav-backdrop" (click)="closeMobileMenu()" aria-hidden="true"></div>
     <nav class="mobile-nav" aria-label="Mobile navigation">
+      <!-- User identity -->
+      <div class="mobile-nav-user">
+        <span class="mobile-nav-user-avatar">{{ userInitials() }}</span>
+        <div class="mobile-nav-user-info">
+          <strong>{{ currentUser()?.fullName || currentUser()?.email }}</strong>
+          @if (currentUser()?.fullName) {
+            <span>{{ currentUser()?.email }}</span>
+          }
+        </div>
+      </div>
+      <div class="mobile-nav-separator"></div>
       <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMobileMenu()">
         <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M4 13h7V4H4v9Zm9 7h7V4h-7v16ZM4 20h7v-5H4v5Z"></path>
@@ -205,6 +216,39 @@
           <ng-container i18n="Admin email templates navigation label@@nav.adminEmail">Email</ng-container>
         </a>
       }
+      <div class="mobile-nav-separator"></div>
+      <button type="button" class="mobile-nav-action" (click)="openProfileModal(); closeMobileMenu()"
+        i18n="My account menu item@@nav.myAccount">My Account</button>
+      <a routerLink="/user-guide" routerLinkActive="active" (click)="closeMobileMenu()"
+        i18n="User guide menu item@@nav.userGuide">User Guide</a>
+      <div class="mobile-nav-separator"></div>
+      <button type="button" class="mobile-nav-action" (click)="closeMobileMenu(); openLegal('disclaimer')"
+        i18n="Disclaimer menu item@@nav.disclaimer">Disclaimer</button>
+      <button type="button" class="mobile-nav-action" (click)="closeMobileMenu(); openLegal('privacy-policy')"
+        i18n="Privacy policy menu item@@nav.privacyPolicy">Privacy Policy</button>
+      <button type="button" class="mobile-nav-action" (click)="closeMobileMenu(); openLegal('terms-of-use')"
+        i18n="Terms of use menu item@@nav.termsOfUse">Terms of Use</button>
+      <div class="mobile-nav-separator"></div>
+      <button type="button" class="mobile-nav-logout" (click)="logout()"
+        i18n="Log out button@@auth.logout">Log out</button>
+      <div class="mobile-nav-separator"></div>
+      <div class="mobile-nav-lang">
+        <span class="mobile-nav-lang-label" i18n="Language label@@profile.language">Language</span>
+        <div class="lang-toggle" role="group" aria-label="Language">
+          <button
+            type="button"
+            class="lang-toggle__option"
+            [class.lang-toggle__option--active]="language() === 'en'"
+            (click)="switchLanguage('en')"
+          >EN</button>
+          <button
+            type="button"
+            class="lang-toggle__option"
+            [class.lang-toggle__option--active]="language() === 'hu'"
+            (click)="switchLanguage('hu')"
+          >HU</button>
+        </div>
+      </div>
     </nav>
   }
 
