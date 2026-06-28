@@ -37,6 +37,10 @@ Configure deployment secrets in the Vercel dashboard:
 - `UPSTASH_REDIS_TOKEN`
 - `QSTASH_URL`
 - `QSTASH_TOKEN`
+- `QSTASH_CURRENT_SIGNING_KEY`
+- `QSTASH_NEXT_SIGNING_KEY`
+- `QSTASH_DAILY_REFRESH_URL` (`https://<api-domain>/api/jobs/daily-data-refresh`)
+- `QSTASH_DAILY_REFRESH_SCHEDULE_ID` if replacing an existing schedule from the admin panel
 - `RESEND_API_KEY`
 - `RESEND_FROM_EMAIL`
 

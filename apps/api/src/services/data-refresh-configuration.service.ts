@@ -18,6 +18,9 @@ export interface DataRefreshConfigurationScheduler {
   applyRefreshFrequency(frequency: RefreshFrequency): Promise<void>;
 }
 
+const QSTASH_DAILY_CRON = '0 0 * * *';
+const QSTASH_HOURLY_CRON = '0 * * * *';
+
 export interface DataRefreshConfigurationUpdate {
   refreshFrequency?: RefreshFrequency;
   historicalDepth?: HistoricalDepth;
@@ -62,17 +65,18 @@ class QStashScheduleService implements DataRefreshConfigurationScheduler {
     const scheduleId = process.env.QSTASH_DAILY_REFRESH_SCHEDULE_ID;
 
     if (scheduleId) {
-      await fetch(`https://qstash.upstash.io/v2/schedules/${scheduleId}`, {
+      const response = await fetch(`https://qstash.upstash.io/v2/schedules/${scheduleId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${process.env.QSTASH_TOKEN}` },
       });
+      await assertQStashResponse(response, 'delete existing data refresh schedule');
     }
 
     if (frequency === 'manual') {
       return;
     }
 
-    await fetch('https://qstash.upstash.io/v2/schedules', {
+    const response = await fetch('https://qstash.upstash.io/v2/schedules', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${process.env.QSTASH_TOKEN}`,
@@ -80,10 +84,20 @@ class QStashScheduleService implements DataRefreshConfigurationScheduler {
       },
       body: JSON.stringify({
         destination: process.env.QSTASH_DAILY_REFRESH_URL,
-        cron: frequency === 'hourly' ? '0 * * * *' : '0 12 * * *',
+        cron: frequency === 'hourly' ? QSTASH_HOURLY_CRON : QSTASH_DAILY_CRON,
       }),
     });
+    await assertQStashResponse(response, 'create data refresh schedule');
   }
+}
+
+async function assertQStashResponse(response: Response, action: string): Promise<void> {
+  if (response.ok) {
+    return;
+  }
+
+  const body = await response.text().catch(() => '');
+  throw new Error(`Failed to ${action}: QStash returned ${response.status} ${body}`.trim());
 }
 
 function validateUpdate(input: DataRefreshConfigurationUpdate): DataRefreshConfigurationUpdate {

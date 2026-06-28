@@ -118,6 +118,9 @@ import { LegalDialogService } from './services/legal-dialog.service';
         <div class="metric-strip">
           <span><ng-container i18n="Landing preview rainbow@@landing.rainbow">Rainbow</ng-container> <strong>Locked</strong></span>
           <span><ng-container i18n="Landing preview pi cycle@@landing.piCycle">Pi Cycle</ng-container> <strong>Locked</strong></span>
+          <span><ng-container i18n="Landing preview NUPL@@landing.nupl">NUPL</ng-container> <strong>Locked</strong></span>
+          <span><ng-container i18n="Landing preview Global M2@@landing.globalM2">Global M2</ng-container> <strong>Locked</strong></span>
+          <span><ng-container i18n="Landing preview DXY@@landing.dxy">DXY</ng-container> <strong>Locked</strong></span>
         </div>
       </div>
     </section>
@@ -143,6 +146,9 @@ import { LegalDialogService } from './services/legal-dialog.service';
         </li>
         <li tabindex="0" data-tooltip="Market sentiment gauge that blends volatility, momentum, social, dominance, and trend inputs.">
           Fear &amp; Greed
+        </li>
+        <li tabindex="0" data-tooltip="Net Unrealized Profit/Loss maps aggregate holder profit and loss into Bitcoin sentiment-cycle phases.">
+          Bitcoin NUPL
         </li>
         <li
           tabindex="0"
