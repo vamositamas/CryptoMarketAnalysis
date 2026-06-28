@@ -751,6 +751,11 @@ export class TradingPlansPageComponent {
       pi_cycle_top: 'Pi Cycle Top',
       mayer_multiple: 'Mayer Multiple',
       puell_multiple: 'Puell Multiple',
+      s2f_model_premium: $localize`:S2F model premium label@@trading.signal.s2fModelPremium:S2F Model Premium`,
+      projection_range: $localize`:Projection range label@@trading.signal.projectionRange:Projection Range`,
+      volatility_position: $localize`:365d volatility position label@@trading.signal.volatilityPosition:365d Volatility Position`,
+      global_m2_yoy: $localize`:Global M2 YoY label@@trading.signal.globalM2Yoy:Global M2 YoY`,
+      dxy_yoy_change: $localize`:DXY YoY label@@trading.signal.dxyYoy:DXY YoY`,
     };
     return labels[signal.name] ?? this.translatePhrase(signal.label);
   }
@@ -828,6 +833,51 @@ export class TradingPlansPageComponent {
       'Far from crossover — early/mid cycle': $localize`:Far crossover interpretation@@trading.interpretation.farCrossover:Far from crossover - early/mid cycle`,
       'Below 200-day MA — accumulation zone': $localize`:Below 200 day MA interpretation@@trading.interpretation.below200Day:Below 200-day MA - accumulation zone`,
       'Below average miner revenue — accumulation zone': $localize`:Below average miner revenue interpretation@@trading.interpretation.belowMinerRevenue:Below average miner revenue - accumulation zone`,
+      // Mayer Multiple
+      'Well below 200-day MA — deep accumulation zone': $localize`:Mayer well below 200d MA@@trading.interpretation.mayerWellBelow:Well below 200-day MA — deep accumulation zone`,
+      'Slightly above 200-day MA — healthy': $localize`:Mayer slightly above 200d MA@@trading.interpretation.mayerSlightlyAbove:Slightly above 200-day MA — healthy`,
+      'Extended above 200-day MA': $localize`:Mayer extended above 200d MA@@trading.interpretation.mayerExtended:Extended above 200-day MA`,
+      'Extreme extension — historical sell signal': $localize`:Mayer extreme extension@@trading.interpretation.mayerExtremeExtension:Extreme extension — historical sell signal`,
+      // Pi Cycle Top
+      'Moving toward crossover — watch for top': $localize`:Pi cycle moving toward crossover@@trading.interpretation.piMovingToCrossover:Moving toward crossover — watch for top`,
+      'Approaching crossover — caution': $localize`:Pi cycle approaching crossover@@trading.interpretation.piApproachingCrossover:Approaching crossover — caution`,
+      'Very close to crossover — high risk': $localize`:Pi cycle very close crossover@@trading.interpretation.piCloseCrossover:Very close to crossover — high risk`,
+      'Crossover occurred — historical cycle top signal': $localize`:Pi cycle crossover occurred@@trading.interpretation.piCrossoverOccurred:Crossover occurred — historical cycle top signal`,
+      // Puell Multiple
+      'Miners stressed — historically rare buy zone': $localize`:Puell miners stressed@@trading.interpretation.puellMinerStressed:Miners stressed — historically rare buy zone`,
+      'Average miner revenue — neutral': $localize`:Puell average miner revenue@@trading.interpretation.puellAverageMiner:Average miner revenue — neutral`,
+      'Elevated miner revenue — late cycle signal': $localize`:Puell elevated miner revenue@@trading.interpretation.puellElevatedMiner:Elevated miner revenue — late cycle signal`,
+      'Extreme miner revenue — distribution zone': $localize`:Puell extreme miner revenue@@trading.interpretation.puellExtremeMiner:Extreme miner revenue — distribution zone`,
+      // S2F Model Premium
+      'Deep discount to Stock-to-Flow model price': $localize`:S2F deep discount@@trading.interpretation.s2fDeepDiscount:Deep discount to Stock-to-Flow model price`,
+      'Meaningful discount to Stock-to-Flow model price': $localize`:S2F meaningful discount@@trading.interpretation.s2fMeaningfulDiscount:Meaningful discount to Stock-to-Flow model price`,
+      'Near Stock-to-Flow model fair value': $localize`:S2F near fair value@@trading.interpretation.s2fNearFairValue:Near Stock-to-Flow model fair value`,
+      'Premium to Stock-to-Flow model price': $localize`:S2F premium@@trading.interpretation.s2fPremiumToModel:Premium to Stock-to-Flow model price`,
+      'Large premium to Stock-to-Flow model price': $localize`:S2F large premium@@trading.interpretation.s2fLargePremium:Large premium to Stock-to-Flow model price`,
+      // Projection Range
+      'Below modeled floor range — historically stressed valuation': $localize`:Projection below floor@@trading.interpretation.projBelowFloor:Below modeled floor range — historically stressed valuation`,
+      'Near projection floor range': $localize`:Projection near floor@@trading.interpretation.projNearFloor:Near projection floor range`,
+      'Mid-range between modeled floor and terminal price': $localize`:Projection mid range@@trading.interpretation.projMidRange:Mid-range between modeled floor and terminal price`,
+      'Upper projection range — reward/risk cooling': $localize`:Projection upper range@@trading.interpretation.projUpperRange:Upper projection range — reward/risk cooling`,
+      'Near or above terminal price range': $localize`:Projection near terminal@@trading.interpretation.projNearTerminal:Near or above terminal price range`,
+      // 365d Volatility Position
+      'Deeply below 365-day trend band — capitulation-style discount': $localize`:Volatility deeply below band@@trading.interpretation.volDeeplyBelow:Deeply below 365-day trend band — capitulation-style discount`,
+      'Below 365-day trend band — accumulation conditions': $localize`:Volatility below band@@trading.interpretation.volBelowBand:Below 365-day trend band — accumulation conditions`,
+      'Inside normal 365-day volatility range': $localize`:Volatility inside normal range@@trading.interpretation.volNormalRange:Inside normal 365-day volatility range`,
+      'Above 365-day trend band — extended conditions': $localize`:Volatility above band@@trading.interpretation.volAboveBand:Above 365-day trend band — extended conditions`,
+      'Far above 365-day trend band — overheated volatility extension': $localize`:Volatility far above band@@trading.interpretation.volFarAbove:Far above 365-day trend band — overheated volatility extension`,
+      // Global M2 YoY
+      'Strong liquidity expansion — supportive macro backdrop for Bitcoin': $localize`:M2 strong expansion@@trading.interpretation.m2StrongExpansion:Strong liquidity expansion — supportive macro backdrop for Bitcoin`,
+      'Positive liquidity growth — risk-on conditions improving': $localize`:M2 positive growth@@trading.interpretation.m2PositiveGrowth:Positive liquidity growth — risk-on conditions improving`,
+      'Mild liquidity expansion — modest macro support': $localize`:M2 mild expansion@@trading.interpretation.m2MildExpansion:Mild liquidity expansion — modest macro support`,
+      'Liquidity contraction — macro headwind': $localize`:M2 contraction@@trading.interpretation.m2Contraction:Liquidity contraction — macro headwind`,
+      'Severe liquidity contraction — strong macro headwind': $localize`:M2 severe contraction@@trading.interpretation.m2SevereContraction:Severe liquidity contraction — strong macro headwind`,
+      // DXY YoY
+      'Dollar weakening sharply - strong macro tailwind for Bitcoin': $localize`:DXY weakening sharply@@trading.interpretation.dxyWeakeningSharp:Dollar weakening sharply - strong macro tailwind for Bitcoin`,
+      'Dollar weakening - supportive liquidity backdrop': $localize`:DXY weakening@@trading.interpretation.dxyWeakening:Dollar weakening - supportive liquidity backdrop`,
+      'Dollar broadly stable - neutral macro impulse': $localize`:DXY stable@@trading.interpretation.dxyStable:Dollar broadly stable - neutral macro impulse`,
+      'Dollar strengthening - macro headwind for Bitcoin': $localize`:DXY strengthening@@trading.interpretation.dxyStrengthening:Dollar strengthening - macro headwind for Bitcoin`,
+      'Dollar strengthening sharply - strong risk-asset headwind': $localize`:DXY strengthening sharply@@trading.interpretation.dxyStrengtheningSharp:Dollar strengthening sharply - strong risk-asset headwind`,
       'Cumulative value days destroyed floor': $localize`:CVDD floor description@@trading.projection.description.cvddFloor:Cumulative value days destroyed floor`,
       'Delta Cap / Realized Cap model floor': $localize`:Balanced price description@@trading.projection.description.balancedPrice:Delta Cap / Realized Cap model floor`,
       'Average cost basis of all coins': $localize`:Realized price description@@trading.projection.description.realizedPrice:Average cost basis of all coins`,

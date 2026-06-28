@@ -551,6 +551,171 @@
       <trans-unit id="auth.signInLink" datatype="html"><source> Sign in</source><target> Bejelentkezés</target></trans-unit>
       <trans-unit id="auth.continueWithGoogle" datatype="html"><source>Continue with Google</source><target>Folytatás Google-fiókkal</target></trans-unit>
       <trans-unit id="register.captchaWrong" datatype="html"><source>Incorrect answer. Please try again.</source><target>Helytelen válasz. Kérjük, próbáld újra.</target></trans-unit>
+      <trans-unit id="trading.eyebrow" datatype="html"><source>Trade Planner</source><target>Kereskedési Tervező</target></trans-unit>
+      <trans-unit id="trading.title" datatype="html"><source>Trading Plans &amp; Market Signals</source><target>Kereskedési Tervek &amp; Piaci Jelzések</target></trans-unit>
+      <trans-unit id="trading.subtitle" datatype="html"><source> Signal aggregation from all chart indicators, model-based price targets, and your personal trade plans. </source><target> Jelzések összesítése az összes grafikonjelzőből, modell alapú árcélok és személyes kereskedési tervek. </target></trans-unit>
+      <trans-unit id="trading.tabs.signals" datatype="html"><source> Market Signals </source><target> Piaci Jelzések </target></trans-unit>
+      <trans-unit id="trading.tabs.projections" datatype="html"><source> Price Projections </source><target> Árvetítések </target></trans-unit>
+      <trans-unit id="trading.signals.loading" datatype="html"><source>Loading signals...</source><target>Jelzések betöltése...</target></trans-unit>
+      <trans-unit id="trading.lastUpdated" datatype="html"><source>Last updated:</source><target>Utoljára frissítve:</target></trans-unit>
+      <trans-unit id="trading.projections.loading" datatype="html"><source>Loading price projections...</source><target>Árvetítések betöltése...</target></trans-unit>
+      <trans-unit id="trading.currentBtcPrice" datatype="html"><source>current BTC price</source><target>jelenlegi BTC ár</target></trans-unit>
+      <trans-unit id="trading.projections.disclaimerLabel" datatype="html"><source>Disclaimer:</source><target>Felelősségkizárás:</target></trans-unit>
+      <trans-unit id="trading.projections.disclaimerText" datatype="html"><source>These projections are based on on-chain and mathematical models (Stock-to-Flow, Mayer Multiple, Rainbow bands, Terminal Price, CVDD). They reflect historical model behaviour and are not financial advice. Always conduct your own research.</source><target>Ezek a vetítések láncon belüli és matematikai modelleken alapulnak (Stock-to-Flow, Mayer Multiple, szivárványsávok, terminális ár, CVDD). A modellek historikus viselkedését tükrözik, és nem minősülnek pénzügyi tanácsnak. Mindig végezze el saját kutatását.</target></trans-unit>
+      <trans-unit id="trading.plans.countLabel" datatype="html"><source>plans</source><target>terv</target></trans-unit>
+      <trans-unit id="trading.plans.activeLabel" datatype="html"><source>active</source><target>aktív</target></trans-unit>
+      <trans-unit id="trading.create.title" datatype="html"><source>Create Trading Plan</source><target>Kereskedési Terv Létrehozása</target></trans-unit>
+      <trans-unit id="trading.form.title" datatype="html"><source>Plan title</source><target>Terv neve</target></trans-unit>
+      <trans-unit id="trading.form.titlePlaceholder" datatype="html"><source>e.g. BTC Long - Mid-cycle entry</source><target>pl. BTC Long – Ciklus közepi belépés</target></trans-unit>
+      <trans-unit id="trading.form.direction" datatype="html"><source>Direction</source><target>Irány</target></trans-unit>
+      <trans-unit id="trading.form.neutralDca" datatype="html"><source>Neutral / DCA</source><target>Semleges / DCA</target></trans-unit>
+      <trans-unit id="trading.form.entryPrice" datatype="html"><source>Entry price (USD)</source><target>Belépési ár (USD)</target></trans-unit>
+      <trans-unit id="trading.form.entryPlaceholder" datatype="html"><source>e.g. 95000</source><target>pl. 95000</target></trans-unit>
+      <trans-unit id="trading.form.expiryDate" datatype="html"><source>Expiry date (optional)</source><target>Lejárati dátum (opcionális)</target></trans-unit>
+      <trans-unit id="trading.form.targetPrice" datatype="html"><source>Target price (USD)</source><target>Célár (USD)</target></trans-unit>
+      <trans-unit id="trading.form.targetPlaceholder" datatype="html"><source>e.g. 140000</source><target>pl. 140000</target></trans-unit>
+      <trans-unit id="trading.form.stopLoss" datatype="html"><source>Stop loss (USD)</source><target>Stop loss (USD)</target></trans-unit>
+      <trans-unit id="trading.form.stopPlaceholder" datatype="html"><source>e.g. 82000</source><target>pl. 82000</target></trans-unit>
+      <trans-unit id="trading.form.positionSize" datatype="html"><source>Position size (USD)</source><target>Pozíció mérete (USD)</target></trans-unit>
+      <trans-unit id="trading.form.sizePlaceholder" datatype="html"><source>e.g. 5000</source><target>pl. 5000</target></trans-unit>
+      <trans-unit id="trading.form.riskPercent" datatype="html"><source>Risk % of portfolio</source><target>Kockázat % (portfólió)</target></trans-unit>
+      <trans-unit id="trading.form.riskPlaceholder" datatype="html"><source>e.g. 2</source><target>pl. 2</target></trans-unit>
+      <trans-unit id="trading.form.notes" datatype="html"><source>Notes / thesis</source><target>Megjegyzések / tézis</target></trans-unit>
+      <trans-unit id="trading.form.notesPlaceholder" datatype="html"><source>Why this trade, what signals support it...</source><target>Miért ez a kereskedés, milyen jelzések támogatják...</target></trans-unit>
+      <trans-unit id="trading.plans.loading" datatype="html"><source>Loading plans...</source><target>Tervek betöltése...</target></trans-unit>
+      <trans-unit id="trading.plans.empty" datatype="html"><source>No trading plans yet.</source><target>Még nincsenek kereskedési tervek.</target></trans-unit>
+      <trans-unit id="trading.plans.createFirst" datatype="html"><source>Create your first plan</source><target>Hozd létre az első terved</target></trans-unit>
+      <trans-unit id="trading.metrics.entry" datatype="html"><source>Entry</source><target>Belépés</target></trans-unit>
+      <trans-unit id="trading.metrics.target" datatype="html"><source>Target</source><target>Célár</target></trans-unit>
+      <trans-unit id="trading.metrics.currentBtc" datatype="html"><source>Current BTC</source><target>Jelenlegi BTC</target></trans-unit>
+      <trans-unit id="trading.metrics.unrealizedPnl" datatype="html"><source>Unrealized P&amp;L</source><target>Nem realizált P&amp;L</target></trans-unit>
+      <trans-unit id="trading.metrics.toTarget" datatype="html"><source>To target</source><target>Célhoz</target></trans-unit>
+      <trans-unit id="trading.metrics.closePrice" datatype="html"><source>Close price</source><target>Zárási ár</target></trans-unit>
+      <trans-unit id="trading.metrics.realizedPnl" datatype="html"><source>Realized P&amp;L</source><target>Realizált P&amp;L</target></trans-unit>
+      <trans-unit id="trading.metrics.position" datatype="html"><source>Position</source><target>Pozíció</target></trans-unit>
+      <trans-unit id="trading.metrics.risk" datatype="html"><source>Risk</source><target>Kockázat</target></trans-unit>
+      <trans-unit id="trading.metrics.expiry" datatype="html"><source>Expiry</source><target>Lejárat</target></trans-unit>
+      <trans-unit id="trading.actions.closePosition" datatype="html"><source>Close position</source><target>Pozíció zárása</target></trans-unit>
+      <trans-unit id="trading.actions.cancelPlan" datatype="html"><source>Cancel plan</source><target>Terv törlése</target></trans-unit>
+      <trans-unit id="trading.close.title" datatype="html"><source>Close position</source><target>Pozíció zárása</target></trans-unit>
+      <trans-unit id="trading.close.description" datatype="html"><source> Enter the price where you closed this position. </source><target> Add meg az árat, ahol lezártad a pozíciót. </target></trans-unit>
+      <trans-unit id="trading.close.price" datatype="html"><source>Close price (USD)</source><target>Zárási ár (USD)</target></trans-unit>
+      <trans-unit id="trading.close.pricePlaceholder" datatype="html"><source>e.g. 125000</source><target>pl. 125000</target></trans-unit>
+      <trans-unit id="trading.close.invalidPrice" datatype="html"><source>Enter a valid price</source><target>Adj meg érvényes árat</target></trans-unit>
+      <trans-unit id="trading.actions.newPlan" datatype="html"><source>New Plan</source><target>Új Terv</target></trans-unit>
+      <trans-unit id="trading.actions.creating" datatype="html"><source>Creating...</source><target>Létrehozás...</target></trans-unit>
+      <trans-unit id="trading.actions.createPlan" datatype="html"><source>Create Plan</source><target>Terv Létrehozása</target></trans-unit>
+      <trans-unit id="trading.actions.closing" datatype="html"><source>Closing...</source><target>Zárás...</target></trans-unit>
+      <trans-unit id="trading.actions.confirmClose" datatype="html"><source>Confirm close</source><target>Zárás megerősítése</target></trans-unit>
+      <trans-unit id="trading.direction.neutral" datatype="html"><source>Neutral</source><target>Semleges</target></trans-unit>
+      <trans-unit id="trading.status.active" datatype="html"><source>Active</source><target>Aktív</target></trans-unit>
+      <trans-unit id="trading.status.closed" datatype="html"><source>Closed</source><target>Lezárt</target></trans-unit>
+      <trans-unit id="trading.status.cancelled" datatype="html"><source>Cancelled</source><target>Törölt</target></trans-unit>
+      <trans-unit id="trading.zone.veryBullish" datatype="html"><source>Very Bullish</source><target>Nagyon bikás</target></trans-unit>
+      <trans-unit id="trading.zone.bullish" datatype="html"><source>Bullish</source><target>Bikás</target></trans-unit>
+      <trans-unit id="trading.zone.neutral" datatype="html"><source>Neutral</source><target>Semleges</target></trans-unit>
+      <trans-unit id="trading.zone.bearish" datatype="html"><source>Bearish</source><target>Medvés</target></trans-unit>
+      <trans-unit id="trading.zone.veryBearish" datatype="html"><source>Very Bearish</source><target>Nagyon medvés</target></trans-unit>
+      <trans-unit id="trading.zone.noData" datatype="html"><source>No Data</source><target>Nincs adat</target></trans-unit>
+      <trans-unit id="trading.signals.headline.strongAccumulation" datatype="html"><source>Strong accumulation conditions</source><target>Erős akkumulációs feltételek</target></trans-unit>
+      <trans-unit id="trading.signals.headline.favourable" datatype="html"><source>Favourable market conditions</source><target>Kedvező piaci feltételek</target></trans-unit>
+      <trans-unit id="trading.signals.headline.mixed" datatype="html"><source>Mixed signals - proceed carefully</source><target>Vegyes jelzések – haladj óvatosan</target></trans-unit>
+      <trans-unit id="trading.signals.headline.elevatedRisk" datatype="html"><source>Elevated risk - overheated market</source><target>Megnövekedett kockázat – túlhevített piac</target></trans-unit>
+      <trans-unit id="trading.signals.headline.extremeCaution" datatype="html"><source>Extreme caution - distribution zone</source><target>Fokozott óvatosság – eladási zóna</target></trans-unit>
+      <trans-unit id="trading.signals.subtext.strongAccumulation" datatype="html"><source>Multiple indicators align for a long-term buy opportunity.</source><target>Több jelző erősíti a hosszú távú vételi lehetőséget.</target></trans-unit>
+      <trans-unit id="trading.signals.subtext.favourable" datatype="html"><source>Most indicators are bullish. Gradual accumulation may be justified.</source><target>A legtöbb jelző bikás. A fokozatos akkumuláció indokolt lehet.</target></trans-unit>
+      <trans-unit id="trading.signals.subtext.mixed" datatype="html"><source>Signals are conflicting. High-conviction positions carry more risk.</source><target>A jelzések ellentmondásosak. A nagy meggyőződéssel kötött pozíciók nagyobb kockázatot hordoznak.</target></trans-unit>
+      <trans-unit id="trading.signals.subtext.elevatedRisk" datatype="html"><source>Several indicators show overvaluation. Reducing exposure may be prudent.</source><target>Több jelző túlértékeltséget mutat. A kitettség csökkentése megfontolt lehet.</target></trans-unit>
+      <trans-unit id="trading.signals.subtext.extremeCaution" datatype="html"><source>Most indicators signal overvaluation or cycle-top risk. Avoid new longs.</source><target>A legtöbb jelző túlértékeltséget vagy cikluscsúcs kockázatot jelez. Kerüld az új long pozíciókat.</target></trans-unit>
+      <trans-unit id="trading.overall.strongBuy" datatype="html"><source>Strong Buy</source><target>Erős vétel</target></trans-unit>
+      <trans-unit id="trading.overall.bullish" datatype="html"><source>Bullish</source><target>Bikás</target></trans-unit>
+      <trans-unit id="trading.overall.neutral" datatype="html"><source>Neutral</source><target>Semleges</target></trans-unit>
+      <trans-unit id="trading.overall.bearish" datatype="html"><source>Bearish</source><target>Medvés</target></trans-unit>
+      <trans-unit id="trading.overall.strongSell" datatype="html"><source>Strong Sell</source><target>Erős eladás</target></trans-unit>
+      <trans-unit id="trading.signal.fearGreed" datatype="html"><source>Fear &amp; Greed Index</source><target>Félelem &amp; Kapzsiság Index</target></trans-unit>
+      <trans-unit id="trading.signal.rainbowBand" datatype="html"><source>Rainbow Band</source><target>Szivárványsáv</target></trans-unit>
+      <trans-unit id="trading.signal.realizedPricePremium" datatype="html"><source>Realized Price Premium</source><target>Realizált Ár Prémium</target></trans-unit>
+      <trans-unit id="trading.signal.nupl" datatype="html"><source>Bitcoin NUPL</source><target>Bitcoin NUPL</target></trans-unit>
+      <trans-unit id="trading.signal.s2fModelPremium" datatype="html"><source>S2F Model Premium</source><target>S2F Modell Prémium</target></trans-unit>
+      <trans-unit id="trading.signal.projectionRange" datatype="html"><source>Projection Range</source><target>Vetítési Tartomány</target></trans-unit>
+      <trans-unit id="trading.signal.volatilityPosition" datatype="html"><source>365d Volatility Position</source><target>365 napos Volatilitási Pozíció</target></trans-unit>
+      <trans-unit id="trading.signal.globalM2Yoy" datatype="html"><source>Global M2 YoY</source><target>Globális M2 ÉvÉv</target></trans-unit>
+      <trans-unit id="trading.signal.dxyYoy" datatype="html"><source>DXY YoY</source><target>DXY ÉvÉv</target></trans-unit>
+      <trans-unit id="trading.phrase.strongBuy" datatype="html"><source>Strong Buy</source><target>Erős vétel</target></trans-unit>
+      <trans-unit id="trading.phrase.bullish" datatype="html"><source>Bullish</source><target>Bikás</target></trans-unit>
+      <trans-unit id="trading.phrase.veryBullish" datatype="html"><source>Very Bullish</source><target>Nagyon bikás</target></trans-unit>
+      <trans-unit id="trading.phrase.neutral" datatype="html"><source>Neutral</source><target>Semleges</target></trans-unit>
+      <trans-unit id="trading.phrase.bearish" datatype="html"><source>Bearish</source><target>Medvés</target></trans-unit>
+      <trans-unit id="trading.phrase.veryBearish" datatype="html"><source>Very Bearish</source><target>Nagyon medvés</target></trans-unit>
+      <trans-unit id="trading.phrase.strongSell" datatype="html"><source>Strong Sell</source><target>Erős eladás</target></trans-unit>
+      <trans-unit id="trading.interpretation.undervaluedAccumulation" datatype="html"><source>Undervalued - accumulation zone</source><target>Alulértékelt – akkumulációs zóna</target></trans-unit>
+      <trans-unit id="trading.interpretation.extremeFear" datatype="html"><source>Extreme fear - historically strong buy signal</source><target>Extrém félelem – historikusan erős vételi jelzés</target></trans-unit>
+      <trans-unit id="trading.interpretation.fearAccumulation" datatype="html"><source>Fear - accumulation favoured</source><target>Félelem – akkumuláció kedvező</target></trans-unit>
+      <trans-unit id="trading.interpretation.neutralSentiment" datatype="html"><source>Neutral sentiment</source><target>Semleges hangulat</target></trans-unit>
+      <trans-unit id="trading.interpretation.greedCaution" datatype="html"><source>Greed - caution advised</source><target>Kapzsiság – óvatosság javasolt</target></trans-unit>
+      <trans-unit id="trading.interpretation.extremeGreed" datatype="html"><source>Extreme greed - distribution zone</source><target>Extrém kapzsiság – eladási zóna</target></trans-unit>
+      <trans-unit id="trading.interpretation.band2Buy" datatype="html"><source>Band 2: Buy</source><target>2. sáv: Vétel</target></trans-unit>
+      <trans-unit id="trading.interpretation.realizedHealthy" datatype="html"><source>Near realized price - healthy premium</source><target>Realizált árhoz közel – egészséges prémium</target></trans-unit>
+      <trans-unit id="trading.interpretation.veryLowAccumulation" datatype="html"><source>Very low - accumulation zone</source><target>Nagyon alacsony – akkumulációs zóna</target></trans-unit>
+      <trans-unit id="trading.interpretation.farCrossover" datatype="html"><source>Far from crossover - early/mid cycle</source><target>Messze a keresztezéstől – korai/közepi ciklus</target></trans-unit>
+      <trans-unit id="trading.interpretation.below200Day" datatype="html"><source>Below 200-day MA - accumulation zone</source><target>200 napos MA alatt – akkumulációs zóna</target></trans-unit>
+      <trans-unit id="trading.interpretation.belowMinerRevenue" datatype="html"><source>Below average miner revenue - accumulation zone</source><target>Átlagos bányászbevétel alatt – akkumulációs zóna</target></trans-unit>
+      <trans-unit id="trading.interpretation.mayerWellBelow" datatype="html"><source>Well below 200-day MA — deep accumulation zone</source><target>Jóval a 200 napos MA alatt – mély akkumulációs zóna</target></trans-unit>
+      <trans-unit id="trading.interpretation.mayerSlightlyAbove" datatype="html"><source>Slightly above 200-day MA — healthy</source><target>Enyhén a 200 napos MA felett – egészséges</target></trans-unit>
+      <trans-unit id="trading.interpretation.mayerExtended" datatype="html"><source>Extended above 200-day MA</source><target>Kiterjesztve a 200 napos MA felett</target></trans-unit>
+      <trans-unit id="trading.interpretation.mayerExtremeExtension" datatype="html"><source>Extreme extension — historical sell signal</source><target>Extrém kiterjesztés – historikus eladási jelzés</target></trans-unit>
+      <trans-unit id="trading.interpretation.piMovingToCrossover" datatype="html"><source>Moving toward crossover — watch for top</source><target>Közelít a keresztezéshez – figyelj a csúcsra</target></trans-unit>
+      <trans-unit id="trading.interpretation.piApproachingCrossover" datatype="html"><source>Approaching crossover — caution</source><target>Közeledő keresztezés – óvatosság</target></trans-unit>
+      <trans-unit id="trading.interpretation.piCloseCrossover" datatype="html"><source>Very close to crossover — high risk</source><target>Nagyon közel a keresztezéshez – magas kockázat</target></trans-unit>
+      <trans-unit id="trading.interpretation.piCrossoverOccurred" datatype="html"><source>Crossover occurred — historical cycle top signal</source><target>Keresztezés megtörtént – historikus cikluscsúcs jelzés</target></trans-unit>
+      <trans-unit id="trading.interpretation.puellMinerStressed" datatype="html"><source>Miners stressed — historically rare buy zone</source><target>Bányászok stresszben – historikusan ritka vételi zóna</target></trans-unit>
+      <trans-unit id="trading.interpretation.puellAverageMiner" datatype="html"><source>Average miner revenue — neutral</source><target>Átlagos bányászbevétel – semleges</target></trans-unit>
+      <trans-unit id="trading.interpretation.puellElevatedMiner" datatype="html"><source>Elevated miner revenue — late cycle signal</source><target>Emelkedett bányászbevétel – késői ciklus jelzés</target></trans-unit>
+      <trans-unit id="trading.interpretation.puellExtremeMiner" datatype="html"><source>Extreme miner revenue — distribution zone</source><target>Extrém bányászbevétel – eladási zóna</target></trans-unit>
+      <trans-unit id="trading.interpretation.s2fDeepDiscount" datatype="html"><source>Deep discount to Stock-to-Flow model price</source><target>Mély kedvezmény a Stock-to-Flow modell árához képest</target></trans-unit>
+      <trans-unit id="trading.interpretation.s2fMeaningfulDiscount" datatype="html"><source>Meaningful discount to Stock-to-Flow model price</source><target>Érdemi kedvezmény a Stock-to-Flow modell árához képest</target></trans-unit>
+      <trans-unit id="trading.interpretation.s2fNearFairValue" datatype="html"><source>Near Stock-to-Flow model fair value</source><target>Stock-to-Flow modell fair értékéhez közel</target></trans-unit>
+      <trans-unit id="trading.interpretation.s2fPremiumToModel" datatype="html"><source>Premium to Stock-to-Flow model price</source><target>Prémium a Stock-to-Flow modell árához képest</target></trans-unit>
+      <trans-unit id="trading.interpretation.s2fLargePremium" datatype="html"><source>Large premium to Stock-to-Flow model price</source><target>Nagy prémium a Stock-to-Flow modell árához képest</target></trans-unit>
+      <trans-unit id="trading.interpretation.projBelowFloor" datatype="html"><source>Below modeled floor range — historically stressed valuation</source><target>Modellezett alsó határ alatt – historikusan stresszelt értékeltség</target></trans-unit>
+      <trans-unit id="trading.interpretation.projNearFloor" datatype="html"><source>Near projection floor range</source><target>A vetítés alsó határához közel</target></trans-unit>
+      <trans-unit id="trading.interpretation.projMidRange" datatype="html"><source>Mid-range between modeled floor and terminal price</source><target>Középső tartomány a modellezett alsó határ és terminális ár között</target></trans-unit>
+      <trans-unit id="trading.interpretation.projUpperRange" datatype="html"><source>Upper projection range — reward/risk cooling</source><target>Felső vetítési tartomány – hozam/kockázat csökken</target></trans-unit>
+      <trans-unit id="trading.interpretation.projNearTerminal" datatype="html"><source>Near or above terminal price range</source><target>Terminális árközelben vagy afölött</target></trans-unit>
+      <trans-unit id="trading.interpretation.volDeeplyBelow" datatype="html"><source>Deeply below 365-day trend band — capitulation-style discount</source><target>Mélyen a 365 napos trendsáv alatt – kapitulációs stílusú kedvezmény</target></trans-unit>
+      <trans-unit id="trading.interpretation.volBelowBand" datatype="html"><source>Below 365-day trend band — accumulation conditions</source><target>365 napos trendsáv alatt – akkumulációs feltételek</target></trans-unit>
+      <trans-unit id="trading.interpretation.volNormalRange" datatype="html"><source>Inside normal 365-day volatility range</source><target>Normál 365 napos volatilitási tartományon belül</target></trans-unit>
+      <trans-unit id="trading.interpretation.volAboveBand" datatype="html"><source>Above 365-day trend band — extended conditions</source><target>365 napos trendsáv felett – kiterjesztett feltételek</target></trans-unit>
+      <trans-unit id="trading.interpretation.volFarAbove" datatype="html"><source>Far above 365-day trend band — overheated volatility extension</source><target>Jóval a 365 napos trendsáv felett – túlhevített volatilitás</target></trans-unit>
+      <trans-unit id="trading.interpretation.m2StrongExpansion" datatype="html"><source>Strong liquidity expansion — supportive macro backdrop for Bitcoin</source><target>Erős likviditásbővülés – kedvező makró háttér Bitcoinnak</target></trans-unit>
+      <trans-unit id="trading.interpretation.m2PositiveGrowth" datatype="html"><source>Positive liquidity growth — risk-on conditions improving</source><target>Pozitív likviditásnövekedés – javuló kockázatvállalási feltételek</target></trans-unit>
+      <trans-unit id="trading.interpretation.m2MildExpansion" datatype="html"><source>Mild liquidity expansion — modest macro support</source><target>Enyhe likviditásbővülés – mérsékelt makró támogatás</target></trans-unit>
+      <trans-unit id="trading.interpretation.m2Contraction" datatype="html"><source>Liquidity contraction — macro headwind</source><target>Likviditáskontrakció – makró ellenszél</target></trans-unit>
+      <trans-unit id="trading.interpretation.m2SevereContraction" datatype="html"><source>Severe liquidity contraction — strong macro headwind</source><target>Súlyos likviditáskontrakció – erős makró ellenszél</target></trans-unit>
+      <trans-unit id="trading.interpretation.dxyWeakeningSharp" datatype="html"><source>Dollar weakening sharply - strong macro tailwind for Bitcoin</source><target>Dollár élesen gyengül – erős makró hátszél Bitcoinnak</target></trans-unit>
+      <trans-unit id="trading.interpretation.dxyWeakening" datatype="html"><source>Dollar weakening - supportive liquidity backdrop</source><target>Dollár gyengül – kedvező likviditási háttér</target></trans-unit>
+      <trans-unit id="trading.interpretation.dxyStable" datatype="html"><source>Dollar broadly stable - neutral macro impulse</source><target>Dollár nagyjából stabil – semleges makró impulzus</target></trans-unit>
+      <trans-unit id="trading.interpretation.dxyStrengthening" datatype="html"><source>Dollar strengthening - macro headwind for Bitcoin</source><target>Dollár erősödik – makró ellenszél a Bitcoinnak</target></trans-unit>
+      <trans-unit id="trading.interpretation.dxyStrengtheningSharp" datatype="html"><source>Dollar strengthening sharply - strong risk-asset headwind</source><target>Dollár élesen erősödik – erős kockázati eszköz ellenszél</target></trans-unit>
+      <trans-unit id="trading.scenario.bear" datatype="html"><source>Bear Case</source><target>Medve szcenárió</target></trans-unit>
+      <trans-unit id="trading.scenario.base" datatype="html"><source>Base Case</source><target>Alap szcenárió</target></trans-unit>
+      <trans-unit id="trading.scenario.bull" datatype="html"><source>Bull Case</source><target>Bika szcenárió</target></trans-unit>
+      <trans-unit id="trading.scenario.ultraBull" datatype="html"><source>Ultra Bull</source><target>Ultra bika</target></trans-unit>
+      <trans-unit id="trading.projection.cvddFloor" datatype="html"><source>CVDD floor</source><target>CVDD alsó határ</target></trans-unit>
+      <trans-unit id="trading.projection.balancedPrice" datatype="html"><source>Balanced Price</source><target>Egyensúlyi ár</target></trans-unit>
+      <trans-unit id="trading.projection.realizedPrice" datatype="html"><source>Realized Price</source><target>Realizált ár</target></trans-unit>
+      <trans-unit id="trading.projection.200day15" datatype="html"><source>200-day MA ×1.5</source><target>200 napos MA ×1,5</target></trans-unit>
+      <trans-unit id="trading.projection.200day24" datatype="html"><source>200-day MA ×2.4</source><target>200 napos MA ×2,4</target></trans-unit>
+      <trans-unit id="trading.projection.s2fModel" datatype="html"><source>S2F model price</source><target>S2F modell ár</target></trans-unit>
+      <trans-unit id="trading.projection.s2f15" datatype="html"><source>S2F ×1.5</source><target>S2F ×1,5</target></trans-unit>
+      <trans-unit id="trading.projection.s2f3" datatype="html"><source>S2F ×3</source><target>S2F ×3</target></trans-unit>
+      <trans-unit id="trading.projection.terminalPrice" datatype="html"><source>Terminal Price</source><target>Terminális ár</target></trans-unit>
+      <trans-unit id="trading.projection.terminal15" datatype="html"><source>Terminal ×1.5</source><target>Terminális ×1,5</target></trans-unit>
+      <trans-unit id="trading.timeframe.3to12" datatype="html"><source>3-12 months</source><target>3–12 hónap</target></trans-unit>
+      <trans-unit id="trading.timeframe.6to12" datatype="html"><source>6-12 months</source><target>6–12 hónap</target></trans-unit>
+      <trans-unit id="trading.timeframe.6to18" datatype="html"><source>6-18 months</source><target>6–18 hónap</target></trans-unit>
+      <trans-unit id="trading.timeframe.12to24" datatype="html"><source>12-24 months</source><target>12–24 hónap</target></trans-unit>
+      <trans-unit id="trading.timeframe.18to36" datatype="html"><source>18-36 months</source><target>18–36 hónap</target></trans-unit>
     </body>
   </file>
 </xliff>
