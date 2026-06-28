@@ -56,6 +56,9 @@ describe('DashboardPage', () => {
     setUp();
 
     const compiled = fixture.nativeElement as HTMLElement;
+    compiled.querySelector<HTMLButtonElement>('[aria-label="Dashboard actions"]')?.click();
+    fixture.detectChanges();
+
     expect(compiled.textContent).toContain('Refresh Data');
   });
 
@@ -248,6 +251,9 @@ describe('DashboardPage', () => {
     expect((fixture.nativeElement as HTMLElement).querySelector('.widget-modal-overlay')).toBeNull();
 
     const compiled = fixture.nativeElement as HTMLElement;
+    compiled.querySelector<HTMLButtonElement>('[aria-label="Dashboard actions"]')?.click();
+    fixture.detectChanges();
+
     const openButtons = Array.from(compiled.querySelectorAll('button')) as HTMLButtonElement[];
     openButtons.find((button) => button.textContent?.includes('Add Widget'))?.click();
     fixture.detectChanges();

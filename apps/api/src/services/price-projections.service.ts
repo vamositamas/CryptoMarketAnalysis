@@ -49,6 +49,8 @@ export class PriceProjectionsService {
         btc_rsi_12m: string | null;
         rainbow_band: string | null;
         stock_to_flow_model: string | null;
+        global_m2_yoy: string | null;
+        dxy_yoy_change: string | null;
       }>(`
         SELECT
           (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'realized_price'        ORDER BY date DESC LIMIT 1) AS realized_price,
@@ -61,7 +63,9 @@ export class PriceProjectionsService {
           (SELECT MAX(price_usd) FROM bitcoin_price_daily) AS ath_price,
           (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'btc_rsi_12m'            ORDER BY date DESC LIMIT 1) AS btc_rsi_12m,
           (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'rainbow_band'           ORDER BY date DESC LIMIT 1) AS rainbow_band,
-          (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'stock_to_flow_ratio'   ORDER BY date DESC LIMIT 1) AS stock_to_flow_model
+          (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'stock_to_flow_ratio'   ORDER BY date DESC LIMIT 1) AS stock_to_flow_model,
+          (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'global_m2_yoy'          ORDER BY date DESC LIMIT 1) AS global_m2_yoy,
+          (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'dxy_yoy_change'        ORDER BY date DESC LIMIT 1) AS dxy_yoy_change
       `),
       db.query<{ date: string; price_usd: string }>(`
         SELECT date::text, price_usd
@@ -85,6 +89,8 @@ export class PriceProjectionsService {
     const btcRsi12m = parseNum(m?.btc_rsi_12m);
     const rainbowBand = parseNum(m?.rainbow_band);
     const s2fRatio = parseNum(m?.stock_to_flow_model);
+    const globalM2YoY = parseNum(m?.global_m2_yoy);
+    const dxyYoYChange = parseNum(m?.dxy_yoy_change);
     // S2F model price: PlanB calibration — 0.4 * ratio^3
     const s2fModel = s2fRatio !== null ? 0.4 * Math.pow(s2fRatio, 3) : null;
 
@@ -104,6 +110,8 @@ export class PriceProjectionsService {
       btcRsi12m,
       rainbowBand,
       s2fModel,
+      globalM2YoY,
+      dxyYoYChange,
     });
 
     return { btcPriceUsd: btc, scenarios, historicalPoints, lastUpdated };
@@ -127,6 +135,8 @@ interface Models {
   btcRsi12m: number | null;
   rainbowBand: number | null;
   s2fModel: number | null;
+  globalM2YoY: number | null;
+  dxyYoYChange: number | null;
 }
 
 function buildScenarios(btc: number | null, m: Models): ProjectionScenario[] {
@@ -148,6 +158,8 @@ function buildScenarios(btc: number | null, m: Models): ProjectionScenario[] {
   const baseTargets: PriceTarget[] = [];
   if (m.ma200)    baseTargets.push({ label: '200-day MA ×1.5', model: 'Mayer Multiple', priceUsd: Math.round(m.ma200 * 1.5), description: 'Mayer Multiple 1.5 — historically fair value', timeframe: '6–12 months' });
   if (m.ma365 && m.stddev365) baseTargets.push({ label: '365d mean +1σ', model: 'Volatility Band', priceUsd: Math.round(m.ma365 + m.stddev365), description: 'One standard deviation above the 365-day mean', timeframe: '3–9 months' });
+  if (btc && m.globalM2YoY !== null && m.globalM2YoY < 0) baseTargets.push({ label: 'Liquidity-adjusted base', model: 'Global M2', priceUsd: Math.round(btc * 0.85), description: 'Negative Global M2 growth applies a defensive macro-liquidity haircut', timeframe: '3–12 months' });
+  if (btc && m.dxyYoYChange !== null && m.dxyYoYChange >= 5) baseTargets.push({ label: 'Dollar-strength base', model: 'DXY', priceUsd: Math.round(btc * dxyDefensiveMultiplier(m.dxyYoYChange)), description: 'Rising dollar pressure applies a defensive macro haircut to Bitcoin', timeframe: '3–12 months' });
   if (m.athPrice && (!btc || m.athPrice > btc)) baseTargets.push({ label: 'ATH retest', model: 'Market Structure', priceUsd: Math.round(m.athPrice), description: 'Retest of the highest stored daily close', timeframe: '6–18 months' });
   if (m.s2fModel) baseTargets.push({ label: 'S2F model price', model: 'Stock-to-Flow', priceUsd: Math.round(m.s2fModel),    description: 'Stock-to-Flow scarcity model fair value',   timeframe: '6–18 months' });
   if (baseTargets.length > 0) {
@@ -161,6 +173,8 @@ function buildScenarios(btc: number | null, m: Models): ProjectionScenario[] {
   if (m.ma200)         bullTargets.push({ label: '200-day MA ×2.4', model: 'Mayer Multiple', priceUsd: Math.round(m.ma200 * 2.4),   description: 'Mayer Multiple 2.4 — historical bull top',  timeframe: '12–24 months' });
   if (m.athPrice)      bullTargets.push({ label: 'ATH ×1.272',     model: 'Fib Extension',  priceUsd: Math.round(m.athPrice * 1.272), description: 'First breakout extension above prior all-time high', timeframe: '9–24 months' });
   if (m.ma365 && m.stddev365) bullTargets.push({ label: '365d mean +2σ', model: 'Volatility Band', priceUsd: Math.round(m.ma365 + (m.stddev365 * 2)), description: 'Two standard deviations above the 365-day mean', timeframe: '9–24 months' });
+  if (btc && m.globalM2YoY !== null && m.globalM2YoY >= 5) bullTargets.push({ label: 'Liquidity expansion target', model: 'Global M2', priceUsd: Math.round(btc * liquidityMultiplier(m.globalM2YoY)), description: 'Macro-liquidity expansion premium based on Global M2 YoY growth', timeframe: '6–18 months' });
+  if (btc && m.dxyYoYChange !== null && m.dxyYoYChange <= -3) bullTargets.push({ label: 'Dollar-weakness target', model: 'DXY', priceUsd: Math.round(btc * dxyTailwindMultiplier(m.dxyYoYChange)), description: 'Dollar weakness adds a macro-liquidity tailwind for Bitcoin', timeframe: '6–18 months' });
   if (bullTargets.length > 0) {
     scenarios.push({ scenario: 'bull', label: 'Bull Case', color: '#22c55e', targets: bullTargets });
   }
@@ -186,6 +200,24 @@ function buildScenarios(btc: number | null, m: Models): ProjectionScenario[] {
   }
 
   return scenarios;
+}
+
+function liquidityMultiplier(globalM2YoY: number): number {
+  if (globalM2YoY >= 10) return 1.5;
+  if (globalM2YoY >= 7) return 1.35;
+  return 1.2;
+}
+
+function dxyDefensiveMultiplier(dxyYoY: number): number {
+  if (dxyYoY >= 10) return 0.75;
+  if (dxyYoY >= 7) return 0.82;
+  return 0.9;
+}
+
+function dxyTailwindMultiplier(dxyYoY: number): number {
+  if (dxyYoY <= -8) return 1.35;
+  if (dxyYoY <= -5) return 1.25;
+  return 1.15;
 }
 
 function pickBest(values: (number | null)[]): number | null {

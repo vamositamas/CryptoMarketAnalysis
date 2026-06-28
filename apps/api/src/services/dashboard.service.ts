@@ -60,6 +60,7 @@ const WIDGET_CATALOG: Record<string, WidgetCatalogEntry> = {
   mvrv_zscore: { title: 'MVRV Z-Score', decimals: 2 },
   stock_to_flow: { title: 'Stock-to-Flow Ratio', decimals: 2 },
   fear_greed: { title: 'Fear & Greed Index', decimals: 0 },
+  nupl: { title: 'Bitcoin NUPL', decimals: 1 },
   realized_price: { title: 'Realized Price', decimals: 2 },
   ma_200_day: { title: '200-day Moving Average', decimals: 2 },
   hash_rate: { title: 'Hash Rate', decimals: 0 },
@@ -69,6 +70,7 @@ const WIDGET_CATALOG: Record<string, WidgetCatalogEntry> = {
   market_cap: { title: 'Market Cap', decimals: 0 },
   halving_progress: { title: 'Halving Progress', decimals: 1 },
   btc_rsi_12m: { title: 'BTC RSI (12m)', decimals: 1 },
+  global_m2_yoy: { title: 'Global M2 YoY', decimals: 1 },
   realized_price_premium: { title: 'Realized Price Premium', decimals: 1 },
   s2f_model_price: { title: 'S2F Model Price', decimals: 0 },
   base_case_target: { title: 'Base Case Target', decimals: 0 },
@@ -93,6 +95,7 @@ const METRIC_NAME_BY_WIDGET_TYPE: Record<string, string> = {
   hash_rate: 'hash_rate',
   mining_difficulty: 'mining_difficulty',
   btc_rsi_12m: 'btc_rsi_12m',
+  global_m2_yoy: 'global_m2_yoy',
 };
 
 const CURRENCY_WIDGET_TYPES = new Set([
@@ -104,7 +107,7 @@ const CURRENCY_WIDGET_TYPES = new Set([
   'base_case_target',
   'bull_case_target',
 ]);
-const PERCENT_WIDGET_TYPES = new Set(['24h_change', 'realized_price_premium']);
+const PERCENT_WIDGET_TYPES = new Set(['24h_change', 'realized_price_premium', 'nupl', 'global_m2_yoy']);
 const SUPPLY_WIDGET_TYPES = new Set(['total_supply', 'circulating_supply']);
 
 export class DashboardService {
@@ -371,6 +374,7 @@ export class DashboardService {
     if (
       ![
         'realized_price_premium',
+        'nupl',
         's2f_model_price',
         'base_case_target',
         'bull_case_target',
@@ -539,6 +543,9 @@ function computeDashboardSignalValue(widgetType: string, inputs: DashboardSignal
     case 'realized_price_premium':
       if (!inputs.btcPrice || !inputs.realizedPrice) return null;
       return ((inputs.btcPrice - inputs.realizedPrice) / inputs.realizedPrice) * 100;
+    case 'nupl':
+      if (!inputs.btcPrice || !inputs.realizedPrice) return null;
+      return ((inputs.btcPrice - inputs.realizedPrice) / inputs.btcPrice) * 100;
     case 's2f_model_price':
       return inputs.stockToFlowRatio !== null ? 0.4 * Math.pow(inputs.stockToFlowRatio, 3) : null;
     case 'base_case_target': {

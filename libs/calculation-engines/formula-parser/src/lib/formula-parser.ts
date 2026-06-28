@@ -19,7 +19,9 @@ const ALLOWED_VARIABLES = new Set([
   'circulating_supply',
   'stock_to_flow',
   'mvrv_zscore',
+  'nupl',
   'fear_greed_index',
+  'global_m2_yoy',
 ]);
 
 const VARIABLE_PATTERN = /\{\{([^}]+)\}\}/g;

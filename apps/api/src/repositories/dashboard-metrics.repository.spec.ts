@@ -83,6 +83,7 @@ describe('DashboardMetricsRepository', () => {
           rows: [
             { metric_name: 'fear_greed_index', metric_value: '42' },
             { metric_name: 'mvrv_zscore', metric_value: '3.4' },
+            { metric_name: 'realized_price', metric_value: '50000' },
             { metric_name: 'stock_to_flow_ratio', metric_value: '56.2' },
           ],
         }),
@@ -97,6 +98,7 @@ describe('DashboardMetricsRepository', () => {
     expect(result.circulating_supply).toBeCloseTo(19_700_000);
     expect(result.stock_to_flow).toBeCloseTo(56.2);
     expect(result.mvrv_zscore).toBeCloseTo(3.4);
+    expect(result.nupl).toBeCloseTo(25.63, 1);
     expect(result.fear_greed_index).toBeCloseTo(42);
   });
 
@@ -117,6 +119,7 @@ describe('DashboardMetricsRepository', () => {
     expect(result.circulating_supply).toBeNull();
     expect(result.stock_to_flow).toBeNull();
     expect(result.mvrv_zscore).toBeNull();
+    expect(result.nupl).toBeNull();
     expect(result.fear_greed_index).toBeNull();
   });
 });

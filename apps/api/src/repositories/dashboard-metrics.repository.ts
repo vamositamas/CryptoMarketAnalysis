@@ -11,7 +11,9 @@ export interface FormulaVariableValues {
   circulating_supply: number | null;
   stock_to_flow: number | null;
   mvrv_zscore: number | null;
+  nupl: number | null;
   fear_greed_index: number | null;
+  global_m2_yoy: number | null;
 }
 
 interface MetricPointRow {
@@ -122,7 +124,7 @@ export class DashboardMetricsRepository {
         `
           SELECT DISTINCT ON (metric_name) metric_name, metric_value
           FROM bitcoin_metrics_daily
-          WHERE metric_name IN ('stock_to_flow_ratio', 'mvrv_zscore', 'fear_greed_index')
+          WHERE metric_name IN ('stock_to_flow_ratio', 'mvrv_zscore', 'fear_greed_index', 'realized_price', 'global_m2_yoy')
           ORDER BY metric_name, date DESC
         `,
       ),
@@ -152,7 +154,11 @@ export class DashboardMetricsRepository {
       circulating_supply: latest?.circulating_supply != null ? Number(latest.circulating_supply) : null,
       stock_to_flow: metricMap.get('stock_to_flow_ratio') ?? null,
       mvrv_zscore: metricMap.get('mvrv_zscore') ?? null,
+      nupl: btcPrice !== null && metricMap.get('realized_price') != null
+        ? ((btcPrice - metricMap.get('realized_price')!) / btcPrice) * 100
+        : null,
       fear_greed_index: metricMap.get('fear_greed_index') ?? null,
+      global_m2_yoy: metricMap.get('global_m2_yoy') ?? null,
     };
   }
 }

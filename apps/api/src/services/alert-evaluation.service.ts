@@ -77,6 +77,8 @@ const CHART_TITLES: Record<string, string> = {
   'bitcoin-rainbow': 'Bitcoin Rainbow Price Chart',
   'pi-cycle-top': 'Pi Cycle Top Indicator',
   'stock-to-flow': 'Stock-to-Flow Model',
+  'global-m2-bitcoin': 'Global M2 vs BTC YoY',
+  'dxy-bitcoin': 'DXY vs Bitcoin',
 };
 
 interface TemplateLoader {

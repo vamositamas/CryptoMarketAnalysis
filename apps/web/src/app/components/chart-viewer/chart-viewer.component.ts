@@ -252,7 +252,7 @@ export class ChartViewerComponent implements AfterViewInit, OnChanges, OnDestroy
   private getConfiguration(): ChartConfiguration<ChartType> {
     return {
       type: this.chartType,
-      data: this.chartData,
+      data: addRightGutter(this.chartData),
       options: this.getOptions(),
     };
   }
@@ -332,6 +332,31 @@ export class ChartViewerComponent implements AfterViewInit, OnChanges, OnDestroy
       },
     };
   }
+}
+
+function addRightGutter(chartData: ChartData): ChartData {
+  const labels = chartData.labels;
+
+  if (!Array.isArray(labels) || labels.length === 0) {
+    return chartData;
+  }
+
+  const gutterSlots = Math.min(12, Math.max(3, Math.ceil(labels.length * 0.08)));
+
+  return {
+    ...chartData,
+    labels: [...labels, ...Array.from({ length: gutterSlots }, () => '')],
+    datasets: chartData.datasets.map((dataset) => {
+      if (!Array.isArray(dataset.data)) {
+        return dataset;
+      }
+
+      return {
+        ...dataset,
+        data: [...dataset.data, ...Array.from({ length: gutterSlots }, () => null)],
+      };
+    }),
+  };
 }
 
 function normalizeLegendItem(item: LegendItem): LegendItem {

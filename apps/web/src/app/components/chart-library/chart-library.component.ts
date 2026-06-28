@@ -52,6 +52,16 @@ const CHARTS: ChartLibraryItem[] = [
     thumbnailClass: 'mvrv-z-score',
   },
   {
+    id: 'nupl',
+    title: $localize`:Chart NUPL title@@charts.library.nupl.title:Bitcoin NUPL`,
+    category: 'cycle',
+
+    signal: $localize`:Chart NUPL signal@@charts.library.nupl.signal:Unrealized profit/loss cycle phases`,
+    description:
+      $localize`:Chart NUPL description@@charts.library.nupl.description:Maps aggregate unrealized Bitcoin profit and loss into sentiment bands from Capitulation through Euphoria / Greed.`,
+    thumbnailClass: 'nupl',
+  },
+  {
     id: 'realized-price',
     title: $localize`:Chart realized-price title@@charts.library.realized-price.title:Realized Price`,
     category: 'valuation',
@@ -247,6 +257,24 @@ const CHARTS: ChartLibraryItem[] = [
     description:
       $localize`:Chart spx-liquidity description@@charts.library.spx-liquidity.description:Compares the S&P 500 year-over-year change with the excess liquidity lead indicator. Positive turns in excess liquidity have historically led equity market advances by roughly 6 months.`,
     thumbnailClass: 'spx-liquidity',
+  },
+  {
+    id: 'global-m2-bitcoin',
+    title: $localize`:Chart global-m2-bitcoin title@@charts.library.global-m2-bitcoin.title:Global M2 vs BTC YoY`,
+    category: 'macro',
+    signal: $localize`:Chart global-m2-bitcoin signal@@charts.library.global-m2-bitcoin.signal:Liquidity cycle correlation`,
+    description:
+      $localize`:Chart global-m2-bitcoin description@@charts.library.global-m2-bitcoin.description:Compares global broad-money year-over-year growth with Bitcoin year-over-year returns to highlight how liquidity expansions and contractions align with major BTC cycles.`,
+    thumbnailClass: 'global-m2-bitcoin',
+  },
+  {
+    id: 'dxy-bitcoin',
+    title: $localize`:Chart dxy-bitcoin title@@charts.library.dxy-bitcoin.title:DXY vs Bitcoin`,
+    category: 'macro',
+    signal: $localize`:Chart dxy-bitcoin signal@@charts.library.dxy-bitcoin.signal:Dollar strength inverse signal`,
+    description:
+      $localize`:Chart dxy-bitcoin description@@charts.library.dxy-bitcoin.description:Compares the year-over-year change in the US dollar index with Bitcoin price to highlight the historically inverse relationship between dollar strength and BTC cycle conditions.`,
+    thumbnailClass: 'global-m2-bitcoin',
   },
   {
     id: 'midterm-cycles',

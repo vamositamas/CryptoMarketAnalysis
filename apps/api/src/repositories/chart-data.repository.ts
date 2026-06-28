@@ -84,6 +84,20 @@ export interface MidtermCyclesDataRow {
   lastUpdated: string | null;
 }
 
+export interface GlobalM2BitcoinDataRow {
+  date: string;
+  globalM2YoY: number | null;
+  btcYoYReturn: number | null;
+  lastUpdated: string | null;
+}
+
+export interface DxyBitcoinDataRow {
+  date: string;
+  dxyYoYChange: number | null;
+  priceUsd: number | null;
+  lastUpdated: string | null;
+}
+
 export class ChartDataRepository extends BaseRepository {
   constructor(private readonly database: Queryable) {
     super();
@@ -211,6 +225,88 @@ export class ChartDataRepository extends BaseRepository {
       btcRsi12m: nullableNumber(row.btc_rsi_12m),
       spxRsi12m: nullableNumber(row.spx_rsi_12m),
       cfnai: nullableNumber(row.cfnai),
+      lastUpdated: row.last_updated === null ? null : formatTimestamp(row.last_updated),
+    }));
+  }
+
+  async findGlobalM2BitcoinData(timeframe: ChartTimeframe, today = new Date()): Promise<GlobalM2BitcoinDataRow[]> {
+    const startDate = timeframe === 'all' ? '2015-01-01' : getStartDate(today, TIMEFRAME_DAYS[timeframe]);
+
+    const result = await this.database.query(
+      `
+        WITH dates AS (
+          SELECT DISTINCT date FROM bitcoin_metrics_daily
+          WHERE metric_name IN ('global_m2_yoy', 'btc_yoy_return')
+            AND date >= $1::date
+        )
+        SELECT
+          d.date,
+          m2.metric_value  AS global_m2_yoy,
+          btc.metric_value AS btc_yoy_return,
+          GREATEST(
+            COALESCE(m2.created_at, NULL),
+            COALESCE(btc.created_at, NULL)
+          ) AS last_updated
+        FROM dates d
+        LEFT JOIN bitcoin_metrics_daily m2
+          ON m2.date = d.date AND m2.metric_name = 'global_m2_yoy'
+        LEFT JOIN bitcoin_metrics_daily btc
+          ON btc.date = d.date AND btc.metric_name = 'btc_yoy_return'
+        ORDER BY d.date ASC
+      `,
+      [startDate],
+    );
+
+    return (result.rows as unknown as Array<{
+      date: string | Date;
+      global_m2_yoy: string | number | null;
+      btc_yoy_return: string | number | null;
+      last_updated: string | Date | null;
+    }>).map((row) => ({
+      date: formatDate(row.date),
+      globalM2YoY: nullableNumber(row.global_m2_yoy),
+      btcYoYReturn: nullableNumber(row.btc_yoy_return),
+      lastUpdated: row.last_updated === null ? null : formatTimestamp(row.last_updated),
+    }));
+  }
+
+  async findDxyBitcoinData(timeframe: ChartTimeframe, today = new Date()): Promise<DxyBitcoinDataRow[]> {
+    const startDate = timeframe === 'all' ? '2011-01-01' : getStartDate(today, TIMEFRAME_DAYS[timeframe]);
+
+    const result = await this.database.query(
+      `
+        WITH dates AS (
+          SELECT DISTINCT date FROM bitcoin_metrics_daily
+          WHERE metric_name = 'dxy_yoy_change'
+            AND date >= $1::date
+        )
+        SELECT
+          d.date,
+          dxy.metric_value AS dxy_yoy_change,
+          btc.price_usd,
+          GREATEST(
+            COALESCE(dxy.created_at, NULL),
+            COALESCE(btc.created_at, NULL)
+          ) AS last_updated
+        FROM dates d
+        LEFT JOIN bitcoin_metrics_daily dxy
+          ON dxy.date = d.date AND dxy.metric_name = 'dxy_yoy_change'
+        LEFT JOIN bitcoin_price_daily btc
+          ON btc.date = d.date
+        ORDER BY d.date ASC
+      `,
+      [startDate],
+    );
+
+    return (result.rows as unknown as Array<{
+      date: string | Date;
+      dxy_yoy_change: string | number | null;
+      price_usd: string | number | null;
+      last_updated: string | Date | null;
+    }>).map((row) => ({
+      date: formatDate(row.date),
+      dxyYoYChange: nullableNumber(row.dxy_yoy_change),
+      priceUsd: nullableNumber(row.price_usd),
       lastUpdated: row.last_updated === null ? null : formatTimestamp(row.last_updated),
     }));
   }

@@ -357,6 +357,22 @@ export interface MidtermCyclesChartResponse {
   lastUpdated: string | null;
 }
 
+export interface GlobalM2BitcoinChartResponse {
+  chartId: 'global-m2-bitcoin';
+  title: string;
+  timeframe: string;
+  dataPoints: { date: string; globalM2YoY: number | null; btcYoYReturn: number | null; }[];
+  lastUpdated: string | null;
+}
+
+export interface DxyBitcoinChartResponse {
+  chartId: 'dxy-bitcoin';
+  title: string;
+  timeframe: string;
+  dataPoints: { date: string; dxyYoYChange: number | null; priceUsd: number | null; }[];
+  lastUpdated: string | null;
+}
+
 export type ChartAnnotation =
   | {
       id: string;
@@ -859,7 +875,7 @@ export class AuthApiClient {
     return this.postWithCsrf('/api/admin/data-configuration/init-historical', { startDate, endDate });
   }
 
-  async backfillMetric(metric: 'vdd' | 'miner-fees' | 'price-forecast' | 'fear-greed' | 'hash-rate' | 'difficulty' | 'transaction-volume' | 'miners-revenue'): Promise<{ inserted: number }> {
+  async backfillMetric(metric: 'vdd' | 'miner-fees' | 'price-forecast' | 'fear-greed' | 'hash-rate' | 'difficulty' | 'transaction-volume' | 'miners-revenue' | 'global-m2-bitcoin' | 'dxy-bitcoin'): Promise<{ inserted: number }> {
     return this.postWithCsrf(`/api/admin/data-configuration/backfill-${metric}`, {});
   }
 
@@ -1056,6 +1072,18 @@ export class AuthApiClient {
   async getMidtermCyclesChartData(): Promise<MidtermCyclesChartResponse> {
     try {
       return await firstValueFrom(this.http.get<MidtermCyclesChartResponse>('/api/charts/midterm-cycles', { withCredentials: true }));
+    } catch (error) { throw toApiClientError(error); }
+  }
+
+  async getGlobalM2BitcoinChartData(timeframe: ChartTimeframe): Promise<GlobalM2BitcoinChartResponse> {
+    try {
+      return await firstValueFrom(this.http.get<GlobalM2BitcoinChartResponse>('/api/charts/global-m2-bitcoin', { params: { timeframe }, withCredentials: true }));
+    } catch (error) { throw toApiClientError(error); }
+  }
+
+  async getDxyBitcoinChartData(timeframe: ChartTimeframe): Promise<DxyBitcoinChartResponse> {
+    try {
+      return await firstValueFrom(this.http.get<DxyBitcoinChartResponse>('/api/charts/dxy-bitcoin', { params: { timeframe }, withCredentials: true }));
     } catch (error) { throw toApiClientError(error); }
   }
 

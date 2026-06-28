@@ -5,7 +5,7 @@ import {
   type ChartTimeframe,
 } from '../repositories/chart-data.repository';
 
-export type ChartId = 'bitcoin-rainbow' | 'pi-cycle-top' | 'stock-to-flow' | 'mvrv-z-score' | 'puell-multiple' | 'vdd-multiple' | 'realized-price' | 'stock-to-income' | '2yr-ma-multiplier' | 'price-forecast-tools' | 'mayer-multiple' | '200-week-ma-heatmap' | 'fear-greed-index' | 'hash-ribbons' | 'difficulty-ribbon' | 'nvt-ratio' | 'thermocap-multiple' | 'excess-liquidity' | 'spx-liquidity' | 'midterm-cycles';
+export type ChartId = 'bitcoin-rainbow' | 'pi-cycle-top' | 'stock-to-flow' | 'mvrv-z-score' | 'puell-multiple' | 'vdd-multiple' | 'realized-price' | 'stock-to-income' | '2yr-ma-multiplier' | 'price-forecast-tools' | 'mayer-multiple' | '200-week-ma-heatmap' | 'fear-greed-index' | 'hash-ribbons' | 'difficulty-ribbon' | 'nvt-ratio' | 'thermocap-multiple' | 'excess-liquidity' | 'spx-liquidity' | 'midterm-cycles' | 'global-m2-bitcoin' | 'dxy-bitcoin';
 
 export interface BitcoinRainbowChartResponse {
   chartId: 'bitcoin-rainbow';
@@ -222,6 +222,22 @@ export interface MidtermCyclesChartResponse {
   lastUpdated: string | null;
 }
 
+export interface GlobalM2BitcoinChartResponse {
+  chartId: 'global-m2-bitcoin';
+  title: 'Global M2 vs BTC YoY';
+  timeframe: ChartTimeframe;
+  dataPoints: { date: string; globalM2YoY: number | null; btcYoYReturn: number | null; }[];
+  lastUpdated: string | null;
+}
+
+export interface DxyBitcoinChartResponse {
+  chartId: 'dxy-bitcoin';
+  title: 'DXY vs Bitcoin';
+  timeframe: ChartTimeframe;
+  dataPoints: { date: string; dxyYoYChange: number | null; priceUsd: number | null; }[];
+  lastUpdated: string | null;
+}
+
 export type ChartDataResponse =
   | BitcoinRainbowChartResponse
   | PiCycleTopChartResponse
@@ -242,7 +258,9 @@ export type ChartDataResponse =
   | ThermocapMultipleChartResponse
   | ExcessLiquidityChartResponse
   | SpxLiquidityChartResponse
-  | MidtermCyclesChartResponse;
+  | MidtermCyclesChartResponse
+  | GlobalM2BitcoinChartResponse
+  | DxyBitcoinChartResponse;
 
 export class ChartDataRequestError extends Error {
   constructor(
@@ -255,7 +273,7 @@ export class ChartDataRequestError extends Error {
 
 export class ChartDataService {
   constructor(
-    private readonly repository: Pick<ChartDataRepository, 'findBitcoinChartData' | 'findExcessLiquidityData' | 'findSpxLiquidityData' | 'findMidtermCyclesData'>,
+    private readonly repository: Pick<ChartDataRepository, 'findBitcoinChartData' | 'findExcessLiquidityData' | 'findSpxLiquidityData' | 'findMidtermCyclesData' | 'findGlobalM2BitcoinData' | 'findDxyBitcoinData'>,
     private readonly now: () => Date = () => new Date(),
     private readonly bitcoinDataClient: Pick<BitcoinDataClient, 'fetchVddMultipleHistory' | 'fetchCvddHistory' | 'fetchBalancedPriceHistory' | 'fetchTerminalPriceHistory'> = new BitcoinDataClient(),
     private readonly coinMetricsClient: Pick<CoinMetricsClient, 'fetchMvrvRatioAndPriceHistory'> = new CoinMetricsClient(),
@@ -316,6 +334,44 @@ export class ChartDataService {
           btcRsi12m: r.btcRsi12m,
           spxRsi12m: r.spxRsi12m,
           cfnai: r.cfnai,
+        })),
+        lastUpdated,
+      };
+    }
+
+    if (chartId === 'global-m2-bitcoin') {
+      const rows = await this.repository.findGlobalM2BitcoinData(timeframe, this.now());
+      const lastUpdated = rows.reduce<string | null>((acc, r) => {
+        if (!r.lastUpdated) return acc;
+        return !acc || r.lastUpdated > acc ? r.lastUpdated : acc;
+      }, null);
+      return {
+        chartId: 'global-m2-bitcoin',
+        title: 'Global M2 vs BTC YoY',
+        timeframe,
+        dataPoints: rows.map((r) => ({
+          date: r.date,
+          globalM2YoY: r.globalM2YoY,
+          btcYoYReturn: r.btcYoYReturn,
+        })),
+        lastUpdated,
+      };
+    }
+
+    if (chartId === 'dxy-bitcoin') {
+      const rows = await this.repository.findDxyBitcoinData(timeframe, this.now());
+      const lastUpdated = rows.reduce<string | null>((acc, r) => {
+        if (!r.lastUpdated) return acc;
+        return !acc || r.lastUpdated > acc ? r.lastUpdated : acc;
+      }, null);
+      return {
+        chartId: 'dxy-bitcoin',
+        title: 'DXY vs Bitcoin',
+        timeframe,
+        dataPoints: rows.map((r) => ({
+          date: r.date,
+          dxyYoYChange: r.dxyYoYChange,
+          priceUsd: r.priceUsd,
         })),
         lastUpdated,
       };

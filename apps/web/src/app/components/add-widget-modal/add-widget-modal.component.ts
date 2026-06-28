@@ -5,7 +5,7 @@ import {
   type DashboardWidget,
 } from '@crypto-market-analysis/data-access/api-client';
 
-type WidgetLibraryCategory = 'Price Metrics' | 'On-chain Metrics' | 'Supply Metrics' | 'Cycle Indicators' | 'Signals & Forecasts';
+type WidgetLibraryCategory = 'Price Metrics' | 'On-chain Metrics' | 'Supply Metrics' | 'Cycle Indicators' | 'Macro Indicators' | 'Signals & Forecasts';
 type ModalView = 'library' | 'custom';
 
 interface WidgetLibraryItem {
@@ -91,10 +91,26 @@ const WIDGET_LIBRARY: WidgetLibraryItem[] = [
     decimals: 1,
   },
   {
+    type: 'global_m2_yoy',
+    icon: 'M2',
+    name: 'Global M2 YoY',
+    description: 'Global broad-money growth proxy. Rising values suggest improving liquidity conditions for risk assets.',
+    category: 'Macro Indicators',
+    decimals: 1,
+  },
+  {
     type: 'realized_price_premium',
     icon: 'R%',
     name: 'Realized Price Premium',
     description: 'Shows how far spot price trades above or below the aggregate on-chain cost basis.',
+    category: 'Signals & Forecasts',
+    decimals: 1,
+  },
+  {
+    type: 'nupl',
+    icon: 'NUPL',
+    name: 'Bitcoin NUPL',
+    description: 'Net Unrealized Profit/Loss sentiment phase, calculated from BTC price and realized price.',
     category: 'Signals & Forecasts',
     decimals: 1,
   },
@@ -132,7 +148,7 @@ const WIDGET_LIBRARY: WidgetLibraryItem[] = [
   },
 ];
 
-const CATEGORIES: WidgetLibraryCategory[] = ['Price Metrics', 'On-chain Metrics', 'Supply Metrics', 'Cycle Indicators', 'Signals & Forecasts'];
+const CATEGORIES: WidgetLibraryCategory[] = ['Price Metrics', 'On-chain Metrics', 'Supply Metrics', 'Cycle Indicators', 'Macro Indicators', 'Signals & Forecasts'];
 
 export const FORMULA_VARIABLES = [
   { name: '{{btc_price}}', description: 'Bitcoin price (USD)' },
@@ -141,7 +157,9 @@ export const FORMULA_VARIABLES = [
   { name: '{{circulating_supply}}', description: 'Circulating supply (BTC)' },
   { name: '{{stock_to_flow}}', description: 'Stock-to-Flow ratio' },
   { name: '{{mvrv_zscore}}', description: 'MVRV Z-Score' },
+  { name: '{{nupl}}', description: 'Bitcoin NUPL (%)' },
   { name: '{{fear_greed_index}}', description: 'Fear & Greed Index (0–100)' },
+  { name: '{{global_m2_yoy}}', description: 'Global M2 YoY proxy (%)' },
 ];
 
 @Component({

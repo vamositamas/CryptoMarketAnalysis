@@ -14,7 +14,7 @@ const rows = [
 
 describe('ChartDataService', () => {
   it('returns Bitcoin Rainbow chart data', async () => {
-    const repository = { findBitcoinChartData: jest.fn().mockResolvedValue(rows), findExcessLiquidityData: jest.fn().mockResolvedValue([]), findSpxLiquidityData: jest.fn().mockResolvedValue([]), findMidtermCyclesData: jest.fn().mockResolvedValue([]) };
+    const repository = { findBitcoinChartData: jest.fn().mockResolvedValue(rows), findExcessLiquidityData: jest.fn().mockResolvedValue([]), findSpxLiquidityData: jest.fn().mockResolvedValue([]), findMidtermCyclesData: jest.fn().mockResolvedValue([]), findGlobalM2BitcoinData: jest.fn().mockResolvedValue([]), findDxyBitcoinData: jest.fn().mockResolvedValue([]) };
 
     await expect(new ChartDataService(repository).getChartData('bitcoin-rainbow', '1y')).resolves.toEqual({
       chartId: 'bitcoin-rainbow',
@@ -26,7 +26,7 @@ describe('ChartDataService', () => {
   });
 
   it('returns Pi Cycle Top chart data with ma350 multiplied by two', async () => {
-    const repository = { findBitcoinChartData: jest.fn().mockResolvedValue(rows), findExcessLiquidityData: jest.fn().mockResolvedValue([]), findSpxLiquidityData: jest.fn().mockResolvedValue([]), findMidtermCyclesData: jest.fn().mockResolvedValue([]) };
+    const repository = { findBitcoinChartData: jest.fn().mockResolvedValue(rows), findExcessLiquidityData: jest.fn().mockResolvedValue([]), findSpxLiquidityData: jest.fn().mockResolvedValue([]), findMidtermCyclesData: jest.fn().mockResolvedValue([]), findGlobalM2BitcoinData: jest.fn().mockResolvedValue([]), findDxyBitcoinData: jest.fn().mockResolvedValue([]) };
 
     await expect(new ChartDataService(repository).getChartData('pi-cycle-top', 'all')).resolves.toMatchObject({
       chartId: 'pi-cycle-top',
@@ -37,7 +37,7 @@ describe('ChartDataService', () => {
   });
 
   it('returns Stock-to-Flow chart data with simplified model price', async () => {
-    const repository = { findBitcoinChartData: jest.fn().mockResolvedValue(rows), findExcessLiquidityData: jest.fn().mockResolvedValue([]), findSpxLiquidityData: jest.fn().mockResolvedValue([]), findMidtermCyclesData: jest.fn().mockResolvedValue([]) };
+    const repository = { findBitcoinChartData: jest.fn().mockResolvedValue(rows), findExcessLiquidityData: jest.fn().mockResolvedValue([]), findSpxLiquidityData: jest.fn().mockResolvedValue([]), findMidtermCyclesData: jest.fn().mockResolvedValue([]), findGlobalM2BitcoinData: jest.fn().mockResolvedValue([]), findDxyBitcoinData: jest.fn().mockResolvedValue([]) };
 
     await expect(new ChartDataService(repository).getChartData('stock-to-flow', 'all')).resolves.toMatchObject({
       chartId: 'stock-to-flow',
@@ -62,6 +62,7 @@ describe('ChartDataService', () => {
       findExcessLiquidityData: jest.fn().mockResolvedValue([]),
       findSpxLiquidityData: jest.fn().mockResolvedValue([]),
       findMidtermCyclesData: jest.fn().mockResolvedValue([]),
+      findGlobalM2BitcoinData: jest.fn().mockResolvedValue([]), findDxyBitcoinData: jest.fn().mockResolvedValue([]),
     };
     const coinMetricsClient = {
       fetchMvrvRatioAndPriceHistory: jest.fn().mockResolvedValue([
@@ -113,6 +114,7 @@ describe('ChartDataService', () => {
       findExcessLiquidityData: jest.fn().mockResolvedValue([]),
       findSpxLiquidityData: jest.fn().mockResolvedValue([]),
       findMidtermCyclesData: jest.fn().mockResolvedValue([]),
+      findGlobalM2BitcoinData: jest.fn().mockResolvedValue([]), findDxyBitcoinData: jest.fn().mockResolvedValue([]),
     };
     const bitcoinDataClient = {
       fetchVddMultipleHistory: jest.fn(),

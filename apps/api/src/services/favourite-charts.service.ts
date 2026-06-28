@@ -36,6 +36,7 @@ export const CHART_CATALOG: Record<string, ChartCatalogEntry> = {
   'pi-cycle-top':        { title: 'Pi Cycle Top Indicator',              url: '/charts/pi-cycle-top' },
   'stock-to-flow':       { title: 'Stock-to-Flow Model',                 url: '/charts/stock-to-flow' },
   'mvrv-z-score':        { title: 'MVRV Z-Score',                        url: '/charts/mvrv-z-score' },
+  'nupl':                { title: 'Bitcoin NUPL',                        url: '/charts/nupl' },
   'sopr-ratio':          { title: 'SOPR Ratio (LTH/STH)',                url: '/charts/sopr-ratio' },
   'puell-multiple':      { title: 'Puell Multiple',                      url: '/charts/puell-multiple' },
   'bitcoin-power-law':   { title: 'Bitcoin Power Law Chart',             url: '/charts/bitcoin-power-law' },
@@ -55,6 +56,8 @@ export const CHART_CATALOG: Record<string, ChartCatalogEntry> = {
   'thermocap-multiple':  { title: 'Thermocap Multiple',                  url: '/charts/thermocap-multiple' },
   'excess-liquidity':    { title: 'Excess Liquidity Leading Indicator',  url: '/charts/excess-liquidity' },
   'spx-liquidity':       { title: 'S&P 500 vs Excess Liquidity',         url: '/charts/spx-liquidity' },
+  'global-m2-bitcoin':   { title: 'Global M2 vs BTC YoY',                url: '/charts/global-m2-bitcoin' },
+  'dxy-bitcoin':         { title: 'DXY vs Bitcoin',                      url: '/charts/dxy-bitcoin' },
   'stock-to-income':     { title: 'Stock-to-Income Ratio',               url: '/charts/stock-to-income' },
   'realized-price':      { title: 'Realized Price',                      url: '/charts/realized-price' },
 };

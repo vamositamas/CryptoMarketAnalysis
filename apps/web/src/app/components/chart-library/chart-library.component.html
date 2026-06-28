@@ -103,6 +103,22 @@
                   <path d="M 0,300 C 50,288 90,175 108,62 C 120,240 148,310 168,298 C 210,272 268,186 300,118 C 318,280 356,312 380,302 C 415,258 448,105 462,55 C 476,188 510,308 528,292 C 548,242 584,95 605,58 C 622,175 652,300 668,286 C 696,254 745,224 778,232 C 790,236 797,240 800,242"
                         stroke="#f59e0b" stroke-width="2.5" fill="none" opacity="0.95"/>
                 </svg>
+              } @else if (chart.thumbnailClass === 'nupl') {
+                <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
+                  <rect x="0" y="0" width="800" height="60" fill="rgba(244,114,182,0.18)"/>
+                  <rect x="0" y="60" width="800" height="60" fill="rgba(253,186,116,0.28)"/>
+                  <rect x="0" y="120" width="800" height="60" fill="rgba(254,249,195,0.52)"/>
+                  <rect x="0" y="180" width="800" height="60" fill="rgba(236,253,245,0.86)"/>
+                  <rect x="0" y="240" width="800" height="120" fill="rgba(16,185,129,0.12)"/>
+                  <line x1="0" y1="60" x2="800" y2="60" stroke="rgba(23,32,42,0.08)" stroke-width="1"/>
+                  <line x1="0" y1="120" x2="800" y2="120" stroke="rgba(23,32,42,0.08)" stroke-width="1"/>
+                  <line x1="0" y1="180" x2="800" y2="180" stroke="rgba(23,32,42,0.08)" stroke-width="1"/>
+                  <line x1="0" y1="240" x2="800" y2="240" stroke="rgba(23,32,42,0.08)" stroke-width="1"/>
+                  <path d="M 0,350 C 80,345 125,325 155,295 C 175,278 192,252 212,230 C 232,212 258,214 276,224 C 318,246 354,246 380,228 C 420,200 445,136 462,84 C 485,118 512,226 532,252 C 560,288 594,188 610,92 C 638,126 656,252 678,284 C 704,252 740,216 778,222 C 790,225 797,229 800,232"
+                        stroke="#20bde8" stroke-width="3" fill="none"/>
+                  <path d="M 0,355 C 100,352 140,346 155,342 C 168,306 198,250 212,243 C 228,295 260,308 272,303 C 308,284 345,240 355,228 C 372,175 408,68 424,62 C 440,102 468,238 477,126 C 492,98 505,84 510,85 C 528,108 542,104 555,85 C 574,50 617,12 632,10 C 648,42 677,250 685,68 C 703,46 737,22 763,14 C 776,10 792,12 800,13"
+                        stroke="#1f2933" stroke-width="2.25" fill="none" opacity="0.92"/>
+                </svg>
               } @else if (chart.thumbnailClass === 'realized-price') {
                 <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
                   <rect width="800" height="360" fill="#fff"/>
@@ -518,6 +534,16 @@
                   <path d="M 0,215 C 15,210 25,195 40,185 C 55,175 65,160 80,150 C 95,140 105,148 120,155 C 135,162 145,168 160,162 C 175,156 185,140 200,125 C 215,110 225,100 240,92 C 255,84 265,80 280,75 C 295,70 310,72 325,78 C 340,84 350,88 365,82 C 380,76 390,65 405,52 C 420,39 430,28 445,20 C 460,12 475,15 490,22 C 505,29 515,40 530,52 C 545,64 555,80 570,95 C 585,110 595,128 610,145 C 625,162 640,178 655,188 C 670,198 685,202 700,198 C 715,194 730,182 750,172 C 770,162 785,155 800,150" stroke="#111827" stroke-width="2" fill="none"/>
                   <!-- Excess liquidity — smooth blue wave (leading indicator) -->
                   <path d="M 0,155 C 40,148 80,138 120,128 C 160,118 200,108 240,102 C 280,96 320,95 360,98 C 400,101 440,110 480,125 C 520,140 560,158 600,170 C 640,182 680,185 720,178 C 750,172 775,162 800,155" stroke="#2563eb" stroke-width="2.5" fill="none"/>
+                </svg>
+              } @else if (chart.thumbnailClass === 'global-m2-bitcoin') {
+                <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
+                  <rect width="800" height="360" fill="#fff"/>
+                  <line x1="0" y1="90" x2="800" y2="90" stroke="#e5e7eb" stroke-width="1"/>
+                  <line x1="0" y1="180" x2="800" y2="180" stroke="#e5e7eb" stroke-width="1"/>
+                  <line x1="0" y1="270" x2="800" y2="270" stroke="#e5e7eb" stroke-width="1"/>
+                  <line x1="0" y1="210" x2="800" y2="210" stroke="rgba(107,114,128,0.5)" stroke-width="1.5" stroke-dasharray="6,4"/>
+                  <path d="M 0,205 C 35,230 70,270 105,282 C 140,292 170,270 205,232 C 240,192 270,145 305,115 C 340,88 370,80 405,96 C 440,112 470,160 505,204 C 540,250 570,285 605,295 C 640,305 675,270 710,230 C 745,188 775,160 800,150" stroke="#111827" stroke-width="2" fill="none"/>
+                  <path d="M 0,188 C 45,210 88,240 130,252 C 175,262 215,235 258,198 C 300,162 338,122 382,104 C 425,88 465,102 508,135 C 550,168 588,215 632,238 C 675,260 718,246 760,218 C 780,205 792,196 800,190" stroke="#20b8ee" stroke-width="2.5" fill="none"/>
                 </svg>
               } @else if (chart.thumbnailClass === 'midterm-cycles') {
                 <!-- Midterm Cycles thumbnail — orange BTC RSI + blue SPX RSI oscillators + dashed election lines + dark PMI -->

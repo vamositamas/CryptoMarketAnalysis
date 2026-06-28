@@ -11,6 +11,8 @@ import {
   RetryExhaustedError,
 } from '@crypto-market-analysis/calculation-engines/data-sources';
 import { ExcessLiquidityService } from '../services/excess-liquidity.service';
+import { DxyBitcoinService } from '../services/dxy-bitcoin.service';
+import { GlobalM2BitcoinService } from '../services/global-m2-bitcoin.service';
 import { SpxLiquidityService } from '../services/spx-liquidity.service';
 import {
   selectLatestBitcoinDailyIndicators,
@@ -115,6 +117,8 @@ export class DailyDataRefreshService {
   private readonly fearGreedClient: Pick<FearGreedClient, 'fetchLatest'>;
   private readonly bitcoinDataClient: Pick<BitcoinDataClient, 'fetchMvrvZScore' | 'fetchRealizedPrice' | 'fetchVddMultiple' | 'fetchCvdd' | 'fetchBalancedPrice' | 'fetchTerminalPrice'>;
   private readonly excessLiquidityService: ExcessLiquidityService;
+  private readonly dxyBitcoinService: DxyBitcoinService;
+  private readonly globalM2BitcoinService: GlobalM2BitcoinService;
   private readonly spxLiquidityService: SpxLiquidityService;
   private readonly database: Parameters<typeof insertBitcoinPriceDaily>[0] | undefined;
   private readonly emailService: DailyDataRefreshFailureEmailSender;
@@ -128,6 +132,8 @@ export class DailyDataRefreshService {
     this.fearGreedClient = options.fearGreedClient ?? new FearGreedClient();
     this.bitcoinDataClient = options.bitcoinDataClient ?? new BitcoinDataClient();
     this.excessLiquidityService = new ExcessLiquidityService({ fredClient: new FredClient() });
+    this.dxyBitcoinService = new DxyBitcoinService({ fredClient: new FredClient() });
+    this.globalM2BitcoinService = new GlobalM2BitcoinService({ fredClient: new FredClient() });
     this.spxLiquidityService = new SpxLiquidityService({ fredClient: new FredClient() });
     this.database = options.database ?? getDatabasePool();
     this.emailService = options.emailService ?? new ResendEmailService();
@@ -332,6 +338,26 @@ export class DailyDataRefreshService {
         this.logger.log('SPX YoY data refreshed', { records: spxRecords.length });
       } catch (error) {
         this.logger.warn('Failed to refresh SPX YoY data; skipping for this run', {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+
+      try {
+        const globalM2Records = await this.globalM2BitcoinService.computeAllRecords(database);
+        await this.globalM2BitcoinService.upsertRecords(database, globalM2Records);
+        this.logger.log('Global M2 vs BTC YoY data refreshed', { records: globalM2Records.length });
+      } catch (error) {
+        this.logger.warn('Failed to refresh Global M2 vs BTC YoY data; skipping for this run', {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+
+      try {
+        const dxyRecords = await this.dxyBitcoinService.computeAllRecords();
+        await this.dxyBitcoinService.upsertRecords(database, dxyRecords);
+        this.logger.log('DXY vs Bitcoin data refreshed', { records: dxyRecords.length });
+      } catch (error) {
+        this.logger.warn('Failed to refresh DXY vs Bitcoin data; skipping for this run', {
           error: error instanceof Error ? error.message : String(error),
         });
       }

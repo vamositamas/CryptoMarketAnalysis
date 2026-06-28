@@ -21,6 +21,8 @@ describe('PriceProjectionsService', () => {
             btc_rsi_12m: '72',
             rainbow_band: '6',
             stock_to_flow_model: '122',
+            global_m2_yoy: '6.4',
+            dxy_yoy_change: '-4.5',
           }],
         })
         .mockResolvedValueOnce({
@@ -49,6 +51,8 @@ describe('PriceProjectionsService', () => {
       expect.arrayContaining([
         expect.objectContaining({ label: 'ATH ×1.272', priceUsd: 137_376 }),
         expect.objectContaining({ label: '365d mean +2σ', priceUsd: 100_000 }),
+        expect.objectContaining({ label: 'Liquidity expansion target', priceUsd: 71_628 }),
+        expect.objectContaining({ label: 'Dollar-weakness target', priceUsd: 68_644 }),
       ]),
     );
     expect(response.scenarios.find((s) => s.scenario === 'ultra_bull')?.targets).toEqual(

@@ -61,12 +61,36 @@ export class FredClient {
     return this.fetchSeries('M2SL');
   }
 
+  async fetchGlobalM2ComponentSeries(): Promise<Array<{ seriesId: string; points: FredDataPoint[] }>> {
+    const seriesIds = [
+      'M2SL',
+      'MABMM301EZM189S',
+      'MABMM301JPM189S',
+      'MABMM301GBM189S',
+      'MYAGM2CNM189N',
+    ];
+
+    const results = await Promise.allSettled(
+      seriesIds.map(async (seriesId) => ({ seriesId, points: await this.fetchSeries(seriesId) })),
+    );
+
+    return results
+      .filter((result): result is PromiseFulfilledResult<{ seriesId: string; points: FredDataPoint[] }> =>
+        result.status === 'fulfilled' && result.value.points.length > 0,
+      )
+      .map((result) => result.value);
+  }
+
   async fetchGDP(): Promise<FredDataPoint[]> {
     return this.fetchSeries('GDP');
   }
 
   async fetchSP500(): Promise<FredDataPoint[]> {
     return this.fetchSeries('SP500');
+  }
+
+  async fetchDxy(): Promise<FredDataPoint[]> {
+    return this.fetchSeries('DTWEXBGS');
   }
 
   async fetchCFNAI(): Promise<FredDataPoint[]> {

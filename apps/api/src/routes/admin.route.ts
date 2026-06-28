@@ -19,6 +19,8 @@ import {
 } from '../services/data-refresh-configuration.service';
 import { DonationsService } from '../services/donations.service';
 import { ResendEmailService, sendRawEmail, substituteTemplateVars } from '../services/email.service';
+import { DxyBitcoinService } from '../services/dxy-bitcoin.service';
+import { GlobalM2BitcoinService } from '../services/global-m2-bitcoin.service';
 import { UserManagementError, UserManagementService } from '../services/user-management.service';
 
 /** Adds one day to a YYYY-MM-DD string */
@@ -955,6 +957,40 @@ export function createAdminRouter(
         spxRsi: spxRsiRecords.length,
         cfnai: cfnaiRecords.length,
         btcRsi: btcRsiRecords.length,
+      });
+    } catch (error) { next(error); }
+  });
+
+  router.post('/data-configuration/backfill-global-m2-bitcoin', ...adminOnly, async (_req, res, next) => {
+    try {
+      const database = getDatabasePool();
+      if (!database) { res.status(503).json({ error: 'Database unavailable' }); return; }
+
+      const service = new GlobalM2BitcoinService({ fredClient: new FredClient() });
+      const records = await service.computeAllRecords(database);
+      await service.upsertRecords(database, records);
+
+      res.status(200).json({
+        inserted: records.length,
+        firstDate: records[0]?.date ?? null,
+        lastDate: records[records.length - 1]?.date ?? null,
+      });
+    } catch (error) { next(error); }
+  });
+
+  router.post('/data-configuration/backfill-dxy-bitcoin', ...adminOnly, async (_req, res, next) => {
+    try {
+      const database = getDatabasePool();
+      if (!database) { res.status(503).json({ error: 'Database unavailable' }); return; }
+
+      const service = new DxyBitcoinService({ fredClient: new FredClient() });
+      const records = await service.computeAllRecords();
+      await service.upsertRecords(database, records);
+
+      res.status(200).json({
+        inserted: records.length,
+        firstDate: records[0]?.date ?? null,
+        lastDate: records[records.length - 1]?.date ?? null,
       });
     } catch (error) { next(error); }
   });

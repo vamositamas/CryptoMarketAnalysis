@@ -1102,7 +1102,6 @@ main .msi-banner {
   text-decoration: none;
   color: inherit;
   transition: border-color 0.15s, box-shadow 0.15s;
-  cursor: pointer;
 }
 main .msi-banner:hover {
   border-color: #22c55e;
@@ -1149,18 +1148,31 @@ main .msi-zone-badge[data-zone="neutral"]      { background: #fef3c7; color: #92
 main .msi-zone-badge[data-zone="bearish"]      { background: #ffedd5; color: #c2410c; }
 main .msi-zone-badge[data-zone="very_bearish"] { background: #fee2e2; color: #b91c1c; }
 main .msi-btc { font-size: 14px; color: #17202a; font-weight: 500; }
-main .msi-link { font-size: 12px; color: #22c55e; font-weight: 500; }
+main .msi-link {
+  font-size: 12px;
+  color: #22c55e;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+main .msi-link:hover {
+  text-decoration: underline;
+}
+
 main .msi-grid {
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--signal-columns, 4), minmax(0, 1fr));
   gap: 8px 12px;
 }
 main .msi-sig {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 8px 10px;
+  min-width: 0;
+  min-height: 56px;
+  padding: 8px 28px 8px 10px;
   border-radius: 8px;
   background: #f7f8f4;
   border-left: 3px solid #e5ebe7;
@@ -1177,18 +1189,96 @@ main .msi-sig-label {
   letter-spacing: 0.03em;
   text-transform: uppercase;
   line-height: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 main .msi-sig-value {
   font-size: 13px;
   font-weight: 700;
   color: #17202a;
   line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 main .msi-sig-zone {
   font-size: 10px;
   color: #6b7280;
   text-transform: capitalize;
   line-height: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+main .msi-sig-remove {
+  position: absolute;
+  top: 4px;
+  right: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #6b7280;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s, color 0.15s;
+}
+
+main .msi-sig:hover .msi-sig-remove,
+main .msi-sig-remove:focus-visible {
+  opacity: 1;
+}
+
+main .msi-sig-remove:hover {
+  background: rgba(15, 23, 42, 0.08);
+  color: #17202a;
+}
+
+main .signal-library {
+  display: grid;
+  gap: 10px;
+}
+
+main .signal-library-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #e5ebe7;
+  border-left: 4px solid #e5ebe7;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+main .signal-library-item[data-zone="very_bullish"] { border-left-color: #16a34a; }
+main .signal-library-item[data-zone="bullish"]      { border-left-color: #22c55e; }
+main .signal-library-item[data-zone="neutral"]      { border-left-color: #f59e0b; }
+main .signal-library-item[data-zone="bearish"]      { border-left-color: #f97316; }
+main .signal-library-item[data-zone="very_bearish"] { border-left-color: #ef4444; }
+
+main .signal-library-item div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+main .signal-library-item strong {
+  color: #17202a;
+  font-size: 0.9rem;
+}
+
+main .signal-library-item span {
+  color: #6b7280;
+  font-size: 0.8rem;
 }
 
 @media (max-width: 640px) {
@@ -1208,6 +1298,15 @@ main .msi-sig-zone {
   main .msi-grid {
     flex-basis: 100%;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  main .msi-sig-remove {
+    opacity: 1;
+  }
+
+  main .signal-library-item {
+    align-items: stretch;
+    flex-direction: column;
   }
 }
 
@@ -1402,6 +1501,19 @@ main .dashboard-widget-grid .wi-gauge-bar--mvrv {
   );
 }
 
+/* NUPL: green capitulation → neutral → warm → euphoria, scale -50%..+100% */
+main .dashboard-widget-grid .wi-gauge-bar--nupl {
+  background: linear-gradient(
+    to right,
+    #10b981 0%,       /* -50% capitulation */
+    #34d399 33.3%,    /*   0% */
+    #f1c40f 50%,      /* +25% hope/optimism */
+    #f97316 66.7%,    /* +50% belief */
+    #db2777 83.3%,    /* +75% euphoria */
+    #9d174d 100%      /* +100% */
+  );
+}
+
 /* Realized Price: blue (below) → green (fair) → yellow → orange → red, scale -50%..+200% */
 main .dashboard-widget-grid .wi-gauge-bar--realized_price {
   background: linear-gradient(
@@ -1477,6 +1589,13 @@ main .dashboard-widget-grid .wi-gauge-label[data-zone='undervalued']{ color: #8b
 main .dashboard-widget-grid .wi-gauge-label[data-zone='fair']       { color: #c8a000; }
 main .dashboard-widget-grid .wi-gauge-label[data-zone='overvalued'] { color: #e67e22; }
 main .dashboard-widget-grid .wi-gauge-label[data-zone='sell']       { color: #c0392b; }
+
+/* NUPL zone colours */
+main .dashboard-widget-grid .wi-gauge-label[data-zone='nupl-capitulation'] { color: #10b981; }
+main .dashboard-widget-grid .wi-gauge-label[data-zone='nupl-hope']         { color: #8bc34a; }
+main .dashboard-widget-grid .wi-gauge-label[data-zone='nupl-optimism']     { color: #c8a000; }
+main .dashboard-widget-grid .wi-gauge-label[data-zone='nupl-belief']       { color: #e67e22; }
+main .dashboard-widget-grid .wi-gauge-label[data-zone='nupl-euphoria']     { color: #db2777; }
 
 /* Realized Price zone colours */
 main .dashboard-widget-grid .wi-gauge-label[data-zone='rp-below']   { color: #5b8dd9; }
@@ -1581,10 +1700,84 @@ main .dashboard-heading {
 }
 
 main .dashboard-heading-actions {
+  position: relative;
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
   align-items: center;
+}
+
+main .dashboard-actions-trigger {
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #111827;
+  background: #fff;
+  border: 1px solid #cfd8d3;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+
+  &:hover,
+  &:focus-visible {
+    border-color: #8ab59e;
+    box-shadow: 0 6px 16px rgba(20, 83, 45, 0.12);
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
+
+  .button-icon {
+    width: 22px;
+    height: 22px;
+    flex-basis: 22px;
+    margin-right: 0;
+    opacity: 0.9;
+  }
+}
+
+main .dashboard-actions-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
+  min-width: 190px;
+  padding: 6px;
+  background: #fff;
+  border: 1px solid #d8e0dc;
+  border-radius: 8px;
+  box-shadow: 0 18px 38px rgba(15, 23, 42, 0.14);
+
+  button {
+    width: 100%;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 9px 10px;
+    color: #111827;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-align: left;
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      background: #f3f8f5;
+    }
+
+    &:disabled {
+      color: #94a3b8;
+      cursor: wait;
+    }
+  }
 }
 
 main .dashboard-refresh-message {

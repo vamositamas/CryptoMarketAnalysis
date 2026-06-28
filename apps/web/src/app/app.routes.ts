@@ -3,7 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { interval } from 'rxjs';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Route, Router, RouterLink } from '@angular/router';
-import type { FavouriteChart, RecentChart, SignalSummary } from '@crypto-market-analysis/data-access/api-client';
+import type { FavouriteChart, RecentChart, SignalScore, SignalSummary } from '@crypto-market-analysis/data-access/api-client';
 import {
   ApiClientError,
   AuthApiClient,
@@ -213,6 +213,12 @@ import { LegalDialogService } from './services/legal-dialog.service';
         </li>
         <li tabindex="0" data-tooltip="Compares S&P 500 performance with excess liquidity to show broader macro risk conditions.">
           S&amp;P 500 Liquidity
+        </li>
+        <li tabindex="0" data-tooltip="Compares global broad-money growth with Bitcoin year-over-year returns to show liquidity-cycle alignment.">
+          Global M2 vs BTC
+        </li>
+        <li tabindex="0" data-tooltip="Compares US dollar year-over-year strength with Bitcoin price to show the inverse dollar-liquidity signal.">
+          DXY vs Bitcoin
         </li>
         <li tabindex="0" data-tooltip="Overlays Bitcoin and S&P 500 12-month RSI with the Chicago Fed National Activity Index, aligned to US midterm election cycles.">
           Midterm Cycles
@@ -516,29 +522,56 @@ export class TermsOfUsePage {}
         <div class="dashboard-heading-actions">
           <button
             type="button"
-            class="secondary-button"
-            [disabled]="isRefreshing()"
-            (click)="refreshData()"
+            class="dashboard-actions-trigger"
+            [attr.aria-expanded]="isDashboardActionsOpen()"
+            aria-haspopup="menu"
+            aria-label="Dashboard actions"
+            i18n-aria-label="Dashboard actions button@@dashboard.actions"
+            (click)="toggleDashboardActions()"
           >
             <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M17.7 6.3A8 8 0 1 0 20 12h-2a6 6 0 1 1-1.8-4.3L13 11h8V3l-3.3 3.3Z"></path>
+              <path d="M19.4 13.5c.1-.5.1-1 .1-1.5s0-1-.1-1.5l2-1.5-2-3.5-2.4 1a7.6 7.6 0 0 0-2.6-1.5L14 2.5h-4l-.4 2.5A7.6 7.6 0 0 0 7 6.5l-2.4-1-2 3.5 2 1.5a9 9 0 0 0 0 3l-2 1.5 2 3.5 2.4-1a7.6 7.6 0 0 0 2.6 1.5l.4 2.5h4l.4-2.5a7.6 7.6 0 0 0 2.6-1.5l2.4 1 2-3.5-2-1.5ZM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z"></path>
             </svg>
-            @if (isRefreshing()) {
-              <ng-container i18n="Refreshing state@@dashboard.refreshing">Refreshing...</ng-container>
-            } @else {
-              <ng-container i18n="Refresh data button@@dashboard.refreshData">Refresh Data</ng-container>
-            }
           </button>
-          <button
-            type="button"
-            class="secondary-button"
-            (click)="openAddWidget()"
-          >
-            <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z"></path>
-            </svg>
-            <ng-container i18n="Add widget button@@dashboard.openAddWidget">Add Widget</ng-container>
-          </button>
+          @if (isDashboardActionsOpen()) {
+            <div class="dashboard-actions-menu" role="menu">
+              <button
+                type="button"
+                role="menuitem"
+                [disabled]="isRefreshing()"
+                (click)="refreshData()"
+              >
+                <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M17.7 6.3A8 8 0 1 0 20 12h-2a6 6 0 1 1-1.8-4.3L13 11h8V3l-3.3 3.3Z"></path>
+                </svg>
+                @if (isRefreshing()) {
+                  <ng-container i18n="Refreshing state@@dashboard.refreshing">Refreshing...</ng-container>
+                } @else {
+                  <ng-container i18n="Refresh data button@@dashboard.refreshData">Refresh Data</ng-container>
+                }
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                (click)="openAddSignal()"
+              >
+                <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z"></path>
+                </svg>
+                <ng-container i18n="Add signal button@@dashboard.openAddSignal">Add Signal</ng-container>
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                (click)="openAddWidget()"
+              >
+                <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z"></path>
+                </svg>
+                <ng-container i18n="Add widget button@@dashboard.openAddWidget">Add Widget</ng-container>
+              </button>
+            </div>
+          }
         </div>
         @if (refreshMessage()) {
           <p class="dashboard-refresh-message" [class.dashboard-refresh-message--error]="refreshError()">
@@ -550,7 +583,7 @@ export class TermsOfUsePage {}
       <!-- Market Signals Banner -->
       @if (signals()) {
         @let s = signals()!;
-        <a class="msi-banner" routerLink="/trading-plans" [attr.data-zone]="s.overallZone">
+        <div class="msi-banner" [attr.data-zone]="s.overallZone">
           <!-- Score ring -->
           <div class="msi-score">
             <svg viewBox="0 0 80 80" aria-hidden="true">
@@ -568,19 +601,73 @@ export class TermsOfUsePage {}
           <div class="msi-summary">
             <span class="msi-zone-badge" [attr.data-zone]="s.overallZone">{{ getZoneLabel(s.overallZone) }}</span>
             <span class="msi-btc">BTC: {{ formatUsd(s.btcPriceUsd) }}</span>
-            <span class="msi-link" i18n="View Trade Planner link@@dashboard.viewTradePlanner">View Trade Planner →</span>
+            <a class="msi-link" routerLink="/trading-plans" i18n="View Trade Planner link@@dashboard.viewTradePlanner">View Trade Planner →</a>
           </div>
           <!-- Signal grid -->
-          <div class="msi-grid">
-            @for (sig of s.signals; track sig.name) {
+          <div class="msi-grid" [style.--signal-columns]="signalColumnCount(s)">
+            @for (sig of visibleSignals(s); track sig.name) {
               <div class="msi-sig" [attr.data-zone]="sig.zone">
+                <button
+                  type="button"
+                  class="msi-sig-remove"
+                  aria-label="Remove signal"
+                  i18n-aria-label="Remove signal aria label@@dashboard.removeSignal"
+                  (click)="removeSignal(sig.name)"
+                >×</button>
                 <span class="msi-sig-label">{{ getSignalLabel(sig.name, sig.label) }}</span>
                 <span class="msi-sig-value">{{ sig.zone === 'no_data' ? 'N/A' : sig.formattedValue }}</span>
                 <span class="msi-sig-zone">{{ sig.zone === 'no_data' ? '—' : getZoneLabel(sig.zone) }}</span>
               </div>
             }
           </div>
-        </a>
+        </div>
+      }
+
+      @if (isAddSignalOpen() && signals()) {
+        @let s = signals()!;
+        <div class="widget-modal-overlay" role="presentation" (click)="closeAddSignal()">
+          <section
+            class="widget-modal signal-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Add signal"
+            i18n-aria-label="Add signal dialog label@@dashboard.addSignalDialog"
+            (click)="$event.stopPropagation()"
+          >
+            <div class="widget-modal-header">
+              <h2 i18n="Add signal modal title@@dashboard.addSignalTitle">Add Signal</h2>
+              <button
+                type="button"
+                class="modal-close-button"
+                aria-label="Close add signal modal"
+                i18n-aria-label="Close add signal modal@@dashboard.closeAddSignal"
+                (click)="closeAddSignal()"
+              >×</button>
+            </div>
+            <div class="signal-library">
+              @for (sig of s.signals; track sig.name) {
+                <article class="signal-library-item" [attr.data-zone]="sig.zone">
+                  <div>
+                    <strong>{{ getSignalLabel(sig.name, sig.label) }}</strong>
+                    <span>{{ sig.zone === 'no_data' ? 'N/A' : sig.formattedValue }} · {{ sig.zone === 'no_data' ? '—' : getZoneLabel(sig.zone) }}</span>
+                  </div>
+                  <button
+                    type="button"
+                    class="secondary-button"
+                    [disabled]="isSignalVisible(sig.name)"
+                    (click)="addSignal(sig.name)"
+                  >
+                    @if (isSignalVisible(sig.name)) {
+                      <ng-container i18n="Signal already added label@@dashboard.signalAdded">Added</ng-container>
+                    } @else {
+                      <ng-container i18n="Add signal item button@@dashboard.addSignalButton">Add</ng-container>
+                    }
+                  </button>
+                </article>
+              }
+            </div>
+          </section>
+        </div>
       }
 
       @if (isLoadingWidgets()) {
@@ -661,6 +748,20 @@ export class TermsOfUsePage {}
                   <div class="wi-gauge-footer">
                     <span class="wi-gauge-label" [attr.data-zone]="mvrvZone(widget.value)">{{ mvrvLabel(widget.value) }}</span>
                     <span class="wi-gauge-score">Z = {{ widget.formattedValue }}</span>
+                  </div>
+                </div>
+              }
+              @if (widget.type === 'nupl' && widget.value !== null) {
+                <div class="wi-gauge">
+                  <div class="wi-gauge-bar wi-gauge-bar--nupl">
+                    <span class="wi-gauge-marker" [style.left.%]="nuplPosition(widget.value)"></span>
+                  </div>
+                  <div class="wi-gauge-labels">
+                    <span>-50%</span><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span>
+                  </div>
+                  <div class="wi-gauge-footer">
+                    <span class="wi-gauge-label" [attr.data-zone]="nuplZone(widget.value)">{{ nuplLabel(widget.value) }}</span>
+                    <span class="wi-gauge-score">{{ widget.formattedValue }}</span>
                   </div>
                 </div>
               }
@@ -852,6 +953,18 @@ export class TermsOfUsePage {}
                               stroke="#17202a" stroke-width="2.5" fill="none"/>
                       <path d="M 0,300 C 50,288 90,175 108,62 C 120,240 148,310 168,298 C 210,272 268,186 300,118 C 318,280 356,312 380,302 C 415,258 448,105 462,55 C 476,188 510,308 528,292 C 548,242 584,95 605,58 C 622,175 652,300 668,286 C 696,254 745,224 778,232 C 790,236 797,240 800,242"
                               stroke="#f59e0b" stroke-width="2.5" fill="none" opacity="0.95"/>
+                      </svg>
+                    } @else if (chart.chartId === 'nupl') {
+                      <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
+                        <rect x="0" y="0" width="800" height="60" fill="rgba(244,114,182,0.18)"/>
+                        <rect x="0" y="60" width="800" height="60" fill="rgba(253,186,116,0.28)"/>
+                        <rect x="0" y="120" width="800" height="60" fill="rgba(254,249,195,0.52)"/>
+                        <rect x="0" y="180" width="800" height="60" fill="rgba(236,253,245,0.86)"/>
+                        <rect x="0" y="240" width="800" height="120" fill="rgba(16,185,129,0.12)"/>
+                        <path d="M 0,350 C 80,345 125,325 155,295 C 175,278 192,252 212,230 C 232,212 258,214 276,224 C 318,246 354,246 380,228 C 420,200 445,136 462,84 C 485,118 512,226 532,252 C 560,288 594,188 610,92 C 638,126 656,252 678,284 C 704,252 740,216 778,222 C 790,225 797,229 800,232"
+                              stroke="#20bde8" stroke-width="3" fill="none"/>
+                        <path d="M 0,355 C 100,352 140,346 155,342 C 168,306 198,250 212,243 C 228,295 260,308 272,303 C 308,284 345,240 355,228 C 372,175 408,68 424,62 C 440,102 468,238 477,126 C 492,98 505,84 510,85 C 528,108 542,104 555,85 C 574,50 617,12 632,10 C 648,42 677,250 685,68 C 703,46 737,22 763,14 C 776,10 792,12 800,13"
+                              stroke="#1f2933" stroke-width="2.25" fill="none" opacity="0.92"/>
                       </svg>
                     } @else if (chart.chartId === 'realized-price') {
                       <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
@@ -1313,6 +1426,18 @@ export class TermsOfUsePage {}
                       <path d="M 0,300 C 50,288 90,175 108,62 C 120,240 148,310 168,298 C 210,272 268,186 300,118 C 318,280 356,312 380,302 C 415,258 448,105 462,55 C 476,188 510,308 528,292 C 548,242 584,95 605,58 C 622,175 652,300 668,286 C 696,254 745,224 778,232 C 790,236 797,240 800,242"
                             stroke="#f59e0b" stroke-width="2.5" fill="none" opacity="0.95"/>
                     </svg>
+                  } @else if (chart.chartId === 'nupl') {
+                    <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
+                      <rect x="0" y="0" width="800" height="60" fill="rgba(244,114,182,0.18)"/>
+                      <rect x="0" y="60" width="800" height="60" fill="rgba(253,186,116,0.28)"/>
+                      <rect x="0" y="120" width="800" height="60" fill="rgba(254,249,195,0.52)"/>
+                      <rect x="0" y="180" width="800" height="60" fill="rgba(236,253,245,0.86)"/>
+                      <rect x="0" y="240" width="800" height="120" fill="rgba(16,185,129,0.12)"/>
+                      <path d="M 0,350 C 80,345 125,325 155,295 C 175,278 192,252 212,230 C 232,212 258,214 276,224 C 318,246 354,246 380,228 C 420,200 445,136 462,84 C 485,118 512,226 532,252 C 560,288 594,188 610,92 C 638,126 656,252 678,284 C 704,252 740,216 778,222 C 790,225 797,229 800,232"
+                            stroke="#20bde8" stroke-width="3" fill="none"/>
+                      <path d="M 0,355 C 100,352 140,346 155,342 C 168,306 198,250 212,243 C 228,295 260,308 272,303 C 308,284 345,240 355,228 C 372,175 408,68 424,62 C 440,102 468,238 477,126 C 492,98 505,84 510,85 C 528,108 542,104 555,85 C 574,50 617,12 632,10 C 648,42 677,250 685,68 C 703,46 737,22 763,14 C 776,10 792,12 800,13"
+                            stroke="#1f2933" stroke-width="2.25" fill="none" opacity="0.92"/>
+                    </svg>
                   } @else if (chart.chartId === 'realized-price') {
                     <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
                       <rect width="800" height="360" fill="#fff"/>
@@ -1731,9 +1856,12 @@ export class DashboardPage {
   protected readonly isLoadingFavouriteCharts = signal(true);
   protected readonly chartTab = signal<'favourites' | 'recent'>('favourites');
   protected readonly isRefreshing = signal(false);
+  protected readonly isDashboardActionsOpen = signal(false);
   protected readonly refreshMessage = signal('');
   protected readonly refreshError = signal(false);
   protected readonly signals = signal<SignalSummary | null>(null);
+  protected readonly isAddSignalOpen = signal(false);
+  protected readonly selectedSignalNames = signal<string[]>(this.loadSelectedSignals());
 
   private activePointerId: number | null = null;
   private pointerDragId: string | null = null;
@@ -1765,6 +1893,7 @@ export class DashboardPage {
   }
 
   protected openAddWidget(): void {
+    this.isDashboardActionsOpen.set(false);
     this.isAddWidgetOpen.set(true);
   }
 
@@ -1772,7 +1901,59 @@ export class DashboardPage {
     this.isAddWidgetOpen.set(false);
   }
 
+  protected openAddSignal(): void {
+    this.isDashboardActionsOpen.set(false);
+    this.isAddSignalOpen.set(true);
+  }
+
+  protected closeAddSignal(): void {
+    this.isAddSignalOpen.set(false);
+  }
+
+  protected toggleDashboardActions(): void {
+    this.isDashboardActionsOpen.update((isOpen) => !isOpen);
+  }
+
+  protected visibleSignals(summary: SignalSummary): SignalScore[] {
+    const selected = this.selectedSignalNames();
+    const selectedSet = new Set(selected);
+    const visible = summary.signals.filter((sig) => selectedSet.has(sig.name));
+
+    if (visible.length > 0) {
+      return visible;
+    }
+
+    return summary.signals.slice(0, 1);
+  }
+
+  protected signalColumnCount(summary: SignalSummary): number {
+    return Math.max(1, Math.ceil(this.visibleSignals(summary).length / 2));
+  }
+
+  protected isSignalVisible(name: string): boolean {
+    return this.selectedSignalNames().includes(name);
+  }
+
+  protected addSignal(name: string): void {
+    if (this.isSignalVisible(name)) {
+      return;
+    }
+
+    this.selectedSignalNames.update((current) => this.persistSelectedSignals([...current, name]));
+  }
+
+  protected removeSignal(name: string): void {
+    const current = this.selectedSignalNames();
+
+    if (current.length <= 1) {
+      return;
+    }
+
+    this.selectedSignalNames.update((selected) => this.persistSelectedSignals(selected.filter((item) => item !== name)));
+  }
+
   protected async refreshData(): Promise<void> {
+    this.isDashboardActionsOpen.set(false);
     this.isRefreshing.set(true);
     this.refreshMessage.set('');
     this.refreshError.set(false);
@@ -2026,6 +2207,26 @@ export class DashboardPage {
     return $localize`:@@mvrv.sellZone:Sell Zone`;
   }
 
+  protected nuplPosition(value: number): number {
+    return Math.min(100, Math.max(0, (value + 50) / 150 * 100));
+  }
+
+  protected nuplZone(value: number): string {
+    if (value < 0) return 'nupl-capitulation';
+    if (value < 25) return 'nupl-hope';
+    if (value < 50) return 'nupl-optimism';
+    if (value < 75) return 'nupl-belief';
+    return 'nupl-euphoria';
+  }
+
+  protected nuplLabel(value: number): string {
+    if (value < 0) return $localize`:NUPL phase capitulation@@charts.nupl.phase.capitulation:Capitulation`;
+    if (value < 25) return $localize`:NUPL phase hope@@charts.nupl.phase.hope:Hope / Fear`;
+    if (value < 50) return $localize`:NUPL phase optimism@@charts.nupl.phase.optimism:Optimism / Anxiety`;
+    if (value < 75) return $localize`:NUPL phase belief@@charts.nupl.phase.belief:Belief / Denial`;
+    return $localize`:NUPL phase euphoria@@charts.nupl.phase.euphoria:Euphoria / Greed`;
+  }
+
   // Stock-to-Flow: scale 0..200 → 0..100%
   // Key levels: 28 (pre-3rd halving), 56 (pre-4th halving), 113 (post-4th halving)
   protected s2fPosition(value: number): number {
@@ -2069,6 +2270,9 @@ export class DashboardPage {
       case 'realized_price_premium': return $localize`:@@signal.realizedPricePremium:Realized Price Premium`;
       case 'puell_multiple':         return $localize`:@@signal.puellMultiple:Puell Multiple`;
       case 'fear_greed':             return $localize`:@@signal.fearGreed:Fear & Greed`;
+      case 'bitcoin_nupl':           return $localize`:@@signal.bitcoinNupl:Bitcoin NUPL`;
+      case 'global_m2_yoy':          return $localize`:@@signal.globalM2Yoy:Global M2 YoY`;
+      case 'dxy_yoy':                return $localize`:@@signal.dxyYoy:DXY YoY`;
       default:                       return fallback;
     }
   }
@@ -2080,10 +2284,12 @@ export class DashboardPage {
       case 'mvrv_zscore':     return $localize`:@@widget.mvrvZscore:MVRV Z-Score`;
       case 'stock_to_flow':   return $localize`:@@widget.stockToFlow:Stock-to-Flow Ratio`;
       case 'fear_greed':      return $localize`:@@widget.fearGreed:Fear & Greed Index`;
+      case 'nupl':            return $localize`:@@widget.nupl:Bitcoin NUPL`;
       case 'realized_price':  return $localize`:@@widget.realizedPrice:Realized Price`;
       case 'ma_200_day':      return $localize`:@@widget.ma200:200-Day Moving Average`;
       case 'market_cap':      return $localize`:@@widget.marketCap:Market Cap`;
       case 'halving_progress':return $localize`:@@widget.halvingProgress:BTC Halving Progress`;
+      case 'global_m2_yoy':   return $localize`:@@widget.globalM2Yoy:Global M2 YoY`;
       default:                return widget.title;
     }
   }
@@ -2115,7 +2321,53 @@ export class DashboardPage {
         } catch { /* leave as no_data */ }
       }
       this.signals.set(data);
+      this.syncSelectedSignals(data.signals);
     } catch { /* banner stays hidden */ }
+  }
+
+  private loadSelectedSignals(): string[] {
+    try {
+      const raw = localStorage.getItem('dashboard.selectedSignals');
+      const parsed = raw ? JSON.parse(raw) : null;
+
+      if (Array.isArray(parsed) && parsed.every((item) => typeof item === 'string')) {
+        return parsed;
+      }
+    } catch { /* use defaults */ }
+
+    return [
+      'mvrv_zscore',
+      'fear_greed',
+      'rainbow_band',
+      'realized_price_premium',
+      'bitcoin_nupl',
+      'vdd_multiple',
+      'pi_cycle_top',
+      'mayer_multiple',
+      'puell_multiple',
+      'global_m2_yoy',
+      'dxy_yoy',
+    ];
+  }
+
+  private syncSelectedSignals(signals: SignalScore[]): void {
+    const available = new Set(signals.map((sig) => sig.name));
+    const selected = this.selectedSignalNames().filter((name) => available.has(name));
+
+    if (selected.length > 0) {
+      this.selectedSignalNames.set(this.persistSelectedSignals(selected));
+      return;
+    }
+
+    this.selectedSignalNames.set(this.persistSelectedSignals(signals.slice(0, 1).map((sig) => sig.name)));
+  }
+
+  private persistSelectedSignals(selected: string[]): string[] {
+    try {
+      localStorage.setItem('dashboard.selectedSignals', JSON.stringify(selected));
+    } catch { /* selection remains in memory */ }
+
+    return selected;
   }
 
   protected signalColor(zone: string): string {
@@ -2489,6 +2741,8 @@ export class AdminDataConfigurationPage {
     const metrics: Array<Parameters<typeof this.auth.backfillMetric>[0]> = [
       'vdd', 'miner-fees', 'price-forecast', 'fear-greed',
       'hash-rate', 'difficulty', 'transaction-volume', 'miners-revenue',
+      'global-m2-bitcoin',
+      'dxy-bitcoin',
     ];
 
     try {
@@ -3351,6 +3605,14 @@ export const appRoutes: Route[] = [
       ),
   },
   {
+    path: 'charts/nupl',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/nupl-chart-page/nupl-chart-page.component').then(
+        (m) => m.NuplChartPageComponent,
+      ),
+  },
+  {
     path: 'charts/realized-price',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -3508,6 +3770,22 @@ export const appRoutes: Route[] = [
     loadComponent: () =>
       import('./components/spx-liquidity-chart-page/spx-liquidity-chart-page.component').then(
         (m) => m.SpxLiquidityChartPageComponent,
+      ),
+  },
+  {
+    path: 'charts/global-m2-bitcoin',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/global-m2-bitcoin-chart-page/global-m2-bitcoin-chart-page.component').then(
+        (m) => m.GlobalM2BitcoinChartPageComponent,
+      ),
+  },
+  {
+    path: 'charts/dxy-bitcoin',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/dxy-bitcoin-chart-page/dxy-bitcoin-chart-page.component').then(
+        (m) => m.DxyBitcoinChartPageComponent,
       ),
   },
   {

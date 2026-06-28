@@ -31,6 +31,8 @@ const VALID_CHART_IDS = [
   '2yr-ma-multiplier',
   'price-forecast-tools',
   'stock-to-income',
+  'global-m2-bitcoin',
+  'dxy-bitcoin',
 ] as const;
 
 const CHART_TITLES: Record<string, string> = {
@@ -53,6 +55,8 @@ const CHART_TITLES: Record<string, string> = {
   '2yr-ma-multiplier':  '2-Year MA Multiplier',
   'price-forecast-tools':'Price Forecast Tools',
   'stock-to-income':    'Stock-to-Income',
+  'global-m2-bitcoin':  'Global M2 vs BTC YoY',
+  'dxy-bitcoin':        'DXY vs Bitcoin',
 };
 
 export interface AlertWithTitle extends AlertRecord {

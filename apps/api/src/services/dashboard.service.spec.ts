@@ -218,10 +218,11 @@ describe('DashboardService', () => {
       ...createWidgetRepositoryStub(),
       listForUser: jest.fn().mockResolvedValue([
         widgetRecord('13', 'realized_price_premium', { title: 'Realized Price Premium', decimals: 1 }, 0),
-        widgetRecord('14', 's2f_model_price', { title: 'S2F Model Price', decimals: 0 }, 1),
-        widgetRecord('15', 'base_case_target', { title: 'Base Case Target', decimals: 0 }, 2),
-        widgetRecord('16', 'bull_case_target', { title: 'Bull Case Target', decimals: 0 }, 3),
-        widgetRecord('17', 'market_signal_score', { title: 'Market Signal Score', decimals: 0 }, 4),
+        widgetRecord('14', 'nupl', { title: 'Bitcoin NUPL', decimals: 1 }, 1),
+        widgetRecord('15', 's2f_model_price', { title: 'S2F Model Price', decimals: 0 }, 2),
+        widgetRecord('16', 'base_case_target', { title: 'Base Case Target', decimals: 0 }, 3),
+        widgetRecord('17', 'bull_case_target', { title: 'Bull Case Target', decimals: 0 }, 4),
+        widgetRecord('18', 'market_signal_score', { title: 'Market Signal Score', decimals: 0 }, 5),
       ]),
     };
     const metricsRepository = {
@@ -247,6 +248,11 @@ describe('DashboardService', () => {
         type: 'realized_price_premium',
         value: 50,
         formattedValue: '+50.0%',
+      }),
+      expect.objectContaining({
+        type: 'nupl',
+        value: 33.33333333333333,
+        formattedValue: '+33.3%',
       }),
       expect.objectContaining({
         type: 's2f_model_price',
@@ -385,7 +391,9 @@ function createMetricsRepositoryStub() {
       circulating_supply: null,
       stock_to_flow: null,
       mvrv_zscore: null,
+      nupl: null,
       fear_greed_index: null,
+      global_m2_yoy: null,
     }),
   };
 }
@@ -409,7 +417,9 @@ describe('DashboardService — custom formula widgets', () => {
         circulating_supply: 19_700_000,
         stock_to_flow: 56.2,
         mvrv_zscore: 3.4,
+        nupl: 33.3,
         fear_greed_index: 42,
+        global_m2_yoy: 6.4,
       }),
     };
     const service = new DashboardService(widgetRepository, metricsRepository);
@@ -478,6 +488,7 @@ describe('DashboardService — custom formula widgets', () => {
         stock_to_flow: 56.2,
         mvrv_zscore: 3.4,
         fear_greed_index: 42,
+        global_m2_yoy: 6.4,
       }),
     };
     const service = new DashboardService(widgetRepository, metricsRepository);
