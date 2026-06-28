@@ -141,7 +141,7 @@ type Tab = 'signals' | 'projections' | 'plans';
         <button class="tp-tab" [class.active]="activeTab() === 'projections'" (click)="setTab('projections')" role="tab" i18n="Price projections tab@@trading.tabs.projections">
           Price Projections
         </button>
-        <button class="tp-tab" [class.active]="activeTab() === 'plans'" (click)="setTab('plans')" role="tab">
+        <button class="tp-tab" [class.active]="activeTab() === 'plans'" (click)="setTab('plans')" role="tab" i18n="My plans tab@@trading.tabs.plans">
           My Plans @if (activePlansCount() > 0) { <span style="margin-left:4px;background:#dbeafe;color:#1d4ed8;border-radius:99px;padding:1px 7px;font-size:0.7rem;">{{ activePlansCount() }}</span> }
         </button>
       </div>
@@ -918,6 +918,21 @@ export class TradingPlansPageComponent {
       'S2F ×3': $localize`:S2F x3 projection@@trading.projection.s2f3:S2F ×3`,
       'Terminal Price': $localize`:Terminal price projection@@trading.projection.terminalPrice:Terminal Price`,
       'Terminal ×1.5': $localize`:Terminal x1.5 projection@@trading.projection.terminal15:Terminal ×1.5`,
+      // MVRV Z-Score interpretations
+      'Deep buy zone — historically rare undervaluation': $localize`:MVRV deep buy zone@@trading.interpretation.mvrvDeepBuy:Deep buy zone — historically rare undervaluation`,
+      'Fair value range': $localize`:MVRV fair value@@trading.interpretation.mvrvFairValue:Fair value range`,
+      'Elevated — market heating up': $localize`:MVRV elevated@@trading.interpretation.mvrvElevated:Elevated — market heating up`,
+      'Extreme overvaluation — historical sell zone': $localize`:MVRV extreme overvaluation@@trading.interpretation.mvrvExtremeOvervaluation:Extreme overvaluation — historical sell zone`,
+      // VDD Multiple interpretations
+      'Below average — mild bullish': $localize`:VDD below average@@trading.interpretation.vddBelowAverage:Below average — mild bullish`,
+      'Average range': $localize`:VDD average range@@trading.interpretation.vddAverageRange:Average range`,
+      'Elevated — caution': $localize`:VDD elevated caution@@trading.interpretation.vddElevated:Elevated — caution`,
+      'Extreme — distribution zone': $localize`:VDD extreme distribution@@trading.interpretation.vddExtreme:Extreme — distribution zone`,
+      // Realized Price Premium interpretations
+      'Below realized price — market at loss, strong accumulation signal': $localize`:Realized below price@@trading.interpretation.realizedBelowPrice:Below realized price — market at loss, strong accumulation signal`,
+      'Moderate premium above realized price': $localize`:Realized moderate premium@@trading.interpretation.realizedModerate:Moderate premium above realized price`,
+      'High premium — market overextended': $localize`:Realized high premium@@trading.interpretation.realizedHighPremium:High premium — market overextended`,
+      'Extreme premium — historical sell zone': $localize`:Realized extreme premium@@trading.interpretation.realizedExtremePremium:Extreme premium — historical sell zone`,
       'Mayer Multiple': 'Mayer Multiple',
       'Stock-to-Flow': 'Stock-to-Flow',
       'CVDD': 'CVDD',

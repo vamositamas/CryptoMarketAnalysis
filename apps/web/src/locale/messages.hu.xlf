@@ -660,6 +660,19 @@
       <trans-unit id="trading.interpretation.farCrossover" datatype="html"><source>Far from crossover - early/mid cycle</source><target>Messze a keresztezéstől – korai/közepi ciklus</target></trans-unit>
       <trans-unit id="trading.interpretation.below200Day" datatype="html"><source>Below 200-day MA - accumulation zone</source><target>200 napos MA alatt – akkumulációs zóna</target></trans-unit>
       <trans-unit id="trading.interpretation.belowMinerRevenue" datatype="html"><source>Below average miner revenue - accumulation zone</source><target>Átlagos bányászbevétel alatt – akkumulációs zóna</target></trans-unit>
+      <trans-unit id="trading.tabs.plans" datatype="html"><source>My Plans</source><target>Terveim</target></trans-unit>
+      <trans-unit id="trading.interpretation.mvrvDeepBuy" datatype="html"><source>Deep buy zone — historically rare undervaluation</source><target>Mély vételi zóna – historikusan ritka alulértékeltség</target></trans-unit>
+      <trans-unit id="trading.interpretation.mvrvFairValue" datatype="html"><source>Fair value range</source><target>Fair értéktartomány</target></trans-unit>
+      <trans-unit id="trading.interpretation.mvrvElevated" datatype="html"><source>Elevated — market heating up</source><target>Emelkedett – a piac felmelegszik</target></trans-unit>
+      <trans-unit id="trading.interpretation.mvrvExtremeOvervaluation" datatype="html"><source>Extreme overvaluation — historical sell zone</source><target>Extrém túlértékeltség – historikus eladási zóna</target></trans-unit>
+      <trans-unit id="trading.interpretation.vddBelowAverage" datatype="html"><source>Below average — mild bullish</source><target>Átlag alatt – enyhe bikás</target></trans-unit>
+      <trans-unit id="trading.interpretation.vddAverageRange" datatype="html"><source>Average range</source><target>Átlagos tartomány</target></trans-unit>
+      <trans-unit id="trading.interpretation.vddElevated" datatype="html"><source>Elevated — caution</source><target>Emelkedett – óvatosság</target></trans-unit>
+      <trans-unit id="trading.interpretation.vddExtreme" datatype="html"><source>Extreme — distribution zone</source><target>Extrém – eladási zóna</target></trans-unit>
+      <trans-unit id="trading.interpretation.realizedBelowPrice" datatype="html"><source>Below realized price — market at loss, strong accumulation signal</source><target>Realizált ár alatt – piac veszteségben, erős akkumulációs jelzés</target></trans-unit>
+      <trans-unit id="trading.interpretation.realizedModerate" datatype="html"><source>Moderate premium above realized price</source><target>Mérsékelt prémium a realizált ár felett</target></trans-unit>
+      <trans-unit id="trading.interpretation.realizedHighPremium" datatype="html"><source>High premium — market overextended</source><target>Magas prémium – piac túlnyújtott</target></trans-unit>
+      <trans-unit id="trading.interpretation.realizedExtremePremium" datatype="html"><source>Extreme premium — historical sell zone</source><target>Extrém prémium – historikus eladási zóna</target></trans-unit>
       <trans-unit id="trading.interpretation.mayerWellBelow" datatype="html"><source>Well below 200-day MA — deep accumulation zone</source><target>Jóval a 200 napos MA alatt – mély akkumulációs zóna</target></trans-unit>
       <trans-unit id="trading.interpretation.mayerSlightlyAbove" datatype="html"><source>Slightly above 200-day MA — healthy</source><target>Enyhén a 200 napos MA felett – egészséges</target></trans-unit>
       <trans-unit id="trading.interpretation.mayerExtended" datatype="html"><source>Extended above 200-day MA</source><target>Kiterjesztve a 200 napos MA felett</target></trans-unit>
