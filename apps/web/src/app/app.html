@@ -62,19 +62,40 @@
           <ng-container i18n="Donate navigation label@@nav.donate">Donate</ng-container>
         </button>
       }
-      <div class="lang-toggle" role="group" aria-label="Language">
+      <div class="lang-menu-wrap">
         <button
           type="button"
-          class="lang-toggle__option"
-          [class.lang-toggle__option--active]="language() === 'en'"
-          (click)="switchLanguage('en')"
-        >EN</button>
-        <button
-          type="button"
-          class="lang-toggle__option"
-          [class.lang-toggle__option--active]="language() === 'hu'"
-          (click)="switchLanguage('hu')"
-        >HU</button>
+          class="lang-menu-btn"
+          (click)="toggleLanguageMenu()"
+          [attr.aria-expanded]="languageMenuOpen()"
+          aria-label="Language"
+          aria-haspopup="menu"
+        >
+          <svg class="lang-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="2" y1="12" x2="22" y2="12"></line>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z"></path>
+          </svg>
+        </button>
+
+        @if (languageMenuOpen()) {
+          <div class="lang-menu" role="menu" aria-label="Language">
+            <button
+              type="button"
+              class="lang-menu-option"
+              role="menuitem"
+              [class.lang-menu-option--active]="language() === 'en'"
+              (click)="selectLanguage('en')"
+            >English</button>
+            <button
+              type="button"
+              class="lang-menu-option"
+              role="menuitem"
+              [class.lang-menu-option--active]="language() === 'hu'"
+              (click)="selectLanguage('hu')"
+            >Magyar</button>
+          </div>
+        }
       </div>
 
       @if (!currentUser()) {

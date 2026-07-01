@@ -28,6 +28,7 @@ export class App {
   protected readonly showDonateModal = signal(false);
   protected readonly mobileMenuOpen = signal(false);
   protected readonly userMenuOpen = signal(false);
+  protected readonly languageMenuOpen = signal(false);
   protected readonly profileModalOpen = signal(false);
   protected readonly profileSaving = signal(false);
   protected readonly profileMessage = signal('');
@@ -60,6 +61,15 @@ export class App {
         .toUpperCase();
     }
     return user.email[0].toUpperCase();
+  }
+
+  protected toggleLanguageMenu(): void {
+    this.languageMenuOpen.update((v) => !v);
+  }
+
+  protected selectLanguage(locale: 'en' | 'hu'): void {
+    this.languageMenuOpen.set(false);
+    void this.switchLanguage(locale);
   }
 
   protected async switchLanguage(locale: 'en' | 'hu'): Promise<void> {
@@ -162,12 +172,22 @@ export class App {
     ) {
       this.userMenuOpen.set(false);
     }
+
+    if (
+      this.languageMenuOpen() &&
+      !(this.elRef.nativeElement as HTMLElement)
+        .querySelector('.lang-menu-wrap')
+        ?.contains(event.target as Node)
+    ) {
+      this.languageMenuOpen.set(false);
+    }
   }
 
   @HostListener('document:keydown.escape')
   protected onEscape(): void {
     this.mobileMenuOpen.set(false);
     this.userMenuOpen.set(false);
+    this.languageMenuOpen.set(false);
     this.legalDialog.close();
   }
 }

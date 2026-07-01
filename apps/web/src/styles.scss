@@ -223,6 +223,80 @@ nav a.active .nav-icon {
   cursor: not-allowed;
 }
 
+/* Language menu — globe icon button + floating dropdown */
+.lang-menu-wrap {
+  position: relative;
+}
+
+.lang-menu-btn {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid #d7ded8;
+  background: rgba(255, 255, 255, 0.64);
+  color: #4a5a54;
+  cursor: pointer;
+  padding: 0;
+  min-height: unset;
+  transition: border-color 0.15s, color 0.15s, box-shadow 0.15s;
+}
+
+.lang-menu-btn:hover,
+.lang-menu-btn[aria-expanded='true'] {
+  border-color: #145c4b;
+  color: #145c4b;
+  box-shadow: 0 0 0 3px rgba(20, 92, 75, 0.14);
+}
+
+.lang-menu-icon {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.lang-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 150px;
+  background: #fff;
+  border: 1px solid #dde3df;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 200;
+  overflow: hidden;
+}
+
+.lang-menu-option {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #2d3a35;
+  font: inherit;
+  font-size: 0.88rem;
+  text-align: left;
+  cursor: pointer;
+  min-height: unset;
+}
+
+.lang-menu-option:hover {
+  background: #f4f7f5;
+}
+
+.lang-menu-option--active {
+  color: #145c4b;
+  font-weight: 700;
+}
+
 /* User avatar button + dropdown */
 .user-avatar-wrap {
   position: relative;
@@ -4587,9 +4661,9 @@ main .halving-spiral-chart-page {
     color: #718096;
   }
 
-  /* Hide avatar dropdown and lang toggle from topbar on mobile — both live in the drawer */
+  /* Hide avatar dropdown and lang menu from topbar on mobile — both live in the drawer */
   .user-avatar-wrap,
-  .topbar-actions .lang-toggle {
+  .topbar-actions .lang-menu-wrap {
     display: none;
   }
 
