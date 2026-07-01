@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-label="Difficulty Ribbon chart thumbnail">
+  <rect width="320" height="180" rx="8" fill="#fff"/>
+  <path d="M0 44h320M0 90h320M0 136h320" stroke="#e5e7eb"/>
+  <path d="M0 112C40 92 72 72 112 76C152 80 184 118 224 110C264 102 286 72 320 66" fill="none" stroke="#22c55e" stroke-width="2.5"/>
+  <path d="M0 122C42 102 78 82 116 86C154 90 184 126 222 118C262 110 286 84 320 78" fill="none" stroke="#f59e0b" stroke-width="2.5"/>
+  <path d="M0 132C45 112 82 94 120 98C158 102 185 136 224 128C264 120 288 96 320 90" fill="none" stroke="#ef4444" stroke-width="2.5"/>
+</svg>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-label="Hash Ribbons chart thumbnail">
+  <rect width="320" height="180" rx="8" fill="#fff"/>
+  <path d="M0 45h320M0 90h320M0 135h320" stroke="#e5e7eb"/>
+  <path d="M0 110C35 98 58 76 92 72C126 68 152 100 184 98C218 96 248 68 320 62" fill="none" stroke="#2563eb" stroke-width="3.2"/>
+  <path d="M0 122C42 110 72 88 106 86C140 84 160 108 196 106C232 104 260 82 320 78" fill="none" stroke="#f59e0b" stroke-width="3.2"/>
+  <circle cx="236" cy="82" r="8" fill="#22c55e"/><path d="M231 82l4 4 8-10" stroke="#fff" stroke-width="2.5" fill="none"/>
+</svg>

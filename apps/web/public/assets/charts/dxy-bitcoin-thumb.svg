@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-label="DXY vs Bitcoin chart thumbnail">
+  <rect width="320" height="180" rx="8" fill="#ffffff"/>
+  <rect width="320" height="180" fill="#fbfbf8"/>
+  <path d="M0 42h320M0 88h320M0 134h320" stroke="#e5e7eb" stroke-width="1"/>
+  <path d="M0 90h320" stroke="#9ca3af" stroke-width="1.4" stroke-dasharray="5 5"/>
+  <path d="M0 55C17 66 31 85 48 82C65 79 78 48 96 45C114 42 127 70 144 92C162 116 177 130 195 120C213 110 225 76 243 62C261 49 277 58 292 75C306 91 315 105 320 112" fill="none" stroke="#1f2937" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M0 126C18 111 33 92 50 96C68 100 81 129 99 135C117 141 131 116 148 93C166 68 181 53 199 60C217 67 229 101 247 116C265 131 280 124 296 106C308 92 315 78 320 68" fill="none" stroke="#f59e0b" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="96" cy="45" r="4.5" fill="#1f2937"/>
+  <circle cx="247" cy="116" r="4.5" fill="#f59e0b"/>
+</svg>

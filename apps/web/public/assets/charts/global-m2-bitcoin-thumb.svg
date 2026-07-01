@@ -1,9 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360" preserveAspectRatio="none">
-  <rect width="800" height="360" fill="#fff"/>
-  <line x1="0" y1="90" x2="800" y2="90" stroke="#e5e7eb"/>
-  <line x1="0" y1="180" x2="800" y2="180" stroke="#e5e7eb"/>
-  <line x1="0" y1="270" x2="800" y2="270" stroke="#e5e7eb"/>
-  <line x1="0" y1="210" x2="800" y2="210" stroke="rgba(107,114,128,.5)" stroke-width="1.5" stroke-dasharray="6 4"/>
-  <path d="M0 205C35 230 70 270 105 282C140 292 170 270 205 232C240 192 270 145 305 115C340 88 370 80 405 96C440 112 470 160 505 204C540 250 570 285 605 295C640 305 675 270 710 230C745 188 775 160 800 150" fill="none" stroke="#111827" stroke-width="2"/>
-  <path d="M0 188C45 210 88 240 130 252C175 262 215 235 258 198C300 162 338 122 382 104C425 88 465 102 508 135C550 168 588 215 632 238C675 260 718 246 760 218C780 205 792 196 800 190" fill="none" stroke="#20b8ee" stroke-width="2.5"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-label="Global M2 vs Bitcoin chart thumbnail">
+  <rect width="320" height="180" rx="8" fill="#ffffff"/>
+  <rect x="0" y="0" width="320" height="180" fill="#f8fbff"/>
+  <path d="M0 40h320M0 85h320M0 130h320" stroke="#e5e7eb" stroke-width="1"/>
+  <path d="M0 108h320" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6 5"/>
+  <path d="M0 126C18 112 32 86 50 72C68 58 82 68 96 95C111 123 126 143 144 132C162 121 171 82 190 58C209 34 225 38 240 64C256 92 267 120 286 112C303 105 311 80 320 64" fill="none" stroke="#111827" stroke-width="3.6" stroke-linecap="round"/>
+  <path d="M0 118C22 110 37 92 58 84C80 76 95 92 113 111C132 131 147 134 166 111C185 88 201 56 222 52C242 48 257 72 274 93C291 114 305 112 320 96" fill="none" stroke="#17a2d8" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="222" cy="52" r="4.5" fill="#17a2d8"/>
+  <circle cx="190" cy="58" r="4.5" fill="#111827"/>
 </svg>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-label="Bitcoin Halving Progress chart thumbnail">
+  <rect width="320" height="180" rx="8" fill="#fff"/>
+  <rect x="0" y="0" width="80" height="180" fill="#fff7ed"/><rect x="80" y="0" width="80" height="180" fill="#f0fdf4"/><rect x="160" y="0" width="80" height="180" fill="#eff6ff"/><rect x="240" y="0" width="80" height="180" fill="#fef2f2"/>
+  <path d="M0 138C30 122 46 74 70 56C97 36 114 132 145 122C174 112 190 58 218 42C246 26 270 74 320 50" fill="none" stroke="#111827" stroke-width="3.4" stroke-linecap="round"/>
+  <path d="M80 18v144M160 18v144M240 18v144" stroke="#6b7280" stroke-width="1.6" stroke-dasharray="5 5"/>
+</svg>

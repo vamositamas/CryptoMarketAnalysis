@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-label="S&amp;P 500 vs Excess Liquidity chart thumbnail">
+  <rect width="320" height="180" rx="8" fill="#fff"/>
+  <path d="M0 45h320M0 90h320M0 135h320" stroke="#e5e7eb"/>
+  <path d="M0 130C32 118 54 75 86 70C120 65 143 122 176 116C210 110 240 78 320 66" fill="none" stroke="#111827" stroke-width="3.3"/>
+  <path d="M0 102C38 82 72 64 108 72C146 80 162 112 202 118C242 124 276 104 320 84" fill="none" stroke="#2563eb" stroke-width="3.6"/>
+</svg>

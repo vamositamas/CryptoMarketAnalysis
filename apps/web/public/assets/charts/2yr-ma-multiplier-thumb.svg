@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-label="2-Year MA Multiplier chart thumbnail">
+  <rect width="320" height="180" rx="8" fill="#fff"/>
+  <path d="M0 45h320M0 90h320M0 135h320" stroke="#e5e7eb"/>
+  <path d="M0 126C55 118 90 112 136 96C180 80 225 58 320 42" fill="none" stroke="#22c55e" stroke-width="3.4"/>
+  <path d="M0 62C72 58 112 54 154 42C198 30 248 23 320 20" fill="none" stroke="#ef4444" stroke-width="3" stroke-dasharray="7 5"/>
+  <path d="M0 148C36 136 58 55 91 48C125 41 139 127 178 116C218 104 239 66 320 72" fill="none" stroke="#111827" stroke-width="3.4"/>
+</svg>

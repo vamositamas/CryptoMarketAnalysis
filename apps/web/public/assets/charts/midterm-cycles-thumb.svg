@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-label="Midterm Cycles chart thumbnail">
+  <rect width="320" height="180" rx="8" fill="#fff"/>
+  <path d="M0 45h320M0 90h320M0 135h320" stroke="#e5e7eb"/>
+  <path d="M80 18v144M160 18v144M240 18v144" stroke="#9ca3af" stroke-dasharray="5 5"/>
+  <path d="M0 98C42 48 78 48 118 98C158 148 198 148 238 98C278 48 300 58 320 78" fill="none" stroke="#f59e0b" stroke-width="3.4"/>
+  <path d="M0 112C42 68 78 72 118 112C158 152 198 150 238 112C278 72 300 78 320 92" fill="none" stroke="#2563eb" stroke-width="3.2"/>
+  <path d="M0 84C54 92 106 86 160 80C214 74 262 80 320 72" fill="none" stroke="#111827" stroke-width="2.8"/>
+</svg>

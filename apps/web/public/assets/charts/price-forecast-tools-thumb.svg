@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-label="Price Forecast Tools chart thumbnail">
+  <rect width="320" height="180" rx="8" fill="#fff"/>
+  <path d="M0 50h320M0 96h320M0 142h320" stroke="#e5e7eb"/>
+  <path d="M0 135C38 125 72 96 108 88C148 80 174 108 214 90C254 72 278 42 320 30" fill="none" stroke="#111827" stroke-width="3.4"/>
+  <path d="M0 72C70 68 130 60 190 46C242 34 284 28 320 24" fill="none" stroke="#ef4444" stroke-width="3" stroke-dasharray="6 5"/>
+  <path d="M0 150C62 144 116 134 178 118C232 104 276 94 320 90" fill="none" stroke="#22c55e" stroke-width="3" stroke-dasharray="6 5"/>
+</svg>

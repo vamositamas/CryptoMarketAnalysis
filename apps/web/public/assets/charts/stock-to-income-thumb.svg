@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-label="Stock-to-Income chart thumbnail">
+  <rect width="320" height="180" rx="8" fill="#fff"/>
+  <path d="M0 45h320M0 90h320M0 135h320" stroke="#e5e7eb"/>
+  <path d="M0 130C46 118 92 104 136 88C184 70 238 48 320 30" fill="none" stroke="#f59e0b" stroke-width="3.4"/>
+  <path d="M0 150C46 138 88 126 136 112C188 96 244 76 320 58" fill="none" stroke="#ef4444" stroke-width="2.4" stroke-dasharray="6 5"/>
+  <path d="M0 112C46 102 90 90 136 74C188 56 246 36 320 18" fill="none" stroke="#22c55e" stroke-width="2.4" stroke-dasharray="6 5"/>
+  <path d="M0 142C38 130 56 68 92 60C128 52 146 128 185 120C225 112 250 76 320 66" fill="none" stroke="#111827" stroke-width="3.2"/>
+</svg>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-label="Thermocap Multiple chart thumbnail">
+  <rect width="320" height="180" rx="8" fill="#fff"/>
+  <path d="M0 44h320M0 90h320M0 136h320" stroke="#e5e7eb"/>
+  <path d="M0 142C42 128 62 62 98 54C134 46 151 124 188 118C228 112 250 72 320 64" fill="none" stroke="#111827" stroke-width="3.4"/>
+  <path d="M0 74h320" stroke="#ef4444" stroke-width="2" stroke-dasharray="5 5"/>
+  <path d="M0 130h320" stroke="#22c55e" stroke-width="2" stroke-dasharray="5 5"/>
+</svg>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-label="Realized Price chart thumbnail">
+  <rect width="320" height="180" rx="8" fill="#fff"/>
+  <path d="M0 45h320M0 90h320M0 135h320" stroke="#e5e7eb"/>
+  <path d="M0 136C42 126 74 112 112 106C152 100 186 112 226 98C266 84 292 64 320 58" fill="none" stroke="#f59e0b" stroke-width="3.4"/>
+  <path d="M0 144C40 132 60 72 96 62C132 52 152 130 190 122C228 114 252 78 320 72" fill="none" stroke="#111827" stroke-width="3.4"/>
+</svg>

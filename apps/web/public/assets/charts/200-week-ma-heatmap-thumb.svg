@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-label="200-Week MA Heatmap chart thumbnail">
+  <rect width="320" height="180" rx="8" fill="#fff"/>
+  <path d="M0 138C50 126 90 112 132 96C180 78 228 58 320 42" fill="none" stroke="#111827" stroke-width="3.4"/>
+  <path d="M0 150C66 142 116 130 168 112C218 94 270 84 320 76" fill="none" stroke="#22c55e" stroke-width="3"/>
+  <rect x="24" y="22" width="28" height="14" fill="#22c55e"/><rect x="58" y="22" width="28" height="14" fill="#84cc16"/><rect x="92" y="22" width="28" height="14" fill="#eab308"/><rect x="126" y="22" width="28" height="14" fill="#f97316"/><rect x="160" y="22" width="28" height="14" fill="#ef4444"/>
+</svg>

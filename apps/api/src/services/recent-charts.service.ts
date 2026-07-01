@@ -57,7 +57,7 @@ const CHART_CATALOG: Record<string, ChartCatalogEntry> = {
   'excess-liquidity':    { title: 'Excess Liquidity Leading Indicator', url: '/charts/excess-liquidity',      thumbnailUrl: '/assets/charts/excess-liquidity-thumb.svg' },
   'spx-liquidity':       { title: 'S&P 500 vs Excess Liquidity',        url: '/charts/spx-liquidity',         thumbnailUrl: '/assets/charts/spx-liquidity-thumb.svg' },
   'global-m2-bitcoin':   { title: 'Global M2 vs BTC YoY',               url: '/charts/global-m2-bitcoin',     thumbnailUrl: '/assets/charts/global-m2-bitcoin-thumb.svg' },
-  'dxy-bitcoin':         { title: 'DXY vs Bitcoin',                     url: '/charts/dxy-bitcoin',           thumbnailUrl: '/assets/charts/global-m2-bitcoin-thumb.svg' },
+  'dxy-bitcoin':         { title: 'DXY vs Bitcoin',                     url: '/charts/dxy-bitcoin',           thumbnailUrl: '/assets/charts/dxy-bitcoin-thumb.svg' },
   'midterm-cycles':      { title: 'Midterm Cycles',                     url: '/charts/midterm-cycles',        thumbnailUrl: '/assets/charts/midterm-cycles-thumb.svg' },
   'stock-to-income':     { title: 'Stock-to-Income Ratio',              url: '/charts/stock-to-income',       thumbnailUrl: '/assets/charts/stock-to-income-thumb.svg' },
   'realized-price':      { title: 'Realized Price',                     url: '/charts/realized-price',        thumbnailUrl: '/assets/charts/realized-price-thumb.svg' },

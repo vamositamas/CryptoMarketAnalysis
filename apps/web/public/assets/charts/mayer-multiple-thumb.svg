@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-label="Mayer Multiple chart thumbnail">
+  <rect width="320" height="180" rx="8" fill="#fff"/>
+  <path d="M0 44h320M0 88h320M0 132h320" stroke="#e5e7eb"/>
+  <path d="M0 118C40 112 76 92 112 86C150 80 184 96 222 82C260 68 288 50 320 44" fill="none" stroke="#22c55e" stroke-width="3.2"/>
+  <path d="M0 144C38 130 56 62 92 52C128 42 146 124 185 118C225 112 250 76 320 82" fill="none" stroke="#111827" stroke-width="3.5"/>
+  <path d="M0 62h320" stroke="#ef4444" stroke-width="2" stroke-dasharray="6 5"/>
+</svg>

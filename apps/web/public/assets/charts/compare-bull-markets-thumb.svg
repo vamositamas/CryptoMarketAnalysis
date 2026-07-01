@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-label="Compare Bull Markets chart thumbnail">
+  <rect width="320" height="180" rx="8" fill="#fff"/>
+  <path d="M0 45h320M0 90h320M0 135h320" stroke="#e5e7eb"/>
+  <path d="M20 142C48 132 63 82 88 58C111 36 132 48 150 76C168 105 184 120 210 96C236 72 254 38 300 30" fill="none" stroke="#111827" stroke-width="3.2"/>
+  <path d="M20 150C55 138 75 105 100 84C130 58 148 62 172 86C198 112 218 116 242 86C262 62 280 50 300 46" fill="none" stroke="#2563eb" stroke-width="3.2"/>
+  <path d="M20 130C42 118 60 94 78 78C105 54 128 72 146 98C168 130 191 136 220 110C247 86 268 70 300 66" fill="none" stroke="#f59e0b" stroke-width="3.2"/>
+</svg>

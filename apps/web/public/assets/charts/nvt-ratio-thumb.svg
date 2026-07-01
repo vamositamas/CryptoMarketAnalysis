@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-label="NVT Ratio chart thumbnail">
+  <rect width="320" height="180" rx="8" fill="#fff"/>
+  <path d="M0 45h320M0 90h320M0 135h320" stroke="#e5e7eb"/>
+  <path d="M0 128C44 118 62 72 98 66C134 60 153 138 190 126C227 114 245 74 320 70" fill="none" stroke="#111827" stroke-width="3.4"/>
+  <path d="M0 94C52 90 100 88 150 92C202 96 255 88 320 82" fill="none" stroke="#f59e0b" stroke-width="3"/>
+</svg>
