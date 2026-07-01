@@ -55,10 +55,11 @@
         chartId="bitcoin-rainbow"
         (annotationsChanged)="updateUserAnnotations($event)"
       ></app-chart-annotations>
-      <button type="button" class="secondary-button" (click)="openAlertModal()">
+      <button type="button" class="secondary-button" (click)="openAlertModal()" i18n="Create alert button@@chart.createAlert">
         Create Alert
       </button>
       <app-chart-favourite-button [chartId]="'bitcoin-rainbow'"></app-chart-favourite-button>
+      <button type="button" class="secondary-button" (click)="toggleFullscreen()" i18n="Full screen control label@@charts.fullscreenControl">Full screen</button>
       <button type="button" class="secondary-button" (click)="toggleInfo()" i18n="Info control label@@charts.infoControl">
         Info
       </button>
@@ -67,7 +68,7 @@
 
   @if (chartAnnotations && chartAnnotations.noteAnnotations().length > 0) {
     <div class="annotation-panel">
-      <span class="annotation-panel-label">Annotations</span>
+      <span class="annotation-panel-label" i18n="Annotations panel label@@chart.annotations">Annotations</span>
       <div class="annotation-panel-list">
         @for (annotation of chartAnnotations.noteAnnotations(); track annotation.id) {
           <div class="annotation-panel-item">
@@ -76,7 +77,7 @@
             <button
               type="button"
               class="annotation-delete-button"
-              aria-label="Delete annotation"
+              aria-label="Delete annotation" i18n-aria-label="Delete annotation button@@chart.deleteAnnotation"
               (click)="chartAnnotations.deleteAnnotation(annotation.id)"
             >&times;</button>
           </div>
@@ -110,7 +111,7 @@
         <div class="rainbow-legend">
           <span class="rainbow-legend-item">
             <span class="rainbow-legend-price"></span>
-            <span class="rainbow-legend-text">BTC price</span>
+            <span class="rainbow-legend-text" i18n="BTC price legend@@charts.metric.bitcoinPrice">BTC price</span>
           </span>
           @for (band of reversedBands; track band.label) {
             <span class="rainbow-legend-item">
@@ -136,6 +137,7 @@
   @if (infoOpen()) {
     <app-chart-info-panel
       title="Bitcoin Rainbow Price Chart"
+      i18n-title="Bitcoin Rainbow title@@charts.rainbowTitle"
       [about]="infoAbout"
       [currentFields]="infoCurrentFields()"
       [interpretation]="infoInterpretation()"

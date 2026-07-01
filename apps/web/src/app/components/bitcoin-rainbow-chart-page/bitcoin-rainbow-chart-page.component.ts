@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ViewChild, computed, inject, signal } from '@angular/core';
+import { AfterViewInit, Component, LOCALE_ID, ViewChild, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import type { ChartData, ChartOptions } from 'chart.js';
@@ -96,6 +96,7 @@ const RAINBOW_ALERT_METRICS: AlertMetricOption[] = [
 })
 export class BitcoinRainbowChartPageComponent implements AfterViewInit {
   private readonly api = inject(AuthApiClient);
+  private readonly locale = inject(LOCALE_ID);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   @ViewChild(ChartViewerComponent) private readonly chartViewer?: ChartViewerComponent;
@@ -118,7 +119,7 @@ export class BitcoinRainbowChartPageComponent implements AfterViewInit {
 
     return [
       { label: $localize`:Current position@@charts.metric.currentPosition:Current position`, value: getBandLabel(band) },
-      { label: $localize`:Current price metric@@charts.metric.currentPrice:Current price`, value: point ? formatUsd(point.priceUsd) : $localize`:Waiting for data@@charts.waitingForData:Waiting for data` },
+      { label: $localize`:Current price metric@@charts.metric.currentPrice:Current price`, value: point ? formatUsd(point.priceUsd, this.locale) : $localize`:Waiting for data@@charts.waitingForData:Waiting for data` },
     ];
   });
   protected readonly infoInterpretation = computed(() => {
@@ -128,11 +129,11 @@ export class BitcoinRainbowChartPageComponent implements AfterViewInit {
   });
   protected readonly infoLastUpdated = computed(() => this.lastUpdatedText());
   protected readonly infoAbout =
-    'The Bitcoin Rainbow Chart uses logarithmic growth curves to identify market cycle positions. Nine color-coded bands represent valuation levels from "Fire Sale" (deep undervaluation) to "Maximum Bubble Territory" (extreme overvaluation).';
+    $localize`:Rainbow about@@charts.rainbow.about:The Bitcoin Rainbow Chart uses logarithmic growth curves to identify market cycle positions. Nine color-coded bands represent valuation levels from "Fire Sale" (deep undervaluation) to "Maximum Bubble Territory" (extreme overvaluation).`;
   protected readonly infoDataSources = [
-    'Bitcoin Price: CoinGecko API',
-    'On-chain Metrics: Blockchain.info',
-    'Calculation: Rainbow bands calculated from logarithmic regression model fit to historical price data since 2009-01-03',
+    $localize`:Rainbow data source price@@charts.rainbow.dataSource.price:Bitcoin Price: CoinGecko API`,
+    $localize`:Rainbow data source onchain@@charts.rainbow.dataSource.onchain:On-chain Metrics: Blockchain.info`,
+    $localize`:Rainbow data source formula@@charts.rainbow.dataSource.formula:Calculation: Rainbow bands calculated from logarithmic regression model fit to historical price data since 2009-01-03`,
   ];
   protected readonly chartData = computed<ChartData<'line'>>(() => {
     const points = this.dataPoints();
@@ -226,16 +227,18 @@ export class BitcoinRainbowChartPageComponent implements AfterViewInit {
         tooltip: {
           filter: (item) => item.datasetIndex === priceDatasetIndex,
           callbacks: {
-            title: (items) => formatDate(String(items[0]?.label ?? '')),
+            title: (items) => formatDate(String(items[0]?.label ?? ''), this.locale),
             label: (item) => {
               const dateStr = String(item.label ?? '');
               const price = Number(item.parsed.y);
               const fv = rainbowFairValue(dateStr);
               const band = rainbowBandFromPrice(price, fv);
+              const priceLabel = $localize`:Tooltip price label@@charts.tooltip.price:Price`;
+              const bandLabel = $localize`:Tooltip band label@@charts.tooltip.band:Band`;
 
               return [
-                `Price: ${formatUsd(price)}`,
-                `Band: ${getBandLabel(band)} (Band ${band})`,
+                `${priceLabel}: ${formatUsd(price, this.locale)}`,
+                `${bandLabel}: ${getBandLabel(band)} (${bandLabel} ${band})`,
               ];
             },
           },
@@ -273,6 +276,8 @@ export class BitcoinRainbowChartPageComponent implements AfterViewInit {
   protected resetZoom(): void {
     this.chartViewer?.resetZoom();
   }
+
+  protected toggleFullscreen(): void { this.chartViewer?.toggleFullscreen(); }
 
   protected zoomIn(): void {
     this.chartViewer?.zoomIn();
@@ -349,7 +354,7 @@ export class BitcoinRainbowChartPageComponent implements AfterViewInit {
       return $localize`:Waiting for data@@charts.waitingForData:Waiting for data`;
     }
 
-    return new Date(timestamp).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
+    return new Date(timestamp).toLocaleString(this.locale, { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false }) + ' UTC';
   }
 
   private latestPoint(): BitcoinRainbowChartDataPoint | undefined {
@@ -396,22 +401,22 @@ function getPriceRange(dataPoints: BitcoinRainbowChartDataPoint[]): { min: numbe
 
 function getRainbowInterpretation(band: number | null): string {
   if (band === null) {
-    return 'Waiting for the latest rainbow band calculation.';
+    return $localize`:Rainbow waiting interpretation@@charts.rainbow.interpretation.waiting:Waiting for the latest rainbow band calculation.`;
   }
 
   if (band <= 2) {
-    return 'Bitcoin is in a historically depressed valuation zone. Cooler bands have often represented long-term accumulation opportunities.';
+    return $localize`:Rainbow depressed interpretation@@charts.rainbow.interpretation.depressed:Bitcoin is in a historically depressed valuation zone. Cooler bands have often represented long-term accumulation opportunities.`;
   }
 
   if (band <= 5) {
-    return 'Bitcoin is near fair-value to accumulation territory. This zone has historically represented constructive long-term positioning.';
+    return $localize`:Rainbow fair value interpretation@@charts.rainbow.interpretation.fairValue:Bitcoin is near fair-value to accumulation territory. This zone has historically represented constructive long-term positioning.`;
   }
 
   if (band <= 7) {
-    return 'Bitcoin is in a warmer valuation zone. Historical cycles suggest risk management becomes more important as price moves higher through the bands.';
+    return $localize`:Rainbow warm interpretation@@charts.rainbow.interpretation.warm:Bitcoin is in a warmer valuation zone. Historical cycles suggest risk management becomes more important as price moves higher through the bands.`;
   }
 
-  return 'Bitcoin is in an overheated valuation zone. Upper bands have historically appeared near speculative market-cycle extremes.';
+  return $localize`:Rainbow overheated interpretation@@charts.rainbow.interpretation.overheated:Bitcoin is in an overheated valuation zone. Upper bands have historically appeared near speculative market-cycle extremes.`;
 }
 
 
@@ -423,20 +428,20 @@ function getBandLabel(band: number | null): string {
   return RAINBOW_BANDS[band - 1]?.label ?? $localize`:Unknown signal@@charts.signal.unknown:Unknown`;
 }
 
-function formatUsd(value: number): string {
-  return new Intl.NumberFormat('en-US', {
+function formatUsd(value: number, locale = 'en-US'): string {
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: 'USD',
     maximumFractionDigits: value >= 1000 ? 0 : 2,
   }).format(value);
 }
 
-function formatDate(value: string): string {
+function formatDate(value: string, locale = 'en-US'): string {
   if (!value) {
     return '';
   }
 
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat(locale, {
     month: 'long',
     day: 'numeric',
     year: 'numeric',
