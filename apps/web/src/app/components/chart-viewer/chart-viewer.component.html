@@ -1,27 +1,20 @@
 <div class="chart-viewer" [class.chart-viewer--fullscreen]="isFullscreen">
-  <button
-    type="button"
-    class="chart-viewer__fullscreen-toggle"
-    [attr.aria-label]="isFullscreen ? 'Exit fullscreen chart view' : 'Open fullscreen chart view'"
-    [attr.title]="isFullscreen ? 'Exit fullscreen' : 'Fullscreen'"
-    (click)="toggleFullscreen()"
-  >
-    @if (isFullscreen) {
+  @if (isFullscreen) {
+    <button
+      type="button"
+      class="chart-viewer__fullscreen-toggle"
+      aria-label="Exit fullscreen chart view"
+      title="Exit fullscreen"
+      (click)="toggleFullscreen()"
+    >
       <svg aria-hidden="true" viewBox="0 0 24 24">
         <path d="M8 3v5H3"/>
         <path d="M16 3v5h5"/>
         <path d="M8 21v-5H3"/>
         <path d="M16 21v-5h5"/>
       </svg>
-    } @else {
-      <svg aria-hidden="true" viewBox="0 0 24 24">
-        <path d="M8 3H3v5"/>
-        <path d="M16 3h5v5"/>
-        <path d="M8 21H3v-5"/>
-        <path d="M16 21h5v-5"/>
-      </svg>
-    }
-  </button>
+    </button>
+  }
   <canvas
     #canvas
     aria-label="Interactive chart"

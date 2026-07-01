@@ -392,6 +392,8 @@ export class MvrvZScoreChartPageComponent implements AfterViewInit {
   }
 
   protected resetZoom(): void { this.chartViewer?.resetZoom(); }
+
+  protected toggleFullscreen(): void { this.chartViewer?.toggleFullscreen(); }
   protected zoomIn(): void { this.chartViewer?.zoomIn(); }
   protected zoomOut(): void { this.chartViewer?.zoomOut(); }
 

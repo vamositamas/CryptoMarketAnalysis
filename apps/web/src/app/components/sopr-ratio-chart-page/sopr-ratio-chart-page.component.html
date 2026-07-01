@@ -39,6 +39,7 @@
       </div>
       <app-chart-annotations chartId="sopr-ratio" (annotationsChanged)="updateUserAnnotations($event)"></app-chart-annotations>
       <app-chart-favourite-button [chartId]="'sopr-ratio'"></app-chart-favourite-button>
+      <button type="button" class="secondary-button" (click)="toggleFullscreen()" i18n="Full screen control label@@charts.fullscreenControl">Full screen</button>
       <button type="button" class="secondary-button" (click)="toggleInfo()" i18n="Info control label@@charts.infoControl">Info</button>
     </div>
   </div>

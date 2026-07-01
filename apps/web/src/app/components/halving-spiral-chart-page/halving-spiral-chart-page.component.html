@@ -27,6 +27,7 @@
         }
       </div>
       <app-chart-favourite-button [chartId]="'halving-spiral'"></app-chart-favourite-button>
+      <button type="button" class="secondary-button" (click)="toggleFullscreen()" i18n="Full screen control label@@charts.fullscreenControl">Full screen</button>
       <button type="button" class="secondary-button" (click)="toggleInfo()" i18n="Info control label@@charts.infoControl">Info</button>
     </div>
   </div>
@@ -35,7 +36,23 @@
     <p class="form-message">{{ errorMessage() }}</p>
   }
 
-  <div class="chart-workspace info-collapsed">
+  <div class="chart-workspace info-collapsed" [class.chart-workspace--fullscreen]="isFullscreen()">
+    @if (isFullscreen()) {
+      <button
+        type="button"
+        class="chart-workspace__fullscreen-exit"
+        aria-label="Exit fullscreen chart view"
+        title="Exit fullscreen"
+        (click)="toggleFullscreen()"
+      >
+        <svg aria-hidden="true" viewBox="0 0 24 24">
+          <path d="M8 3v5H3"/>
+          <path d="M16 3v5h5"/>
+          <path d="M8 21v-5H3"/>
+          <path d="M16 21v-5h5"/>
+        </svg>
+      </button>
+    }
     <div class="chart-stage">
       @if (isLoading()) {
         <div class="loading-state" role="status">

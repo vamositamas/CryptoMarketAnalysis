@@ -203,6 +203,8 @@ export class GlobalM2BitcoinChartPageComponent implements AfterViewInit {
   }
 
   protected resetZoom(): void { this.chartViewer?.resetZoom(); }
+
+  protected toggleFullscreen(): void { this.chartViewer?.toggleFullscreen(); }
   protected toggleInfo(): void { this.infoOpen.update((v) => !v); }
   protected toggleExportMenu(): void { this.exportMenuOpen.update((v) => !v); }
 

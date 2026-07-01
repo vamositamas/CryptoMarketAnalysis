@@ -2,6 +2,7 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  HostListener,
   OnDestroy,
   ViewChild,
   computed,
@@ -198,6 +199,7 @@ export class HavingSpiralChartPageComponent implements AfterViewInit, OnDestroy 
   protected readonly errorMessage = signal('');
   protected readonly exportMenuOpen = signal(false);
   protected readonly infoOpen = signal(true);
+  protected readonly isFullscreen = signal(false);
   protected readonly dataPoints = signal<BitcoinRainbowChartDataPoint[]>([]);
   protected readonly lastUpdated = signal<string | null>(null);
 
@@ -279,6 +281,18 @@ export class HavingSpiralChartPageComponent implements AfterViewInit, OnDestroy 
 
   protected toggleInfo(): void {
     this.infoOpen.update((v) => !v);
+  }
+
+  protected toggleFullscreen(): void {
+    this.isFullscreen.update((v) => !v);
+    window.setTimeout(() => this.chart?.resize(), 0);
+  }
+
+  @HostListener('document:keydown.escape')
+  protected closeFullscreen(): void {
+    if (!this.isFullscreen()) return;
+    this.isFullscreen.set(false);
+    window.setTimeout(() => this.chart?.resize(), 0);
   }
 
   protected async exportPng(): Promise<void> {

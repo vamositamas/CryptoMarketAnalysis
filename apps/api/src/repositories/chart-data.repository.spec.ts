@@ -35,6 +35,9 @@ describe('ChartDataRepository', () => {
     expect(database.query).toHaveBeenCalledWith(expect.stringContaining("stock_to_flow.metric_name = 'stock_to_flow_ratio'"), [
       '2025-06-15',
     ]);
+    expect(database.query).toHaveBeenCalledWith(expect.stringContaining("exres_m.metric_name = 'exchange_reserve'"), [
+      '2025-06-15',
+    ]);
     expect(rows).toMatchObject([
       {
         date: '2025-06-15',

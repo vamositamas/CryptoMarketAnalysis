@@ -69,6 +69,7 @@ describe('ChartDataService', () => {
         { date: '2025-06-10', realizedPrice: 51000 },
         { date: '2025-06-11', realizedPrice: 51500 },
       ]),
+      fetchExchangeReserveHistory: jest.fn().mockResolvedValue([]),
     };
 
     await expect(
@@ -83,6 +84,41 @@ describe('ChartDataService', () => {
       dataPoints: [
         { date: '2025-06-10', priceUsd: 65000, realizedPrice: 51000, mvrvRatio: 65000 / 51000 },
         { date: '2025-06-11', priceUsd: 66000, realizedPrice: 52000, mvrvRatio: 66000 / 52000 },
+      ],
+    });
+  });
+
+  it('fills sparse exchange reserve history from CoinMetrics-derived history', async () => {
+    const repository = {
+      findBitcoinChartData: jest.fn().mockResolvedValue([
+        { ...rows[0], date: '2025-06-10', priceUsd: 65000, exchangeReserve: null },
+        { ...rows[0], date: '2025-06-11', priceUsd: 66000, exchangeReserve: 2_610_000 },
+      ]),
+      findExcessLiquidityData: jest.fn().mockResolvedValue([]),
+      findSpxLiquidityData: jest.fn().mockResolvedValue([]),
+      findMidtermCyclesData: jest.fn().mockResolvedValue([]),
+      findGlobalM2BitcoinData: jest.fn().mockResolvedValue([]), findDxyBitcoinData: jest.fn().mockResolvedValue([]),
+    };
+    const coinMetricsClient = {
+      fetchMvrvRatioAndPriceHistory: jest.fn(),
+      fetchExchangeReserveHistory: jest.fn().mockResolvedValue([
+        { date: '2025-06-10', exchangeReserve: 2_600_000 },
+        { date: '2025-06-11', exchangeReserve: 2_605_000 },
+      ]),
+    };
+
+    await expect(
+      new ChartDataService(
+        repository,
+        () => new Date('2025-06-12T00:00:00.000Z'),
+        undefined,
+        coinMetricsClient,
+      ).getChartData('exchange-reserve', 'all'),
+    ).resolves.toMatchObject({
+      chartId: 'exchange-reserve',
+      dataPoints: [
+        { date: '2025-06-10', priceUsd: 65000, exchangeReserve: 2_600_000 },
+        { date: '2025-06-11', priceUsd: 66000, exchangeReserve: 2_610_000 },
       ],
     });
   });
@@ -136,6 +172,7 @@ describe('ChartDataService', () => {
         { date: '2025-06-10', realizedPrice: 51900 },
         { date: '2025-06-11', realizedPrice: 52000 },
       ]),
+      fetchExchangeReserveHistory: jest.fn().mockResolvedValue([]),
     };
 
     await expect(

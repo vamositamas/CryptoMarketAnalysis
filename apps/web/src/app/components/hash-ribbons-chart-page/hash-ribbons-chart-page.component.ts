@@ -295,6 +295,8 @@ export class HashRibbonsChartPageComponent implements AfterViewInit {
     this.chartViewer?.resetZoom();
   }
 
+  protected toggleFullscreen(): void { this.chartViewer?.toggleFullscreen(); }
+
   protected zoomIn(): void {
     this.chartViewer?.zoomIn();
   }

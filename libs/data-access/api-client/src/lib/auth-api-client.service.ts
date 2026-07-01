@@ -373,6 +373,20 @@ export interface DxyBitcoinChartResponse {
   lastUpdated: string | null;
 }
 
+export interface ExchangeReserveChartDataPoint {
+  date: string;
+  priceUsd: number;
+  exchangeReserve: number | null;
+}
+
+export interface ExchangeReserveChartResponse {
+  chartId: 'exchange-reserve';
+  title: string;
+  timeframe: ChartTimeframe;
+  dataPoints: ExchangeReserveChartDataPoint[];
+  lastUpdated: string | null;
+}
+
 export type ChartAnnotation =
   | {
       id: string;
@@ -1153,6 +1167,12 @@ export class AuthApiClient {
   async getDxyBitcoinChartData(timeframe: ChartTimeframe): Promise<DxyBitcoinChartResponse> {
     try {
       return await firstValueFrom(this.http.get<DxyBitcoinChartResponse>('/api/charts/dxy-bitcoin', { params: { timeframe }, withCredentials: true }));
+    } catch (error) { throw toApiClientError(error); }
+  }
+
+  async getExchangeReserveChartData(timeframe: ChartTimeframe): Promise<ExchangeReserveChartResponse> {
+    try {
+      return await firstValueFrom(this.http.get<ExchangeReserveChartResponse>('/api/charts/exchange-reserve', { params: { timeframe }, withCredentials: true }));
     } catch (error) { throw toApiClientError(error); }
   }
 

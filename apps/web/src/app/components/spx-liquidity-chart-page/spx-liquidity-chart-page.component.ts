@@ -249,6 +249,8 @@ export class SpxLiquidityChartPageComponent implements AfterViewInit {
 
   protected resetZoom(): void { this.chartViewer?.resetZoom(); }
 
+  protected toggleFullscreen(): void { this.chartViewer?.toggleFullscreen(); }
+
   protected selectTimeframe(timeframe: ChartTimeframe): void {
     if (this.selectedTimeframe() === timeframe || this.isLoading()) return;
     void this.router.navigate([], { relativeTo: this.route, queryParams: { timeframe } });

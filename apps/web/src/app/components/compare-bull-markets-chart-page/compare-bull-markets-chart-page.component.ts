@@ -232,6 +232,8 @@ export class CompareBullMarketsChartPageComponent {
     this.chartViewer?.resetZoom();
   }
 
+  protected toggleFullscreen(): void { this.chartViewer?.toggleFullscreen(); }
+
   protected toggleInfo(): void {
     this.infoOpen.update((value) => !value);
   }

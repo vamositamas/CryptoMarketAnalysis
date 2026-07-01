@@ -321,6 +321,8 @@ export class BitcoinHalvingProgressChartPageComponent {
     this.chartViewer?.resetZoom();
   }
 
+  protected toggleFullscreen(): void { this.chartViewer?.toggleFullscreen(); }
+
   protected toggleInfo(): void {
     this.infoOpen.update((v) => !v);
   }

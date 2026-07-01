@@ -2,9 +2,13 @@
   <div class="chart-page-header">
     <div>
       <a class="form-link" routerLink="/charts" i18n="Back to chart library@@charts.backToLibrary">Back to chart library</a>
-      <p class="eyebrow" i18n="Chart category label@@charts.category.onchainValuation">On-chain Valuation</p>
-      <h2>Stock to Income modell</h2>
-      <p>Bitcoin price model using total miner revenue as flow</p>
+      <p class="eyebrow" i18n="Exchange reserve chart eyebrow@@charts.exchangeReserveEyebrow">
+        Exchange Flow Collection
+      </p>
+      <h2 i18n="Exchange reserve chart title@@charts.exchangeReserveTitle">Bitcoin: Exchange Reserve</h2>
+      <p i18n="Exchange reserve chart subtitle@@charts.exchangeReserveSubtitle">
+        Aggregate BTC held on exchanges — the accumulated result of exchange in/outflows
+      </p>
     </div>
     <div class="chart-status">
       <span i18n="Chart last updated label@@charts.lastUpdated">Last updated</span>
@@ -12,8 +16,8 @@
     </div>
   </div>
 
-  <div class="chart-toolbar" aria-label="Chart controls">
-    <div class="timeframe-selector" role="group">
+  <div class="chart-toolbar" aria-label="Chart controls" i18n-aria-label="Chart controls aria@@charts.controls">
+    <div class="timeframe-selector" role="group" aria-label="Timeframe selector" i18n-aria-label="Timeframe selector aria@@charts.timeframeSelector">
       @for (timeframe of timeframes; track timeframe.value) {
         <button
           type="button"
@@ -38,11 +42,11 @@
         }
       </div>
       <app-chart-annotations
-        chartId="stock-to-income"
+        chartId="exchange-reserve"
         (annotationsChanged)="updateUserAnnotations($event)"
       ></app-chart-annotations>
-      <button type="button" class="secondary-button" (click)="openAlertModal()" i18n="Create alert button@@alerts.create">Create alert</button>
-      <app-chart-favourite-button [chartId]="'stock-to-income'"></app-chart-favourite-button>
+      <button type="button" class="secondary-button" (click)="openAlertModal()" i18n="Create alert button@@chart.createAlert">Create Alert</button>
+      <app-chart-favourite-button [chartId]="'exchange-reserve'"></app-chart-favourite-button>
       <button type="button" class="secondary-button" (click)="toggleFullscreen()" i18n="Full screen control label@@charts.fullscreenControl">Full screen</button>
       <button type="button" class="secondary-button" (click)="toggleInfo()" i18n="Info control label@@charts.infoControl">Info</button>
     </div>
@@ -50,7 +54,7 @@
 
   @if (showAlertModal()) {
     <app-create-alert-modal
-      chartId="stock-to-income"
+      chartId="exchange-reserve"
       [metrics]="alertMetrics"
       (closed)="closeAlertModal()"
     ></app-create-alert-modal>
@@ -77,14 +81,15 @@
           (chartPointSelected)="handleChartPoint($event)"
         ></app-chart-viewer>
       } @else if (!isLoading() && !errorMessage()) {
-        <p class="empty-state" i18n="Chart empty state@@charts.empty.stock.to.income.data.is.not.available.yet.run.the.admin.backfill.to.populate.min">Stock to Income data is not available yet. Run the admin backfill to populate miner fee data.</p>
+        <p class="empty-state" i18n="Exchange reserve chart empty state@@charts.exchangeReserve.noData">Exchange reserve data is not available yet.</p>
       }
     </div>
   </div>
 
   @if (infoOpen()) {
     <app-chart-info-panel
-      title="Stock to Income modell"
+      title="Bitcoin: Exchange Reserve"
+      i18n-title="Exchange reserve chart title@@charts.exchangeReserveTitle"
       [about]="infoAbout"
       [currentFields]="infoCurrentFields()"
       [interpretation]="infoInterpretation()"

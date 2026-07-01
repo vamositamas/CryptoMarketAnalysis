@@ -23,6 +23,7 @@ export interface ChartDataRow {
   miningDifficulty: number | null;
   transactionVolumeUsd: number | null;
   minersRevenueUsd: number | null;
+  exchangeReserve: number | null;
   lastUpdated: string | null;
 }
 
@@ -47,6 +48,7 @@ interface ChartDataDbRow {
   mining_difficulty: string | number | null;
   transaction_volume_usd: string | number | null;
   miners_revenue_usd: string | number | null;
+  exchange_reserve: string | number | null;
   last_updated: string | Date | null;
 }
 
@@ -336,6 +338,7 @@ export class ChartDataRepository extends BaseRepository {
           diff_m.metric_value AS mining_difficulty,
           txvol_m.metric_value AS transaction_volume_usd,
           minrev_m.metric_value AS miners_revenue_usd,
+          exres_m.metric_value AS exchange_reserve,
           GREATEST(
             price.created_at,
             COALESCE(rainbow.created_at, price.created_at),
@@ -354,7 +357,8 @@ export class ChartDataRepository extends BaseRepository {
             COALESCE(hr_m.created_at, price.created_at),
             COALESCE(diff_m.created_at, price.created_at),
             COALESCE(txvol_m.created_at, price.created_at),
-            COALESCE(minrev_m.created_at, price.created_at)
+            COALESCE(minrev_m.created_at, price.created_at),
+            COALESCE(exres_m.created_at, price.created_at)
           ) AS last_updated
         FROM bitcoin_price_daily price
         LEFT JOIN bitcoin_metrics_daily rainbow
@@ -408,6 +412,9 @@ export class ChartDataRepository extends BaseRepository {
         LEFT JOIN bitcoin_metrics_daily minrev_m
           ON minrev_m.date = price.date
           AND minrev_m.metric_name = 'miners_revenue_usd'
+        LEFT JOIN bitcoin_metrics_daily exres_m
+          ON exres_m.date = price.date
+          AND exres_m.metric_name = 'exchange_reserve'
         WHERE price.date >= $1::date
         ORDER BY price.date ASC
       `,
@@ -447,6 +454,7 @@ function toChartDataRow(row: ChartDataDbRow): ChartDataRow {
     miningDifficulty: nullableNumber(row.mining_difficulty),
     transactionVolumeUsd: nullableNumber(row.transaction_volume_usd),
     minersRevenueUsd: nullableNumber(row.miners_revenue_usd),
+    exchangeReserve: nullableNumber(row.exchange_reserve),
     lastUpdated: row.last_updated === null ? null : formatTimestamp(row.last_updated),
   };
 }

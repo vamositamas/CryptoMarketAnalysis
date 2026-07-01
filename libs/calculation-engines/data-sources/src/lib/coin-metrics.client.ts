@@ -14,6 +14,11 @@ export interface CoinMetricsRealizedPricePoint {
   realizedPrice: number;
 }
 
+export interface CoinMetricsExchangeReservePoint {
+  date: string;
+  exchangeReserve: number;
+}
+
 interface CoinMetricsRow {
   asset: string;
   time: string;
@@ -23,6 +28,17 @@ interface CoinMetricsRow {
 
 interface CoinMetricsResponse {
   data: CoinMetricsRow[];
+  next_page_url: string | null;
+}
+
+interface CoinMetricsSupplyRow {
+  asset: string;
+  time: string;
+  SplyExNtv: string | null;
+}
+
+interface CoinMetricsSupplyResponse {
+  data: CoinMetricsSupplyRow[];
   next_page_url: string | null;
 }
 
@@ -83,6 +99,75 @@ export class CoinMetricsClient {
     }
 
     return results;
+  }
+
+  // BTC supply held in known exchange wallets (aggregated across exchanges) — CoinMetrics
+  // community tier metric SplyExNtv, freely available with full history since 2011-04-24.
+  async fetchExchangeReserveHistory(): Promise<CoinMetricsExchangeReservePoint[]> {
+    const results: CoinMetricsExchangeReservePoint[] = [];
+    let url: string | null =
+      `${this.baseUrl}/timeseries/asset-metrics?assets=btc&metrics=SplyExNtv&frequency=1d&page_size=10000`;
+
+    while (url !== null) {
+      const pageUrl: string = url;
+      const page: CoinMetricsSupplyResponse = await retryWithBackoff(
+        async (): Promise<CoinMetricsSupplyResponse> => {
+          const response: Response = await this.fetchFn(pageUrl);
+          if (!response.ok) {
+            throw new CoinMetricsClientError(
+              `CoinMetrics request failed with status ${response.status}`,
+              response.status,
+            );
+          }
+          return (await response.json()) as CoinMetricsSupplyResponse;
+        },
+        this.retryAttempts,
+        this.retryBaseDelayMs,
+        { sleep: this.sleep, shouldRetry: isRetryableCoinMetricsError },
+      );
+
+      for (const row of page.data) {
+        const supply = Number(row.SplyExNtv);
+        if (Number.isFinite(supply) && supply > 0) {
+          results.push({ date: row.time.slice(0, 10), exchangeReserve: supply });
+        }
+      }
+
+      url = page.next_page_url ?? null;
+    }
+
+    return results;
+  }
+
+  // Lightweight fetch of the most recent exchange-reserve reading, for the daily refresh job.
+  async fetchExchangeReserveLatest(): Promise<{ date: string; value: number }> {
+    const url = `${this.baseUrl}/timeseries/asset-metrics?assets=btc&metrics=SplyExNtv&frequency=1d&page_size=5`;
+
+    const page = await retryWithBackoff(
+      async (): Promise<CoinMetricsSupplyResponse> => {
+        const response = await this.fetchFn(url);
+        if (!response.ok) {
+          throw new CoinMetricsClientError(
+            `CoinMetrics request failed with status ${response.status}`,
+            response.status,
+          );
+        }
+        return (await response.json()) as CoinMetricsSupplyResponse;
+      },
+      this.retryAttempts,
+      this.retryBaseDelayMs,
+      { sleep: this.sleep, shouldRetry: isRetryableCoinMetricsError },
+    );
+
+    for (let i = page.data.length - 1; i >= 0; i--) {
+      const row = page.data[i]!;
+      const supply = Number(row.SplyExNtv);
+      if (Number.isFinite(supply) && supply > 0) {
+        return { date: row.time.slice(0, 10), value: supply };
+      }
+    }
+
+    throw new CoinMetricsClientError('CoinMetrics exchange reserve response contained no valid data');
   }
 }
 

@@ -5,7 +5,7 @@ import {
   type ChartTimeframe,
 } from '../repositories/chart-data.repository';
 
-export type ChartId = 'bitcoin-rainbow' | 'pi-cycle-top' | 'stock-to-flow' | 'mvrv-z-score' | 'puell-multiple' | 'vdd-multiple' | 'realized-price' | 'stock-to-income' | '2yr-ma-multiplier' | 'price-forecast-tools' | 'mayer-multiple' | '200-week-ma-heatmap' | 'fear-greed-index' | 'hash-ribbons' | 'difficulty-ribbon' | 'nvt-ratio' | 'thermocap-multiple' | 'excess-liquidity' | 'spx-liquidity' | 'midterm-cycles' | 'global-m2-bitcoin' | 'dxy-bitcoin';
+export type ChartId = 'bitcoin-rainbow' | 'pi-cycle-top' | 'stock-to-flow' | 'mvrv-z-score' | 'puell-multiple' | 'vdd-multiple' | 'realized-price' | 'stock-to-income' | '2yr-ma-multiplier' | 'price-forecast-tools' | 'mayer-multiple' | '200-week-ma-heatmap' | 'fear-greed-index' | 'hash-ribbons' | 'difficulty-ribbon' | 'nvt-ratio' | 'thermocap-multiple' | 'excess-liquidity' | 'spx-liquidity' | 'midterm-cycles' | 'global-m2-bitcoin' | 'dxy-bitcoin' | 'exchange-reserve';
 
 export interface BitcoinRainbowChartResponse {
   chartId: 'bitcoin-rainbow';
@@ -238,6 +238,14 @@ export interface DxyBitcoinChartResponse {
   lastUpdated: string | null;
 }
 
+export interface ExchangeReserveChartResponse {
+  chartId: 'exchange-reserve';
+  title: 'Bitcoin Exchange Reserve';
+  timeframe: ChartTimeframe;
+  dataPoints: { date: string; priceUsd: number; exchangeReserve: number | null; }[];
+  lastUpdated: string | null;
+}
+
 export type ChartDataResponse =
   | BitcoinRainbowChartResponse
   | PiCycleTopChartResponse
@@ -260,7 +268,8 @@ export type ChartDataResponse =
   | SpxLiquidityChartResponse
   | MidtermCyclesChartResponse
   | GlobalM2BitcoinChartResponse
-  | DxyBitcoinChartResponse;
+  | DxyBitcoinChartResponse
+  | ExchangeReserveChartResponse;
 
 export class ChartDataRequestError extends Error {
   constructor(
@@ -276,7 +285,7 @@ export class ChartDataService {
     private readonly repository: Pick<ChartDataRepository, 'findBitcoinChartData' | 'findExcessLiquidityData' | 'findSpxLiquidityData' | 'findMidtermCyclesData' | 'findGlobalM2BitcoinData' | 'findDxyBitcoinData'>,
     private readonly now: () => Date = () => new Date(),
     private readonly bitcoinDataClient: Pick<BitcoinDataClient, 'fetchVddMultipleHistory' | 'fetchCvddHistory' | 'fetchBalancedPriceHistory' | 'fetchTerminalPriceHistory'> = new BitcoinDataClient(),
-    private readonly coinMetricsClient: Pick<CoinMetricsClient, 'fetchMvrvRatioAndPriceHistory'> = new CoinMetricsClient(),
+    private readonly coinMetricsClient: Pick<CoinMetricsClient, 'fetchMvrvRatioAndPriceHistory' | 'fetchExchangeReserveHistory'> = new CoinMetricsClient(),
   ) {}
 
   async getChartData(chartId: ChartId, timeframeInput: unknown): Promise<ChartDataResponse> {
@@ -648,6 +657,25 @@ export class ChartDataService {
       };
     }
 
+    if (chartId === 'exchange-reserve') {
+      const exchangeReserveByDate = await this.getExchangeReserveHistory(rows);
+      const firstErDate = [...exchangeReserveByDate.keys()].sort()[0] ?? '2011-04-24';
+      const startDate = timeframe === 'all' ? firstErDate : getTimeframeStartDate(timeframe, this.now());
+      return {
+        chartId: 'exchange-reserve',
+        title: 'Bitcoin Exchange Reserve',
+        timeframe,
+        dataPoints: rows
+          .filter((r) => r.date >= startDate)
+          .map((r) => ({
+            date: r.date,
+            priceUsd: r.priceUsd,
+            exchangeReserve: exchangeReserveByDate.get(r.date) ?? null,
+          })),
+        lastUpdated,
+      };
+    }
+
     if (chartId === 'stock-to-income') {
       return buildStockToIncomeResponse(rows, timeframe, this.now);
     }
@@ -728,6 +756,32 @@ export class ChartDataService {
     }
 
     return realizedPriceByDate;
+  }
+
+  private async getExchangeReserveHistory(rows: ChartDataRow[]): Promise<Map<string, number>> {
+    const exchangeReserveByDate = new Map(
+      rows
+        .filter((r): r is ChartDataRow & { exchangeReserve: number } => r.exchangeReserve !== null)
+        .map((r) => [r.date, r.exchangeReserve] as const),
+    );
+    const coverageRatio = rows.length === 0 ? 0 : exchangeReserveByDate.size / rows.length;
+
+    if (exchangeReserveByDate.size > 30 && coverageRatio >= 0.95) {
+      return exchangeReserveByDate;
+    }
+
+    try {
+      const history = await this.coinMetricsClient.fetchExchangeReserveHistory();
+      for (const point of history) {
+        if (!exchangeReserveByDate.has(point.date)) {
+          exchangeReserveByDate.set(point.date, point.exchangeReserve);
+        }
+      }
+    } catch {
+      // Keep stored database values if the external full-history source is unavailable.
+    }
+
+    return exchangeReserveByDate;
   }
 
   private async getForecastMetricHistory(

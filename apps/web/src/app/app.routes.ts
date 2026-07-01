@@ -214,6 +214,14 @@ import { LegalDialogService } from './services/legal-dialog.service';
         <li tabindex="0" data-tooltip="Compares market cap with cumulative miner revenue to show how expensive Bitcoin is relative to security spend.">
           Thermocap Multiple
         </li>
+        <li
+          tabindex="0"
+          data-tooltip="Tracks the total BTC held on exchanges. Rising reserves imply more coins available for sale (bearish); falling reserves imply accumulation and increasing scarcity (bullish)."
+          i18n-data-tooltip="Landing Exchange Reserve tooltip@@landing.model.exchangeReserve.tooltip"
+          i18n="Landing Exchange Reserve label@@landing.model.exchangeReserve"
+        >
+          Exchange Reserve
+        </li>
         <li tabindex="0" data-tooltip="Macro liquidity indicator using money growth and economic growth to identify risk-on conditions.">
           Excess Liquidity
         </li>
@@ -3773,6 +3781,14 @@ export const appRoutes: Route[] = [
     loadComponent: () =>
       import('./components/mvrv-z-score-chart-page/mvrv-z-score-chart-page.component').then(
         (m) => m.MvrvZScoreChartPageComponent,
+      ),
+  },
+  {
+    path: 'charts/exchange-reserve',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/exchange-reserve-chart-page/exchange-reserve-chart-page.component').then(
+        (m) => m.ExchangeReserveChartPageComponent,
       ),
   },
   {

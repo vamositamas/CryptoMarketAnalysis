@@ -237,6 +237,8 @@ export class MidtermCyclesChartPageComponent implements AfterViewInit {
     this.chartViewer?.resetZoom();
   }
 
+  protected toggleFullscreen(): void { this.chartViewer?.toggleFullscreen(); }
+
   protected toggleExportMenu(): void {
     this.exportMenuOpen.update((v) => !v);
   }

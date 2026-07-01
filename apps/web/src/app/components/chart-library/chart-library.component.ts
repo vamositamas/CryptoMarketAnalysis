@@ -285,6 +285,15 @@ const CHARTS: ChartLibraryItem[] = [
       $localize`:Chart midterm-cycles description@@charts.library.midterm-cycles.description:Overlays Bitcoin and S&P 500 12-month RSI against the Chicago Fed National Activity Index (CFNAI), aligned to US midterm election cycles. Historically, equity and economic conditions around midterms have preceded significant Bitcoin moves.`,
     thumbnailClass: 'midterm-cycles',
   },
+  {
+    id: 'exchange-reserve',
+    title: $localize`:Chart exchange-reserve title@@charts.library.exchange-reserve.title:Bitcoin: Exchange Reserve`,
+    category: 'cycle',
+    signal: $localize`:Chart exchange-reserve signal@@charts.library.exchange-reserve.signal:Aggregate selling pressure vs scarcity`,
+    description:
+      $localize`:Chart exchange-reserve description@@charts.library.exchange-reserve.description:Tracks the total BTC held on exchanges. Rising reserves imply more coins available for sale (bearish); falling reserves imply accumulation and increasing scarcity (bullish).`,
+    thumbnailClass: 'exchange-reserve',
+  },
 ];
 
 const CATEGORY_LABELS: Record<ChartLibraryItem['category'], string> = {

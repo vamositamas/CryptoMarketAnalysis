@@ -7,7 +7,7 @@ import {
   ApiClientError,
   AuthApiClient,
   type ChartTimeframe,
-  type RealizePriceChartDataPoint,
+  type ExchangeReserveChartDataPoint,
 } from '@crypto-market-analysis/data-access/api-client';
 import { ChartViewerComponent } from '../chart-viewer/chart-viewer.component';
 import { ChartAnnotationsComponent } from '../chart-annotations/chart-annotations.component';
@@ -42,13 +42,15 @@ const TIMEFRAMES: TimeframeOption[] = [
   { label: $localize`:Timeframe All@@charts.timeframe.all:All`, value: 'all' },
 ];
 
-const REALIZED_PRICE_ALERT_METRICS: AlertMetricOption[] = [
-  { value: 'realized_price', label: $localize`:Realized price USD metric@@charts.metric.realizedPriceUsd:Realized price USD` },
+const EXCHANGE_RESERVE_ALERT_METRICS: AlertMetricOption[] = [
+  { value: 'exchange_reserve', label: $localize`:Exchange reserve metric@@charts.metric.exchangeReserve:Exchange reserve` },
   { value: 'btc_price', label: $localize`:BTC price USD metric@@charts.metric.btcPriceUsd:BTC price USD` },
 ];
 
+const TREND_THRESHOLD_PCT = 2;
+
 @Component({
-  selector: 'app-realized-price-chart-page',
+  selector: 'app-exchange-reserve-chart-page',
   imports: [
     ChartViewerComponent,
     ChartAnnotationsComponent,
@@ -57,9 +59,9 @@ const REALIZED_PRICE_ALERT_METRICS: AlertMetricOption[] = [
     CreateAlertModalComponent,
     ChartFavouriteButtonComponent,
   ],
-  templateUrl: './realized-price-chart-page.component.html',
+  templateUrl: './exchange-reserve-chart-page.component.html',
 })
-export class RealizePriceChartPageComponent implements AfterViewInit {
+export class ExchangeReserveChartPageComponent implements AfterViewInit {
   private readonly api = inject(AuthApiClient);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -68,7 +70,7 @@ export class RealizePriceChartPageComponent implements AfterViewInit {
   @ViewChild(ChartAnnotationsComponent) protected readonly chartAnnotations?: ChartAnnotationsComponent;
 
   protected readonly timeframes = TIMEFRAMES;
-  protected readonly alertMetrics = REALIZED_PRICE_ALERT_METRICS;
+  protected readonly alertMetrics = EXCHANGE_RESERVE_ALERT_METRICS;
   protected readonly showAlertModal = signal(false);
   protected readonly selectedTimeframe = signal<ChartTimeframe>('all');
   protected readonly isLoading = signal(false);
@@ -76,51 +78,72 @@ export class RealizePriceChartPageComponent implements AfterViewInit {
   protected readonly infoOpen = signal(true);
   protected readonly exportMenuOpen = signal(false);
   protected readonly userAnnotations = signal<Record<string, AnnotationOptions>>({});
-  protected readonly dataPoints = signal<RealizePriceChartDataPoint[]>([]);
+  protected readonly dataPoints = signal<ExchangeReserveChartDataPoint[]>([]);
   protected readonly lastUpdated = signal<string | null>(null);
+
+  // Percent change in exchange reserve over the trailing ~30 days — the basis for the
+  // trend signal. Per the metric's standard interpretation: rising reserves imply more
+  // coins available for sale (bearish); falling reserves imply accumulation/scarcity (bullish).
+  private readonly trend30d = computed<number | null>(() => {
+    const withData = this.dataPoints().filter(
+      (p): p is ExchangeReserveChartDataPoint & { exchangeReserve: number } => p.exchangeReserve !== null,
+    );
+    if (withData.length < 2) return null;
+
+    const last = withData[withData.length - 1];
+    const lastMs = new Date(`${last.date}T00:00:00Z`).getTime();
+    const targetMs = lastMs - 30 * 86_400_000;
+
+    let reference = withData[0];
+    for (const point of withData) {
+      if (new Date(`${point.date}T00:00:00Z`).getTime() <= targetMs) {
+        reference = point;
+      } else {
+        break;
+      }
+    }
+
+    if (reference === last || reference.exchangeReserve <= 0) return null;
+    return ((last.exchangeReserve - reference.exchangeReserve) / reference.exchangeReserve) * 100;
+  });
 
   protected readonly infoCurrentFields = computed<ChartInfoField[]>(() => {
     const points = this.dataPoints();
     const last = points[points.length - 1];
-    if (!last) return [];
-    const lastRpPoint = [...points].reverse().find((p) => p.realizedPrice !== null);
-    const rp = lastRpPoint?.realizedPrice ?? null;
-    const mvrv = lastRpPoint?.mvrvRatio ?? null;
+    const lastErPoint = [...points].reverse().find((p) => p.exchangeReserve !== null);
+    const exchangeReserve = lastErPoint?.exchangeReserve ?? null;
+    const trend = this.trend30d();
+    const noData = $localize`:No data value@@common.noData:No data`;
+
     return [
-      { label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`, value: formatUsd(last.priceUsd) },
-      { label: $localize`:Realized price metric@@charts.metric.realizedPrice:Realized price`, value: rp !== null ? formatUsd(rp) : $localize`:No data value@@common.noData:No data` },
-      { label: $localize`:MVRV ratio metric@@charts.metric.mvrvRatio:MVRV ratio`, value: mvrv !== null ? mvrv.toFixed(2) : $localize`:No data value@@common.noData:No data` },
-      { label: $localize`:Signal metric@@charts.metric.signal:Signal`, value: mvrv !== null ? getMvrvSignal(mvrv) : $localize`:No data value@@common.noData:No data` },
+      { label: $localize`:BTC price metric@@charts.metric.btcPrice:BTC price`, value: last ? formatUsd(last.priceUsd) : noData },
+      { label: $localize`:Exchange reserve metric@@charts.metric.exchangeReserve:Exchange reserve`, value: exchangeReserve !== null ? formatBtc(exchangeReserve) : noData },
+      { label: $localize`:Exchange reserve 30 day trend metric@@charts.metric.exchangeReserveTrend30d:30-day trend`, value: trend !== null ? formatPercent(trend) : noData },
+      { label: $localize`:Signal metric@@charts.metric.signal:Signal`, value: trend !== null ? getExchangeReserveSignal(trend) : noData },
     ];
   });
 
   protected readonly infoInterpretation = computed(() => {
-    const points = this.dataPoints();
-    const lastRpPoint = [...points].reverse().find((p) => p.mvrvRatio !== null);
-    const mvrv = lastRpPoint?.mvrvRatio ?? null;
-    if (mvrv === null) {
-      return $localize`:Realized Price waiting interpretation@@charts.realizedPrice.interpretation.waiting:Waiting for realized price data to compute the MVRV ratio.`;
+    const trend = this.trend30d();
+    if (trend === null) {
+      return $localize`:Exchange reserve waiting interpretation@@charts.exchangeReserve.interpretation.waiting:Waiting for exchange reserve data.`;
     }
-    if (mvrv > 3.5) {
-      return $localize`:Realized Price overheated interpretation@@charts.realizedPrice.interpretation.overheated:MVRV Ratio is ${mvrv.toFixed(2)}:INTERPOLATION:. Market price is far above realized price, so aggregate holders are deeply in profit; historically this has appeared in late-cycle conditions.`;
+    if (trend > TREND_THRESHOLD_PCT) {
+      return $localize`:Exchange reserve rising interpretation@@charts.exchangeReserve.interpretation.rising:Exchange reserves have risen ${trend.toFixed(1)}:INTERPOLATION:% over the past 30 days. A rising reserve means more coins are moving onto exchanges and becoming available for sale, historically associated with increasing selling pressure and decreasing scarcity — a bearish signal.`;
     }
-    if (mvrv > 2.0) {
-      return $localize`:Realized Price elevated interpretation@@charts.realizedPrice.interpretation.elevated:MVRV Ratio is ${mvrv.toFixed(2)}:INTERPOLATION:. Price is meaningfully above the aggregate on-chain cost basis, so most market participants are holding paper profits.`;
+    if (trend < -TREND_THRESHOLD_PCT) {
+      return $localize`:Exchange reserve falling interpretation@@charts.exchangeReserve.interpretation.falling:Exchange reserves have fallen ${Math.abs(trend).toFixed(1)}:INTERPOLATION:% over the past 30 days. A falling reserve means coins are being withdrawn from exchanges into private custody, historically associated with accumulation and increasing scarcity — a bullish signal.`;
     }
-    if (mvrv >= 1.0) {
-      return $localize`:Realized Price fair interpretation@@charts.realizedPrice.interpretation.fair:MVRV Ratio is ${mvrv.toFixed(2)}:INTERPOLATION:. BTC trades above realized price, meaning the market is in aggregate profit but still close to its on-chain cost basis.`;
-    }
-    return $localize`:Realized Price stress interpretation@@charts.realizedPrice.interpretation.stress:MVRV Ratio is ${mvrv.toFixed(2)}:INTERPOLATION:. BTC trades below realized price, meaning aggregate holders are underwater; historically these periods have clustered near major cycle lows.`;
+    return $localize`:Exchange reserve stable interpretation@@charts.exchangeReserve.interpretation.stable:Exchange reserves have been roughly stable over the past 30 days, suggesting no strong shift in aggregate selling or accumulation pressure.`;
   });
 
   protected readonly infoLastUpdated = computed(() => this.lastUpdatedText());
 
-  protected readonly infoAbout = $localize`:Realized Price about@@charts.realizedPrice.about:Bitcoin Realized Price values each coin at the price when it last moved on-chain, then divides that value by circulating supply. This gives an estimate of the market's aggregate cost basis. When BTC price is above realized price, holders are in profit on aggregate; when BTC price is below realized price, the market is carrying aggregate paper losses.`;
+  protected readonly infoAbout = $localize`:Exchange reserve about@@charts.exchangeReserve.about:Exchange Reserve tracks the total quantity of BTC held in wallets controlled by exchanges — the accumulated result of exchange in/outflows. A rising reserve signals more coins are available for sale (bearish); a falling reserve signals coins are leaving exchanges for private custody, implying accumulation and increasing scarcity (bullish).`;
 
   protected readonly infoDataSources = [
-    $localize`:Realized Price data source BTC price@@charts.realizedPrice.dataSource.price:Bitcoin price: CoinGecko API via backend price history`,
-    $localize`:Realized Price data source realized price@@charts.realizedPrice.dataSource.realized:Realized price: stored DB values plus CoinMetrics community API history derived from PriceUSD / CapMVRVCur`,
-    $localize`:Realized Price data source MVRV ratio@@charts.realizedPrice.dataSource.mvrv:MVRV Ratio: BTC price divided by realized price, computed by the backend`,
+    $localize`:Exchange reserve data source BTC price@@charts.exchangeReserve.dataSource.price:Bitcoin price: CoinGecko API via backend price history`,
+    $localize`:Exchange reserve data source reserve@@charts.exchangeReserve.dataSource.reserve:Exchange reserve: CoinMetrics Community API (SplyExNtv) — aggregate BTC supply held in known exchange wallets, full history since 2011`,
   ];
 
   protected readonly chartData = computed<ChartData>(() => {
@@ -140,20 +163,20 @@ export class RealizePriceChartPageComponent implements AfterViewInit {
           pointHitRadius: 8,
           tension: 0,
           yAxisID: 'y',
-          order: 1,
+          order: 2,
         },
         {
           type: 'line' as const,
-          label: $localize`:Realized price metric@@charts.metric.realizedPrice:Realized Price`,
-          data: points.map((p) => p.realizedPrice),
-          borderColor: '#ff8a1f',
-          backgroundColor: '#ff8a1f',
+          label: $localize`:Exchange reserve metric@@charts.metric.exchangeReserve:Exchange Reserve`,
+          data: points.map((p) => p.exchangeReserve),
+          borderColor: '#7c3aed',
+          backgroundColor: '#7c3aed',
           borderWidth: 2,
           pointRadius: 0,
           pointHitRadius: 8,
-          tension: 0,
-          yAxisID: 'y',
-          order: 2,
+          tension: 0.1,
+          yAxisID: 'y2',
+          order: 1,
         },
       ],
     };
@@ -171,7 +194,7 @@ export class RealizePriceChartPageComponent implements AfterViewInit {
       },
       y: {
         type: 'logarithmic',
-        position: 'right',
+        position: 'left',
         title: {
           display: true,
           text: $localize`:BTC price USD axis label@@charts.axis.btcPriceUsd:BTC Price (USD)`,
@@ -183,6 +206,21 @@ export class RealizePriceChartPageComponent implements AfterViewInit {
           callback: (value) => formatCompactUsd(Number(value)),
         },
         grid: { color: 'rgba(23, 32, 42, 0.08)' },
+      },
+      y2: {
+        type: 'linear',
+        position: 'right',
+        title: {
+          display: true,
+          text: $localize`:Exchange reserve axis label@@charts.axis.exchangeReserve:Exchange Reserve (BTC)`,
+          color: '#7c3aed',
+          font: { size: 12, weight: 500 },
+        },
+        ticks: {
+          color: '#7c3aed',
+          callback: (value) => formatBtc(Number(value)),
+        },
+        grid: { drawOnChartArea: false },
       },
     },
     plugins: {
@@ -203,9 +241,9 @@ export class RealizePriceChartPageComponent implements AfterViewInit {
           title: (items) => formatDate(String(items[0]?.label ?? '')),
           label: (item) => {
             if (item.datasetIndex === 1) {
-              return `Realized Price: ${formatUsd(Number(item.parsed.y))}`;
+              return `${$localize`:Exchange reserve metric@@charts.metric.exchangeReserve:Exchange Reserve`}: ${formatBtc(Number(item.parsed.y))}`;
             }
-            return `BTC Price: ${formatUsd(Number(item.parsed.y))}`;
+            return `${$localize`:BTC price metric@@charts.metric.btcPrice:BTC Price`}: ${formatUsd(Number(item.parsed.y))}`;
           },
         },
       },
@@ -218,7 +256,7 @@ export class RealizePriceChartPageComponent implements AfterViewInit {
   }));
 
   constructor() {
-    void this.api.recordRecentChart('realized-price').catch(() => undefined);
+    void this.api.recordRecentChart('exchange-reserve').catch(() => undefined);
     this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
       const requested = params.get('timeframe');
       const timeframe = parseChartTimeframe(requested);
@@ -289,8 +327,8 @@ export class RealizePriceChartPageComponent implements AfterViewInit {
     this.exportMenuOpen.set(false);
     await exportChartPng({
       chartImageDataUrl,
-      chartTitle: 'Bitcoin Realized Price',
-      fileName: `realized-price_${getExportDateStamp()}.png`,
+      chartTitle: 'Bitcoin Exchange Reserve',
+      fileName: `exchange-reserve_${getExportDateStamp()}.png`,
     });
   }
 
@@ -298,12 +336,11 @@ export class RealizePriceChartPageComponent implements AfterViewInit {
     this.exportMenuOpen.set(false);
     exportChartCsv({
       rows: this.dataPoints(),
-      fileName: `realized-price_${getExportDateStamp()}.csv`,
+      fileName: `exchange-reserve_${getExportDateStamp()}.csv`,
       columns: [
         { header: $localize`:Date header@@charts.csv.date:Date`, value: (row) => row.date },
         { header: $localize`:Price USD header@@charts.csv.priceUsd:Price USD`, value: (row) => formatCsvNumber(row.priceUsd) },
-        { header: $localize`:Realized price metric@@charts.metric.realizedPrice:Realized price`, value: (row) => formatCsvNumber(row.realizedPrice) },
-        { header: $localize`:MVRV ratio metric@@charts.metric.mvrvRatio:MVRV ratio`, value: (row) => formatCsvNumber(row.mvrvRatio) },
+        { header: $localize`:Exchange reserve metric@@charts.metric.exchangeReserve:Exchange reserve`, value: (row) => formatCsvNumber(row.exchangeReserve) },
       ],
     });
   }
@@ -319,14 +356,14 @@ export class RealizePriceChartPageComponent implements AfterViewInit {
     this.isLoading.set(true);
     this.errorMessage.set('');
     try {
-      const response = await this.api.getRealizePriceChartData(timeframe);
+      const response = await this.api.getExchangeReserveChartData(timeframe);
       this.dataPoints.set(response.dataPoints);
       this.lastUpdated.set(response.lastUpdated);
     } catch (error) {
       this.errorMessage.set(
         error instanceof ApiClientError
           ? error.message
-          : 'Chart data could not be loaded. Please try again.',
+          : $localize`:Exchange reserve chart load failure@@charts.exchangeReserveLoadFailed:Chart data could not be loaded. Please try again.`,
       );
     } finally {
       this.isLoading.set(false);
@@ -334,11 +371,10 @@ export class RealizePriceChartPageComponent implements AfterViewInit {
   }
 }
 
-function getMvrvSignal(value: number): string {
-  if (value > 3.5) return $localize`:Sell zone signal@@charts.signal.sellZone:Sell zone`;
-  if (value > 2.0) return $localize`:Overvalued signal@@charts.signal.overvalued:Overvalued`;
-  if (value >= 1.0) return $localize`:Fair value range@@charts.signal.fairValueRange:Fair value range`;
-  return $localize`:Below realized price@@charts.signal.belowRealizedPrice:Below realized price`;
+function getExchangeReserveSignal(trend: number): string {
+  if (trend > TREND_THRESHOLD_PCT) return $localize`:Rising selling pressure signal@@charts.signal.exchangeReserve.rising:Rising — Selling pressure`;
+  if (trend < -TREND_THRESHOLD_PCT) return $localize`:Falling accumulation signal@@charts.signal.exchangeReserve.falling:Falling — Accumulation`;
+  return $localize`:Stable neutral signal@@charts.signal.exchangeReserve.stable:Stable — Neutral`;
 }
 
 function formatUsd(value: number): string {
@@ -355,6 +391,18 @@ function formatCompactUsd(value: number): string {
   if (value >= 1000) return `$${Math.round(value / 1000)}k`;
   if (value >= 1) return `$${value.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
   return `$${value.toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
+}
+
+function formatBtc(value: number): string {
+  if (!Number.isFinite(value)) return '';
+  if (value >= 1e6) return `${(value / 1e6).toFixed(2)}M BTC`;
+  if (value >= 1e3) return `${(value / 1e3).toFixed(0)}K BTC`;
+  return `${value.toFixed(0)} BTC`;
+}
+
+function formatPercent(value: number): string {
+  const sign = value > 0 ? '+' : '';
+  return `${sign}${value.toFixed(1)}%`;
 }
 
 function formatDate(value: string): string {

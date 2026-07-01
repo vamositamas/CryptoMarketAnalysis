@@ -5,6 +5,7 @@ import {
   BitcoinDataClient,
   BlockchainInfoClient,
   CoinGeckoClient,
+  CoinMetricsClient,
   FearGreedClient,
   FredClient,
   type FredDataPoint,
@@ -64,6 +65,7 @@ interface DailyDataRefreshOptions {
   >;
   fearGreedClient?: Pick<FearGreedClient, 'fetchLatest'>;
   bitcoinDataClient?: Pick<BitcoinDataClient, 'fetchMvrvZScore' | 'fetchRealizedPrice' | 'fetchVddMultiple' | 'fetchCvdd' | 'fetchBalancedPrice' | 'fetchTerminalPrice'>;
+  coinMetricsClient?: Pick<CoinMetricsClient, 'fetchExchangeReserveLatest'>;
   database?: Parameters<typeof insertBitcoinPriceDaily>[0];
   emailService?: DailyDataRefreshFailureEmailSender;
   alertEvaluationService?: Pick<AlertEvaluationService, 'evaluateAlerts'>;
@@ -116,6 +118,7 @@ export class DailyDataRefreshService {
   >;
   private readonly fearGreedClient: Pick<FearGreedClient, 'fetchLatest'>;
   private readonly bitcoinDataClient: Pick<BitcoinDataClient, 'fetchMvrvZScore' | 'fetchRealizedPrice' | 'fetchVddMultiple' | 'fetchCvdd' | 'fetchBalancedPrice' | 'fetchTerminalPrice'>;
+  private readonly coinMetricsClient: Pick<CoinMetricsClient, 'fetchExchangeReserveLatest'>;
   private readonly excessLiquidityService: ExcessLiquidityService;
   private readonly dxyBitcoinService: DxyBitcoinService;
   private readonly globalM2BitcoinService: GlobalM2BitcoinService;
@@ -131,6 +134,7 @@ export class DailyDataRefreshService {
     this.blockchainInfoClient = options.blockchainInfoClient ?? new BlockchainInfoClient();
     this.fearGreedClient = options.fearGreedClient ?? new FearGreedClient();
     this.bitcoinDataClient = options.bitcoinDataClient ?? new BitcoinDataClient();
+    this.coinMetricsClient = options.coinMetricsClient ?? new CoinMetricsClient();
     this.excessLiquidityService = new ExcessLiquidityService({ fredClient: new FredClient() });
     this.dxyBitcoinService = new DxyBitcoinService({ fredClient: new FredClient() });
     this.globalM2BitcoinService = new GlobalM2BitcoinService({ fredClient: new FredClient() });
@@ -282,6 +286,9 @@ export class DailyDataRefreshService {
       )),
       ...(await this.fetchExternalMetric('terminal_price', () =>
         this.bitcoinDataClient.fetchTerminalPrice(),
+      )),
+      ...(await this.fetchExternalMetric('exchange_reserve', () =>
+        this.coinMetricsClient.fetchExchangeReserveLatest(),
       )),
       ...(await this.fetchExternalMetric('hash_rate', () =>
         this.fetchBlockchainInfoChartValue(date, () =>
