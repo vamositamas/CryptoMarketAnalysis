@@ -14,6 +14,7 @@ import { createDailyDataRefreshRouter } from './jobs/daily-data-refresh.controll
 import { createAlertEvaluationRouter } from './jobs/alert-evaluation.controller';
 import { createDonationsRouter } from './routes/donations.route';
 import { createTradingPlansRouter } from './routes/trading-plans.route';
+import { createSupportTicketsRouter } from './routes/support-tickets.route';
 
 export function createApp() {
   const app = express();
@@ -34,6 +35,7 @@ export function createApp() {
   app.use('/api/donations', createDonationsRouter());
   app.use('/api/charts', createChartsRouter());
   app.use('/api/trading-plans', createTradingPlansRouter());
+  app.use('/api/support-tickets', createSupportTicketsRouter());
   app.use('/api/dashboard', createDashboardRouter());
   app.use('/api/health', createHealthRouter());
 

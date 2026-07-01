@@ -493,6 +493,75 @@ export interface AlertResponse {
   triggeredAt: string | null;
 }
 
+export type SupportTicketStatus = 'open' | 'in_progress' | 'waiting_for_user' | 'resolved' | 'closed';
+export type SupportTicketPriority = 'low' | 'normal' | 'high' | 'urgent';
+
+export interface SupportTicketAttachment {
+  id: string;
+  ticketId: string;
+  messageId: string | null;
+  uploadedByUserId: string;
+  fileName: string;
+  contentType: string;
+  fileSizeBytes: number;
+  createdAt: string;
+}
+
+export interface SupportTicketMessage {
+  id: string;
+  ticketId: string;
+  authorUserId: string;
+  authorEmail: string;
+  authorName: string | null;
+  body: string;
+  isAdminReply: boolean;
+  createdAt: string;
+  attachments: SupportTicketAttachment[];
+}
+
+export interface SupportTicket {
+  id: string;
+  ticketNumber: string;
+  creatorUserId: string;
+  creatorEmail: string;
+  creatorName: string | null;
+  subject: string;
+  description: string;
+  status: SupportTicketStatus;
+  priority: SupportTicketPriority;
+  createdAt: string;
+  updatedAt: string;
+  closedAt: string | null;
+}
+
+export interface SupportTicketDetail extends SupportTicket {
+  messages: SupportTicketMessage[];
+  attachments: SupportTicketAttachment[];
+}
+
+export interface SupportAttachmentInput {
+  fileName: string;
+  contentType: string;
+  fileSizeBytes: number;
+  contentBase64: string;
+}
+
+export interface CreateSupportTicketRequest {
+  subject: string;
+  description: string;
+  priority?: SupportTicketPriority;
+  attachments?: SupportAttachmentInput[];
+}
+
+export interface CreateSupportReplyRequest {
+  body: string;
+  attachments?: SupportAttachmentInput[];
+}
+
+export interface SupportTicketsResponse {
+  tickets: SupportTicket[];
+}
+
 export interface EmailTemplate {
   key: string;
   label: string;
@@ -1191,6 +1260,42 @@ export class AuthApiClient {
 
   async updateAlert(alertId: string, data: Partial<{ alertName: string; condition: string; thresholdValue: number; status: string }>): Promise<AlertWithTitle> {
     return this.patchWithCsrf<AlertWithTitle>(`/api/alerts/${alertId}`, data);
+  }
+
+  async getSupportTickets(): Promise<SupportTicketsResponse> {
+    try {
+      return await firstValueFrom(
+        this.http.get<SupportTicketsResponse>('/api/support-tickets', { withCredentials: true }),
+      );
+    } catch (error) {
+      throw toApiClientError(error);
+    }
+  }
+
+  async createSupportTicket(request: CreateSupportTicketRequest): Promise<SupportTicketDetail> {
+    return this.postWithCsrf<SupportTicketDetail>('/api/support-tickets', request);
+  }
+
+  async getSupportTicket(ticketId: string): Promise<SupportTicketDetail> {
+    try {
+      return await firstValueFrom(
+        this.http.get<SupportTicketDetail>(`/api/support-tickets/${ticketId}`, { withCredentials: true }),
+      );
+    } catch (error) {
+      throw toApiClientError(error);
+    }
+  }
+
+  async addSupportTicketReply(ticketId: string, request: CreateSupportReplyRequest): Promise<SupportTicketDetail> {
+    return this.postWithCsrf<SupportTicketDetail>(`/api/support-tickets/${ticketId}/messages`, request);
+  }
+
+  async updateSupportTicketStatus(ticketId: string, status: SupportTicketStatus): Promise<SupportTicketDetail> {
+    return this.patchWithCsrf<SupportTicketDetail>(`/api/support-tickets/${ticketId}/status`, { status });
+  }
+
+  supportAttachmentUrl(attachmentId: string): string {
+    return `/api/support-tickets/attachments/${attachmentId}/download`;
   }
 
   async getEmailConfig(): Promise<{ provider: string; apiKeyConfigured: boolean; fromEmail: string | null; appUrl: string }> {

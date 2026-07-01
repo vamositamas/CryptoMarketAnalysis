@@ -4028,6 +4028,14 @@ export const appRoutes: Route[] = [
   },
   { path: 'alerts', canActivate: [authGuard], loadComponent: () => import('./components/alerts-page/alerts-page.component').then((m) => m.AlertsPageComponent) },
   {
+    path: 'support',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/support-tickets-page/support-tickets-page.component').then(
+        (m) => m.SupportTicketsPageComponent,
+      ),
+  },
+  {
     path: 'trading-plans',
     canActivate: [authGuard],
     loadComponent: () =>

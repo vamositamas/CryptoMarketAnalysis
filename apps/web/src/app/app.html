@@ -115,6 +115,11 @@
                 i18n="User guide menu item@@nav.userGuide">
                 User Guide
               </a>
+              <a class="user-menu-item" role="menuitem" routerLink="/support"
+                (click)="userMenuOpen.set(false)"
+                i18n="Support menu item@@nav.support">
+                Support
+              </a>
               <div class="user-menu-divider"></div>
               <button type="button" class="user-menu-item" role="menuitem"
                 (click)="openLegal('disclaimer')"
@@ -221,6 +226,8 @@
         i18n="My account menu item@@nav.myAccount">My Account</button>
       <a routerLink="/user-guide" routerLinkActive="active" (click)="closeMobileMenu()"
         i18n="User guide menu item@@nav.userGuide">User Guide</a>
+      <a routerLink="/support" routerLinkActive="active" (click)="closeMobileMenu()"
+        i18n="Support menu item@@nav.support">Support</a>
       <div class="mobile-nav-separator"></div>
       <button type="button" class="mobile-nav-action" (click)="closeMobileMenu(); openLegal('disclaimer')"
         i18n="Disclaimer menu item@@nav.disclaimer">Disclaimer</button>
