@@ -78,6 +78,21 @@ import { AuthSessionService } from '../../services/auth-session.service';
       min-width: 0;
     }
 
+    .ticket-chat__meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ticket-chat__summary {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: end;
+      gap: 14px;
+    }
+
+    .ticket-chat__fact,
     .ticket-chat__status {
       display: grid;
       justify-items: end;
@@ -249,6 +264,13 @@ import { AuthSessionService } from '../../services/auth-session.service';
       border-top: 1px solid #e5eee7;
     }
 
+    .reply-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
     .create-ticket-form {
       border-top: 0;
     }
@@ -416,14 +438,14 @@ import { AuthSessionService } from '../../services/auth-session.service';
               <input
                 type="search"
                 [ngModel]="ticketSearch()"
-                (ngModelChange)="ticketSearch.set($event)"
+                (ngModelChange)="onTicketSearchChange($event)"
                 placeholder="Subject, description, ticket number"
                 i18n-placeholder="Incident search placeholder@@support.searchPlaceholder"
               />
             </label>
             <label>
               <ng-container i18n="Incident status filter label@@support.statusFilter">Filter</ng-container>
-              <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)">
+              <select [ngModel]="statusFilter()" (ngModelChange)="onStatusFilterChange($event)">
                 <option value="all" i18n="All ticket statuses filter@@support.filter.all">All tickets</option>
                 <option value="active" i18n="Active ticket statuses filter@@support.filter.active">Active tickets</option>
                 <option value="open">Open</option>
@@ -459,11 +481,19 @@ import { AuthSessionService } from '../../services/auth-session.service';
             <div class="ticket-chat__header">
               <div class="ticket-chat__title">
                 <h3>{{ ticket.subject }}</h3>
-                <span class="ticket-meta">{{ ticket.ticketNumber }} · {{ ticket.creatorEmail }}</span>
+                <div class="ticket-chat__meta ticket-meta">
+                  <span>{{ ticket.ticketNumber }} · {{ ticket.creatorEmail }}</span>
+                </div>
               </div>
-              <div class="ticket-chat__status">
-                <span class="ticket-chat__status-label" i18n="Ticket status label@@support.ticketStatus">Status</span>
-                <span class="status-pill" [class.closed]="ticket.status === 'closed'">{{ statusLabel(ticket.status) }}</span>
+              <div class="ticket-chat__summary">
+                <div class="ticket-chat__fact">
+                  <span class="ticket-chat__status-label" i18n="Ticket priority label@@support.ticketPriority">Priority</span>
+                  <span class="priority-pill">{{ ticket.priority }}</span>
+                </div>
+                <div class="ticket-chat__status">
+                  <span class="ticket-chat__status-label" i18n="Ticket status label@@support.ticketStatus">Status</span>
+                  <span class="status-pill" [class.closed]="ticket.status === 'closed'">{{ statusLabel(ticket.status) }}</span>
+                </div>
               </div>
             </div>
             @if (isAdmin()) {
@@ -515,7 +545,7 @@ import { AuthSessionService } from '../../services/auth-session.service';
                   }
                 </div>
               }
-              <div>
+              <div class="reply-actions">
                 <button type="submit" class="primary-link" [disabled]="replyForm.invalid || isSaving() || (ticket.status === 'closed' && !isAdmin())">
                   {{ isSaving() ? sendingLabel() : sendLabel() }}
                 </button>
@@ -636,11 +666,8 @@ export class SupportTicketsPageComponent implements OnInit {
     try {
       const response = await this.api.getSupportTickets();
       this.tickets.set(response.tickets);
-      if (!this.selectedTicket()) {
-        const firstVisibleTicket = this.filteredTickets()[0] ?? response.tickets[0];
-        if (firstVisibleTicket) {
-          await this.selectTicket(firstVisibleTicket.id);
-        }
+      if (this.selectedTicket()) {
+        await this.syncSelectedTicketWithFilters();
       }
     } catch (error) {
       this.showError(error);
@@ -679,6 +706,16 @@ export class SupportTicketsPageComponent implements OnInit {
     } catch (error) {
       this.showError(error);
     }
+  }
+
+  protected async onStatusFilterChange(value: SupportTicketStatus | 'active' | 'all'): Promise<void> {
+    this.statusFilter.set(value);
+    await this.syncSelectedTicketWithFilters();
+  }
+
+  protected async onTicketSearchChange(value: string): Promise<void> {
+    this.ticketSearch.set(value);
+    await this.syncSelectedTicketWithFilters();
   }
 
   protected async sendReply(): Promise<void> {
@@ -759,6 +796,17 @@ export class SupportTicketsPageComponent implements OnInit {
   private showError(error: unknown): void {
     this.messageIsSuccess.set(false);
     this.message.set(error instanceof ApiClientError ? error.message : $localize`:Support generic error@@support.error:Something went wrong. Please try again.`);
+  }
+
+  private async syncSelectedTicketWithFilters(): Promise<void> {
+    const visibleTickets = this.filteredTickets();
+    const selected = this.selectedTicket();
+    if (selected && visibleTickets.some((ticket) => ticket.id === selected.id)) return;
+
+    this.replyForm.reset({ body: '' });
+    this.replyAttachments.set([]);
+
+    this.selectedTicket.set(null);
   }
 }
 
