@@ -1,4 +1,5 @@
 import { getDatabasePool } from '../config/database.config';
+import { MarketSignalPreferencesRepository } from '../repositories/market-signal-preferences.repository';
 
 export interface SignalScore {
   name: string;
@@ -19,6 +20,8 @@ export interface SignalSummary {
   overallLabel: string;
   btcPriceUsd: number | null;
   signals: SignalScore[];
+  availableSignals: SignalScore[];
+  selectedSignalNames: string[];
   lastUpdated: string | null;
   fearGreedMissing: boolean;
 }
@@ -26,6 +29,19 @@ export interface SignalSummary {
 interface Queryable {
   query<Row = unknown>(sql: string, values?: unknown[]): Promise<{ rows: Row[] }>;
 }
+
+export const DEFAULT_MARKET_SIGNAL_NAMES = [
+  'mvrv_zscore',
+  'fear_greed',
+  'rainbow_band',
+  'realized_price',
+  'nupl',
+  'vdd_multiple',
+  'pi_cycle',
+  'mayer_multiple',
+  'puell_multiple',
+  'global_m2_yoy',
+] as const;
 
 interface LatestMetricsRow {
   price_usd: string | null;
@@ -45,15 +61,32 @@ interface LatestMetricsRow {
   hash_rate: string | null;
   miners_revenue_usd: string | null;
   miner_fees: string | null;
+  exchange_reserve: string | null;
+  exchange_netflow: string | null;
+  funding_rate_avg: string | null;
+  open_interest_usd: string | null;
+  lth_sopr: string | null;
+  sth_sopr: string | null;
+  google_trends_bitcoin: string | null;
+  active_addresses: string | null;
+  btc_dvol: string | null;
   global_m2_yoy: string | null;
   dxy_yoy_change: string | null;
+  excess_liquidity_leading: string | null;
   last_updated: string | Date | null;
 }
 
 export class SignalAggregationService {
-  constructor(private readonly database: Queryable | undefined = getDatabasePool()) {}
+  private readonly preferences: MarketSignalPreferencesRepository;
 
-  async getSummary(): Promise<SignalSummary> {
+  constructor(
+    private readonly database: Queryable | undefined = getDatabasePool(),
+    preferences?: MarketSignalPreferencesRepository,
+  ) {
+    this.preferences = preferences ?? new MarketSignalPreferencesRepository(database);
+  }
+
+  async getSummary(userId?: string): Promise<SignalSummary> {
     const db = this.requireDatabase();
 
     const result = await db.query<LatestMetricsRow>(`
@@ -76,8 +109,18 @@ export class SignalAggregationService {
         (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'hash_rate'      ORDER BY date DESC LIMIT 1) AS hash_rate,
         (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'miners_revenue_usd' ORDER BY date DESC LIMIT 1) AS miners_revenue_usd,
         (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'miner_fees'     ORDER BY date DESC LIMIT 1) AS miner_fees,
+        (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'exchange_reserve' ORDER BY date DESC LIMIT 1) AS exchange_reserve,
+        (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'exchange_netflow' ORDER BY date DESC LIMIT 1) AS exchange_netflow,
+        (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'funding_rate_avg' ORDER BY date DESC LIMIT 1) AS funding_rate_avg,
+        (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'open_interest_usd' ORDER BY date DESC LIMIT 1) AS open_interest_usd,
+        (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'lth_sopr'      ORDER BY date DESC LIMIT 1) AS lth_sopr,
+        (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'sth_sopr'      ORDER BY date DESC LIMIT 1) AS sth_sopr,
+        (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'google_trends_bitcoin' ORDER BY date DESC LIMIT 1) AS google_trends_bitcoin,
+        (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'active_addresses' ORDER BY date DESC LIMIT 1) AS active_addresses,
+        (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'btc_dvol'      ORDER BY date DESC LIMIT 1) AS btc_dvol,
         (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'global_m2_yoy'  ORDER BY date DESC LIMIT 1) AS global_m2_yoy,
-        (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'dxy_yoy_change' ORDER BY date DESC LIMIT 1) AS dxy_yoy_change
+        (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'dxy_yoy_change' ORDER BY date DESC LIMIT 1) AS dxy_yoy_change,
+        (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'excess_liquidity_leading' ORDER BY date DESC LIMIT 1) AS excess_liquidity_leading
       FROM (
         SELECT price_usd, created_at AS last_updated FROM bitcoin_price_daily ORDER BY date DESC LIMIT 1
       ) p
@@ -87,7 +130,7 @@ export class SignalAggregationService {
     const btcPrice = parseNum(row?.price_usd);
     const lastUpdated = toIso(row?.last_updated ?? null);
 
-    const signals: SignalScore[] = [
+    const coreSignals: SignalScore[] = [
       scoreMvrv(parseNum(row?.mvrv_zscore)),
       scoreFearGreed(parseNum(row?.fear_greed_index)),
       scoreRainbowBand(parseNum(row?.rainbow_band)),
@@ -113,6 +156,24 @@ export class SignalAggregationService {
       scoreDxy(parseNum(row?.dxy_yoy_change)),
     ];
 
+    const optionalSignals: SignalScore[] = [
+      scoreExchangeNetflow(parseNum(row?.exchange_netflow)),
+      scoreFundingRate(parseNum(row?.funding_rate_avg)),
+      scoreOpenInterest(btcPrice, parseNum(row?.open_interest_usd)),
+      scoreSoprSplit(parseNum(row?.lth_sopr), parseNum(row?.sth_sopr)),
+      scoreGoogleTrends(parseNum(row?.google_trends_bitcoin)),
+      scoreActiveAddresses(parseNum(row?.active_addresses)),
+      scoreDvol(parseNum(row?.btc_dvol)),
+      scoreExcessLiquidity(parseNum(row?.excess_liquidity_leading)),
+    ].filter((signal) => signal.zone !== 'no_data');
+
+    const availableSignals = [...coreSignals, ...optionalSignals];
+    const availableNames = new Set(availableSignals.map((signal) => signal.name));
+    const savedSelection = userId ? await this.preferences.findSelectedSignalNames(userId) : null;
+    const selectedSignalNames = normalizeSelectedSignalNames(savedSelection, availableNames);
+    const selectedNames = new Set(selectedSignalNames);
+    const signals = availableSignals.filter((signal) => selectedNames.has(signal.name));
+
     const scoringSignals = signals.filter((s) => s.zone !== 'no_data');
     const totalScore = scoringSignals.reduce((sum, s) => sum + s.score, 0);
     const maxPossibleScore = scoringSignals.reduce((sum, s) => sum + s.maxScore, 0);
@@ -129,9 +190,34 @@ export class SignalAggregationService {
       overallLabel: overallLabel(normalizedScore),
       btcPriceUsd: btcPrice,
       signals,
+      availableSignals,
+      selectedSignalNames,
       lastUpdated,
       fearGreedMissing: fearGreedSignal?.zone === 'no_data',
     };
+  }
+
+  async updateSelectedSignals(userId: string, body: unknown): Promise<SignalSummary> {
+    const selectedSignalNames = validateSelectedSignalNames(body);
+    const current = await this.getSummary(userId);
+    const availableNames = new Set(current.availableSignals.map((signal) => signal.name));
+    const normalized = selectedSignalNames.filter((name, index) =>
+      availableNames.has(name) && selectedSignalNames.indexOf(name) === index,
+    );
+
+    if (normalized.length === 0) {
+      throw new SignalAggregationError('Select at least one available market signal', 400);
+    }
+
+    try {
+      await this.preferences.saveSelectedSignalNames(userId, normalized);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('preferences table is missing')) {
+        throw new SignalAggregationError(error.message, 503);
+      }
+      throw error;
+    }
+    return this.getSummary(userId);
   }
 
   private async get200DayMA(db: Queryable): Promise<number | null> {
@@ -166,6 +252,15 @@ export class SignalAggregationService {
       throw new Error('Database is not configured');
     }
     return this.database;
+  }
+}
+
+export class SignalAggregationError extends Error {
+  constructor(
+    message: string,
+    public readonly statusCode: number,
+  ) {
+    super(message);
   }
 }
 
@@ -440,6 +535,159 @@ function scoreGlobalM2(m2YoY: number | null): SignalScore {
   return { name, label, value: m2YoY, formattedValue: `${m2YoY.toFixed(1)}%`, score, maxScore, interpretation, zone: toZone(score, maxScore) };
 }
 
+function scoreExchangeNetflow(netflow: number | null): SignalScore {
+  const name = 'exchange_netflow';
+  const label = 'Exchange Netflow';
+  const maxScore = 10;
+
+  if (netflow === null) return noData(name, label, maxScore);
+
+  let score: number;
+  let interpretation: string;
+
+  if (netflow <= -10_000)    { score = 10; interpretation = 'Large net outflows — coins leaving exchanges, supply pressure easing'; }
+  else if (netflow < -2_000) { score = 6;  interpretation = 'Net outflows — mild accumulation signal'; }
+  else if (netflow <= 2_000) { score = 0;  interpretation = 'Flows balanced — neutral exchange impulse'; }
+  else if (netflow <= 10_000){ score = -6; interpretation = 'Net inflows — potential sell-side supply building'; }
+  else                       { score = -10; interpretation = 'Large exchange inflows — distribution risk elevated'; }
+
+  return { name, label, value: netflow, formattedValue: `${formatCompact(netflow)} BTC`, score, maxScore, interpretation, zone: toZone(score, maxScore) };
+}
+
+function scoreFundingRate(fundingRate: number | null): SignalScore {
+  const name = 'funding_rate_avg';
+  const label = 'Funding Rate';
+  const maxScore = 10;
+
+  if (fundingRate === null) return noData(name, label, maxScore);
+
+  const percent = fundingRate * 100;
+  let score: number;
+  let interpretation: string;
+
+  if (percent <= -0.03)      { score = 10; interpretation = 'Shorts paying longs — contrarian bullish derivatives setup'; }
+  else if (percent < 0)      { score = 5;  interpretation = 'Negative funding — leverage skew is not overheated'; }
+  else if (percent <= 0.03)  { score = 0;  interpretation = 'Funding near neutral'; }
+  else if (percent <= 0.08)  { score = -5; interpretation = 'Positive funding — long leverage building'; }
+  else                       { score = -10; interpretation = 'Very positive funding — crowded long risk'; }
+
+  return { name, label, value: percent, formattedValue: `${percent.toFixed(3)}%`, score, maxScore, interpretation, zone: toZone(score, maxScore) };
+}
+
+function scoreOpenInterest(btc: number | null, openInterestUsd: number | null): SignalScore {
+  const name = 'open_interest_usd';
+  const label = 'Open Interest';
+  const maxScore = 10;
+
+  if (btc === null || btc <= 0 || openInterestUsd === null) return noData(name, label, maxScore);
+
+  const oiToPrice = openInterestUsd / btc;
+  let score: number;
+  let interpretation: string;
+
+  if (oiToPrice < 150_000)       { score = 6;  interpretation = 'Leverage load is light relative to BTC price'; }
+  else if (oiToPrice < 350_000)  { score = 2;  interpretation = 'Open interest is moderate'; }
+  else if (oiToPrice < 600_000)  { score = -4; interpretation = 'Open interest elevated — liquidation sensitivity rising'; }
+  else                           { score = -10; interpretation = 'Open interest very high — leverage flush risk elevated'; }
+
+  return { name, label, value: openInterestUsd, formattedValue: `$${formatCompact(openInterestUsd)}`, score, maxScore, interpretation, zone: toZone(score, maxScore) };
+}
+
+function scoreSoprSplit(lthSopr: number | null, sthSopr: number | null): SignalScore {
+  const name = 'sopr_split';
+  const label = 'LTH/STH SOPR';
+  const maxScore = 10;
+
+  if (lthSopr === null || sthSopr === null) return noData(name, label, maxScore);
+
+  const avg = (lthSopr + sthSopr) / 2;
+  let score: number;
+  let interpretation: string;
+
+  if (avg < 0.98)      { score = 10; interpretation = 'Coins selling at losses — capitulation-style reset'; }
+  else if (avg < 1.02) { score = 5;  interpretation = 'Profit/loss near breakeven — reset conditions'; }
+  else if (avg < 1.08) { score = 0;  interpretation = 'Moderate realized profits'; }
+  else if (avg < 1.2)  { score = -5; interpretation = 'Profit taking elevated'; }
+  else                 { score = -10; interpretation = 'Heavy profit taking — late-cycle distribution risk'; }
+
+  return { name, label, value: avg, formattedValue: `${lthSopr.toFixed(2)} / ${sthSopr.toFixed(2)}`, score, maxScore, interpretation, zone: toZone(score, maxScore) };
+}
+
+function scoreGoogleTrends(searchInterest: number | null): SignalScore {
+  const name = 'google_trends_bitcoin';
+  const label = 'Google Trends';
+  const maxScore = 10;
+
+  if (searchInterest === null) return noData(name, label, maxScore);
+
+  let score: number;
+  let interpretation: string;
+
+  if (searchInterest < 20)       { score = 8;  interpretation = 'Low retail attention — accumulation backdrop'; }
+  else if (searchInterest < 45)  { score = 4;  interpretation = 'Search interest rising from a quiet base'; }
+  else if (searchInterest < 70)  { score = 0;  interpretation = 'Retail attention is normal'; }
+  else if (searchInterest < 90)  { score = -6; interpretation = 'High retail attention — crowding risk rising'; }
+  else                           { score = -10; interpretation = 'Extreme search interest — euphoric attention risk'; }
+
+  return { name, label, value: searchInterest, formattedValue: `${Math.round(searchInterest)}/100`, score, maxScore, interpretation, zone: toZone(score, maxScore) };
+}
+
+function scoreActiveAddresses(activeAddresses: number | null): SignalScore {
+  const name = 'active_addresses';
+  const label = 'Active Addresses';
+  const maxScore = 10;
+
+  if (activeAddresses === null) return noData(name, label, maxScore);
+
+  let score: number;
+  let interpretation: string;
+
+  if (activeAddresses >= 1_000_000)      { score = 8;  interpretation = 'Strong network usage — demand fundamentals healthy'; }
+  else if (activeAddresses >= 750_000)   { score = 4;  interpretation = 'Network usage is constructive'; }
+  else if (activeAddresses >= 500_000)   { score = 0;  interpretation = 'Network usage is moderate'; }
+  else if (activeAddresses >= 350_000)   { score = -4; interpretation = 'Network usage is soft'; }
+  else                                   { score = -8; interpretation = 'Weak network usage — demand confirmation missing'; }
+
+  return { name, label, value: activeAddresses, formattedValue: formatCompact(activeAddresses), score, maxScore, interpretation, zone: toZone(score, maxScore) };
+}
+
+function scoreDvol(dvol: number | null): SignalScore {
+  const name = 'btc_dvol';
+  const label = 'BTC DVOL';
+  const maxScore = 10;
+
+  if (dvol === null) return noData(name, label, maxScore);
+
+  let score: number;
+  let interpretation: string;
+
+  if (dvol < 45)      { score = 5;  interpretation = 'Low implied volatility — calm conditions'; }
+  else if (dvol < 70) { score = 1;  interpretation = 'Normal implied volatility'; }
+  else if (dvol < 95) { score = -4; interpretation = 'Elevated implied volatility — risk premium rising'; }
+  else                { score = -8; interpretation = 'Very high implied volatility — stress conditions'; }
+
+  return { name, label, value: dvol, formattedValue: `${dvol.toFixed(1)}%`, score, maxScore, interpretation, zone: toZone(score, maxScore) };
+}
+
+function scoreExcessLiquidity(excessLiquidity: number | null): SignalScore {
+  const name = 'excess_liquidity_leading';
+  const label = 'Excess Liquidity';
+  const maxScore = 10;
+
+  if (excessLiquidity === null) return noData(name, label, maxScore);
+
+  let score: number;
+  let interpretation: string;
+
+  if (excessLiquidity >= 8)       { score = 10; interpretation = 'Strong leading liquidity impulse'; }
+  else if (excessLiquidity >= 3)  { score = 6;  interpretation = 'Positive leading liquidity impulse'; }
+  else if (excessLiquidity > -3)  { score = 0;  interpretation = 'Liquidity impulse is neutral'; }
+  else if (excessLiquidity > -8)  { score = -6; interpretation = 'Negative leading liquidity impulse'; }
+  else                            { score = -10; interpretation = 'Severe liquidity drag'; }
+
+  return { name, label, value: excessLiquidity, formattedValue: `${excessLiquidity.toFixed(1)}%`, score, maxScore, interpretation, zone: toZone(score, maxScore) };
+}
+
 function scoreDxy(dxyYoY: number | null): SignalScore {
   const name = 'dxy_yoy_change';
   const label = 'DXY YoY';
@@ -463,6 +711,36 @@ function scoreDxy(dxyYoY: number | null): SignalScore {
 
 function noData(name: string, label: string, maxScore: number): SignalScore {
   return { name, label, value: null, formattedValue: 'N/A', score: 0, maxScore, interpretation: 'No data available', zone: 'no_data' };
+}
+
+function normalizeSelectedSignalNames(
+  savedSelection: string[] | null,
+  availableNames: Set<string>,
+): string[] {
+  const source = savedSelection && savedSelection.length > 0
+    ? savedSelection
+    : [...DEFAULT_MARKET_SIGNAL_NAMES];
+  const selected = source.filter((name, index) => availableNames.has(name) && source.indexOf(name) === index);
+
+  if (selected.length > 0) {
+    return selected;
+  }
+
+  const firstAvailable = availableNames.values().next().value;
+  return firstAvailable ? [firstAvailable] : [];
+}
+
+function validateSelectedSignalNames(body: unknown): string[] {
+  if (typeof body !== 'object' || body === null) {
+    throw new SignalAggregationError('Invalid request body', 400);
+  }
+
+  const value = (body as Record<string, unknown>)['selectedSignalNames'];
+  if (!Array.isArray(value) || !value.every((item) => typeof item === 'string')) {
+    throw new SignalAggregationError('selectedSignalNames must be an array of signal names', 400);
+  }
+
+  return value;
 }
 
 function toZone(score: number, max: number): SignalScore['zone'] {
@@ -499,4 +777,11 @@ function parseNum(v: unknown): number | null {
 function toIso(v: string | Date | null): string | null {
   if (!v) return null;
   return v instanceof Date ? v.toISOString() : new Date(v).toISOString();
+}
+
+function formatCompact(value: number): string {
+  return Intl.NumberFormat('en-US', {
+    notation: 'compact',
+    maximumFractionDigits: 1,
+  }).format(value);
 }

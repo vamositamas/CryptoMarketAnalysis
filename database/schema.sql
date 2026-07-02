@@ -14,3 +14,4 @@
 \i database/migrations/014_create_favourite_charts.sql
 \i database/migrations/015_expand_dashboard_widget_limit.sql
 \i database/migrations/016_create_support_tickets.sql
+\i database/migrations/017_create_user_market_signal_preferences.sql

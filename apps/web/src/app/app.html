@@ -127,40 +127,54 @@
               </div>
               <div class="user-menu-divider"></div>
               <button type="button" class="user-menu-item" role="menuitem"
-                (click)="openProfileModal()"
-                i18n="My account menu item@@nav.myAccount">
-                My Account
+                (click)="openProfileModal()">
+                <svg class="user-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.4 0-8 2.2-8 5v3h16v-3c0-2.8-3.6-5-8-5Z"></path>
+                </svg>
+                <ng-container i18n="My account menu item@@nav.myAccount">My Account</ng-container>
               </button>
               <a class="user-menu-item" role="menuitem" routerLink="/user-guide"
-                (click)="userMenuOpen.set(false)"
-                i18n="User guide menu item@@nav.userGuide">
-                User Guide
+                (click)="userMenuOpen.set(false)">
+                <svg class="user-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M6 3a2 2 0 0 0-2 2v14a3 3 0 0 0 3 3h11a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H6Zm0 2h9v12H7a3 3 0 0 0-1 .18V5Zm0 15.82c.14-.05.32-.09.5-.09H15v.27H7a1 1 0 0 1-1-1Z"></path>
+                </svg>
+                <ng-container i18n="User guide menu item@@nav.userGuide">User Guide</ng-container>
               </a>
               <a class="user-menu-item" role="menuitem" routerLink="/support"
-                (click)="userMenuOpen.set(false)"
-                i18n="Support menu item@@nav.support">
-                Support
+                (click)="userMenuOpen.set(false)">
+                <svg class="user-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 3a9 9 0 0 0-9 9v5a3 3 0 0 0 3 3h1v-7H5v-1a7 7 0 0 1 14 0v1h-2v7h1a3 3 0 0 0 3-3v-5a9 9 0 0 0-9-9Z"></path>
+                </svg>
+                <ng-container i18n="Support menu item@@nav.support">Support</ng-container>
               </a>
               <div class="user-menu-divider"></div>
               <button type="button" class="user-menu-item" role="menuitem"
-                (click)="openLegal('disclaimer')"
-                i18n="Disclaimer menu item@@nav.disclaimer">
-                Disclaimer
+                (click)="openLegal('disclaimer')">
+                <svg class="user-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 2 1 21h22L12 2Zm0 6 7.5 13h-15L12 8Zm-1 3v4h2v-4h-2Zm0 5v2h2v-2h-2Z"></path>
+                </svg>
+                <ng-container i18n="Disclaimer menu item@@nav.disclaimer">Disclaimer</ng-container>
               </button>
               <button type="button" class="user-menu-item" role="menuitem"
-                (click)="openLegal('privacy-policy')"
-                i18n="Privacy policy menu item@@nav.privacyPolicy">
-                Privacy Policy
+                (click)="openLegal('privacy-policy')">
+                <svg class="user-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Zm0 2.2 6 2.2v4.6c0 4-2.6 7.5-6 8.8-3.4-1.3-6-4.8-6-8.8V6.4l6-2.2Zm-1 9.3-2.5-2.5-1.4 1.4L11 17l6-6-1.4-1.4L11 13.5Z"></path>
+                </svg>
+                <ng-container i18n="Privacy policy menu item@@nav.privacyPolicy">Privacy Policy</ng-container>
               </button>
               <button type="button" class="user-menu-item" role="menuitem"
-                (click)="openLegal('terms-of-use')"
-                i18n="Terms of use menu item@@nav.termsOfUse">
-                Terms of Use
+                (click)="openLegal('terms-of-use')">
+                <svg class="user-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm8 1.5V8h4.5L14 3.5ZM8 12h8v2H8v-2Zm0 4h8v2H8v-2Zm0-8h4v2H8V8Z"></path>
+                </svg>
+                <ng-container i18n="Terms of use menu item@@nav.termsOfUse">Terms of Use</ng-container>
               </button>
               <div class="user-menu-divider"></div>
-              <button type="button" class="user-menu-item" role="menuitem" (click)="logout()"
-                i18n="Log out button@@auth.logout">
-                Log out
+              <button type="button" class="user-menu-item" role="menuitem" (click)="logout()">
+                <svg class="user-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M10 3h8a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-8v-2h7V5h-7V3ZM3 12l5-5v3h7v4H8v3l-5-5Z"></path>
+                </svg>
+                <ng-container i18n="Log out button@@auth.logout">Log out</ng-container>
               </button>
             </div>
           }

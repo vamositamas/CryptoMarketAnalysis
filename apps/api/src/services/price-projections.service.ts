@@ -51,6 +51,13 @@ export class PriceProjectionsService {
         stock_to_flow_model: string | null;
         global_m2_yoy: string | null;
         dxy_yoy_change: string | null;
+        excess_liquidity_leading: string | null;
+        funding_rate_avg: string | null;
+        open_interest_usd: string | null;
+        exchange_netflow: string | null;
+        active_addresses: string | null;
+        google_trends_bitcoin: string | null;
+        btc_dvol: string | null;
       }>(`
         SELECT
           (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'realized_price'        ORDER BY date DESC LIMIT 1) AS realized_price,
@@ -65,7 +72,14 @@ export class PriceProjectionsService {
           (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'rainbow_band'           ORDER BY date DESC LIMIT 1) AS rainbow_band,
           (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'stock_to_flow_ratio'   ORDER BY date DESC LIMIT 1) AS stock_to_flow_model,
           (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'global_m2_yoy'          ORDER BY date DESC LIMIT 1) AS global_m2_yoy,
-          (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'dxy_yoy_change'        ORDER BY date DESC LIMIT 1) AS dxy_yoy_change
+          (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'dxy_yoy_change'        ORDER BY date DESC LIMIT 1) AS dxy_yoy_change,
+          (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'excess_liquidity_leading' ORDER BY date DESC LIMIT 1) AS excess_liquidity_leading,
+          (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'funding_rate_avg'      ORDER BY date DESC LIMIT 1) AS funding_rate_avg,
+          (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'open_interest_usd'      ORDER BY date DESC LIMIT 1) AS open_interest_usd,
+          (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'exchange_netflow'       ORDER BY date DESC LIMIT 1) AS exchange_netflow,
+          (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'active_addresses'       ORDER BY date DESC LIMIT 1) AS active_addresses,
+          (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'google_trends_bitcoin'  ORDER BY date DESC LIMIT 1) AS google_trends_bitcoin,
+          (SELECT metric_value FROM bitcoin_metrics_daily WHERE metric_name = 'btc_dvol'               ORDER BY date DESC LIMIT 1) AS btc_dvol
       `),
       db.query<{ date: string; price_usd: string }>(`
         SELECT date::text, price_usd
@@ -91,6 +105,13 @@ export class PriceProjectionsService {
     const s2fRatio = parseNum(m?.stock_to_flow_model);
     const globalM2YoY = parseNum(m?.global_m2_yoy);
     const dxyYoYChange = parseNum(m?.dxy_yoy_change);
+    const excessLiquidityLeading = parseNum(m?.excess_liquidity_leading);
+    const fundingRateAvg = parseNum(m?.funding_rate_avg);
+    const openInterestUsd = parseNum(m?.open_interest_usd);
+    const exchangeNetflow = parseNum(m?.exchange_netflow);
+    const activeAddresses = parseNum(m?.active_addresses);
+    const googleTrendsBitcoin = parseNum(m?.google_trends_bitcoin);
+    const btcDvol = parseNum(m?.btc_dvol);
     // S2F model price: PlanB calibration — 0.4 * ratio^3
     const s2fModel = s2fRatio !== null ? 0.4 * Math.pow(s2fRatio, 3) : null;
 
@@ -112,6 +133,13 @@ export class PriceProjectionsService {
       s2fModel,
       globalM2YoY,
       dxyYoYChange,
+      excessLiquidityLeading,
+      fundingRateAvg,
+      openInterestUsd,
+      exchangeNetflow,
+      activeAddresses,
+      googleTrendsBitcoin,
+      btcDvol,
     });
 
     return { btcPriceUsd: btc, scenarios, historicalPoints, lastUpdated };
@@ -137,6 +165,13 @@ interface Models {
   s2fModel: number | null;
   globalM2YoY: number | null;
   dxyYoYChange: number | null;
+  excessLiquidityLeading: number | null;
+  fundingRateAvg: number | null;
+  openInterestUsd: number | null;
+  exchangeNetflow: number | null;
+  activeAddresses: number | null;
+  googleTrendsBitcoin: number | null;
+  btcDvol: number | null;
 }
 
 function buildScenarios(btc: number | null, m: Models): ProjectionScenario[] {
@@ -150,6 +185,10 @@ function buildScenarios(btc: number | null, m: Models): ProjectionScenario[] {
   if (m.realizedPrice)  bearTargets.push({ label: 'Realized Price', model: 'Realized Price', priceUsd: m.realizedPrice, description: 'Average cost basis of all coins',         timeframe: '3–12 months' });
   const volatilityFloor = m.ma365 !== null && m.stddev365 !== null ? Math.max(0, m.ma365 - m.stddev365) : null;
   if (volatilityFloor)  bearTargets.push({ label: '365d mean -1σ',  model: 'Volatility Band', priceUsd: Math.round(volatilityFloor), description: 'One standard deviation below the 365-day mean', timeframe: '1–6 months' });
+  if (btc && m.fundingRateAvg !== null && m.fundingRateAvg * 100 >= 0.08) bearTargets.push({ label: 'Crowded longs flush', model: 'Funding Rate', priceUsd: Math.round(btc * 0.82), description: 'Very positive funding implies crowded long leverage and liquidation risk', timeframe: '1–3 months' });
+  if (btc && m.openInterestUsd !== null && m.openInterestUsd / btc >= 600_000) bearTargets.push({ label: 'Open-interest deleveraging', model: 'Open Interest', priceUsd: Math.round(btc * 0.78), description: 'Very high open interest relative to spot price increases downside flush risk', timeframe: '1–3 months' });
+  if (btc && m.exchangeNetflow !== null && m.exchangeNetflow > 10_000) bearTargets.push({ label: 'Exchange inflow stress', model: 'Exchange Netflow', priceUsd: Math.round(btc * 0.88), description: 'Large net exchange inflows may add sell-side supply', timeframe: '1–4 months' });
+  if (btc && m.btcDvol !== null && m.btcDvol >= 95) bearTargets.push({ label: 'High-volatility stress', model: 'BTC DVOL', priceUsd: Math.round(btc * 0.75), description: 'Very high implied volatility creates a wider downside stress scenario', timeframe: '1–3 months' });
   if (bearTargets.length > 0) {
     scenarios.push({ scenario: 'bear', label: 'Bear Case', color: '#ef4444', targets: bearTargets });
   }
@@ -159,7 +198,12 @@ function buildScenarios(btc: number | null, m: Models): ProjectionScenario[] {
   if (m.ma200)    baseTargets.push({ label: '200-day MA ×1.5', model: 'Mayer Multiple', priceUsd: Math.round(m.ma200 * 1.5), description: 'Mayer Multiple 1.5 — historically fair value', timeframe: '6–12 months' });
   if (m.ma365 && m.stddev365) baseTargets.push({ label: '365d mean +1σ', model: 'Volatility Band', priceUsd: Math.round(m.ma365 + m.stddev365), description: 'One standard deviation above the 365-day mean', timeframe: '3–9 months' });
   if (btc && m.globalM2YoY !== null && m.globalM2YoY < 0) baseTargets.push({ label: 'Liquidity-adjusted base', model: 'Global M2', priceUsd: Math.round(btc * 0.85), description: 'Negative Global M2 growth applies a defensive macro-liquidity haircut', timeframe: '3–12 months' });
+  if (btc && m.excessLiquidityLeading !== null && m.excessLiquidityLeading < -3) baseTargets.push({ label: 'Excess-liquidity haircut', model: 'Excess Liquidity', priceUsd: Math.round(btc * 0.9), description: 'Negative leading liquidity impulse tempers the base case', timeframe: '3–12 months' });
+  if (btc && m.excessLiquidityLeading !== null && m.excessLiquidityLeading >= -3 && m.excessLiquidityLeading < 3) baseTargets.push({ label: 'Neutral liquidity path', model: 'Excess Liquidity', priceUsd: Math.round(btc * 1.05), description: 'Flat leading liquidity keeps the base case close to spot with a modest trend premium', timeframe: '3–9 months' });
   if (btc && m.dxyYoYChange !== null && m.dxyYoYChange >= 5) baseTargets.push({ label: 'Dollar-strength base', model: 'DXY', priceUsd: Math.round(btc * dxyDefensiveMultiplier(m.dxyYoYChange)), description: 'Rising dollar pressure applies a defensive macro haircut to Bitcoin', timeframe: '3–12 months' });
+  if (btc && m.dxyYoYChange !== null && m.dxyYoYChange > -3 && m.dxyYoYChange < 3) baseTargets.push({ label: 'Stable dollar path', model: 'DXY', priceUsd: Math.round(btc * 1.06), description: 'Broadly stable dollar conditions support a moderate trend-following base case', timeframe: '3–9 months' });
+  if (btc && m.fundingRateAvg !== null && Math.abs(m.fundingRateAvg * 100) <= 0.02) baseTargets.push({ label: 'Neutral funding path', model: 'Funding Rate', priceUsd: Math.round(btc * 1.08), description: 'Near-neutral perpetual funding suggests leverage is not crowded and can support orderly continuation', timeframe: '3–9 months' });
+  if (btc && m.googleTrendsBitcoin !== null && m.googleTrendsBitcoin >= 25 && m.googleTrendsBitcoin < 45) baseTargets.push({ label: 'Attention recovery path', model: 'Google Trends', priceUsd: Math.round(btc * 1.1), description: 'Search interest is recovering from quiet levels without reaching euphoric retail demand', timeframe: '3–12 months' });
   if (m.athPrice && (!btc || m.athPrice > btc)) baseTargets.push({ label: 'ATH retest', model: 'Market Structure', priceUsd: Math.round(m.athPrice), description: 'Retest of the highest stored daily close', timeframe: '6–18 months' });
   if (m.s2fModel) baseTargets.push({ label: 'S2F model price', model: 'Stock-to-Flow', priceUsd: Math.round(m.s2fModel),    description: 'Stock-to-Flow scarcity model fair value',   timeframe: '6–18 months' });
   if (baseTargets.length > 0) {
@@ -174,7 +218,14 @@ function buildScenarios(btc: number | null, m: Models): ProjectionScenario[] {
   if (m.athPrice)      bullTargets.push({ label: 'ATH ×1.272',     model: 'Fib Extension',  priceUsd: Math.round(m.athPrice * 1.272), description: 'First breakout extension above prior all-time high', timeframe: '9–24 months' });
   if (m.ma365 && m.stddev365) bullTargets.push({ label: '365d mean +2σ', model: 'Volatility Band', priceUsd: Math.round(m.ma365 + (m.stddev365 * 2)), description: 'Two standard deviations above the 365-day mean', timeframe: '9–24 months' });
   if (btc && m.globalM2YoY !== null && m.globalM2YoY >= 5) bullTargets.push({ label: 'Liquidity expansion target', model: 'Global M2', priceUsd: Math.round(btc * liquidityMultiplier(m.globalM2YoY)), description: 'Macro-liquidity expansion premium based on Global M2 YoY growth', timeframe: '6–18 months' });
+  if (btc && m.excessLiquidityLeading !== null && m.excessLiquidityLeading >= 3) bullTargets.push({ label: 'Excess liquidity target', model: 'Excess Liquidity', priceUsd: Math.round(btc * excessLiquidityMultiplier(m.excessLiquidityLeading)), description: 'Leading liquidity expansion supports a higher risk-asset target', timeframe: '6–18 months' });
   if (btc && m.dxyYoYChange !== null && m.dxyYoYChange <= -3) bullTargets.push({ label: 'Dollar-weakness target', model: 'DXY', priceUsd: Math.round(btc * dxyTailwindMultiplier(m.dxyYoYChange)), description: 'Dollar weakness adds a macro-liquidity tailwind for Bitcoin', timeframe: '6–18 months' });
+  if (btc && m.fundingRateAvg !== null && Math.abs(m.fundingRateAvg * 100) <= 0.02) bullTargets.push({ label: 'Funding reset advance', model: 'Funding Rate', priceUsd: Math.round(btc * 1.16), description: 'Neutral funding leaves room for spot-led upside before derivatives become crowded', timeframe: '3–12 months' });
+  if (btc && m.openInterestUsd !== null && m.openInterestUsd / btc < 120_000) bullTargets.push({ label: 'Low-leverage advance', model: 'Open Interest', priceUsd: Math.round(btc * 1.22), description: 'Low open interest relative to spot price suggests leverage is light and upside can be less fragile', timeframe: '3–12 months' });
+  if (btc && m.exchangeNetflow !== null && m.exchangeNetflow < -2_000) bullTargets.push({ label: 'Exchange outflow target', model: 'Exchange Netflow', priceUsd: Math.round(btc * 1.14), description: 'Net BTC outflows from exchanges reduce liquid supply and support an upside supply-squeeze scenario', timeframe: '3–12 months' });
+  if (btc && m.activeAddresses !== null && m.activeAddresses >= 750_000 && m.activeAddresses < 1_000_000) bullTargets.push({ label: 'Network growth target', model: 'Active Addresses', priceUsd: Math.round(btc * 1.18), description: 'Healthy active-address growth confirms improving network demand before the strongest usage regime', timeframe: '6–18 months' });
+  if (btc && m.activeAddresses !== null && m.activeAddresses >= 1_000_000) bullTargets.push({ label: 'Network activity target', model: 'Active Addresses', priceUsd: Math.round(btc * 1.3), description: 'Strong active-address demand adds a network-usage expansion scenario', timeframe: '6–18 months' });
+  if (btc && m.googleTrendsBitcoin !== null && m.googleTrendsBitcoin >= 45 && m.googleTrendsBitcoin < 70) bullTargets.push({ label: 'Attention expansion target', model: 'Google Trends', priceUsd: Math.round(btc * 1.18), description: 'Retail attention is rising without reaching euphoric conditions', timeframe: '3–12 months' });
   if (bullTargets.length > 0) {
     scenarios.push({ scenario: 'bull', label: 'Bull Case', color: '#22c55e', targets: bullTargets });
   }
@@ -195,6 +246,15 @@ function buildScenarios(btc: number | null, m: Models): ProjectionScenario[] {
       timeframe: '12–30 months',
     });
   }
+  if (btc && m.googleTrendsBitcoin !== null && m.googleTrendsBitcoin >= 90) {
+    ultraTargets.push({
+      label: 'Retail euphoria extension',
+      model: 'Google Trends',
+      priceUsd: Math.round(btc * 1.35),
+      description: 'Extreme search interest can accompany blow-off extensions, but also raises reversal risk',
+      timeframe: '3–12 months',
+    });
+  }
   if (ultraTargets.length > 0) {
     scenarios.push({ scenario: 'ultra_bull', label: 'Ultra Bull', color: '#a855f7', targets: ultraTargets });
   }
@@ -212,6 +272,12 @@ function dxyDefensiveMultiplier(dxyYoY: number): number {
   if (dxyYoY >= 10) return 0.75;
   if (dxyYoY >= 7) return 0.82;
   return 0.9;
+}
+
+function excessLiquidityMultiplier(excessLiquidity: number): number {
+  if (excessLiquidity >= 8) return 1.35;
+  if (excessLiquidity >= 5) return 1.25;
+  return 1.15;
 }
 
 function dxyTailwindMultiplier(dxyYoY: number): number {

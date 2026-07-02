@@ -392,7 +392,9 @@ nav a.active .nav-icon {
 }
 
 .user-menu-item {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   width: 100%;
   padding: 10px 16px;
   border: 0;
@@ -409,6 +411,14 @@ nav a.active .nav-icon {
 
 .user-menu-item:hover {
   background: #f4f7f5;
+}
+
+.user-menu-icon {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 17px;
+  fill: currentColor;
+  opacity: 0.65;
 }
 
 /* ── Profile modal ──────────────────────────────────────────────────────── */
@@ -1889,7 +1899,7 @@ main .dashboard-actions-menu {
   top: calc(100% + 8px);
   right: 0;
   z-index: 20;
-  min-width: 190px;
+  min-width: 240px;
   padding: 6px;
   background: #fff;
   border: 1px solid #d8e0dc;
@@ -1901,6 +1911,7 @@ main .dashboard-actions-menu {
     min-height: 40px;
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     gap: 9px;
     padding: 9px 10px;
     color: #111827;
@@ -4895,6 +4906,19 @@ main .proj-info::after {
   white-space: normal;
 }
 
+main .proj-info.signal-info::after {
+  width: min(380px, 82vw);
+}
+
+main .proj-info.projection-info::after {
+  width: min(360px, calc(100vw - 32px));
+  max-height: min(320px, calc(100vh - 80px));
+  overflow-y: auto;
+  font-size: 13px;
+  line-height: 1.55;
+  box-shadow: 0 18px 50px rgba(20, 92, 75, 0.22);
+}
+
 main .proj-info::before {
   content: '';
   position: absolute;
@@ -4922,8 +4946,4 @@ main .proj-info:focus-visible::before {
 main .proj-info:hover::after,
 main .proj-info:focus-visible::after {
   transform: translate(-50%, 0);
-}
-
-main .proj-scenario {
-  overflow: visible;
 }

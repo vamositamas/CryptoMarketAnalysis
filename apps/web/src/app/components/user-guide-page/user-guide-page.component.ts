@@ -494,6 +494,13 @@ export class UserGuidePageComponent {
       question: $localize`:FAQ Q score calculation@@faq.q.scoreCalc:How is the market signal score calculated?`,
       answer: $localize`:FAQ A score calculation@@faq.a.scoreCalc:The composite score (−100 to +100) aggregates readings from MVRV Z-Score, Rainbow Band, Fear & Greed, Stock-to-Flow, Puell Multiple, and other indicators. Each contributes a normalised sub-score based on its current zone. Higher positive scores indicate bullish cycle conditions; lower negative scores indicate bearish conditions.`,
     },
+    {
+      id: 'customize-signals',
+      categoryId: 'trade-planner',
+      category: $localize`:FAQ category trade planner@@faq.cat.tradePlanner:Trade Planner`,
+      question: $localize`:FAQ Q customize signals@@faq.q.customizeSignals:Can I choose which signals count toward my score?`,
+      answer: $localize`:FAQ A customize signals@@faq.a.customizeSignals:Yes. On the Market Signals tab, click the gear "Configure" button next to "Signals used in your score" to open the signal picker. Check or uncheck any indicator to include or exclude it from your composite score — hover or focus a signal in the dialog to read its explanation. At least one signal must stay selected, and your choices are saved automatically.`,
+    },
 
     // ── Alerts ────────────────────────────────────────────────────────────────
     {

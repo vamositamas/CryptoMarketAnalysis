@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { requireAuth, requireRole } from '../middleware/rbac.middleware';
 import type { AuthenticatedRequest } from '../middleware/rbac.middleware';
 import { TradingPlansService, TradingPlansError } from '../services/trading-plans.service';
-import { SignalAggregationService } from '../services/signal-aggregation.service';
+import { SignalAggregationError, SignalAggregationService } from '../services/signal-aggregation.service';
 import { PriceProjectionsService } from '../services/price-projections.service';
 
 export function createTradingPlansRouter(): Router {
@@ -18,11 +18,27 @@ export function createTradingPlansRouter(): Router {
   const signalsService = new SignalAggregationService();
   const projectionsService = new PriceProjectionsService();
 
-  router.get('/signals', auth, anyRole, async (_req, res, next) => {
+  router.get('/signals', auth, anyRole, async (req, res, next) => {
     try {
-      const summary = await signalsService.getSummary();
+      const summary = await signalsService.getSummary(userId(req as AuthenticatedRequest));
       res.status(200).json(summary);
     } catch (error) {
+      next(error);
+    }
+  });
+
+  router.put('/signals/preferences', auth, anyRole, async (req, res, next) => {
+    try {
+      const summary = await signalsService.updateSelectedSignals(
+        userId(req as AuthenticatedRequest),
+        req.body,
+      );
+      res.status(200).json(summary);
+    } catch (error) {
+      if (error instanceof SignalAggregationError) {
+        res.status(error.statusCode).json({ error: error.message });
+        return;
+      }
       next(error);
     }
   });

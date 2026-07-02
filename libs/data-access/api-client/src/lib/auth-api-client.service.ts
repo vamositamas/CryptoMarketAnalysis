@@ -922,6 +922,8 @@ export interface SignalSummary {
   overallLabel: string;
   btcPriceUsd: number | null;
   signals: SignalScore[];
+  availableSignals: SignalScore[];
+  selectedSignalNames: string[];
   lastUpdated: string | null;
   fearGreedMissing: boolean;
 }
@@ -1753,6 +1755,10 @@ export class AuthApiClient {
     } catch (error) { throw toApiClientError(error); }
   }
 
+  async updateTradingSignalPreferences(selectedSignalNames: string[]): Promise<SignalSummary> {
+    return this.putWithCsrf<SignalSummary>('/api/trading-plans/signals/preferences', { selectedSignalNames });
+  }
+
   async getPriceProjections(): Promise<PriceProjectionsResponse> {
     try {
       return await firstValueFrom(
@@ -1823,6 +1829,24 @@ export class AuthApiClient {
 
       return await firstValueFrom(
         this.http.patch<TResponse>(url, body, {
+          headers: { 'x-csrf-token': csrfToken },
+          withCredentials: true,
+        }),
+      );
+    } catch (error) {
+      throw toApiClientError(error);
+    }
+  }
+
+  private async putWithCsrf<TResponse>(
+    url: string,
+    body: unknown,
+  ): Promise<TResponse> {
+    try {
+      const csrfToken = await this.getCsrfToken();
+
+      return await firstValueFrom(
+        this.http.put<TResponse>(url, body, {
           headers: { 'x-csrf-token': csrfToken },
           withCredentials: true,
         }),
