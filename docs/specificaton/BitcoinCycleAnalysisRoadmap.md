@@ -126,18 +126,34 @@ deviation from every other chart's incremental-merge pattern: Google Trends
 normalizes values 0-100 *relative to whatever date range is requested*, so a
 short daily "latest" fetch would use a different normalization basis than a
 multi-year historical fetch and the two would not be comparable if merged
-point-by-point. Google Trends also returns weekly (not daily) granularity for
-multi-year ranges, so the frontend chart uses `spanGaps: true` to draw a
-continuous line across the sparser weekly points on a daily x-axis.
+point-by-point. Google Trends returns daily/weekly/monthly granularity depending
+on the requested range length (monthly for the full 2010-present range used
+here), so the frontend chart uses `spanGaps: true` to draw a continuous line
+across the sparser points on a daily x-axis.
 
-This endpoint is genuinely fragile — undocumented, subject to change, and prone to
-rate-limiting or blocking from datacenter IPs (as flagged when this chart was
-scoped). The daily-refresh job wraps it in the same best-effort
-`fetchExternalMetric` pattern used for every other external metric: a failure logs
-a warning and skips that day rather than failing the whole refresh run. If it
-starts failing consistently in production, the chart will simply stop accumulating
-new points rather than break — revisit the endpoint or drop the chart if that
-happens.
+**Session cookie requirement (found during rollout):** the endpoint initially
+returned HTTP 429 on every request, including from a residential/office IP, not
+just cloud datacenter IPs as originally assumed. The actual cause: Google Trends'
+unofficial API rejects "cold" requests with no prior session — but even a
+rejected first request still returns a `Set-Cookie: NID=...` header. The client
+now keeps an in-memory cookie jar (`captureCookies`/`buildHeaders` in
+`google-trends.client.ts`) that captures that cookie from any response (success
+or failure) and replays it on subsequent requests. The existing retry-with-backoff
+wrapper naturally self-heals: attempt 1 has no cookie and gets 429 (but captures
+one), attempt 2 carries it and succeeds. A `Referer` header matching a real
+explore-page URL is also sent. Separately, the `widgetdata/multiline` response
+turned out to prefix its JSON body with `)]}',` (comma included) while `explore`
+uses just `)]}'` (no comma) — `parseGoogleTrendsJson` strips both forms.
+Verified end-to-end against the live endpoint after these fixes: 199 monthly
+points returned covering 2010-01 through the current month.
+
+This endpoint remains unofficial and undocumented, so it can still change or
+tighten its bot detection without notice. The daily-refresh job wraps it in the
+same best-effort `fetchExternalMetric` pattern used for every other external
+metric: a failure logs a warning and skips that day rather than failing the
+whole refresh run. If it starts failing consistently in production, the chart
+will simply stop accumulating new points rather than break — revisit the cookie
+logic or drop the chart if that happens.
 
 ## Why Tier 1 #2 (Bitcoin Dominance & Total Market Cap) was removed
 
