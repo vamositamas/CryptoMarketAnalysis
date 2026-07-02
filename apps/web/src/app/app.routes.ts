@@ -253,6 +253,30 @@ import { LegalDialogService } from './services/legal-dialog.service';
         <li tabindex="0" data-tooltip="Overlays Bitcoin and S&P 500 12-month RSI with the Chicago Fed National Activity Index, aligned to US midterm election cycles.">
           Midterm Cycles
         </li>
+        <li
+          tabindex="0"
+          data-tooltip="Compares market cap with realized cap in dollar terms, the same relationship behind the MVRV Z-Score presented as raw cap values."
+          i18n-data-tooltip="Landing Realized Cap tooltip@@landing.model.realizedCap.tooltip"
+          i18n="Landing Realized Cap label@@landing.model.realizedCap"
+        >
+          Realized Cap
+        </li>
+        <li
+          tabindex="0"
+          data-tooltip="Splits SOPR into long-term and short-term holder cohorts. LTH capitulation below 1 has historically clustered near major cycle bottoms."
+          i18n-data-tooltip="Landing LTH STH SOPR split tooltip@@landing.model.lthSthSoprSplit.tooltip"
+          i18n="Landing LTH STH SOPR split label@@landing.model.lthSthSoprSplit"
+        >
+          LTH-SOPR / STH-SOPR Split
+        </li>
+        <li
+          tabindex="0"
+          data-tooltip="Tracks worldwide Google search interest for bitcoin, a classic retail-euphoria proxy that complements the Fear & Greed Index."
+          i18n-data-tooltip="Landing Google Trends tooltip@@landing.model.googleTrendsBitcoin.tooltip"
+          i18n="Landing Google Trends label@@landing.model.googleTrendsBitcoin"
+        >
+          Google Trends: Bitcoin
+        </li>
       </ul>
     </div>
 
@@ -3893,6 +3917,30 @@ export const appRoutes: Route[] = [
     loadComponent: () =>
       import('./components/exchange-netflow-chart-page/exchange-netflow-chart-page.component').then(
         (m) => m.ExchangeNetflowChartPageComponent,
+      ),
+  },
+  {
+    path: 'charts/realized-cap',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/realized-cap-chart-page/realized-cap-chart-page.component').then(
+        (m) => m.RealizedCapChartPageComponent,
+      ),
+  },
+  {
+    path: 'charts/lth-sth-sopr-split',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/lth-sth-sopr-split-chart-page/lth-sth-sopr-split-chart-page.component').then(
+        (m) => m.LthSthSoprSplitChartPageComponent,
+      ),
+  },
+  {
+    path: 'charts/google-trends-bitcoin',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/google-trends-bitcoin-chart-page/google-trends-bitcoin-chart-page.component').then(
+        (m) => m.GoogleTrendsBitcoinChartPageComponent,
       ),
   },
   {

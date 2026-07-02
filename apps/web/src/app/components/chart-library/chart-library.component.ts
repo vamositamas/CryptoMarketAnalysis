@@ -312,6 +312,33 @@ const CHARTS: ChartLibraryItem[] = [
       $localize`:Chart exchange-netflow description@@charts.library.exchange-netflow.description:Tracks the daily net BTC flow into or out of exchanges. Positive netflow implies more coins available for sale (bearish); negative netflow implies accumulation and increasing scarcity (bullish).`,
     thumbnailClass: 'exchange-netflow',
   },
+  {
+    id: 'realized-cap',
+    title: $localize`:Chart realized-cap title@@charts.library.realized-cap.title:Bitcoin Realized Cap`,
+    category: 'valuation',
+    signal: $localize`:Chart realized-cap signal@@charts.library.realized-cap.signal:Market cap vs aggregate cost basis`,
+    description:
+      $localize`:Chart realized-cap description@@charts.library.realized-cap.description:Compares Bitcoin market cap with realized cap in dollar terms — the same relationship the MVRV Z-Score is built from, shown as raw cap values rather than a standardized score.`,
+    thumbnailClass: 'realized-price',
+  },
+  {
+    id: 'lth-sth-sopr-split',
+    title: $localize`:Chart lth-sth-sopr-split title@@charts.library.lth-sth-sopr-split.title:LTH-SOPR / STH-SOPR Split`,
+    category: 'cycle',
+    signal: $localize`:Chart lth-sth-sopr-split signal@@charts.library.lth-sth-sopr-split.signal:Holder profit-taking by cohort`,
+    description:
+      $localize`:Chart lth-sth-sopr-split description@@charts.library.lth-sth-sopr-split.description:Shows long-term and short-term holder SOPR separately instead of as a combined ratio. LTH capitulation below 1 has historically clustered near major cycle bottoms.`,
+    thumbnailClass: 'sopr-ratio',
+  },
+  {
+    id: 'google-trends-bitcoin',
+    title: $localize`:Chart google-trends-bitcoin title@@charts.library.google-trends-bitcoin.title:Google Trends: Bitcoin Search Interest`,
+    category: 'cycle',
+    signal: $localize`:Chart google-trends-bitcoin signal@@charts.library.google-trends-bitcoin.signal:Retail search euphoria proxy`,
+    description:
+      $localize`:Chart google-trends-bitcoin description@@charts.library.google-trends-bitcoin.description:Tracks worldwide Google search interest for "bitcoin", a classic retail-euphoria proxy that complements the Fear & Greed Index.`,
+    thumbnailClass: 'fear-greed-index',
+  },
 ];
 
 const CATEGORY_LABELS: Record<ChartLibraryItem['category'], string> = {

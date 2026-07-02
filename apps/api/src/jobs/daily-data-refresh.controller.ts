@@ -11,6 +11,7 @@ import {
   FearGreedClient,
   FredClient,
   type FredDataPoint,
+  GoogleTrendsClient,
   RetryExhaustedError,
 } from '@crypto-market-analysis/calculation-engines/data-sources';
 import { ExcessLiquidityService } from '../services/excess-liquidity.service';
@@ -66,10 +67,11 @@ interface DailyDataRefreshOptions {
     'fetchMarketPrice' | 'fetchHashRate' | 'fetchDifficulty' | 'fetchCoinDaysDestroyed' | 'fetchTransactionFees' | 'fetchTransactionVolumeUsd' | 'fetchMinersRevenueUsd'
   >;
   fearGreedClient?: Pick<FearGreedClient, 'fetchLatest'>;
-  bitcoinDataClient?: Pick<BitcoinDataClient, 'fetchMvrvZScore' | 'fetchRealizedPrice' | 'fetchVddMultiple' | 'fetchCvdd' | 'fetchBalancedPrice' | 'fetchTerminalPrice'>;
+  bitcoinDataClient?: Pick<BitcoinDataClient, 'fetchMvrvZScore' | 'fetchRealizedPrice' | 'fetchVddMultiple' | 'fetchCvdd' | 'fetchBalancedPrice' | 'fetchTerminalPrice' | 'fetchLthSopr' | 'fetchSthSopr'>;
   coinMetricsClient?: Pick<CoinMetricsClient, 'fetchExchangeReserveLatest' | 'fetchExchangeNetflowLatest'>;
   binanceFuturesClient?: Pick<BinanceFuturesClient, 'fetchFundingRateLatest'>;
   bybitClient?: Pick<BybitClient, 'fetchOpenInterestLatest'>;
+  googleTrendsClient?: Pick<GoogleTrendsClient, 'fetchBitcoinSearchInterestLatest'>;
   database?: Parameters<typeof insertBitcoinPriceDaily>[0];
   emailService?: DailyDataRefreshFailureEmailSender;
   alertEvaluationService?: Pick<AlertEvaluationService, 'evaluateAlerts'>;
@@ -121,10 +123,11 @@ export class DailyDataRefreshService {
     'fetchMarketPrice' | 'fetchHashRate' | 'fetchDifficulty' | 'fetchCoinDaysDestroyed' | 'fetchTransactionFees' | 'fetchTransactionVolumeUsd' | 'fetchMinersRevenueUsd'
   >;
   private readonly fearGreedClient: Pick<FearGreedClient, 'fetchLatest'>;
-  private readonly bitcoinDataClient: Pick<BitcoinDataClient, 'fetchMvrvZScore' | 'fetchRealizedPrice' | 'fetchVddMultiple' | 'fetchCvdd' | 'fetchBalancedPrice' | 'fetchTerminalPrice'>;
+  private readonly bitcoinDataClient: Pick<BitcoinDataClient, 'fetchMvrvZScore' | 'fetchRealizedPrice' | 'fetchVddMultiple' | 'fetchCvdd' | 'fetchBalancedPrice' | 'fetchTerminalPrice' | 'fetchLthSopr' | 'fetchSthSopr'>;
   private readonly coinMetricsClient: Pick<CoinMetricsClient, 'fetchExchangeReserveLatest' | 'fetchExchangeNetflowLatest'>;
   private readonly binanceFuturesClient: Pick<BinanceFuturesClient, 'fetchFundingRateLatest'>;
   private readonly bybitClient: Pick<BybitClient, 'fetchOpenInterestLatest'>;
+  private readonly googleTrendsClient: Pick<GoogleTrendsClient, 'fetchBitcoinSearchInterestLatest'>;
   private readonly excessLiquidityService: ExcessLiquidityService;
   private readonly dxyBitcoinService: DxyBitcoinService;
   private readonly globalM2BitcoinService: GlobalM2BitcoinService;
@@ -143,6 +146,7 @@ export class DailyDataRefreshService {
     this.coinMetricsClient = options.coinMetricsClient ?? new CoinMetricsClient();
     this.binanceFuturesClient = options.binanceFuturesClient ?? new BinanceFuturesClient();
     this.bybitClient = options.bybitClient ?? new BybitClient();
+    this.googleTrendsClient = options.googleTrendsClient ?? new GoogleTrendsClient();
     this.excessLiquidityService = new ExcessLiquidityService({ fredClient: new FredClient() });
     this.dxyBitcoinService = new DxyBitcoinService({ fredClient: new FredClient() });
     this.globalM2BitcoinService = new GlobalM2BitcoinService({ fredClient: new FredClient() });
@@ -306,6 +310,15 @@ export class DailyDataRefreshService {
       )),
       ...(await this.fetchExternalMetric('open_interest_usd', () =>
         this.bybitClient.fetchOpenInterestLatest(),
+      )),
+      ...(await this.fetchExternalMetric('lth_sopr', () =>
+        this.bitcoinDataClient.fetchLthSopr(),
+      )),
+      ...(await this.fetchExternalMetric('sth_sopr', () =>
+        this.bitcoinDataClient.fetchSthSopr(),
+      )),
+      ...(await this.fetchExternalMetric('google_trends_bitcoin', () =>
+        this.googleTrendsClient.fetchBitcoinSearchInterestLatest(),
       )),
       ...(await this.fetchExternalMetric('hash_rate', () =>
         this.fetchBlockchainInfoChartValue(date, () =>

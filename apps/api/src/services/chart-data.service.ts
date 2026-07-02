@@ -1,11 +1,11 @@
-import { BinanceFuturesClient, BitcoinDataClient, BybitClient, CoinMetricsClient } from '@crypto-market-analysis/calculation-engines/data-sources';
+import { BinanceFuturesClient, BitcoinDataClient, BybitClient, CoinMetricsClient, GoogleTrendsClient } from '@crypto-market-analysis/calculation-engines/data-sources';
 import {
   ChartDataRepository,
   type ChartDataRow,
   type ChartTimeframe,
 } from '../repositories/chart-data.repository';
 
-export type ChartId = 'bitcoin-rainbow' | 'pi-cycle-top' | 'stock-to-flow' | 'mvrv-z-score' | 'puell-multiple' | 'vdd-multiple' | 'realized-price' | 'stock-to-income' | '2yr-ma-multiplier' | 'price-forecast-tools' | 'mayer-multiple' | '200-week-ma-heatmap' | 'fear-greed-index' | 'hash-ribbons' | 'difficulty-ribbon' | 'nvt-ratio' | 'thermocap-multiple' | 'excess-liquidity' | 'spx-liquidity' | 'midterm-cycles' | 'global-m2-bitcoin' | 'dxy-bitcoin' | 'exchange-reserve' | 'funding-rate-oi' | 'exchange-netflow';
+export type ChartId = 'bitcoin-rainbow' | 'pi-cycle-top' | 'stock-to-flow' | 'mvrv-z-score' | 'puell-multiple' | 'vdd-multiple' | 'realized-price' | 'stock-to-income' | '2yr-ma-multiplier' | 'price-forecast-tools' | 'mayer-multiple' | '200-week-ma-heatmap' | 'fear-greed-index' | 'hash-ribbons' | 'difficulty-ribbon' | 'nvt-ratio' | 'thermocap-multiple' | 'excess-liquidity' | 'spx-liquidity' | 'midterm-cycles' | 'global-m2-bitcoin' | 'dxy-bitcoin' | 'exchange-reserve' | 'funding-rate-oi' | 'exchange-netflow' | 'realized-cap' | 'google-trends-bitcoin' | 'lth-sth-sopr-split';
 
 export interface BitcoinRainbowChartResponse {
   chartId: 'bitcoin-rainbow';
@@ -262,6 +262,30 @@ export interface ExchangeNetflowChartResponse {
   lastUpdated: string | null;
 }
 
+export interface RealizedCapChartResponse {
+  chartId: 'realized-cap';
+  title: 'Bitcoin Realized Cap';
+  timeframe: ChartTimeframe;
+  dataPoints: { date: string; priceUsd: number; marketCap: number | null; realizedCap: number | null; }[];
+  lastUpdated: string | null;
+}
+
+export interface GoogleTrendsBitcoinChartResponse {
+  chartId: 'google-trends-bitcoin';
+  title: 'Google Trends: Bitcoin Search Interest';
+  timeframe: ChartTimeframe;
+  dataPoints: { date: string; priceUsd: number; searchInterest: number | null; }[];
+  lastUpdated: string | null;
+}
+
+export interface LthSthSoprSplitChartResponse {
+  chartId: 'lth-sth-sopr-split';
+  title: 'LTH-SOPR / STH-SOPR Split';
+  timeframe: ChartTimeframe;
+  dataPoints: { date: string; priceUsd: number; lthSopr: number | null; sthSopr: number | null; }[];
+  lastUpdated: string | null;
+}
+
 export type ChartDataResponse =
   | BitcoinRainbowChartResponse
   | PiCycleTopChartResponse
@@ -287,7 +311,10 @@ export type ChartDataResponse =
   | GlobalM2BitcoinChartResponse
   | DxyBitcoinChartResponse
   | ExchangeReserveChartResponse
-  | ExchangeNetflowChartResponse;
+  | ExchangeNetflowChartResponse
+  | RealizedCapChartResponse
+  | GoogleTrendsBitcoinChartResponse
+  | LthSthSoprSplitChartResponse;
 
 export class ChartDataRequestError extends Error {
   constructor(
@@ -302,10 +329,11 @@ export class ChartDataService {
   constructor(
     private readonly repository: Pick<ChartDataRepository, 'findBitcoinChartData' | 'findExcessLiquidityData' | 'findSpxLiquidityData' | 'findMidtermCyclesData' | 'findGlobalM2BitcoinData' | 'findDxyBitcoinData'>,
     private readonly now: () => Date = () => new Date(),
-    private readonly bitcoinDataClient: Pick<BitcoinDataClient, 'fetchVddMultipleHistory' | 'fetchCvddHistory' | 'fetchBalancedPriceHistory' | 'fetchTerminalPriceHistory'> = new BitcoinDataClient(),
+    private readonly bitcoinDataClient: Pick<BitcoinDataClient, 'fetchVddMultipleHistory' | 'fetchCvddHistory' | 'fetchBalancedPriceHistory' | 'fetchTerminalPriceHistory' | 'fetchLthSoprHistory' | 'fetchSthSoprHistory'> = new BitcoinDataClient(),
     private readonly coinMetricsClient: Pick<CoinMetricsClient, 'fetchMvrvRatioAndPriceHistory' | 'fetchExchangeReserveHistory' | 'fetchExchangeNetflowHistory'> = new CoinMetricsClient(),
     private readonly binanceFuturesClient: Pick<BinanceFuturesClient, 'fetchFundingRateHistory'> = new BinanceFuturesClient(),
     private readonly bybitClient: Pick<BybitClient, 'fetchOpenInterestHistory'> = new BybitClient(),
+    private readonly googleTrendsClient: Pick<GoogleTrendsClient, 'fetchBitcoinSearchInterestHistory'> = new GoogleTrendsClient(),
   ) {}
 
   async getChartData(chartId: ChartId, timeframeInput: unknown): Promise<ChartDataResponse> {
@@ -738,6 +766,72 @@ export class ChartDataService {
       };
     }
 
+    if (chartId === 'realized-cap') {
+      const realizedPriceByDate = await this.getRealizedPriceHistory(rows);
+      const firstRcDate = [...realizedPriceByDate.keys()].sort()[0] ?? '2010-07-18';
+      const startDate = timeframe === 'all' ? firstRcDate : getTimeframeStartDate(timeframe, this.now());
+      return {
+        chartId: 'realized-cap',
+        title: 'Bitcoin Realized Cap',
+        timeframe,
+        dataPoints: rows
+          .filter((r) => r.date >= startDate)
+          .map((r) => {
+            const realizedPrice = realizedPriceByDate.get(r.date) ?? null;
+            const supply = r.circulatingSupply ?? estimateSupplyFromHalvings(r.date);
+            return {
+              date: r.date,
+              priceUsd: r.priceUsd,
+              marketCap: supply > 0 ? r.priceUsd * supply : null,
+              realizedCap: realizedPrice !== null && supply > 0 ? realizedPrice * supply : null,
+            };
+          }),
+        lastUpdated,
+      };
+    }
+
+    if (chartId === 'lth-sth-sopr-split') {
+      const [lthSoprByDate, sthSoprByDate] = await Promise.all([
+        this.getForecastMetricHistory(rows, 'lthSopr', () => this.bitcoinDataClient.fetchLthSoprHistory()),
+        this.getForecastMetricHistory(rows, 'sthSopr', () => this.bitcoinDataClient.fetchSthSoprHistory()),
+      ]);
+      const firstSoprDate = [...lthSoprByDate.keys(), ...sthSoprByDate.keys()].sort()[0] ?? '2022-06-25';
+      const startDate = timeframe === 'all' ? firstSoprDate : getTimeframeStartDate(timeframe, this.now());
+      return {
+        chartId: 'lth-sth-sopr-split',
+        title: 'LTH-SOPR / STH-SOPR Split',
+        timeframe,
+        dataPoints: rows
+          .filter((r) => r.date >= startDate)
+          .map((r) => ({
+            date: r.date,
+            priceUsd: r.priceUsd,
+            lthSopr: lthSoprByDate.get(r.date) ?? null,
+            sthSopr: sthSoprByDate.get(r.date) ?? null,
+          })),
+        lastUpdated,
+      };
+    }
+
+    if (chartId === 'google-trends-bitcoin') {
+      const searchInterestByDate = await this.getGoogleTrendsHistory(rows);
+      const firstTrendsDate = [...searchInterestByDate.keys()].sort()[0] ?? '2010-01-03';
+      const startDate = timeframe === 'all' ? firstTrendsDate : getTimeframeStartDate(timeframe, this.now());
+      return {
+        chartId: 'google-trends-bitcoin',
+        title: 'Google Trends: Bitcoin Search Interest',
+        timeframe,
+        dataPoints: rows
+          .filter((r) => r.date >= startDate)
+          .map((r) => ({
+            date: r.date,
+            priceUsd: r.priceUsd,
+            searchInterest: searchInterestByDate.get(r.date) ?? null,
+          })),
+        lastUpdated,
+      };
+    }
+
     if (chartId === 'stock-to-income') {
       return buildStockToIncomeResponse(rows, timeframe, this.now);
     }
@@ -924,9 +1018,33 @@ export class ChartDataService {
     return openInterestByDate;
   }
 
+  private async getGoogleTrendsHistory(rows: ChartDataRow[]): Promise<Map<string, number>> {
+    const searchInterestByDate = new Map(
+      rows
+        .filter((r): r is ChartDataRow & { googleTrendsBitcoin: number } => r.googleTrendsBitcoin !== null)
+        .map((r) => [r.date, r.googleTrendsBitcoin] as const),
+    );
+    const coverageRatio = rows.length === 0 ? 0 : searchInterestByDate.size / rows.length;
+
+    if (searchInterestByDate.size > 30 && coverageRatio >= 0.95) {
+      return searchInterestByDate;
+    }
+
+    try {
+      const history = await this.googleTrendsClient.fetchBitcoinSearchInterestHistory();
+      for (const point of history) {
+        searchInterestByDate.set(point.date, point.value);
+      }
+    } catch {
+      // Keep stored database values if Google Trends' unofficial endpoint is unavailable.
+    }
+
+    return searchInterestByDate;
+  }
+
   private async getForecastMetricHistory(
     rows: ChartDataRow[],
-    metric: 'cvdd' | 'balancedPrice' | 'terminalPrice',
+    metric: 'cvdd' | 'balancedPrice' | 'terminalPrice' | 'lthSopr' | 'sthSopr',
     fetchHistory: () => Promise<{ date: string; value: number }[]>,
   ): Promise<Map<string, number>> {
     const metricByDate = new Map(

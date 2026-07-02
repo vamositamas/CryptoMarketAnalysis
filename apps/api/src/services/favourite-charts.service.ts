@@ -60,6 +60,9 @@ export const CHART_CATALOG: Record<string, ChartCatalogEntry> = {
   'dxy-bitcoin':         { title: 'DXY vs Bitcoin',                      url: '/charts/dxy-bitcoin' },
   'stock-to-income':     { title: 'Stock-to-Income Ratio',               url: '/charts/stock-to-income' },
   'realized-price':      { title: 'Realized Price',                      url: '/charts/realized-price' },
+  'realized-cap':        { title: 'Bitcoin Realized Cap',                 url: '/charts/realized-cap' },
+  'lth-sth-sopr-split':  { title: 'LTH-SOPR / STH-SOPR Split',            url: '/charts/lth-sth-sopr-split' },
+  'google-trends-bitcoin': { title: 'Google Trends: Bitcoin Search Interest', url: '/charts/google-trends-bitcoin' },
 };
 
 interface FavouriteChartsStore {

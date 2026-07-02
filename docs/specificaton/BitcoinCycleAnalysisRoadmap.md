@@ -5,26 +5,26 @@ buy/sell decision-making, what's missing, and the plan to close the gaps using
 only free data sources. It is a living roadmap, not a one-time spec — update
 the status column as items ship.
 
-## Current coverage (30 charts, as of 2026-07-01)
+## Current coverage (33 charts, as of 2026-07-02)
 
-- **Valuation vs cost basis:** MVRV Z-Score, Realized Price, Stock-to-Flow,
-  Bitcoin Power Law, 200-Week MA Heatmap, Mayer Multiple, 2yr MA Multiplier,
-  Thermocap Multiple, NVT Ratio
-- **Holder profit/loss & flows:** NUPL, SOPR Ratio (LTH/STH), Exchange Reserve,
+- **Valuation vs cost basis:** MVRV Z-Score, Realized Price, Realized Cap,
+  Stock-to-Flow, Bitcoin Power Law, 200-Week MA Heatmap, Mayer Multiple,
+  2yr MA Multiplier, Thermocap Multiple, NVT Ratio
+- **Holder profit/loss & flows:** NUPL, SOPR Ratio (LTH/STH), LTH-SOPR / STH-SOPR
+  Split, Exchange Reserve, Exchange Netflow,
   CVDD / VDD Multiple / Balanced Price / Terminal Price (Price Forecast Tools)
 - **Cycle pattern models:** Bitcoin Rainbow, Pi Cycle Top, Halving Spiral,
   Halving Progress, Compare Bull Markets
 - **Mining/security:** Hash Ribbons, Difficulty Ribbon, Puell Multiple
-- **Sentiment:** Fear & Greed Index
+- **Sentiment:** Fear & Greed Index, Google Trends: Bitcoin Search Interest
 - **Derivatives/leverage:** Funding Rate & Open Interest
 - **Macro overlays:** Excess Liquidity, SPX Liquidity, Global M2 vs Bitcoin,
   DXY vs Bitcoin, Midterm Cycles
 
 This is a strong on-chain + valuation + macro base, now including a first
-derivatives/leverage signal. The remaining gaps are concentrated in
-exchange-flow refinements and a few holder/flow splits — categories most
-on-chain research platforms treat as essential that this app doesn't fully
-touch yet.
+derivatives/leverage signal plus the full Tier 1 and Tier 2 gap lists. Remaining
+gaps are concentrated in Tier 3 (HODL waves, miner reserve, options put/call
+ratio) — lower priority or harder to source free, per the table below.
 
 ## Gap analysis
 
@@ -40,9 +40,9 @@ touch yet.
 
 | # | Chart | Why it matters | Free data source | Status |
 |---|-------|-----------------|-------------------|--------|
-| 4 | **Realized Cap (standalone)** | Market Cap vs Realized Cap growth is a zero-new-source addition — the backend already computes realized price/MVRV internally; this just exposes a different lens on data already ingested. | Derived from existing DB data — no new provider | Not started |
-| 5 | **Google Trends "bitcoin" search interest** | Classic retail-euphoria proxy, complements Fear & Greed. | No official free API anymore — would need an unofficial scraping wrapper (fragile, verify before committing) | Not started |
-| 6 | **LTH-SOPR / STH-SOPR split** | Sharper than the combined SOPR ratio already shipped — short-term-holder panic-selling and long-term-holder distribution mean very different things for cycle stage. | Needs verification: unclear whether CoinMetrics' free/community tier exposes the split metrics separately | Not started |
+| 4 | **Realized Cap (standalone)** | Market Cap vs Realized Cap growth is a zero-new-source addition — the backend already computes realized price/MVRV internally; this just exposes a different lens on data already ingested. | Derived from existing DB data — no new provider | **Shipped** |
+| 5 | **Google Trends "bitcoin" search interest** | Classic retail-euphoria proxy, complements Fear & Greed. | Google Trends' unofficial `explore` + `widgetdata/multiline` endpoints (same technique as the `google-trends-api` package). Undocumented and can change or rate-limit without notice — see implementation notes below. | **Shipped** |
+| 6 | **LTH-SOPR / STH-SOPR split** | Sharper than the combined SOPR ratio already shipped — short-term-holder panic-selling and long-term-holder distribution mean very different things for cycle stage. | CoinMetrics' free/community tier does not expose LTH/STH SOPR split metrics (confirmed — not in their community catalog). Sourced instead from bitcoin-data.com's `/v1/lth-sopr` and `/v1/sth-sopr` endpoints, the same source the existing combined SOPR Ratio chart already uses client-side, now promoted to the standard server-side ingestion pipeline. | **Shipped** |
 
 ### Tier 3 — nice-to-have, lower priority or harder to source free
     
@@ -83,6 +83,61 @@ persisted to `bitcoin_metrics_daily` under `exchange_netflow`, joined into
 (colored red for net inflow, green for net outflow) against a BTC price line,
 with the buy/sell signal derived from the trailing 7-day average rather than a
 single noisy day.
+
+## Implementation notes for Tier 2 #4 (Realized Cap)
+
+Realized Cap needed no new data-source client, no new daily-refresh ingestion, and no
+new `bitcoin_metrics_daily` column — it's a `chart-data.service.ts`-only addition. The
+`realized-cap` branch reuses the existing `getRealizedPriceHistory()` helper (already
+built for the Realized Price chart) and the existing `estimateSupplyFromHalvings()`
+helper (already used by NVT Ratio, Thermocap Multiple, and Price Forecast Tools) to
+compute `marketCap = priceUsd × supply` and `realizedCap = realizedPrice × supply` on
+the fly. The frontend renders both as a dual log-scale line chart, functionally the
+same underlying ratio as the MVRV Z-Score chart, but presented as raw dollar caps
+instead of a standardized score.
+
+## Implementation notes for Tier 2 #6 (LTH-SOPR / STH-SOPR split)
+
+Follows the standard architectural pattern end-to-end. `BitcoinDataClient` gained
+`fetchLthSopr()` / `fetchSthSopr()` (single latest value, for the daily-refresh job)
+and `fetchLthSoprHistory()` / `fetchSthSoprHistory()` (full history, for the
+`chart-data.service.ts` DB-first/live-fallback pattern), calling bitcoin-data.com's
+`lth-sopr` and `sth-sopr` endpoints — the same source the existing combined SOPR
+Ratio chart already fetches directly from the browser. Values are persisted to
+`bitcoin_metrics_daily` under `lth_sopr` / `sth_sopr`, joined into
+`findBitcoinChartData`, and exposed at `GET /api/charts/lth-sth-sopr-split`. Unlike
+the existing SOPR Ratio chart (which only shows the LTH/STH *ratio*), this chart
+plots both cohorts as separate lines against a SOPR-equals-1 reference line, since
+LTH capitulation (SOPR < 1 for long-term holders) and STH stress carry very different
+implications for cycle stage that get blurred together in a single ratio.
+
+## Implementation notes for Tier 2 #5 (Google Trends)
+
+A new `GoogleTrendsClient` (`libs/calculation-engines/data-sources/src/lib/google-trends.client.ts`)
+replicates the two-step flow used by the unofficial `google-trends-api` npm package:
+an `explore` request returns a widget token, then a `widgetdata/multiline` request
+using that token returns the actual "interest over time" series for the worldwide
+"bitcoin" search term, scaled 0-100 relative to the requested date range's peak.
+
+The client always requests the **full history in one call** (2010-01-01 to today)
+rather than a short "latest" window, and re-fetches (and fully overwrites, not
+merges) the whole series whenever DB coverage is thin. This is a deliberate
+deviation from every other chart's incremental-merge pattern: Google Trends
+normalizes values 0-100 *relative to whatever date range is requested*, so a
+short daily "latest" fetch would use a different normalization basis than a
+multi-year historical fetch and the two would not be comparable if merged
+point-by-point. Google Trends also returns weekly (not daily) granularity for
+multi-year ranges, so the frontend chart uses `spanGaps: true` to draw a
+continuous line across the sparser weekly points on a daily x-axis.
+
+This endpoint is genuinely fragile — undocumented, subject to change, and prone to
+rate-limiting or blocking from datacenter IPs (as flagged when this chart was
+scoped). The daily-refresh job wraps it in the same best-effort
+`fetchExternalMetric` pattern used for every other external metric: a failure logs
+a warning and skips that day rather than failing the whole refresh run. If it
+starts failing consistently in production, the chart will simply stop accumulating
+new points rather than break — revisit the endpoint or drop the chart if that
+happens.
 
 ## Why Tier 1 #2 (Bitcoin Dominance & Total Market Cap) was removed
 

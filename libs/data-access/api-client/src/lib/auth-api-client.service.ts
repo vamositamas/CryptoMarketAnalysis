@@ -416,6 +416,50 @@ export interface ExchangeNetflowChartResponse {
   lastUpdated: string | null;
 }
 
+export interface RealizedCapChartDataPoint {
+  date: string;
+  priceUsd: number;
+  marketCap: number | null;
+  realizedCap: number | null;
+}
+
+export interface RealizedCapChartResponse {
+  chartId: 'realized-cap';
+  title: string;
+  timeframe: ChartTimeframe;
+  dataPoints: RealizedCapChartDataPoint[];
+  lastUpdated: string | null;
+}
+
+export interface LthSthSoprSplitChartDataPoint {
+  date: string;
+  priceUsd: number;
+  lthSopr: number | null;
+  sthSopr: number | null;
+}
+
+export interface LthSthSoprSplitChartResponse {
+  chartId: 'lth-sth-sopr-split';
+  title: string;
+  timeframe: ChartTimeframe;
+  dataPoints: LthSthSoprSplitChartDataPoint[];
+  lastUpdated: string | null;
+}
+
+export interface GoogleTrendsBitcoinChartDataPoint {
+  date: string;
+  priceUsd: number;
+  searchInterest: number | null;
+}
+
+export interface GoogleTrendsBitcoinChartResponse {
+  chartId: 'google-trends-bitcoin';
+  title: string;
+  timeframe: ChartTimeframe;
+  dataPoints: GoogleTrendsBitcoinChartDataPoint[];
+  lastUpdated: string | null;
+}
+
 export type ChartAnnotation =
   | {
       id: string;
@@ -1214,6 +1258,24 @@ export class AuthApiClient {
   async getExchangeNetflowChartData(timeframe: ChartTimeframe): Promise<ExchangeNetflowChartResponse> {
     try {
       return await firstValueFrom(this.http.get<ExchangeNetflowChartResponse>('/api/charts/exchange-netflow', { params: { timeframe }, withCredentials: true }));
+    } catch (error) { throw toApiClientError(error); }
+  }
+
+  async getRealizedCapChartData(timeframe: ChartTimeframe): Promise<RealizedCapChartResponse> {
+    try {
+      return await firstValueFrom(this.http.get<RealizedCapChartResponse>('/api/charts/realized-cap', { params: { timeframe }, withCredentials: true }));
+    } catch (error) { throw toApiClientError(error); }
+  }
+
+  async getLthSthSoprSplitChartData(timeframe: ChartTimeframe): Promise<LthSthSoprSplitChartResponse> {
+    try {
+      return await firstValueFrom(this.http.get<LthSthSoprSplitChartResponse>('/api/charts/lth-sth-sopr-split', { params: { timeframe }, withCredentials: true }));
+    } catch (error) { throw toApiClientError(error); }
+  }
+
+  async getGoogleTrendsBitcoinChartData(timeframe: ChartTimeframe): Promise<GoogleTrendsBitcoinChartResponse> {
+    try {
+      return await firstValueFrom(this.http.get<GoogleTrendsBitcoinChartResponse>('/api/charts/google-trends-bitcoin', { params: { timeframe }, withCredentials: true }));
     } catch (error) { throw toApiClientError(error); }
   }
 

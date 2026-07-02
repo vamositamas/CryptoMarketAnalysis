@@ -81,6 +81,7 @@ describe('daily data refresh job', () => {
       coinMetricsClient: createCoinMetricsClientStub(),
       binanceFuturesClient: createBinanceFuturesClientStub(),
       bybitClient: createBybitClientStub(),
+      googleTrendsClient: createGoogleTrendsClientStub(),
       database,
       emailService: { sendDailyDataRefreshFailureAlert: jest.fn() },
       alertEvaluationService: createAlertEvaluationServiceStub(),
@@ -150,6 +151,7 @@ describe('daily data refresh job', () => {
       coinMetricsClient: createCoinMetricsClientStub(),
       binanceFuturesClient: createBinanceFuturesClientStub(),
       bybitClient: createBybitClientStub(),
+      googleTrendsClient: createGoogleTrendsClientStub(),
       database,
       emailService: { sendDailyDataRefreshFailureAlert: jest.fn() },
       alertEvaluationService: createAlertEvaluationServiceStub(),
@@ -196,6 +198,8 @@ describe('daily data refresh job', () => {
       fetchCvdd: jest.fn().mockRejectedValue(new Error('not available in test')),
       fetchBalancedPrice: jest.fn().mockRejectedValue(new Error('not available in test')),
       fetchTerminalPrice: jest.fn().mockRejectedValue(new Error('not available in test')),
+      fetchLthSopr: jest.fn().mockRejectedValue(new Error('not available in test')),
+      fetchSthSopr: jest.fn().mockRejectedValue(new Error('not available in test')),
     };
     const blockchainInfoClient = createBlockchainInfoClientStub();
     const service = new DailyDataRefreshService({
@@ -216,6 +220,7 @@ describe('daily data refresh job', () => {
       bybitClient: {
         fetchOpenInterestLatest: jest.fn().mockRejectedValue(new Error('not available in test')),
       },
+      googleTrendsClient: createGoogleTrendsClientStub(),
       database,
       emailService: { sendDailyDataRefreshFailureAlert: jest.fn() },
       alertEvaluationService: createAlertEvaluationServiceStub(),
@@ -275,6 +280,7 @@ describe('daily data refresh job', () => {
       coinMetricsClient: createCoinMetricsClientStub(),
       binanceFuturesClient: createBinanceFuturesClientStub(),
       bybitClient: createBybitClientStub(),
+      googleTrendsClient: createGoogleTrendsClientStub(),
       database,
       emailService: { sendDailyDataRefreshFailureAlert: jest.fn() },
       alertEvaluationService: createAlertEvaluationServiceStub(),
@@ -340,6 +346,7 @@ describe('daily data refresh job', () => {
       coinMetricsClient: createCoinMetricsClientStub(),
       binanceFuturesClient: createBinanceFuturesClientStub(),
       bybitClient: createBybitClientStub(),
+      googleTrendsClient: createGoogleTrendsClientStub(),
       database: {
         query: jest
           .fn()
@@ -435,6 +442,14 @@ function createBitcoinDataClientStub() {
     fetchCvdd: jest.fn().mockRejectedValue(new Error('not available in test')),
     fetchBalancedPrice: jest.fn().mockRejectedValue(new Error('not available in test')),
     fetchTerminalPrice: jest.fn().mockRejectedValue(new Error('not available in test')),
+    fetchLthSopr: jest.fn().mockRejectedValue(new Error('not available in test')),
+    fetchSthSopr: jest.fn().mockRejectedValue(new Error('not available in test')),
+  };
+}
+
+function createGoogleTrendsClientStub() {
+  return {
+    fetchBitcoinSearchInterestLatest: jest.fn().mockRejectedValue(new Error('not available in test')),
   };
 }
 

@@ -7,7 +7,7 @@ interface ChartsRouterOptions {
   chartDataService?: Pick<ChartDataService, 'getChartData'>;
 }
 
-const CHART_IDS: ChartId[] = ['bitcoin-rainbow', 'pi-cycle-top', 'stock-to-flow', 'mvrv-z-score', 'puell-multiple', 'vdd-multiple', 'realized-price', 'stock-to-income', '2yr-ma-multiplier', 'price-forecast-tools', 'mayer-multiple', '200-week-ma-heatmap', 'fear-greed-index', 'hash-ribbons', 'difficulty-ribbon', 'nvt-ratio', 'thermocap-multiple', 'excess-liquidity', 'spx-liquidity', 'midterm-cycles', 'global-m2-bitcoin', 'dxy-bitcoin', 'exchange-reserve', 'funding-rate-oi', 'exchange-netflow'];
+const CHART_IDS: ChartId[] = ['bitcoin-rainbow', 'pi-cycle-top', 'stock-to-flow', 'mvrv-z-score', 'puell-multiple', 'vdd-multiple', 'realized-price', 'stock-to-income', '2yr-ma-multiplier', 'price-forecast-tools', 'mayer-multiple', '200-week-ma-heatmap', 'fear-greed-index', 'hash-ribbons', 'difficulty-ribbon', 'nvt-ratio', 'thermocap-multiple', 'excess-liquidity', 'spx-liquidity', 'midterm-cycles', 'global-m2-bitcoin', 'dxy-bitcoin', 'exchange-reserve', 'funding-rate-oi', 'exchange-netflow', 'realized-cap', 'google-trends-bitcoin', 'lth-sth-sopr-split'];
 
 export function createChartsRouter(options: ChartsRouterOptions = {}): Router {
   const router = Router();

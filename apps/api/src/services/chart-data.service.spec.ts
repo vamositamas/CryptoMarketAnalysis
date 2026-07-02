@@ -248,6 +248,8 @@ describe('ChartDataService', () => {
         { date: '2025-06-10', value: 128000 },
         { date: '2025-06-11', value: 129000 },
       ]),
+      fetchLthSoprHistory: jest.fn().mockResolvedValue([]),
+      fetchSthSoprHistory: jest.fn().mockResolvedValue([]),
     };
     const coinMetricsClient = {
       fetchMvrvRatioAndPriceHistory: jest.fn().mockResolvedValue([

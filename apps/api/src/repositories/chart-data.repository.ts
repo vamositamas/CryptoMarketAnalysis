@@ -27,6 +27,9 @@ export interface ChartDataRow {
   fundingRateAvg: number | null;
   openInterestUsd: number | null;
   exchangeNetflow: number | null;
+  lthSopr: number | null;
+  sthSopr: number | null;
+  googleTrendsBitcoin: number | null;
   lastUpdated: string | null;
 }
 
@@ -55,6 +58,9 @@ interface ChartDataDbRow {
   funding_rate_avg: string | number | null;
   open_interest_usd: string | number | null;
   exchange_netflow: string | number | null;
+  lth_sopr: string | number | null;
+  sth_sopr: string | number | null;
+  google_trends_bitcoin: string | number | null;
   last_updated: string | Date | null;
 }
 
@@ -348,6 +354,9 @@ export class ChartDataRepository extends BaseRepository {
           fund_m.metric_value AS funding_rate_avg,
           oi_m.metric_value AS open_interest_usd,
           exnet_m.metric_value AS exchange_netflow,
+          lthsopr_m.metric_value AS lth_sopr,
+          sthsopr_m.metric_value AS sth_sopr,
+          trends_m.metric_value AS google_trends_bitcoin,
           GREATEST(
             price.created_at,
             COALESCE(rainbow.created_at, price.created_at),
@@ -370,7 +379,10 @@ export class ChartDataRepository extends BaseRepository {
             COALESCE(exres_m.created_at, price.created_at),
             COALESCE(fund_m.created_at, price.created_at),
             COALESCE(oi_m.created_at, price.created_at),
-            COALESCE(exnet_m.created_at, price.created_at)
+            COALESCE(exnet_m.created_at, price.created_at),
+            COALESCE(lthsopr_m.created_at, price.created_at),
+            COALESCE(sthsopr_m.created_at, price.created_at),
+            COALESCE(trends_m.created_at, price.created_at)
           ) AS last_updated
         FROM bitcoin_price_daily price
         LEFT JOIN bitcoin_metrics_daily rainbow
@@ -436,6 +448,15 @@ export class ChartDataRepository extends BaseRepository {
         LEFT JOIN bitcoin_metrics_daily exnet_m
           ON exnet_m.date = price.date
           AND exnet_m.metric_name = 'exchange_netflow'
+        LEFT JOIN bitcoin_metrics_daily lthsopr_m
+          ON lthsopr_m.date = price.date
+          AND lthsopr_m.metric_name = 'lth_sopr'
+        LEFT JOIN bitcoin_metrics_daily sthsopr_m
+          ON sthsopr_m.date = price.date
+          AND sthsopr_m.metric_name = 'sth_sopr'
+        LEFT JOIN bitcoin_metrics_daily trends_m
+          ON trends_m.date = price.date
+          AND trends_m.metric_name = 'google_trends_bitcoin'
         WHERE price.date >= $1::date
         ORDER BY price.date ASC
       `,
@@ -479,6 +500,9 @@ function toChartDataRow(row: ChartDataDbRow): ChartDataRow {
     fundingRateAvg: nullableNumber(row.funding_rate_avg),
     openInterestUsd: nullableNumber(row.open_interest_usd),
     exchangeNetflow: nullableNumber(row.exchange_netflow),
+    lthSopr: nullableNumber(row.lth_sopr),
+    sthSopr: nullableNumber(row.sth_sopr),
+    googleTrendsBitcoin: nullableNumber(row.google_trends_bitcoin),
     lastUpdated: row.last_updated === null ? null : formatTimestamp(row.last_updated),
   };
 }

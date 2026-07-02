@@ -61,6 +61,9 @@ const CHART_CATALOG: Record<string, ChartCatalogEntry> = {
   'midterm-cycles':      { title: 'Midterm Cycles',                     url: '/charts/midterm-cycles',        thumbnailUrl: '/assets/charts/midterm-cycles-thumb.svg' },
   'stock-to-income':     { title: 'Stock-to-Income Ratio',              url: '/charts/stock-to-income',       thumbnailUrl: '/assets/charts/stock-to-income-thumb.svg' },
   'realized-price':      { title: 'Realized Price',                     url: '/charts/realized-price',        thumbnailUrl: '/assets/charts/realized-price-thumb.svg' },
+  'realized-cap':        { title: 'Bitcoin Realized Cap',                url: '/charts/realized-cap',           thumbnailUrl: '/assets/charts/realized-price-thumb.svg' },
+  'lth-sth-sopr-split':  { title: 'LTH-SOPR / STH-SOPR Split',           url: '/charts/lth-sth-sopr-split',     thumbnailUrl: '/assets/charts/sopr-ratio-thumb.svg' },
+  'google-trends-bitcoin': { title: 'Google Trends: Bitcoin Search Interest', url: '/charts/google-trends-bitcoin', thumbnailUrl: '/assets/charts/fear-greed-index-thumb.svg' },
 };
 
 interface RecentChartsStore {

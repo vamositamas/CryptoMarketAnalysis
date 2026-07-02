@@ -62,6 +62,14 @@ export class BitcoinDataClient {
     return this.fetchLatest('terminal-price', 'terminalPrice', 'Terminal Price');
   }
 
+  async fetchLthSopr(): Promise<BitcoinDataPoint> {
+    return this.fetchLatest('lth-sopr', 'lthSopr', 'LTH SOPR');
+  }
+
+  async fetchSthSopr(): Promise<BitcoinDataPoint> {
+    return this.fetchLatest('sth-sopr', 'sthSopr', 'STH SOPR');
+  }
+
   async fetchMvrvZScoreHistory(): Promise<BitcoinDataPoint[]> {
     return retryWithBackoff(
       async () => {
@@ -177,6 +185,44 @@ export class BitcoinDataClient {
         const rows = (await response.json()) as BitcoinDataApiResponse[];
         return rows
           .map((r) => normalizeHistoryPoint(r, ['terminalPrice', 'terminal_price', 'terminal-price']))
+          .filter((p): p is BitcoinDataPoint => p !== null);
+      },
+      this.retryAttempts,
+      this.retryBaseDelayMs,
+      { sleep: this.sleep, shouldRetry: isRetryableBitcoinDataError },
+    );
+  }
+
+  async fetchLthSoprHistory(): Promise<BitcoinDataPoint[]> {
+    return retryWithBackoff(
+      async () => {
+        const url = new URL('lth-sopr', ensureTrailingSlash(this.baseUrl)).toString();
+        const response = await this.fetchFn(url);
+        if (!response.ok) {
+          throw new BitcoinDataClientError(`LTH SOPR history request failed with status ${response.status}`, response.status);
+        }
+        const rows = (await response.json()) as BitcoinDataApiResponse[];
+        return rows
+          .map((r) => normalizeHistoryPoint(r, ['lthSopr']))
+          .filter((p): p is BitcoinDataPoint => p !== null);
+      },
+      this.retryAttempts,
+      this.retryBaseDelayMs,
+      { sleep: this.sleep, shouldRetry: isRetryableBitcoinDataError },
+    );
+  }
+
+  async fetchSthSoprHistory(): Promise<BitcoinDataPoint[]> {
+    return retryWithBackoff(
+      async () => {
+        const url = new URL('sth-sopr', ensureTrailingSlash(this.baseUrl)).toString();
+        const response = await this.fetchFn(url);
+        if (!response.ok) {
+          throw new BitcoinDataClientError(`STH SOPR history request failed with status ${response.status}`, response.status);
+        }
+        const rows = (await response.json()) as BitcoinDataApiResponse[];
+        return rows
+          .map((r) => normalizeHistoryPoint(r, ['sthSopr']))
           .filter((p): p is BitcoinDataPoint => p !== null);
       },
       this.retryAttempts,
