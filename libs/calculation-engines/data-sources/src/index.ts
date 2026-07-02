@@ -4,6 +4,7 @@ export * from './lib/blockchain-info.client';
 export * from './lib/bybit.client';
 export * from './lib/coin-metrics.client';
 export * from './lib/coingecko.client';
+export * from './lib/deribit.client';
 export * from './lib/fear-greed.client';
 export * from './lib/fred.client';
 export * from './lib/google-trends.client';

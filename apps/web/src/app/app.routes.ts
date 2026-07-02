@@ -127,7 +127,7 @@ import { LegalDialogService } from './services/legal-dialog.service';
 
     <!-- Indicators strip -->
     <div class="lp-strip" aria-label="Available analytical models" role="list">
-      <span class="lp-strip__label" aria-hidden="true" i18n="Indicators strip label@@landing.stripLabel">Models (36)</span>
+      <span class="lp-strip__label" aria-hidden="true" i18n="Indicators strip label@@landing.stripLabel">Models (40)</span>
       <ul class="lp-strip__list">
         <li tabindex="0" data-tooltip="Compares Bitcoin market value with realized value to highlight historically overheated or undervalued cycle zones.">
           MVRV Z-Score
@@ -276,6 +276,38 @@ import { LegalDialogService } from './services/legal-dialog.service';
           i18n="Landing Google Trends label@@landing.model.googleTrendsBitcoin"
         >
           Google Trends: Bitcoin
+        </li>
+        <li
+          tabindex="0"
+          data-tooltip="Annualized 30-day / 90-day price volatility computed from BTC's own price history — volatility compression has historically preceded large moves in either direction."
+          i18n-data-tooltip="Landing Realized Volatility tooltip@@landing.model.realizedVolatility.tooltip"
+          i18n="Landing Realized Volatility label@@landing.model.realizedVolatility"
+        >
+          Realized Volatility
+        </li>
+        <li
+          tabindex="0"
+          data-tooltip="Unique daily active addresses — a fundamentals-based network usage trend, independent of the valuation-ratio charts elsewhere in this library."
+          i18n-data-tooltip="Landing Active Addresses tooltip@@landing.model.activeAddresses.tooltip"
+          i18n="Landing Active Addresses label@@landing.model.activeAddresses"
+        >
+          Active Addresses
+        </li>
+        <li
+          tabindex="0"
+          data-tooltip="Total network computational power — a raw miner-investment and network-security trend, complementing Hash Ribbons and Puell Multiple."
+          i18n-data-tooltip="Landing Hash Rate tooltip@@landing.model.hashRate.tooltip"
+          i18n="Landing Hash Rate label@@landing.model.hashRate"
+        >
+          Hash Rate
+        </li>
+        <li
+          tabindex="0"
+          data-tooltip="Deribit's options-implied volatility index (DVOL) — a forward-looking counterpart to Realized Volatility, with history since 2021 only."
+          i18n-data-tooltip="Landing BTC DVOL tooltip@@landing.model.btcDvol.tooltip"
+          i18n="Landing BTC DVOL label@@landing.model.btcDvol"
+        >
+          Implied Volatility (DVOL)
         </li>
       </ul>
     </div>
@@ -3941,6 +3973,38 @@ export const appRoutes: Route[] = [
     loadComponent: () =>
       import('./components/google-trends-bitcoin-chart-page/google-trends-bitcoin-chart-page.component').then(
         (m) => m.GoogleTrendsBitcoinChartPageComponent,
+      ),
+  },
+  {
+    path: 'charts/realized-volatility',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/realized-volatility-chart-page/realized-volatility-chart-page.component').then(
+        (m) => m.RealizedVolatilityChartPageComponent,
+      ),
+  },
+  {
+    path: 'charts/active-addresses',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/active-addresses-chart-page/active-addresses-chart-page.component').then(
+        (m) => m.ActiveAddressesChartPageComponent,
+      ),
+  },
+  {
+    path: 'charts/hash-rate',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/hash-rate-chart-page/hash-rate-chart-page.component').then(
+        (m) => m.HashRateChartPageComponent,
+      ),
+  },
+  {
+    path: 'charts/btc-dvol',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/btc-dvol-chart-page/btc-dvol-chart-page.component').then(
+        (m) => m.BtcDvolChartPageComponent,
       ),
   },
   {

@@ -460,6 +460,63 @@ export interface GoogleTrendsBitcoinChartResponse {
   lastUpdated: string | null;
 }
 
+export interface RealizedVolatilityChartDataPoint {
+  date: string;
+  priceUsd: number;
+  volatility30d: number | null;
+  volatility90d: number | null;
+}
+
+export interface RealizedVolatilityChartResponse {
+  chartId: 'realized-volatility';
+  title: string;
+  timeframe: ChartTimeframe;
+  dataPoints: RealizedVolatilityChartDataPoint[];
+  lastUpdated: string | null;
+}
+
+export interface ActiveAddressesChartDataPoint {
+  date: string;
+  priceUsd: number;
+  activeAddresses: number | null;
+}
+
+export interface ActiveAddressesChartResponse {
+  chartId: 'active-addresses';
+  title: string;
+  timeframe: ChartTimeframe;
+  dataPoints: ActiveAddressesChartDataPoint[];
+  lastUpdated: string | null;
+}
+
+export interface HashRateChartDataPoint {
+  date: string;
+  priceUsd: number;
+  hashRate: number | null;
+}
+
+export interface HashRateChartResponse {
+  chartId: 'hash-rate';
+  title: string;
+  timeframe: ChartTimeframe;
+  dataPoints: HashRateChartDataPoint[];
+  lastUpdated: string | null;
+}
+
+export interface BtcDvolChartDataPoint {
+  date: string;
+  priceUsd: number;
+  dvol: number | null;
+}
+
+export interface BtcDvolChartResponse {
+  chartId: 'btc-dvol';
+  title: string;
+  timeframe: ChartTimeframe;
+  dataPoints: BtcDvolChartDataPoint[];
+  lastUpdated: string | null;
+}
+
 export type ChartAnnotation =
   | {
       id: string;
@@ -1276,6 +1333,30 @@ export class AuthApiClient {
   async getGoogleTrendsBitcoinChartData(timeframe: ChartTimeframe): Promise<GoogleTrendsBitcoinChartResponse> {
     try {
       return await firstValueFrom(this.http.get<GoogleTrendsBitcoinChartResponse>('/api/charts/google-trends-bitcoin', { params: { timeframe }, withCredentials: true }));
+    } catch (error) { throw toApiClientError(error); }
+  }
+
+  async getRealizedVolatilityChartData(timeframe: ChartTimeframe): Promise<RealizedVolatilityChartResponse> {
+    try {
+      return await firstValueFrom(this.http.get<RealizedVolatilityChartResponse>('/api/charts/realized-volatility', { params: { timeframe }, withCredentials: true }));
+    } catch (error) { throw toApiClientError(error); }
+  }
+
+  async getActiveAddressesChartData(timeframe: ChartTimeframe): Promise<ActiveAddressesChartResponse> {
+    try {
+      return await firstValueFrom(this.http.get<ActiveAddressesChartResponse>('/api/charts/active-addresses', { params: { timeframe }, withCredentials: true }));
+    } catch (error) { throw toApiClientError(error); }
+  }
+
+  async getHashRateChartData(timeframe: ChartTimeframe): Promise<HashRateChartResponse> {
+    try {
+      return await firstValueFrom(this.http.get<HashRateChartResponse>('/api/charts/hash-rate', { params: { timeframe }, withCredentials: true }));
+    } catch (error) { throw toApiClientError(error); }
+  }
+
+  async getBtcDvolChartData(timeframe: ChartTimeframe): Promise<BtcDvolChartResponse> {
+    try {
+      return await firstValueFrom(this.http.get<BtcDvolChartResponse>('/api/charts/btc-dvol', { params: { timeframe }, withCredentials: true }));
     } catch (error) { throw toApiClientError(error); }
   }
 

@@ -1,11 +1,11 @@
-import { BinanceFuturesClient, BitcoinDataClient, BybitClient, CoinMetricsClient, GoogleTrendsClient } from '@crypto-market-analysis/calculation-engines/data-sources';
+import { BinanceFuturesClient, BitcoinDataClient, BybitClient, CoinMetricsClient, DeribitClient, GoogleTrendsClient } from '@crypto-market-analysis/calculation-engines/data-sources';
 import {
   ChartDataRepository,
   type ChartDataRow,
   type ChartTimeframe,
 } from '../repositories/chart-data.repository';
 
-export type ChartId = 'bitcoin-rainbow' | 'pi-cycle-top' | 'stock-to-flow' | 'mvrv-z-score' | 'puell-multiple' | 'vdd-multiple' | 'realized-price' | 'stock-to-income' | '2yr-ma-multiplier' | 'price-forecast-tools' | 'mayer-multiple' | '200-week-ma-heatmap' | 'fear-greed-index' | 'hash-ribbons' | 'difficulty-ribbon' | 'nvt-ratio' | 'thermocap-multiple' | 'excess-liquidity' | 'spx-liquidity' | 'midterm-cycles' | 'global-m2-bitcoin' | 'dxy-bitcoin' | 'exchange-reserve' | 'funding-rate-oi' | 'exchange-netflow' | 'realized-cap' | 'google-trends-bitcoin' | 'lth-sth-sopr-split';
+export type ChartId = 'bitcoin-rainbow' | 'pi-cycle-top' | 'stock-to-flow' | 'mvrv-z-score' | 'puell-multiple' | 'vdd-multiple' | 'realized-price' | 'stock-to-income' | '2yr-ma-multiplier' | 'price-forecast-tools' | 'mayer-multiple' | '200-week-ma-heatmap' | 'fear-greed-index' | 'hash-ribbons' | 'difficulty-ribbon' | 'nvt-ratio' | 'thermocap-multiple' | 'excess-liquidity' | 'spx-liquidity' | 'midterm-cycles' | 'global-m2-bitcoin' | 'dxy-bitcoin' | 'exchange-reserve' | 'funding-rate-oi' | 'exchange-netflow' | 'realized-cap' | 'google-trends-bitcoin' | 'lth-sth-sopr-split' | 'realized-volatility' | 'active-addresses' | 'hash-rate' | 'btc-dvol';
 
 export interface BitcoinRainbowChartResponse {
   chartId: 'bitcoin-rainbow';
@@ -286,6 +286,38 @@ export interface LthSthSoprSplitChartResponse {
   lastUpdated: string | null;
 }
 
+export interface RealizedVolatilityChartResponse {
+  chartId: 'realized-volatility';
+  title: 'Bitcoin Realized Volatility';
+  timeframe: ChartTimeframe;
+  dataPoints: { date: string; priceUsd: number; volatility30d: number | null; volatility90d: number | null; }[];
+  lastUpdated: string | null;
+}
+
+export interface ActiveAddressesChartResponse {
+  chartId: 'active-addresses';
+  title: 'Bitcoin Active Addresses';
+  timeframe: ChartTimeframe;
+  dataPoints: { date: string; priceUsd: number; activeAddresses: number | null; }[];
+  lastUpdated: string | null;
+}
+
+export interface HashRateChartResponse {
+  chartId: 'hash-rate';
+  title: 'Bitcoin Hash Rate';
+  timeframe: ChartTimeframe;
+  dataPoints: { date: string; priceUsd: number; hashRate: number | null; }[];
+  lastUpdated: string | null;
+}
+
+export interface BtcDvolChartResponse {
+  chartId: 'btc-dvol';
+  title: 'Bitcoin Implied Volatility (DVOL)';
+  timeframe: ChartTimeframe;
+  dataPoints: { date: string; priceUsd: number; dvol: number | null; }[];
+  lastUpdated: string | null;
+}
+
 export type ChartDataResponse =
   | BitcoinRainbowChartResponse
   | PiCycleTopChartResponse
@@ -314,7 +346,11 @@ export type ChartDataResponse =
   | ExchangeNetflowChartResponse
   | RealizedCapChartResponse
   | GoogleTrendsBitcoinChartResponse
-  | LthSthSoprSplitChartResponse;
+  | LthSthSoprSplitChartResponse
+  | RealizedVolatilityChartResponse
+  | ActiveAddressesChartResponse
+  | HashRateChartResponse
+  | BtcDvolChartResponse;
 
 export class ChartDataRequestError extends Error {
   constructor(
@@ -330,10 +366,11 @@ export class ChartDataService {
     private readonly repository: Pick<ChartDataRepository, 'findBitcoinChartData' | 'findExcessLiquidityData' | 'findSpxLiquidityData' | 'findMidtermCyclesData' | 'findGlobalM2BitcoinData' | 'findDxyBitcoinData'>,
     private readonly now: () => Date = () => new Date(),
     private readonly bitcoinDataClient: Pick<BitcoinDataClient, 'fetchVddMultipleHistory' | 'fetchCvddHistory' | 'fetchBalancedPriceHistory' | 'fetchTerminalPriceHistory' | 'fetchLthSoprHistory' | 'fetchSthSoprHistory'> = new BitcoinDataClient(),
-    private readonly coinMetricsClient: Pick<CoinMetricsClient, 'fetchMvrvRatioAndPriceHistory' | 'fetchExchangeReserveHistory' | 'fetchExchangeNetflowHistory'> = new CoinMetricsClient(),
+    private readonly coinMetricsClient: Pick<CoinMetricsClient, 'fetchMvrvRatioAndPriceHistory' | 'fetchExchangeReserveHistory' | 'fetchExchangeNetflowHistory' | 'fetchActiveAddressesHistory'> = new CoinMetricsClient(),
     private readonly binanceFuturesClient: Pick<BinanceFuturesClient, 'fetchFundingRateHistory'> = new BinanceFuturesClient(),
     private readonly bybitClient: Pick<BybitClient, 'fetchOpenInterestHistory'> = new BybitClient(),
     private readonly googleTrendsClient: Pick<GoogleTrendsClient, 'fetchBitcoinSearchInterestHistory'> = new GoogleTrendsClient(),
+    private readonly deribitClient: Pick<DeribitClient, 'fetchBtcDvolHistory'> = new DeribitClient(),
   ) {}
 
   async getChartData(chartId: ChartId, timeframeInput: unknown): Promise<ChartDataResponse> {
@@ -832,6 +869,95 @@ export class ChartDataService {
       };
     }
 
+    if (chartId === 'active-addresses') {
+      const activeAddressesByDate = await this.getActiveAddressesHistory(rows);
+      const firstAaDate = [...activeAddressesByDate.keys()].sort()[0] ?? '2009-01-03';
+      const startDate = timeframe === 'all' ? firstAaDate : getTimeframeStartDate(timeframe, this.now());
+      return {
+        chartId: 'active-addresses',
+        title: 'Bitcoin Active Addresses',
+        timeframe,
+        dataPoints: rows
+          .filter((r) => r.date >= startDate)
+          .map((r) => ({
+            date: r.date,
+            priceUsd: r.priceUsd,
+            activeAddresses: activeAddressesByDate.get(r.date) ?? null,
+          })),
+        lastUpdated,
+      };
+    }
+
+    if (chartId === 'btc-dvol') {
+      const dvolByDate = await this.getBtcDvolHistory(rows);
+      const firstDvolDate = [...dvolByDate.keys()].sort()[0] ?? '2021-03-24';
+      const startDate = timeframe === 'all' ? firstDvolDate : getTimeframeStartDate(timeframe, this.now());
+      return {
+        chartId: 'btc-dvol',
+        title: 'Bitcoin Implied Volatility (DVOL)',
+        timeframe,
+        dataPoints: rows
+          .filter((r) => r.date >= startDate)
+          .map((r) => ({
+            date: r.date,
+            priceUsd: r.priceUsd,
+            dvol: dvolByDate.get(r.date) ?? null,
+          })),
+        lastUpdated,
+      };
+    }
+
+    if (chartId === 'hash-rate') {
+      const firstHrDate = rows.find((r) => r.hashRate !== null)?.date ?? '2009-01-09';
+      const startDate = timeframe === 'all' ? firstHrDate : getTimeframeStartDate(timeframe, this.now());
+      return {
+        chartId: 'hash-rate',
+        title: 'Bitcoin Hash Rate',
+        timeframe,
+        dataPoints: rows
+          .filter((r) => r.date >= startDate)
+          .map((r) => ({ date: r.date, priceUsd: r.priceUsd, hashRate: r.hashRate })),
+        lastUpdated,
+      };
+    }
+
+    if (chartId === 'realized-volatility') {
+      const allRows = await this.repository.findBitcoinChartData('all', this.now());
+      const prices = allRows.map((r) => r.priceUsd);
+      const logReturns = prices.map((price, i) => {
+        const previous = i === 0 ? null : prices[i - 1]!;
+        return previous === null || previous <= 0 || price <= 0 ? null : Math.log(price / previous);
+      });
+      const rollingAnnualizedVol = (window: number): (number | null)[] =>
+        logReturns.map((_, i) => {
+          const windowValues = logReturns
+            .slice(Math.max(0, i - window + 1), i + 1)
+            .filter((value): value is number => value !== null);
+          if (windowValues.length < window) return null;
+          const mean = windowValues.reduce((sum, value) => sum + value, 0) / windowValues.length;
+          const variance =
+            windowValues.reduce((sum, value) => sum + (value - mean) ** 2, 0) / windowValues.length;
+          return Math.sqrt(variance) * Math.sqrt(365) * 100;
+        });
+      const volatility30d = rollingAnnualizedVol(30);
+      const volatility90d = rollingAnnualizedVol(90);
+      const allPoints = allRows.map((r, i) => ({
+        date: r.date,
+        priceUsd: r.priceUsd,
+        volatility30d: volatility30d[i] ?? null,
+        volatility90d: volatility90d[i] ?? null,
+      }));
+      const firstVolDate = allPoints.find((p) => p.volatility30d !== null)?.date ?? allRows[0]?.date ?? '2009-01-03';
+      const startDate = timeframe === 'all' ? firstVolDate : getTimeframeStartDate(timeframe, this.now());
+      return {
+        chartId: 'realized-volatility',
+        title: 'Bitcoin Realized Volatility',
+        timeframe,
+        dataPoints: allPoints.filter((p) => p.date >= startDate),
+        lastUpdated: getLastUpdated(allRows),
+      };
+    }
+
     if (chartId === 'stock-to-income') {
       return buildStockToIncomeResponse(rows, timeframe, this.now);
     }
@@ -964,6 +1090,60 @@ export class ChartDataService {
     }
 
     return exchangeNetflowByDate;
+  }
+
+  private async getActiveAddressesHistory(rows: ChartDataRow[]): Promise<Map<string, number>> {
+    const activeAddressesByDate = new Map(
+      rows
+        .filter((r): r is ChartDataRow & { activeAddresses: number } => r.activeAddresses !== null)
+        .map((r) => [r.date, r.activeAddresses] as const),
+    );
+    const coverageRatio = rows.length === 0 ? 0 : activeAddressesByDate.size / rows.length;
+
+    if (activeAddressesByDate.size > 30 && coverageRatio >= 0.95) {
+      return activeAddressesByDate;
+    }
+
+    try {
+      const history = await this.coinMetricsClient.fetchActiveAddressesHistory();
+      for (const point of history) {
+        if (!activeAddressesByDate.has(point.date)) {
+          activeAddressesByDate.set(point.date, point.activeAddresses);
+        }
+      }
+    } catch {
+      // Keep stored database values if the external full-history source is unavailable.
+    }
+
+    return activeAddressesByDate;
+  }
+
+  // DVOL only has ~5 years of history (since 2021-03-24), far short of BTC's full price
+  // history, so the size+coverage-ratio check used by getExchangeNetflowHistory above would
+  // never pass — a size-only threshold is used instead.
+  private async getBtcDvolHistory(rows: ChartDataRow[]): Promise<Map<string, number>> {
+    const dvolByDate = new Map(
+      rows
+        .filter((r): r is ChartDataRow & { btcDvol: number } => r.btcDvol !== null)
+        .map((r) => [r.date, r.btcDvol] as const),
+    );
+
+    if (dvolByDate.size > 30) {
+      return dvolByDate;
+    }
+
+    try {
+      const history = await this.deribitClient.fetchBtcDvolHistory();
+      for (const point of history) {
+        if (!dvolByDate.has(point.date)) {
+          dvolByDate.set(point.date, point.dvol);
+        }
+      }
+    } catch {
+      // Keep stored database values if the external full-history source is unavailable.
+    }
+
+    return dvolByDate;
   }
 
   private async getFundingRateHistory(rows: ChartDataRow[]): Promise<Map<string, number>> {

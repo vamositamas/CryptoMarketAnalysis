@@ -8,6 +8,7 @@ import {
   BybitClient,
   CoinGeckoClient,
   CoinMetricsClient,
+  DeribitClient,
   FearGreedClient,
   FredClient,
   type FredDataPoint,
@@ -68,7 +69,8 @@ interface DailyDataRefreshOptions {
   >;
   fearGreedClient?: Pick<FearGreedClient, 'fetchLatest'>;
   bitcoinDataClient?: Pick<BitcoinDataClient, 'fetchMvrvZScore' | 'fetchRealizedPrice' | 'fetchVddMultiple' | 'fetchCvdd' | 'fetchBalancedPrice' | 'fetchTerminalPrice' | 'fetchLthSopr' | 'fetchSthSopr'>;
-  coinMetricsClient?: Pick<CoinMetricsClient, 'fetchExchangeReserveLatest' | 'fetchExchangeNetflowLatest'>;
+  coinMetricsClient?: Pick<CoinMetricsClient, 'fetchExchangeReserveLatest' | 'fetchExchangeNetflowLatest' | 'fetchActiveAddressesLatest'>;
+  deribitClient?: Pick<DeribitClient, 'fetchBtcDvolLatest'>;
   binanceFuturesClient?: Pick<BinanceFuturesClient, 'fetchFundingRateLatest'>;
   bybitClient?: Pick<BybitClient, 'fetchOpenInterestLatest'>;
   googleTrendsClient?: Pick<GoogleTrendsClient, 'fetchBitcoinSearchInterestLatest'>;
@@ -124,7 +126,8 @@ export class DailyDataRefreshService {
   >;
   private readonly fearGreedClient: Pick<FearGreedClient, 'fetchLatest'>;
   private readonly bitcoinDataClient: Pick<BitcoinDataClient, 'fetchMvrvZScore' | 'fetchRealizedPrice' | 'fetchVddMultiple' | 'fetchCvdd' | 'fetchBalancedPrice' | 'fetchTerminalPrice' | 'fetchLthSopr' | 'fetchSthSopr'>;
-  private readonly coinMetricsClient: Pick<CoinMetricsClient, 'fetchExchangeReserveLatest' | 'fetchExchangeNetflowLatest'>;
+  private readonly coinMetricsClient: Pick<CoinMetricsClient, 'fetchExchangeReserveLatest' | 'fetchExchangeNetflowLatest' | 'fetchActiveAddressesLatest'>;
+  private readonly deribitClient: Pick<DeribitClient, 'fetchBtcDvolLatest'>;
   private readonly binanceFuturesClient: Pick<BinanceFuturesClient, 'fetchFundingRateLatest'>;
   private readonly bybitClient: Pick<BybitClient, 'fetchOpenInterestLatest'>;
   private readonly googleTrendsClient: Pick<GoogleTrendsClient, 'fetchBitcoinSearchInterestLatest'>;
@@ -144,6 +147,7 @@ export class DailyDataRefreshService {
     this.fearGreedClient = options.fearGreedClient ?? new FearGreedClient();
     this.bitcoinDataClient = options.bitcoinDataClient ?? new BitcoinDataClient();
     this.coinMetricsClient = options.coinMetricsClient ?? new CoinMetricsClient();
+    this.deribitClient = options.deribitClient ?? new DeribitClient();
     this.binanceFuturesClient = options.binanceFuturesClient ?? new BinanceFuturesClient();
     this.bybitClient = options.bybitClient ?? new BybitClient();
     this.googleTrendsClient = options.googleTrendsClient ?? new GoogleTrendsClient();
@@ -304,6 +308,12 @@ export class DailyDataRefreshService {
       )),
       ...(await this.fetchExternalMetric('exchange_netflow', () =>
         this.coinMetricsClient.fetchExchangeNetflowLatest(),
+      )),
+      ...(await this.fetchExternalMetric('active_addresses', () =>
+        this.coinMetricsClient.fetchActiveAddressesLatest(),
+      )),
+      ...(await this.fetchExternalMetric('btc_dvol', () =>
+        this.deribitClient.fetchBtcDvolLatest(),
       )),
       ...(await this.fetchExternalMetric('funding_rate_avg', () =>
         this.binanceFuturesClient.fetchFundingRateLatest(),

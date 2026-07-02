@@ -30,6 +30,8 @@ export interface ChartDataRow {
   lthSopr: number | null;
   sthSopr: number | null;
   googleTrendsBitcoin: number | null;
+  activeAddresses: number | null;
+  btcDvol: number | null;
   lastUpdated: string | null;
 }
 
@@ -61,6 +63,8 @@ interface ChartDataDbRow {
   lth_sopr: string | number | null;
   sth_sopr: string | number | null;
   google_trends_bitcoin: string | number | null;
+  active_addresses: string | number | null;
+  btc_dvol: string | number | null;
   last_updated: string | Date | null;
 }
 
@@ -357,6 +361,8 @@ export class ChartDataRepository extends BaseRepository {
           lthsopr_m.metric_value AS lth_sopr,
           sthsopr_m.metric_value AS sth_sopr,
           trends_m.metric_value AS google_trends_bitcoin,
+          aa_m.metric_value AS active_addresses,
+          dvol_m.metric_value AS btc_dvol,
           GREATEST(
             price.created_at,
             COALESCE(rainbow.created_at, price.created_at),
@@ -382,7 +388,9 @@ export class ChartDataRepository extends BaseRepository {
             COALESCE(exnet_m.created_at, price.created_at),
             COALESCE(lthsopr_m.created_at, price.created_at),
             COALESCE(sthsopr_m.created_at, price.created_at),
-            COALESCE(trends_m.created_at, price.created_at)
+            COALESCE(trends_m.created_at, price.created_at),
+            COALESCE(aa_m.created_at, price.created_at),
+            COALESCE(dvol_m.created_at, price.created_at)
           ) AS last_updated
         FROM bitcoin_price_daily price
         LEFT JOIN bitcoin_metrics_daily rainbow
@@ -457,6 +465,12 @@ export class ChartDataRepository extends BaseRepository {
         LEFT JOIN bitcoin_metrics_daily trends_m
           ON trends_m.date = price.date
           AND trends_m.metric_name = 'google_trends_bitcoin'
+        LEFT JOIN bitcoin_metrics_daily aa_m
+          ON aa_m.date = price.date
+          AND aa_m.metric_name = 'active_addresses'
+        LEFT JOIN bitcoin_metrics_daily dvol_m
+          ON dvol_m.date = price.date
+          AND dvol_m.metric_name = 'btc_dvol'
         WHERE price.date >= $1::date
         ORDER BY price.date ASC
       `,
@@ -503,6 +517,8 @@ function toChartDataRow(row: ChartDataDbRow): ChartDataRow {
     lthSopr: nullableNumber(row.lth_sopr),
     sthSopr: nullableNumber(row.sth_sopr),
     googleTrendsBitcoin: nullableNumber(row.google_trends_bitcoin),
+    activeAddresses: nullableNumber(row.active_addresses),
+    btcDvol: nullableNumber(row.btc_dvol),
     lastUpdated: row.last_updated === null ? null : formatTimestamp(row.last_updated),
   };
 }

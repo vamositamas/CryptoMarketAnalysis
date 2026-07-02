@@ -339,6 +339,42 @@ const CHARTS: ChartLibraryItem[] = [
       $localize`:Chart google-trends-bitcoin description@@charts.library.google-trends-bitcoin.description:Tracks worldwide Google search interest for "bitcoin", a classic retail-euphoria proxy that complements the Fear & Greed Index.`,
     thumbnailClass: 'fear-greed-index',
   },
+  {
+    id: 'realized-volatility',
+    title: $localize`:Chart realized-volatility title@@charts.library.realized-volatility.title:Bitcoin: Realized Volatility`,
+    category: 'cycle',
+    signal: $localize`:Chart realized-volatility signal@@charts.library.realized-volatility.signal:Volatility compression and turbulence regimes`,
+    description:
+      $localize`:Chart realized-volatility description@@charts.library.realized-volatility.description:Annualized 30-day and 90-day realized volatility, computed from BTC's own price history. Not directional — both tops and bottoms show elevated readings — but volatility compression has historically preceded large moves in either direction.`,
+    thumbnailClass: 'thermocap-multiple',
+  },
+  {
+    id: 'active-addresses',
+    title: $localize`:Chart active-addresses title@@charts.library.active-addresses.title:Bitcoin: Active Addresses`,
+    category: 'cycle',
+    signal: $localize`:Chart active-addresses signal@@charts.library.active-addresses.signal:Network usage and adoption trend`,
+    description:
+      $localize`:Chart active-addresses description@@charts.library.active-addresses.description:Unique daily active addresses, a fundamentals-based measure of network usage independent of the valuation-ratio charts elsewhere in this library. Falling usage while price rises is a classic late-cycle divergence warning.`,
+    thumbnailClass: 'exchange-reserve',
+  },
+  {
+    id: 'hash-rate',
+    title: $localize`:Chart hash-rate title@@charts.library.hash-rate.title:Bitcoin: Hash Rate`,
+    category: 'cycle',
+    signal: $localize`:Chart hash-rate signal@@charts.library.hash-rate.signal:Miner investment and network security trend`,
+    description:
+      $localize`:Chart hash-rate description@@charts.library.hash-rate.description:Total network computational power, the raw series behind the existing Hash Ribbons and Puell Multiple charts. A rising trend reflects growing miner investment and security; sharp drops mark miner capitulation events.`,
+    thumbnailClass: 'hash-ribbons',
+  },
+  {
+    id: 'btc-dvol',
+    title: $localize`:Chart btc-dvol title@@charts.library.btc-dvol.title:Bitcoin: Implied Volatility (DVOL)`,
+    category: 'cycle',
+    signal: $localize`:Chart btc-dvol signal@@charts.library.btc-dvol.signal:Options-implied forward-looking volatility`,
+    description:
+      $localize`:Chart btc-dvol description@@charts.library.btc-dvol.description:Deribit's BTC implied volatility index, derived from options prices — a forward-looking counterpart to Realized Volatility. Note: history only goes back to Deribit's index launch on 2021-03-24.`,
+    thumbnailClass: 'nvt-ratio',
+  },
 ];
 
 const CATEGORY_LABELS: Record<ChartLibraryItem['category'], string> = {

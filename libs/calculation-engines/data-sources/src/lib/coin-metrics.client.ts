@@ -24,6 +24,11 @@ export interface CoinMetricsExchangeNetflowPoint {
   netflow: number;
 }
 
+export interface CoinMetricsActiveAddressesPoint {
+  date: string;
+  activeAddresses: number;
+}
+
 interface CoinMetricsRow {
   asset: string;
   time: string;
@@ -56,6 +61,17 @@ interface CoinMetricsFlowRow {
 
 interface CoinMetricsFlowResponse {
   data: CoinMetricsFlowRow[];
+  next_page_url: string | null;
+}
+
+interface CoinMetricsActiveAddressesRow {
+  asset: string;
+  time: string;
+  AdrActCnt: string | null;
+}
+
+interface CoinMetricsActiveAddressesResponse {
+  data: CoinMetricsActiveAddressesRow[];
   next_page_url: string | null;
 }
 
@@ -257,6 +273,75 @@ export class CoinMetricsClient {
     }
 
     throw new CoinMetricsClientError('CoinMetrics exchange netflow response contained no valid data');
+  }
+
+  // Count of unique BTC addresses active (as sender or receiver) each day — CoinMetrics
+  // community tier metric AdrActCnt, freely available with full history since 2009-01-03.
+  async fetchActiveAddressesHistory(): Promise<CoinMetricsActiveAddressesPoint[]> {
+    const results: CoinMetricsActiveAddressesPoint[] = [];
+    let url: string | null =
+      `${this.baseUrl}/timeseries/asset-metrics?assets=btc&metrics=AdrActCnt&frequency=1d&page_size=10000`;
+
+    while (url !== null) {
+      const pageUrl: string = url;
+      const page: CoinMetricsActiveAddressesResponse = await retryWithBackoff(
+        async (): Promise<CoinMetricsActiveAddressesResponse> => {
+          const response: Response = await this.fetchFn(pageUrl);
+          if (!response.ok) {
+            throw new CoinMetricsClientError(
+              `CoinMetrics request failed with status ${response.status}`,
+              response.status,
+            );
+          }
+          return (await response.json()) as CoinMetricsActiveAddressesResponse;
+        },
+        this.retryAttempts,
+        this.retryBaseDelayMs,
+        { sleep: this.sleep, shouldRetry: isRetryableCoinMetricsError },
+      );
+
+      for (const row of page.data) {
+        const activeAddresses = Number(row.AdrActCnt);
+        if (Number.isFinite(activeAddresses) && activeAddresses > 0) {
+          results.push({ date: row.time.slice(0, 10), activeAddresses });
+        }
+      }
+
+      url = page.next_page_url ?? null;
+    }
+
+    return results;
+  }
+
+  // Lightweight fetch of the most recent active-addresses reading, for the daily refresh job.
+  async fetchActiveAddressesLatest(): Promise<{ date: string; value: number }> {
+    const url = `${this.baseUrl}/timeseries/asset-metrics?assets=btc&metrics=AdrActCnt&frequency=1d&page_size=5`;
+
+    const page = await retryWithBackoff(
+      async (): Promise<CoinMetricsActiveAddressesResponse> => {
+        const response = await this.fetchFn(url);
+        if (!response.ok) {
+          throw new CoinMetricsClientError(
+            `CoinMetrics request failed with status ${response.status}`,
+            response.status,
+          );
+        }
+        return (await response.json()) as CoinMetricsActiveAddressesResponse;
+      },
+      this.retryAttempts,
+      this.retryBaseDelayMs,
+      { sleep: this.sleep, shouldRetry: isRetryableCoinMetricsError },
+    );
+
+    for (let i = page.data.length - 1; i >= 0; i--) {
+      const row = page.data[i]!;
+      const activeAddresses = Number(row.AdrActCnt);
+      if (Number.isFinite(activeAddresses) && activeAddresses > 0) {
+        return { date: row.time.slice(0, 10), value: activeAddresses };
+      }
+    }
+
+    throw new CoinMetricsClientError('CoinMetrics active addresses response contained no valid data');
   }
 }
 

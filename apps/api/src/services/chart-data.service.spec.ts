@@ -71,6 +71,7 @@ describe('ChartDataService', () => {
       ]),
       fetchExchangeReserveHistory: jest.fn().mockResolvedValue([]),
       fetchExchangeNetflowHistory: jest.fn().mockResolvedValue([]),
+      fetchActiveAddressesHistory: jest.fn().mockResolvedValue([]),
     };
 
     await expect(
@@ -107,6 +108,7 @@ describe('ChartDataService', () => {
         { date: '2025-06-11', exchangeReserve: 2_605_000 },
       ]),
       fetchExchangeNetflowHistory: jest.fn().mockResolvedValue([]),
+      fetchActiveAddressesHistory: jest.fn().mockResolvedValue([]),
     };
 
     await expect(
@@ -143,6 +145,7 @@ describe('ChartDataService', () => {
         { date: '2025-06-10', netflow: 1200 },
         { date: '2025-06-11', netflow: -450 },
       ]),
+      fetchActiveAddressesHistory: jest.fn().mockResolvedValue([]),
     };
 
     await expect(
@@ -258,6 +261,7 @@ describe('ChartDataService', () => {
       ]),
       fetchExchangeReserveHistory: jest.fn().mockResolvedValue([]),
       fetchExchangeNetflowHistory: jest.fn().mockResolvedValue([]),
+      fetchActiveAddressesHistory: jest.fn().mockResolvedValue([]),
     };
 
     await expect(
