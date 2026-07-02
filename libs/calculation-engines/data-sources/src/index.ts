@@ -1,5 +1,7 @@
+export * from './lib/binance-futures.client';
 export * from './lib/bitcoin-data.client';
 export * from './lib/blockchain-info.client';
+export * from './lib/bybit.client';
 export * from './lib/coin-metrics.client';
 export * from './lib/coingecko.client';
 export * from './lib/fear-greed.client';

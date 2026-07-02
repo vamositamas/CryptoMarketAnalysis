@@ -79,6 +79,8 @@ describe('daily data refresh job', () => {
       fearGreedClient: createFearGreedClientStub(),
       bitcoinDataClient: createBitcoinDataClientStub(),
       coinMetricsClient: createCoinMetricsClientStub(),
+      binanceFuturesClient: createBinanceFuturesClientStub(),
+      bybitClient: createBybitClientStub(),
       database,
       emailService: { sendDailyDataRefreshFailureAlert: jest.fn() },
       alertEvaluationService: createAlertEvaluationServiceStub(),
@@ -146,6 +148,8 @@ describe('daily data refresh job', () => {
       fearGreedClient: createFearGreedClientStub(),
       bitcoinDataClient: createBitcoinDataClientStub(),
       coinMetricsClient: createCoinMetricsClientStub(),
+      binanceFuturesClient: createBinanceFuturesClientStub(),
+      bybitClient: createBybitClientStub(),
       database,
       emailService: { sendDailyDataRefreshFailureAlert: jest.fn() },
       alertEvaluationService: createAlertEvaluationServiceStub(),
@@ -204,6 +208,13 @@ describe('daily data refresh job', () => {
       bitcoinDataClient,
       coinMetricsClient: {
         fetchExchangeReserveLatest: jest.fn().mockRejectedValue(new Error('not available in test')),
+        fetchExchangeNetflowLatest: jest.fn().mockRejectedValue(new Error('not available in test')),
+      },
+      binanceFuturesClient: {
+        fetchFundingRateLatest: jest.fn().mockRejectedValue(new Error('not available in test')),
+      },
+      bybitClient: {
+        fetchOpenInterestLatest: jest.fn().mockRejectedValue(new Error('not available in test')),
       },
       database,
       emailService: { sendDailyDataRefreshFailureAlert: jest.fn() },
@@ -262,6 +273,8 @@ describe('daily data refresh job', () => {
       fearGreedClient: { fetchLatest: jest.fn().mockRejectedValue(new Error('service down')) },
       bitcoinDataClient,
       coinMetricsClient: createCoinMetricsClientStub(),
+      binanceFuturesClient: createBinanceFuturesClientStub(),
+      bybitClient: createBybitClientStub(),
       database,
       emailService: { sendDailyDataRefreshFailureAlert: jest.fn() },
       alertEvaluationService: createAlertEvaluationServiceStub(),
@@ -325,6 +338,8 @@ describe('daily data refresh job', () => {
       fearGreedClient: createFearGreedClientStub(),
       bitcoinDataClient: createBitcoinDataClientStub(),
       coinMetricsClient: createCoinMetricsClientStub(),
+      binanceFuturesClient: createBinanceFuturesClientStub(),
+      bybitClient: createBybitClientStub(),
       database: {
         query: jest
           .fn()
@@ -426,6 +441,19 @@ function createBitcoinDataClientStub() {
 function createCoinMetricsClientStub() {
   return {
     fetchExchangeReserveLatest: jest.fn().mockResolvedValue({ date: '2026-06-09', value: 2_600_000 }),
+    fetchExchangeNetflowLatest: jest.fn().mockResolvedValue({ date: '2026-06-09', value: -350 }),
+  };
+}
+
+function createBinanceFuturesClientStub() {
+  return {
+    fetchFundingRateLatest: jest.fn().mockResolvedValue({ date: '2026-06-09', value: 0.0001 }),
+  };
+}
+
+function createBybitClientStub() {
+  return {
+    fetchOpenInterestLatest: jest.fn().mockResolvedValue({ date: '2026-06-09', value: 6_200_000_000 }),
   };
 }
 

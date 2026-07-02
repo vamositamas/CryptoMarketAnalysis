@@ -19,6 +19,11 @@ export interface CoinMetricsExchangeReservePoint {
   exchangeReserve: number;
 }
 
+export interface CoinMetricsExchangeNetflowPoint {
+  date: string;
+  netflow: number;
+}
+
 interface CoinMetricsRow {
   asset: string;
   time: string;
@@ -39,6 +44,18 @@ interface CoinMetricsSupplyRow {
 
 interface CoinMetricsSupplyResponse {
   data: CoinMetricsSupplyRow[];
+  next_page_url: string | null;
+}
+
+interface CoinMetricsFlowRow {
+  asset: string;
+  time: string;
+  FlowInExNtv: string | null;
+  FlowOutExNtv: string | null;
+}
+
+interface CoinMetricsFlowResponse {
+  data: CoinMetricsFlowRow[];
   next_page_url: string | null;
 }
 
@@ -168,6 +185,78 @@ export class CoinMetricsClient {
     }
 
     throw new CoinMetricsClientError('CoinMetrics exchange reserve response contained no valid data');
+  }
+
+  // Daily net exchange flow (inflow minus outflow), aggregated across known exchange wallets —
+  // CoinMetrics community tier metrics FlowInExNtv / FlowOutExNtv. Netflow is computed client-side
+  // since the community API doesn't expose a combined net metric.
+  async fetchExchangeNetflowHistory(): Promise<CoinMetricsExchangeNetflowPoint[]> {
+    const results: CoinMetricsExchangeNetflowPoint[] = [];
+    let url: string | null =
+      `${this.baseUrl}/timeseries/asset-metrics?assets=btc&metrics=FlowInExNtv,FlowOutExNtv&frequency=1d&page_size=10000`;
+
+    while (url !== null) {
+      const pageUrl: string = url;
+      const page: CoinMetricsFlowResponse = await retryWithBackoff(
+        async (): Promise<CoinMetricsFlowResponse> => {
+          const response: Response = await this.fetchFn(pageUrl);
+          if (!response.ok) {
+            throw new CoinMetricsClientError(
+              `CoinMetrics request failed with status ${response.status}`,
+              response.status,
+            );
+          }
+          return (await response.json()) as CoinMetricsFlowResponse;
+        },
+        this.retryAttempts,
+        this.retryBaseDelayMs,
+        { sleep: this.sleep, shouldRetry: isRetryableCoinMetricsError },
+      );
+
+      for (const row of page.data) {
+        const flowIn = Number(row.FlowInExNtv);
+        const flowOut = Number(row.FlowOutExNtv);
+        if (Number.isFinite(flowIn) && Number.isFinite(flowOut)) {
+          results.push({ date: row.time.slice(0, 10), netflow: flowIn - flowOut });
+        }
+      }
+
+      url = page.next_page_url ?? null;
+    }
+
+    return results;
+  }
+
+  // Lightweight fetch of the most recent exchange-netflow reading, for the daily refresh job.
+  async fetchExchangeNetflowLatest(): Promise<{ date: string; value: number }> {
+    const url = `${this.baseUrl}/timeseries/asset-metrics?assets=btc&metrics=FlowInExNtv,FlowOutExNtv&frequency=1d&page_size=5`;
+
+    const page = await retryWithBackoff(
+      async (): Promise<CoinMetricsFlowResponse> => {
+        const response = await this.fetchFn(url);
+        if (!response.ok) {
+          throw new CoinMetricsClientError(
+            `CoinMetrics request failed with status ${response.status}`,
+            response.status,
+          );
+        }
+        return (await response.json()) as CoinMetricsFlowResponse;
+      },
+      this.retryAttempts,
+      this.retryBaseDelayMs,
+      { sleep: this.sleep, shouldRetry: isRetryableCoinMetricsError },
+    );
+
+    for (let i = page.data.length - 1; i >= 0; i--) {
+      const row = page.data[i]!;
+      const flowIn = Number(row.FlowInExNtv);
+      const flowOut = Number(row.FlowOutExNtv);
+      if (Number.isFinite(flowIn) && Number.isFinite(flowOut)) {
+        return { date: row.time.slice(0, 10), value: flowIn - flowOut };
+      }
+    }
+
+    throw new CoinMetricsClientError('CoinMetrics exchange netflow response contained no valid data');
   }
 }
 

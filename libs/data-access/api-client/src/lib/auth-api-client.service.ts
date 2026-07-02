@@ -387,6 +387,35 @@ export interface ExchangeReserveChartResponse {
   lastUpdated: string | null;
 }
 
+export interface FundingRateOpenInterestChartDataPoint {
+  date: string;
+  priceUsd: number;
+  fundingRate: number | null;
+  openInterestUsd: number | null;
+}
+
+export interface FundingRateOpenInterestChartResponse {
+  chartId: 'funding-rate-oi';
+  title: string;
+  timeframe: ChartTimeframe;
+  dataPoints: FundingRateOpenInterestChartDataPoint[];
+  lastUpdated: string | null;
+}
+
+export interface ExchangeNetflowChartDataPoint {
+  date: string;
+  priceUsd: number;
+  exchangeNetflow: number | null;
+}
+
+export interface ExchangeNetflowChartResponse {
+  chartId: 'exchange-netflow';
+  title: string;
+  timeframe: ChartTimeframe;
+  dataPoints: ExchangeNetflowChartDataPoint[];
+  lastUpdated: string | null;
+}
+
 export type ChartAnnotation =
   | {
       id: string;
@@ -1173,6 +1202,18 @@ export class AuthApiClient {
   async getExchangeReserveChartData(timeframe: ChartTimeframe): Promise<ExchangeReserveChartResponse> {
     try {
       return await firstValueFrom(this.http.get<ExchangeReserveChartResponse>('/api/charts/exchange-reserve', { params: { timeframe }, withCredentials: true }));
+    } catch (error) { throw toApiClientError(error); }
+  }
+
+  async getFundingRateOpenInterestChartData(timeframe: ChartTimeframe): Promise<FundingRateOpenInterestChartResponse> {
+    try {
+      return await firstValueFrom(this.http.get<FundingRateOpenInterestChartResponse>('/api/charts/funding-rate-oi', { params: { timeframe }, withCredentials: true }));
+    } catch (error) { throw toApiClientError(error); }
+  }
+
+  async getExchangeNetflowChartData(timeframe: ChartTimeframe): Promise<ExchangeNetflowChartResponse> {
+    try {
+      return await firstValueFrom(this.http.get<ExchangeNetflowChartResponse>('/api/charts/exchange-netflow', { params: { timeframe }, withCredentials: true }));
     } catch (error) { throw toApiClientError(error); }
   }
 

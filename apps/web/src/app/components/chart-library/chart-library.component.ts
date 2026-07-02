@@ -294,6 +294,24 @@ const CHARTS: ChartLibraryItem[] = [
       $localize`:Chart exchange-reserve description@@charts.library.exchange-reserve.description:Tracks the total BTC held on exchanges. Rising reserves imply more coins available for sale (bearish); falling reserves imply accumulation and increasing scarcity (bullish).`,
     thumbnailClass: 'exchange-reserve',
   },
+  {
+    id: 'funding-rate-oi',
+    title: $localize`:Chart funding-rate-oi title@@charts.library.funding-rate-oi.title:Funding Rate & Open Interest`,
+    category: 'cycle',
+    signal: $localize`:Chart funding-rate-oi signal@@charts.library.funding-rate-oi.signal:Derivatives leverage and euphoria`,
+    description:
+      $localize`:Chart funding-rate-oi description@@charts.library.funding-rate-oi.description:Tracks perpetual futures funding rate and open interest as a gauge of leveraged market sentiment. Extreme positive funding with rising open interest has historically marked overheated, squeeze-prone conditions.`,
+    thumbnailClass: 'funding-rate-oi',
+  },
+  {
+    id: 'exchange-netflow',
+    title: $localize`:Chart exchange-netflow title@@charts.library.exchange-netflow.title:Bitcoin: Exchange Netflow`,
+    category: 'cycle',
+    signal: $localize`:Chart exchange-netflow signal@@charts.library.exchange-netflow.signal:Daily flow — leading edge of reserve trend`,
+    description:
+      $localize`:Chart exchange-netflow description@@charts.library.exchange-netflow.description:Tracks the daily net BTC flow into or out of exchanges. Positive netflow implies more coins available for sale (bearish); negative netflow implies accumulation and increasing scarcity (bullish).`,
+    thumbnailClass: 'exchange-netflow',
+  },
 ];
 
 const CATEGORY_LABELS: Record<ChartLibraryItem['category'], string> = {

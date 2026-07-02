@@ -38,6 +38,15 @@ describe('ChartDataRepository', () => {
     expect(database.query).toHaveBeenCalledWith(expect.stringContaining("exres_m.metric_name = 'exchange_reserve'"), [
       '2025-06-15',
     ]);
+    expect(database.query).toHaveBeenCalledWith(expect.stringContaining("fund_m.metric_name = 'funding_rate_avg'"), [
+      '2025-06-15',
+    ]);
+    expect(database.query).toHaveBeenCalledWith(expect.stringContaining("oi_m.metric_name = 'open_interest_usd'"), [
+      '2025-06-15',
+    ]);
+    expect(database.query).toHaveBeenCalledWith(expect.stringContaining("exnet_m.metric_name = 'exchange_netflow'"), [
+      '2025-06-15',
+    ]);
     expect(rows).toMatchObject([
       {
         date: '2025-06-15',

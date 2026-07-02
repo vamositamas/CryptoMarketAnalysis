@@ -222,6 +222,22 @@ import { LegalDialogService } from './services/legal-dialog.service';
         >
           Exchange Reserve
         </li>
+        <li
+          tabindex="0"
+          data-tooltip="Tracks perpetual futures funding rate and open interest as a gauge of leveraged market sentiment. Extreme positive funding with rising open interest has historically marked overheated, squeeze-prone conditions."
+          i18n-data-tooltip="Landing Funding Rate tooltip@@landing.model.fundingRateOi.tooltip"
+          i18n="Landing Funding Rate label@@landing.model.fundingRateOi"
+        >
+          Funding Rate &amp; Open Interest
+        </li>
+        <li
+          tabindex="0"
+          data-tooltip="Tracks the daily net BTC flow into or out of exchanges — the leading edge of the Exchange Reserve trend. Positive netflow implies more coins available for sale (bearish); negative netflow implies accumulation and increasing scarcity (bullish)."
+          i18n-data-tooltip="Landing Exchange Netflow tooltip@@landing.model.exchangeNetflow.tooltip"
+          i18n="Landing Exchange Netflow label@@landing.model.exchangeNetflow"
+        >
+          Exchange Netflow
+        </li>
         <li tabindex="0" data-tooltip="Macro liquidity indicator using money growth and economic growth to identify risk-on conditions.">
           Excess Liquidity
         </li>
@@ -1363,6 +1379,42 @@ export class TermsOfUsePage {}
                         <path d="M 0,255 C 30,248 55,235 80,215 C 100,198 115,175 135,155 C 155,135 170,120 190,118 C 210,125 225,148 245,175 C 262,198 272,225 292,242 C 312,255 327,250 347,232 C 367,212 382,185 402,162 C 422,140 437,122 457,115 C 477,118 492,140 512,168 C 528,192 538,220 558,238 C 578,252 592,252 612,238 C 632,220 647,195 667,172 C 687,150 700,132 720,125 C 738,122 755,132 775,152 C 790,168 797,185 800,195" stroke="#7ab3d4" stroke-width="1.5" fill="none"/>
                         <path d="M 0,175 C 40,172 80,168 120,165 C 160,162 200,160 240,162 C 280,165 320,170 360,172 C 400,174 440,172 480,168 C 520,164 560,158 600,155 C 640,152 680,152 720,156 C 755,160 780,165 800,168" stroke="#1a2e5e" stroke-width="2" fill="none" opacity="0.7"/>
                       </svg>
+                    } @else if (chart.chartId === 'funding-rate-oi') {
+                      <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
+                        <rect width="800" height="360" fill="#fff"/>
+                        <line x1="0" y1="180" x2="800" y2="180" stroke="rgba(180,83,9,0.4)" stroke-width="1" stroke-dasharray="6,4"/>
+                        <path d="M 0,60 C 70,56 130,48 200,60 C 260,70 310,110 380,100 C 440,92 480,50 550,40 C 610,32 670,30 800,20"
+                              stroke="#1f2933" stroke-width="2.5" fill="none"/>
+                        <path d="M 0,190 C 60,170 110,150 160,185 C 210,220 250,140 300,120 C 350,100 400,230 450,210 C 500,195 550,150 600,175 C 650,198 700,160 800,150"
+                              stroke="#f59e0b" stroke-width="2" fill="none"/>
+                        <path d="M 0,330 C 100,326 200,320 300,310 C 400,298 500,270 600,240 C 680,215 740,200 800,190"
+                              stroke="#7c3aed" stroke-width="2.5" fill="none"/>
+                      </svg>
+                    } @else if (chart.chartId === 'exchange-netflow') {
+                      <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
+                        <rect width="800" height="360" fill="#fff"/>
+                        <line x1="0" y1="180" x2="800" y2="180" stroke="rgba(75,85,99,0.4)" stroke-width="1" stroke-dasharray="6,4"/>
+                        <rect x="10" y="140" width="34" height="40" fill="rgba(220,38,38,0.75)"/>
+                        <rect x="54" y="160" width="34" height="20" fill="rgba(22,163,74,0.75)"/>
+                        <rect x="98" y="100" width="34" height="80" fill="rgba(220,38,38,0.75)"/>
+                        <rect x="142" y="180" width="34" height="30" fill="rgba(22,163,74,0.75)"/>
+                        <rect x="186" y="150" width="34" height="30" fill="rgba(220,38,38,0.75)"/>
+                        <rect x="230" y="180" width="34" height="55" fill="rgba(22,163,74,0.75)"/>
+                        <rect x="274" y="120" width="34" height="60" fill="rgba(220,38,38,0.75)"/>
+                        <rect x="318" y="180" width="34" height="15" fill="rgba(22,163,74,0.75)"/>
+                        <rect x="362" y="90" width="34" height="90" fill="rgba(220,38,38,0.75)"/>
+                        <rect x="406" y="180" width="34" height="70" fill="rgba(22,163,74,0.75)"/>
+                        <rect x="450" y="160" width="34" height="20" fill="rgba(220,38,38,0.75)"/>
+                        <rect x="494" y="180" width="34" height="40" fill="rgba(22,163,74,0.75)"/>
+                        <rect x="538" y="110" width="34" height="70" fill="rgba(220,38,38,0.75)"/>
+                        <rect x="582" y="180" width="34" height="25" fill="rgba(22,163,74,0.75)"/>
+                        <rect x="626" y="150" width="34" height="30" fill="rgba(220,38,38,0.75)"/>
+                        <rect x="670" y="180" width="34" height="60" fill="rgba(22,163,74,0.75)"/>
+                        <rect x="714" y="130" width="34" height="50" fill="rgba(220,38,38,0.75)"/>
+                        <rect x="758" y="180" width="34" height="35" fill="rgba(22,163,74,0.75)"/>
+                        <path d="M 0,320 C 80,300 150,260 210,220 C 280,175 340,120 410,95 C 470,74 540,80 600,60 C 660,42 730,36 800,28"
+                              stroke="#1f2933" stroke-width="2.5" fill="none"/>
+                      </svg>
                     }
                   </div>
                   <div class="recent-chart-info">
@@ -1834,6 +1886,42 @@ export class TermsOfUsePage {}
                       <path d="M 0,270 C 30,260 55,240 80,210 C 100,185 110,150 130,120 C 150,90 165,70 185,65 C 205,75 220,120 240,160 C 255,190 265,230 285,255 C 305,270 320,265 340,240 C 360,215 375,180 395,150 C 415,120 430,95 450,80 C 470,75 485,100 505,140 C 520,170 530,210 550,235 C 570,255 585,258 605,240 C 625,218 640,185 660,155 C 680,125 695,100 715,88 C 730,80 748,90 768,118 C 785,142 795,170 800,185" stroke="#e07b39" stroke-width="2" fill="none"/>
                       <path d="M 0,255 C 30,248 55,235 80,215 C 100,198 115,175 135,155 C 155,135 170,120 190,118 C 210,125 225,148 245,175 C 262,198 272,225 292,242 C 312,255 327,250 347,232 C 367,212 382,185 402,162 C 422,140 437,122 457,115 C 477,118 492,140 512,168 C 528,192 538,220 558,238 C 578,252 592,252 612,238 C 632,220 647,195 667,172 C 687,150 700,132 720,125 C 738,122 755,132 775,152 C 790,168 797,185 800,195" stroke="#7ab3d4" stroke-width="1.5" fill="none"/>
                       <path d="M 0,175 C 40,172 80,168 120,165 C 160,162 200,160 240,162 C 280,165 320,170 360,172 C 400,174 440,172 480,168 C 520,164 560,158 600,155 C 640,152 680,152 720,156 C 755,160 780,165 800,168" stroke="#1a2e5e" stroke-width="2" fill="none" opacity="0.7"/>
+                    </svg>
+                  } @else if (chart.chartId === 'funding-rate-oi') {
+                    <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
+                      <rect width="800" height="360" fill="#fff"/>
+                      <line x1="0" y1="180" x2="800" y2="180" stroke="rgba(180,83,9,0.4)" stroke-width="1" stroke-dasharray="6,4"/>
+                      <path d="M 0,60 C 70,56 130,48 200,60 C 260,70 310,110 380,100 C 440,92 480,50 550,40 C 610,32 670,30 800,20"
+                            stroke="#1f2933" stroke-width="2.5" fill="none"/>
+                      <path d="M 0,190 C 60,170 110,150 160,185 C 210,220 250,140 300,120 C 350,100 400,230 450,210 C 500,195 550,150 600,175 C 650,198 700,160 800,150"
+                            stroke="#f59e0b" stroke-width="2" fill="none"/>
+                      <path d="M 0,330 C 100,326 200,320 300,310 C 400,298 500,270 600,240 C 680,215 740,200 800,190"
+                            stroke="#7c3aed" stroke-width="2.5" fill="none"/>
+                    </svg>
+                  } @else if (chart.chartId === 'exchange-netflow') {
+                    <svg viewBox="0 0 800 360" preserveAspectRatio="none" aria-hidden="true">
+                      <rect width="800" height="360" fill="#fff"/>
+                      <line x1="0" y1="180" x2="800" y2="180" stroke="rgba(75,85,99,0.4)" stroke-width="1" stroke-dasharray="6,4"/>
+                      <rect x="10" y="140" width="34" height="40" fill="rgba(220,38,38,0.75)"/>
+                      <rect x="54" y="160" width="34" height="20" fill="rgba(22,163,74,0.75)"/>
+                      <rect x="98" y="100" width="34" height="80" fill="rgba(220,38,38,0.75)"/>
+                      <rect x="142" y="180" width="34" height="30" fill="rgba(22,163,74,0.75)"/>
+                      <rect x="186" y="150" width="34" height="30" fill="rgba(220,38,38,0.75)"/>
+                      <rect x="230" y="180" width="34" height="55" fill="rgba(22,163,74,0.75)"/>
+                      <rect x="274" y="120" width="34" height="60" fill="rgba(220,38,38,0.75)"/>
+                      <rect x="318" y="180" width="34" height="15" fill="rgba(22,163,74,0.75)"/>
+                      <rect x="362" y="90" width="34" height="90" fill="rgba(220,38,38,0.75)"/>
+                      <rect x="406" y="180" width="34" height="70" fill="rgba(22,163,74,0.75)"/>
+                      <rect x="450" y="160" width="34" height="20" fill="rgba(220,38,38,0.75)"/>
+                      <rect x="494" y="180" width="34" height="40" fill="rgba(22,163,74,0.75)"/>
+                      <rect x="538" y="110" width="34" height="70" fill="rgba(220,38,38,0.75)"/>
+                      <rect x="582" y="180" width="34" height="25" fill="rgba(22,163,74,0.75)"/>
+                      <rect x="626" y="150" width="34" height="30" fill="rgba(220,38,38,0.75)"/>
+                      <rect x="670" y="180" width="34" height="60" fill="rgba(22,163,74,0.75)"/>
+                      <rect x="714" y="130" width="34" height="50" fill="rgba(220,38,38,0.75)"/>
+                      <rect x="758" y="180" width="34" height="35" fill="rgba(22,163,74,0.75)"/>
+                      <path d="M 0,320 C 80,300 150,260 210,220 C 280,175 340,120 410,95 C 470,74 540,80 600,60 C 660,42 730,36 800,28"
+                            stroke="#1f2933" stroke-width="2.5" fill="none"/>
                     </svg>
                   }
                 </div>
@@ -3789,6 +3877,22 @@ export const appRoutes: Route[] = [
     loadComponent: () =>
       import('./components/exchange-reserve-chart-page/exchange-reserve-chart-page.component').then(
         (m) => m.ExchangeReserveChartPageComponent,
+      ),
+  },
+  {
+    path: 'charts/funding-rate-oi',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/funding-rate-oi-chart-page/funding-rate-oi-chart-page.component').then(
+        (m) => m.FundingRateOpenInterestChartPageComponent,
+      ),
+  },
+  {
+    path: 'charts/exchange-netflow',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/exchange-netflow-chart-page/exchange-netflow-chart-page.component').then(
+        (m) => m.ExchangeNetflowChartPageComponent,
       ),
   },
   {

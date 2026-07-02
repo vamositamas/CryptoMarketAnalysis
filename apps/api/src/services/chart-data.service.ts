@@ -1,11 +1,11 @@
-import { BitcoinDataClient, CoinMetricsClient } from '@crypto-market-analysis/calculation-engines/data-sources';
+import { BinanceFuturesClient, BitcoinDataClient, BybitClient, CoinMetricsClient } from '@crypto-market-analysis/calculation-engines/data-sources';
 import {
   ChartDataRepository,
   type ChartDataRow,
   type ChartTimeframe,
 } from '../repositories/chart-data.repository';
 
-export type ChartId = 'bitcoin-rainbow' | 'pi-cycle-top' | 'stock-to-flow' | 'mvrv-z-score' | 'puell-multiple' | 'vdd-multiple' | 'realized-price' | 'stock-to-income' | '2yr-ma-multiplier' | 'price-forecast-tools' | 'mayer-multiple' | '200-week-ma-heatmap' | 'fear-greed-index' | 'hash-ribbons' | 'difficulty-ribbon' | 'nvt-ratio' | 'thermocap-multiple' | 'excess-liquidity' | 'spx-liquidity' | 'midterm-cycles' | 'global-m2-bitcoin' | 'dxy-bitcoin' | 'exchange-reserve';
+export type ChartId = 'bitcoin-rainbow' | 'pi-cycle-top' | 'stock-to-flow' | 'mvrv-z-score' | 'puell-multiple' | 'vdd-multiple' | 'realized-price' | 'stock-to-income' | '2yr-ma-multiplier' | 'price-forecast-tools' | 'mayer-multiple' | '200-week-ma-heatmap' | 'fear-greed-index' | 'hash-ribbons' | 'difficulty-ribbon' | 'nvt-ratio' | 'thermocap-multiple' | 'excess-liquidity' | 'spx-liquidity' | 'midterm-cycles' | 'global-m2-bitcoin' | 'dxy-bitcoin' | 'exchange-reserve' | 'funding-rate-oi' | 'exchange-netflow';
 
 export interface BitcoinRainbowChartResponse {
   chartId: 'bitcoin-rainbow';
@@ -246,6 +246,22 @@ export interface ExchangeReserveChartResponse {
   lastUpdated: string | null;
 }
 
+export interface FundingRateOpenInterestChartResponse {
+  chartId: 'funding-rate-oi';
+  title: 'Bitcoin Funding Rate & Open Interest';
+  timeframe: ChartTimeframe;
+  dataPoints: { date: string; priceUsd: number; fundingRate: number | null; openInterestUsd: number | null; }[];
+  lastUpdated: string | null;
+}
+
+export interface ExchangeNetflowChartResponse {
+  chartId: 'exchange-netflow';
+  title: 'Bitcoin Exchange Netflow';
+  timeframe: ChartTimeframe;
+  dataPoints: { date: string; priceUsd: number; exchangeNetflow: number | null; }[];
+  lastUpdated: string | null;
+}
+
 export type ChartDataResponse =
   | BitcoinRainbowChartResponse
   | PiCycleTopChartResponse
@@ -264,12 +280,14 @@ export type ChartDataResponse =
   | DifficultyRibbonChartResponse
   | NvtRatioChartResponse
   | ThermocapMultipleChartResponse
+  | FundingRateOpenInterestChartResponse
   | ExcessLiquidityChartResponse
   | SpxLiquidityChartResponse
   | MidtermCyclesChartResponse
   | GlobalM2BitcoinChartResponse
   | DxyBitcoinChartResponse
-  | ExchangeReserveChartResponse;
+  | ExchangeReserveChartResponse
+  | ExchangeNetflowChartResponse;
 
 export class ChartDataRequestError extends Error {
   constructor(
@@ -285,7 +303,9 @@ export class ChartDataService {
     private readonly repository: Pick<ChartDataRepository, 'findBitcoinChartData' | 'findExcessLiquidityData' | 'findSpxLiquidityData' | 'findMidtermCyclesData' | 'findGlobalM2BitcoinData' | 'findDxyBitcoinData'>,
     private readonly now: () => Date = () => new Date(),
     private readonly bitcoinDataClient: Pick<BitcoinDataClient, 'fetchVddMultipleHistory' | 'fetchCvddHistory' | 'fetchBalancedPriceHistory' | 'fetchTerminalPriceHistory'> = new BitcoinDataClient(),
-    private readonly coinMetricsClient: Pick<CoinMetricsClient, 'fetchMvrvRatioAndPriceHistory' | 'fetchExchangeReserveHistory'> = new CoinMetricsClient(),
+    private readonly coinMetricsClient: Pick<CoinMetricsClient, 'fetchMvrvRatioAndPriceHistory' | 'fetchExchangeReserveHistory' | 'fetchExchangeNetflowHistory'> = new CoinMetricsClient(),
+    private readonly binanceFuturesClient: Pick<BinanceFuturesClient, 'fetchFundingRateHistory'> = new BinanceFuturesClient(),
+    private readonly bybitClient: Pick<BybitClient, 'fetchOpenInterestHistory'> = new BybitClient(),
   ) {}
 
   async getChartData(chartId: ChartId, timeframeInput: unknown): Promise<ChartDataResponse> {
@@ -676,6 +696,48 @@ export class ChartDataService {
       };
     }
 
+    if (chartId === 'funding-rate-oi') {
+      const [fundingRateByDate, openInterestByDate] = await Promise.all([
+        this.getFundingRateHistory(rows),
+        this.getOpenInterestHistory(rows),
+      ]);
+      const firstFundingDate = [...fundingRateByDate.keys()].sort()[0] ?? '2019-09-10';
+      const startDate = timeframe === 'all' ? firstFundingDate : getTimeframeStartDate(timeframe, this.now());
+      return {
+        chartId: 'funding-rate-oi',
+        title: 'Bitcoin Funding Rate & Open Interest',
+        timeframe,
+        dataPoints: rows
+          .filter((r) => r.date >= startDate)
+          .map((r) => ({
+            date: r.date,
+            priceUsd: r.priceUsd,
+            fundingRate: fundingRateByDate.get(r.date) ?? null,
+            openInterestUsd: openInterestByDate.get(r.date) ?? r.openInterestUsd,
+          })),
+        lastUpdated,
+      };
+    }
+
+    if (chartId === 'exchange-netflow') {
+      const exchangeNetflowByDate = await this.getExchangeNetflowHistory(rows);
+      const firstNetflowDate = [...exchangeNetflowByDate.keys()].sort()[0] ?? '2011-04-24';
+      const startDate = timeframe === 'all' ? firstNetflowDate : getTimeframeStartDate(timeframe, this.now());
+      return {
+        chartId: 'exchange-netflow',
+        title: 'Bitcoin Exchange Netflow',
+        timeframe,
+        dataPoints: rows
+          .filter((r) => r.date >= startDate)
+          .map((r) => ({
+            date: r.date,
+            priceUsd: r.priceUsd,
+            exchangeNetflow: exchangeNetflowByDate.get(r.date) ?? null,
+          })),
+        lastUpdated,
+      };
+    }
+
     if (chartId === 'stock-to-income') {
       return buildStockToIncomeResponse(rows, timeframe, this.now);
     }
@@ -782,6 +844,84 @@ export class ChartDataService {
     }
 
     return exchangeReserveByDate;
+  }
+
+  private async getExchangeNetflowHistory(rows: ChartDataRow[]): Promise<Map<string, number>> {
+    const exchangeNetflowByDate = new Map(
+      rows
+        .filter((r): r is ChartDataRow & { exchangeNetflow: number } => r.exchangeNetflow !== null)
+        .map((r) => [r.date, r.exchangeNetflow] as const),
+    );
+    const coverageRatio = rows.length === 0 ? 0 : exchangeNetflowByDate.size / rows.length;
+
+    if (exchangeNetflowByDate.size > 30 && coverageRatio >= 0.95) {
+      return exchangeNetflowByDate;
+    }
+
+    try {
+      const history = await this.coinMetricsClient.fetchExchangeNetflowHistory();
+      for (const point of history) {
+        if (!exchangeNetflowByDate.has(point.date)) {
+          exchangeNetflowByDate.set(point.date, point.netflow);
+        }
+      }
+    } catch {
+      // Keep stored database values if the external full-history source is unavailable.
+    }
+
+    return exchangeNetflowByDate;
+  }
+
+  private async getFundingRateHistory(rows: ChartDataRow[]): Promise<Map<string, number>> {
+    const fundingRateByDate = new Map(
+      rows
+        .filter((r): r is ChartDataRow & { fundingRateAvg: number } => r.fundingRateAvg !== null)
+        .map((r) => [r.date, r.fundingRateAvg] as const),
+    );
+    const coverageRatio = rows.length === 0 ? 0 : fundingRateByDate.size / rows.length;
+
+    if (fundingRateByDate.size > 30 && coverageRatio >= 0.95) {
+      return fundingRateByDate;
+    }
+
+    try {
+      const history = await this.binanceFuturesClient.fetchFundingRateHistory();
+      for (const point of history) {
+        if (!fundingRateByDate.has(point.date)) {
+          fundingRateByDate.set(point.date, point.value);
+        }
+      }
+    } catch {
+      // Keep stored database values if the external full-history source is unavailable.
+    }
+
+    return fundingRateByDate;
+  }
+
+  // Bybit reports open interest in BTC (base currency), not USD — each history point
+  // is converted using that date's own BTC price rather than a separately-fetched
+  // price series, since `rows` already carries the full daily price history.
+  private async getOpenInterestHistory(rows: ChartDataRow[]): Promise<Map<string, number>> {
+    const openInterestByDate = new Map(
+      rows
+        .filter((r): r is ChartDataRow & { openInterestUsd: number } => r.openInterestUsd !== null)
+        .map((r) => [r.date, r.openInterestUsd] as const),
+    );
+    const priceByDate = new Map(rows.map((r) => [r.date, r.priceUsd] as const));
+
+    try {
+      const history = await this.bybitClient.fetchOpenInterestHistory();
+      for (const point of history) {
+        const priceUsd = priceByDate.get(point.date);
+        if (priceUsd !== undefined && priceUsd > 0) {
+          openInterestByDate.set(point.date, point.openInterestBtc * priceUsd);
+        }
+      }
+    } catch {
+      // Keep stored database values if the external source is unavailable.
+    }
+
+    return openInterestByDate;
   }
 
   private async getForecastMetricHistory(

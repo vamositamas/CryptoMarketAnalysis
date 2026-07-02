@@ -70,6 +70,7 @@ describe('ChartDataService', () => {
         { date: '2025-06-11', realizedPrice: 51500 },
       ]),
       fetchExchangeReserveHistory: jest.fn().mockResolvedValue([]),
+      fetchExchangeNetflowHistory: jest.fn().mockResolvedValue([]),
     };
 
     await expect(
@@ -105,6 +106,7 @@ describe('ChartDataService', () => {
         { date: '2025-06-10', exchangeReserve: 2_600_000 },
         { date: '2025-06-11', exchangeReserve: 2_605_000 },
       ]),
+      fetchExchangeNetflowHistory: jest.fn().mockResolvedValue([]),
     };
 
     await expect(
@@ -119,6 +121,86 @@ describe('ChartDataService', () => {
       dataPoints: [
         { date: '2025-06-10', priceUsd: 65000, exchangeReserve: 2_600_000 },
         { date: '2025-06-11', priceUsd: 66000, exchangeReserve: 2_610_000 },
+      ],
+    });
+  });
+
+  it('fills sparse exchange netflow history from CoinMetrics-derived history', async () => {
+    const repository = {
+      findBitcoinChartData: jest.fn().mockResolvedValue([
+        { ...rows[0], date: '2025-06-10', priceUsd: 65000, exchangeNetflow: null },
+        { ...rows[0], date: '2025-06-11', priceUsd: 66000, exchangeNetflow: -500 },
+      ]),
+      findExcessLiquidityData: jest.fn().mockResolvedValue([]),
+      findSpxLiquidityData: jest.fn().mockResolvedValue([]),
+      findMidtermCyclesData: jest.fn().mockResolvedValue([]),
+      findGlobalM2BitcoinData: jest.fn().mockResolvedValue([]), findDxyBitcoinData: jest.fn().mockResolvedValue([]),
+    };
+    const coinMetricsClient = {
+      fetchMvrvRatioAndPriceHistory: jest.fn(),
+      fetchExchangeReserveHistory: jest.fn(),
+      fetchExchangeNetflowHistory: jest.fn().mockResolvedValue([
+        { date: '2025-06-10', netflow: 1200 },
+        { date: '2025-06-11', netflow: -450 },
+      ]),
+    };
+
+    await expect(
+      new ChartDataService(
+        repository,
+        () => new Date('2025-06-12T00:00:00.000Z'),
+        undefined,
+        coinMetricsClient,
+      ).getChartData('exchange-netflow', 'all'),
+    ).resolves.toMatchObject({
+      chartId: 'exchange-netflow',
+      dataPoints: [
+        { date: '2025-06-10', priceUsd: 65000, exchangeNetflow: 1200 },
+        { date: '2025-06-11', priceUsd: 66000, exchangeNetflow: -500 },
+      ],
+    });
+  });
+
+  it('fills sparse funding rate history from Binance-derived history', async () => {
+    const repository = {
+      findBitcoinChartData: jest.fn().mockResolvedValue([
+        { ...rows[0], date: '2025-06-10', priceUsd: 65000, fundingRateAvg: null, openInterestUsd: 6_100_000_000 },
+        { ...rows[0], date: '2025-06-11', priceUsd: 66000, fundingRateAvg: 0.00015, openInterestUsd: 6_200_000_000 },
+      ]),
+      findExcessLiquidityData: jest.fn().mockResolvedValue([]),
+      findSpxLiquidityData: jest.fn().mockResolvedValue([]),
+      findMidtermCyclesData: jest.fn().mockResolvedValue([]),
+      findGlobalM2BitcoinData: jest.fn().mockResolvedValue([]), findDxyBitcoinData: jest.fn().mockResolvedValue([]),
+    };
+    const binanceFuturesClient = {
+      fetchFundingRateHistory: jest.fn().mockResolvedValue([
+        { date: '2025-06-10', value: 0.0001 },
+        { date: '2025-06-11', value: 0.00012 },
+      ]),
+    };
+    // Only covers 2025-06-10 — proves the BTC-denominated live history is converted
+    // to USD using that date's own price and overrides a stored value when present;
+    // 2025-06-11 falls back to the stored database value.
+    const bybitClient = {
+      fetchOpenInterestHistory: jest.fn().mockResolvedValue([
+        { date: '2025-06-10', openInterestBtc: 100 },
+      ]),
+    };
+
+    await expect(
+      new ChartDataService(
+        repository,
+        () => new Date('2025-06-12T00:00:00.000Z'),
+        undefined,
+        undefined,
+        binanceFuturesClient,
+        bybitClient,
+      ).getChartData('funding-rate-oi', 'all'),
+    ).resolves.toMatchObject({
+      chartId: 'funding-rate-oi',
+      dataPoints: [
+        { date: '2025-06-10', priceUsd: 65000, fundingRate: 0.0001, openInterestUsd: 6_500_000 },
+        { date: '2025-06-11', priceUsd: 66000, fundingRate: 0.00015, openInterestUsd: 6_200_000_000 },
       ],
     });
   });
@@ -173,6 +255,7 @@ describe('ChartDataService', () => {
         { date: '2025-06-11', realizedPrice: 52000 },
       ]),
       fetchExchangeReserveHistory: jest.fn().mockResolvedValue([]),
+      fetchExchangeNetflowHistory: jest.fn().mockResolvedValue([]),
     };
 
     await expect(

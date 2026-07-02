@@ -2,8 +2,10 @@ import { createHash } from 'crypto';
 import { Router, type NextFunction, type Request, type Response } from 'express';
 import jwt, { type JwtPayload } from 'jsonwebtoken';
 import {
+  BinanceFuturesClient,
   BitcoinDataClient,
   BlockchainInfoClient,
+  BybitClient,
   CoinGeckoClient,
   CoinMetricsClient,
   FearGreedClient,
@@ -65,7 +67,9 @@ interface DailyDataRefreshOptions {
   >;
   fearGreedClient?: Pick<FearGreedClient, 'fetchLatest'>;
   bitcoinDataClient?: Pick<BitcoinDataClient, 'fetchMvrvZScore' | 'fetchRealizedPrice' | 'fetchVddMultiple' | 'fetchCvdd' | 'fetchBalancedPrice' | 'fetchTerminalPrice'>;
-  coinMetricsClient?: Pick<CoinMetricsClient, 'fetchExchangeReserveLatest'>;
+  coinMetricsClient?: Pick<CoinMetricsClient, 'fetchExchangeReserveLatest' | 'fetchExchangeNetflowLatest'>;
+  binanceFuturesClient?: Pick<BinanceFuturesClient, 'fetchFundingRateLatest'>;
+  bybitClient?: Pick<BybitClient, 'fetchOpenInterestLatest'>;
   database?: Parameters<typeof insertBitcoinPriceDaily>[0];
   emailService?: DailyDataRefreshFailureEmailSender;
   alertEvaluationService?: Pick<AlertEvaluationService, 'evaluateAlerts'>;
@@ -118,7 +122,9 @@ export class DailyDataRefreshService {
   >;
   private readonly fearGreedClient: Pick<FearGreedClient, 'fetchLatest'>;
   private readonly bitcoinDataClient: Pick<BitcoinDataClient, 'fetchMvrvZScore' | 'fetchRealizedPrice' | 'fetchVddMultiple' | 'fetchCvdd' | 'fetchBalancedPrice' | 'fetchTerminalPrice'>;
-  private readonly coinMetricsClient: Pick<CoinMetricsClient, 'fetchExchangeReserveLatest'>;
+  private readonly coinMetricsClient: Pick<CoinMetricsClient, 'fetchExchangeReserveLatest' | 'fetchExchangeNetflowLatest'>;
+  private readonly binanceFuturesClient: Pick<BinanceFuturesClient, 'fetchFundingRateLatest'>;
+  private readonly bybitClient: Pick<BybitClient, 'fetchOpenInterestLatest'>;
   private readonly excessLiquidityService: ExcessLiquidityService;
   private readonly dxyBitcoinService: DxyBitcoinService;
   private readonly globalM2BitcoinService: GlobalM2BitcoinService;
@@ -135,6 +141,8 @@ export class DailyDataRefreshService {
     this.fearGreedClient = options.fearGreedClient ?? new FearGreedClient();
     this.bitcoinDataClient = options.bitcoinDataClient ?? new BitcoinDataClient();
     this.coinMetricsClient = options.coinMetricsClient ?? new CoinMetricsClient();
+    this.binanceFuturesClient = options.binanceFuturesClient ?? new BinanceFuturesClient();
+    this.bybitClient = options.bybitClient ?? new BybitClient();
     this.excessLiquidityService = new ExcessLiquidityService({ fredClient: new FredClient() });
     this.dxyBitcoinService = new DxyBitcoinService({ fredClient: new FredClient() });
     this.globalM2BitcoinService = new GlobalM2BitcoinService({ fredClient: new FredClient() });
@@ -289,6 +297,15 @@ export class DailyDataRefreshService {
       )),
       ...(await this.fetchExternalMetric('exchange_reserve', () =>
         this.coinMetricsClient.fetchExchangeReserveLatest(),
+      )),
+      ...(await this.fetchExternalMetric('exchange_netflow', () =>
+        this.coinMetricsClient.fetchExchangeNetflowLatest(),
+      )),
+      ...(await this.fetchExternalMetric('funding_rate_avg', () =>
+        this.binanceFuturesClient.fetchFundingRateLatest(),
+      )),
+      ...(await this.fetchExternalMetric('open_interest_usd', () =>
+        this.bybitClient.fetchOpenInterestLatest(),
       )),
       ...(await this.fetchExternalMetric('hash_rate', () =>
         this.fetchBlockchainInfoChartValue(date, () =>

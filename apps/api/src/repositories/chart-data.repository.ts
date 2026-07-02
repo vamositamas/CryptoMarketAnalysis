@@ -24,6 +24,9 @@ export interface ChartDataRow {
   transactionVolumeUsd: number | null;
   minersRevenueUsd: number | null;
   exchangeReserve: number | null;
+  fundingRateAvg: number | null;
+  openInterestUsd: number | null;
+  exchangeNetflow: number | null;
   lastUpdated: string | null;
 }
 
@@ -49,6 +52,9 @@ interface ChartDataDbRow {
   transaction_volume_usd: string | number | null;
   miners_revenue_usd: string | number | null;
   exchange_reserve: string | number | null;
+  funding_rate_avg: string | number | null;
+  open_interest_usd: string | number | null;
+  exchange_netflow: string | number | null;
   last_updated: string | Date | null;
 }
 
@@ -339,6 +345,9 @@ export class ChartDataRepository extends BaseRepository {
           txvol_m.metric_value AS transaction_volume_usd,
           minrev_m.metric_value AS miners_revenue_usd,
           exres_m.metric_value AS exchange_reserve,
+          fund_m.metric_value AS funding_rate_avg,
+          oi_m.metric_value AS open_interest_usd,
+          exnet_m.metric_value AS exchange_netflow,
           GREATEST(
             price.created_at,
             COALESCE(rainbow.created_at, price.created_at),
@@ -358,7 +367,10 @@ export class ChartDataRepository extends BaseRepository {
             COALESCE(diff_m.created_at, price.created_at),
             COALESCE(txvol_m.created_at, price.created_at),
             COALESCE(minrev_m.created_at, price.created_at),
-            COALESCE(exres_m.created_at, price.created_at)
+            COALESCE(exres_m.created_at, price.created_at),
+            COALESCE(fund_m.created_at, price.created_at),
+            COALESCE(oi_m.created_at, price.created_at),
+            COALESCE(exnet_m.created_at, price.created_at)
           ) AS last_updated
         FROM bitcoin_price_daily price
         LEFT JOIN bitcoin_metrics_daily rainbow
@@ -415,6 +427,15 @@ export class ChartDataRepository extends BaseRepository {
         LEFT JOIN bitcoin_metrics_daily exres_m
           ON exres_m.date = price.date
           AND exres_m.metric_name = 'exchange_reserve'
+        LEFT JOIN bitcoin_metrics_daily fund_m
+          ON fund_m.date = price.date
+          AND fund_m.metric_name = 'funding_rate_avg'
+        LEFT JOIN bitcoin_metrics_daily oi_m
+          ON oi_m.date = price.date
+          AND oi_m.metric_name = 'open_interest_usd'
+        LEFT JOIN bitcoin_metrics_daily exnet_m
+          ON exnet_m.date = price.date
+          AND exnet_m.metric_name = 'exchange_netflow'
         WHERE price.date >= $1::date
         ORDER BY price.date ASC
       `,
@@ -455,6 +476,9 @@ function toChartDataRow(row: ChartDataDbRow): ChartDataRow {
     transactionVolumeUsd: nullableNumber(row.transaction_volume_usd),
     minersRevenueUsd: nullableNumber(row.miners_revenue_usd),
     exchangeReserve: nullableNumber(row.exchange_reserve),
+    fundingRateAvg: nullableNumber(row.funding_rate_avg),
+    openInterestUsd: nullableNumber(row.open_interest_usd),
+    exchangeNetflow: nullableNumber(row.exchange_netflow),
     lastUpdated: row.last_updated === null ? null : formatTimestamp(row.last_updated),
   };
 }
