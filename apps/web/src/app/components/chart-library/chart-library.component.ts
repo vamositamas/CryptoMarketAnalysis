@@ -4,11 +4,14 @@ import { Router } from '@angular/router';
 interface ChartLibraryItem {
   id: string;
   title: string;
-  category: 'valuation' | 'cycle' | 'movingAverage' | 'macro';
+  category: 'valuation' | 'cycle' | 'holderNetwork' | 'minerHealth' | 'marketStructure' | 'movingAverage' | 'macro';
   description: string;
   signal: string;
   thumbnailClass: string;
 }
+
+type ChartCategory = ChartLibraryItem['category'];
+type ChartLibraryTab = ChartCategory | 'all';
 
 const CHARTS: ChartLibraryItem[] = [
   {
@@ -19,6 +22,16 @@ const CHARTS: ChartLibraryItem[] = [
     signal: $localize`:Chart stock-to-flow signal@@charts.library.stock-to-flow.signal:Scarcity valuation`,
     description:
       $localize`:Chart stock-to-flow description@@charts.library.stock-to-flow.description:Tracks Bitcoin scarcity using circulating supply and issuance flow, with a simplified model price for long-term valuation context.`,
+    thumbnailClass: 'stock-to-flow',
+  },
+  {
+    id: 'stock-to-income',
+    title: $localize`:Chart stock-to-income title@@charts.library.stock-to-income.title:Stock-to-Income Ratio`,
+    category: 'valuation',
+
+    signal: $localize`:Chart stock-to-income signal@@charts.library.stock-to-income.signal:Scarcity valuation with miner revenue`,
+    description:
+      $localize`:Chart stock-to-income description@@charts.library.stock-to-income.description:Extends the stock-to-flow idea by including miner transaction fees in issuance flow, giving another lens on Bitcoin scarcity and model valuation.`,
     thumbnailClass: 'stock-to-flow',
   },
   {
@@ -54,7 +67,7 @@ const CHARTS: ChartLibraryItem[] = [
   {
     id: 'nupl',
     title: $localize`:Chart NUPL title@@charts.library.nupl.title:Bitcoin NUPL`,
-    category: 'cycle',
+    category: 'holderNetwork',
 
     signal: $localize`:Chart NUPL signal@@charts.library.nupl.signal:Unrealized profit/loss cycle phases`,
     description:
@@ -74,7 +87,7 @@ const CHARTS: ChartLibraryItem[] = [
   {
     id: 'sopr-ratio',
     title: $localize`:Chart sopr-ratio title@@charts.library.sopr-ratio.title:SOPR Ratio (LTH/STH)`,
-    category: 'cycle',
+    category: 'holderNetwork',
 
     signal: $localize`:Chart sopr-ratio signal@@charts.library.sopr-ratio.signal:Holder profit-taking comparison`,
     description:
@@ -84,7 +97,7 @@ const CHARTS: ChartLibraryItem[] = [
   {
     id: 'puell-multiple',
     title: $localize`:Chart puell-multiple title@@charts.library.puell-multiple.title:Puell Multiple`,
-    category: 'cycle',
+    category: 'minerHealth',
 
     signal: $localize`:Chart puell-multiple signal@@charts.library.puell-multiple.signal:Miner revenue cycle`,
     description:
@@ -193,7 +206,7 @@ const CHARTS: ChartLibraryItem[] = [
   {
     id: 'fear-greed-index',
     title: $localize`:Chart fear-greed-index title@@charts.library.fear-greed-index.title:Fear & Greed Index`,
-    category: 'cycle',
+    category: 'marketStructure',
 
     signal: $localize`:Chart fear-greed-index signal@@charts.library.fear-greed-index.signal:Market sentiment extremes`,
     description:
@@ -203,7 +216,7 @@ const CHARTS: ChartLibraryItem[] = [
   {
     id: 'hash-ribbons',
     title: $localize`:Chart hash-ribbons title@@charts.library.hash-ribbons.title:Hash Ribbons`,
-    category: 'cycle',
+    category: 'minerHealth',
 
     signal: $localize`:Chart hash-ribbons signal@@charts.library.hash-ribbons.signal:Miner capitulation and recovery`,
     description:
@@ -213,7 +226,7 @@ const CHARTS: ChartLibraryItem[] = [
   {
     id: 'difficulty-ribbon',
     title: $localize`:Chart difficulty-ribbon title@@charts.library.difficulty-ribbon.title:Difficulty Ribbon`,
-    category: 'cycle',
+    category: 'minerHealth',
 
     signal: $localize`:Chart difficulty-ribbon signal@@charts.library.difficulty-ribbon.signal:Miner stress through difficulty compression`,
     description:
@@ -288,7 +301,7 @@ const CHARTS: ChartLibraryItem[] = [
   {
     id: 'exchange-reserve',
     title: $localize`:Chart exchange-reserve title@@charts.library.exchange-reserve.title:Bitcoin: Exchange Reserve`,
-    category: 'cycle',
+    category: 'marketStructure',
     signal: $localize`:Chart exchange-reserve signal@@charts.library.exchange-reserve.signal:Aggregate selling pressure vs scarcity`,
     description:
       $localize`:Chart exchange-reserve description@@charts.library.exchange-reserve.description:Tracks the total BTC held on exchanges. Rising reserves imply more coins available for sale (bearish); falling reserves imply accumulation and increasing scarcity (bullish).`,
@@ -297,7 +310,7 @@ const CHARTS: ChartLibraryItem[] = [
   {
     id: 'funding-rate-oi',
     title: $localize`:Chart funding-rate-oi title@@charts.library.funding-rate-oi.title:Funding Rate & Open Interest`,
-    category: 'cycle',
+    category: 'marketStructure',
     signal: $localize`:Chart funding-rate-oi signal@@charts.library.funding-rate-oi.signal:Derivatives leverage and euphoria`,
     description:
       $localize`:Chart funding-rate-oi description@@charts.library.funding-rate-oi.description:Tracks perpetual futures funding rate and open interest as a gauge of leveraged market sentiment. Extreme positive funding with rising open interest has historically marked overheated, squeeze-prone conditions.`,
@@ -306,7 +319,7 @@ const CHARTS: ChartLibraryItem[] = [
   {
     id: 'exchange-netflow',
     title: $localize`:Chart exchange-netflow title@@charts.library.exchange-netflow.title:Bitcoin: Exchange Netflow`,
-    category: 'cycle',
+    category: 'marketStructure',
     signal: $localize`:Chart exchange-netflow signal@@charts.library.exchange-netflow.signal:Daily flow — leading edge of reserve trend`,
     description:
       $localize`:Chart exchange-netflow description@@charts.library.exchange-netflow.description:Tracks the daily net BTC flow into or out of exchanges. Positive netflow implies more coins available for sale (bearish); negative netflow implies accumulation and increasing scarcity (bullish).`,
@@ -324,7 +337,7 @@ const CHARTS: ChartLibraryItem[] = [
   {
     id: 'lth-sth-sopr-split',
     title: $localize`:Chart lth-sth-sopr-split title@@charts.library.lth-sth-sopr-split.title:LTH-SOPR / STH-SOPR Split`,
-    category: 'cycle',
+    category: 'holderNetwork',
     signal: $localize`:Chart lth-sth-sopr-split signal@@charts.library.lth-sth-sopr-split.signal:Holder profit-taking by cohort`,
     description:
       $localize`:Chart lth-sth-sopr-split description@@charts.library.lth-sth-sopr-split.description:Shows long-term and short-term holder SOPR separately instead of as a combined ratio. LTH capitulation below 1 has historically clustered near major cycle bottoms.`,
@@ -333,7 +346,7 @@ const CHARTS: ChartLibraryItem[] = [
   {
     id: 'google-trends-bitcoin',
     title: $localize`:Chart google-trends-bitcoin title@@charts.library.google-trends-bitcoin.title:Google Trends: Bitcoin Search Interest`,
-    category: 'cycle',
+    category: 'holderNetwork',
     signal: $localize`:Chart google-trends-bitcoin signal@@charts.library.google-trends-bitcoin.signal:Retail search euphoria proxy`,
     description:
       $localize`:Chart google-trends-bitcoin description@@charts.library.google-trends-bitcoin.description:Tracks worldwide Google search interest for "bitcoin", a classic retail-euphoria proxy that complements the Fear & Greed Index.`,
@@ -342,7 +355,7 @@ const CHARTS: ChartLibraryItem[] = [
   {
     id: 'realized-volatility',
     title: $localize`:Chart realized-volatility title@@charts.library.realized-volatility.title:Bitcoin: Realized Volatility`,
-    category: 'cycle',
+    category: 'marketStructure',
     signal: $localize`:Chart realized-volatility signal@@charts.library.realized-volatility.signal:Volatility compression and turbulence regimes`,
     description:
       $localize`:Chart realized-volatility description@@charts.library.realized-volatility.description:Annualized 30-day and 90-day realized volatility, computed from BTC's own price history. Not directional — both tops and bottoms show elevated readings — but volatility compression has historically preceded large moves in either direction.`,
@@ -351,7 +364,7 @@ const CHARTS: ChartLibraryItem[] = [
   {
     id: 'active-addresses',
     title: $localize`:Chart active-addresses title@@charts.library.active-addresses.title:Bitcoin: Active Addresses`,
-    category: 'cycle',
+    category: 'holderNetwork',
     signal: $localize`:Chart active-addresses signal@@charts.library.active-addresses.signal:Network usage and adoption trend`,
     description:
       $localize`:Chart active-addresses description@@charts.library.active-addresses.description:Unique daily active addresses, a fundamentals-based measure of network usage independent of the valuation-ratio charts elsewhere in this library. Falling usage while price rises is a classic late-cycle divergence warning.`,
@@ -360,7 +373,7 @@ const CHARTS: ChartLibraryItem[] = [
   {
     id: 'hash-rate',
     title: $localize`:Chart hash-rate title@@charts.library.hash-rate.title:Bitcoin: Hash Rate`,
-    category: 'cycle',
+    category: 'minerHealth',
     signal: $localize`:Chart hash-rate signal@@charts.library.hash-rate.signal:Miner investment and network security trend`,
     description:
       $localize`:Chart hash-rate description@@charts.library.hash-rate.description:Total network computational power, the raw series behind the existing Hash Ribbons and Puell Multiple charts. A rising trend reflects growing miner investment and security; sharp drops mark miner capitulation events.`,
@@ -369,7 +382,7 @@ const CHARTS: ChartLibraryItem[] = [
   {
     id: 'btc-dvol',
     title: $localize`:Chart btc-dvol title@@charts.library.btc-dvol.title:Bitcoin: Implied Volatility (DVOL)`,
-    category: 'cycle',
+    category: 'marketStructure',
     signal: $localize`:Chart btc-dvol signal@@charts.library.btc-dvol.signal:Options-implied forward-looking volatility`,
     description:
       $localize`:Chart btc-dvol description@@charts.library.btc-dvol.description:Deribit's BTC implied volatility index, derived from options prices — a forward-looking counterpart to Realized Volatility. Note: history only goes back to Deribit's index launch on 2021-03-24.`,
@@ -379,12 +392,20 @@ const CHARTS: ChartLibraryItem[] = [
 
 const CATEGORY_LABELS: Record<ChartLibraryItem['category'], string> = {
   valuation: $localize`:Chart category valuation@@charts.category.valuation:Valuation Models`,
-  cycle: $localize`:Chart category cycle@@charts.category.cycle:Cycle Indicators`,
+  cycle: $localize`:Chart category cycle@@charts.category.cycle:Cycle Models`,
+  holderNetwork: $localize`:Chart category holder network@@charts.category.holderNetwork:Holder & Network`,
+  minerHealth: $localize`:Chart category miner health@@charts.category.minerHealth:Miner Health`,
+  marketStructure: $localize`:Chart category market structure@@charts.category.marketStructure:Market Structure`,
   movingAverage: $localize`:Chart category moving average@@charts.category.movingAverage:Moving Averages`,
   macro: $localize`:Chart category macro@@charts.category.macro:Macro Indicators`,
 };
 
-const CATEGORIES: ChartLibraryItem['category'][] = ['valuation', 'cycle', 'movingAverage', 'macro'];
+const CATEGORIES: ChartCategory[] = ['valuation', 'cycle', 'holderNetwork', 'minerHealth', 'marketStructure', 'movingAverage', 'macro'];
+
+const TAB_LABELS: Record<ChartLibraryTab, string> = {
+  all: $localize`:Chart category all@@charts.category.all:All charts`,
+  ...CATEGORY_LABELS,
+};
 
 @Component({
   selector: 'app-chart-library',
@@ -394,6 +415,7 @@ const CATEGORIES: ChartLibraryItem['category'][] = ['valuation', 'cycle', 'movin
 export class ChartLibraryComponent {
   private readonly router = inject(Router);
   private readonly query = signal('');
+  protected readonly activeTab = signal<ChartLibraryTab>('all');
   protected readonly searchQuery = this.query.asReadonly();
   private readonly filteredCharts = computed(() => {
     const q = this.query().trim().toLowerCase();
@@ -401,15 +423,26 @@ export class ChartLibraryComponent {
       ? CHARTS.filter((c) => c.title.toLowerCase().includes(q) || c.description.toLowerCase().includes(q))
       : CHARTS;
   });
+  protected readonly tabs = computed(() =>
+    (['all', ...CATEGORIES] as ChartLibraryTab[]).map((tab) => ({
+      id: tab,
+      label: TAB_LABELS[tab],
+      count: tab === 'all' ? this.filteredCharts().length : this.filteredCharts().filter((c) => c.category === tab).length,
+    })),
+  );
   protected readonly filteredCategories = computed(() =>
     CATEGORIES.map((category) => ({
       category: CATEGORY_LABELS[category],
-      charts: this.filteredCharts().filter((c) => c.category === category),
+      charts: this.filteredCharts().filter((c) => (this.activeTab() === 'all' || c.category === this.activeTab()) && c.category === category),
     })).filter((group) => group.charts.length > 0),
   );
 
   protected updateSearch(event: Event): void {
     this.query.set((event.target as HTMLInputElement).value);
+  }
+
+  protected selectTab(tab: ChartLibraryTab): void {
+    this.activeTab.set(tab);
   }
 
   protected async openChart(chart: ChartLibraryItem): Promise<void> {

@@ -1987,6 +1987,16 @@ main .charts-tab-count {
   border-radius: 9px;
 }
 
+main .chart-lib-tabs .charts-tab-count {
+  background: #e4ece7;
+  color: #65736f;
+}
+
+main .chart-lib-tabs .charts-tab-btn.active .charts-tab-count {
+  background: #d97706;
+  color: #fff;
+}
+
 main .recent-charts-heading {
   font-size: 1rem;
   font-weight: 600;
@@ -2555,7 +2565,7 @@ main .split-section {
 
 main .chart-lib-page {
   display: grid;
-  gap: 36px;
+  gap: 24px;
   padding: 28px 0 56px;
 }
 
@@ -2575,32 +2585,43 @@ main .chart-lib-header h1 {
 main .chart-lib-search {
   display: flex;
   align-items: center;
+  gap: 0;
+  min-height: 42px;
+  overflow: hidden;
+  border: 1px solid #cbd8d1;
+  border-radius: 8px;
+  background: #ffffff;
   color: #65736f;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+main .chart-lib-search:focus-within {
+  border-color: #145c4b;
+  box-shadow: 0 0 0 3px rgba(20, 92, 75, 0.14);
 }
 
 main .chart-lib-search > svg {
   display: flex;
   flex-shrink: 0;
   width: 38px;
-  height: 42px;
+  height: 40px;
   padding: 13px 11px;
   box-sizing: border-box;
-  border: 1px solid #cbd8d1;
-  border-right: none;
-  border-radius: 8px 0 0 8px;
-  background: #ffffff;
+  border-right: 1px solid #e0e7e2;
   color: #65736f;
 }
 
 main .chart-lib-search input {
   height: 42px;
   min-width: 240px;
-  border-radius: 0 8px 8px 0;
+  border: 0;
+  border-radius: 0;
+  outline: none;
 }
 
 main .chart-lib-category {
   display: grid;
-  gap: 18px;
+  gap: 12px;
 }
 
 main .chart-lib-category-title {
@@ -2614,8 +2635,14 @@ main .chart-lib-category-title {
 
 main .chart-card-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 22px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+@media (max-width: 1320px) {
+  main .chart-card-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 1024px) {
@@ -2632,12 +2659,12 @@ main .chart-card-grid {
 
 main .chart-card {
   display: grid;
-  grid-template-rows: 160px 1fr;
+  grid-template-rows: 112px 1fr;
   overflow: hidden;
   border: 1px solid #dce2dd;
-  border-radius: 14px;
+  border-radius: 8px;
   background: #ffffff;
-  box-shadow: 0 2px 10px rgba(20, 92, 75, 0.07);
+  box-shadow: 0 2px 8px rgba(20, 92, 75, 0.06);
   cursor: pointer;
   transition:
     box-shadow 0.22s ease,
@@ -2645,8 +2672,8 @@ main .chart-card {
 }
 
 main .chart-card:hover {
-  box-shadow: 0 10px 32px rgba(20, 92, 75, 0.16);
-  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(20, 92, 75, 0.14);
+  transform: translateY(-2px);
 }
 
 main .chart-card:focus-visible {
@@ -2688,8 +2715,8 @@ main .chart-card:hover .chart-card-thumb-cta {
 main .chart-card-info {
   display: grid;
   align-content: start;
-  gap: 9px;
-  padding: 18px;
+  gap: 7px;
+  padding: 14px;
 }
 
 main .chart-card-tags {
@@ -2701,25 +2728,32 @@ main .chart-card-tags {
 
 main .chart-card-signal {
   color: #65736f;
-  font-size: 0.74rem;
+  font-size: 0.68rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 main .chart-card-info h3 {
   margin: 0;
   color: #17202a;
-  font-size: 1.05rem;
+  font-size: 0.96rem;
   font-weight: 800;
-  line-height: 1.3;
+  line-height: 1.25;
 }
 
 main .chart-card-info p {
   margin: 0;
   color: #65736f;
-  font-size: 0.875rem;
-  line-height: 1.55;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  font-size: 0.81rem;
+  line-height: 1.45;
 }
 
 main .tier-badge {

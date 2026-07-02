@@ -127,7 +127,7 @@ import { LegalDialogService } from './services/legal-dialog.service';
 
     <!-- Indicators strip -->
     <div class="lp-strip" aria-label="Available analytical models" role="list">
-      <span class="lp-strip__label" aria-hidden="true" i18n="Indicators strip label@@landing.stripLabel">Models (40)</span>
+      <span class="lp-strip__label" aria-hidden="true" i18n="Indicators strip label@@landing.stripLabel">Models (39)</span>
       <ul class="lp-strip__list">
         <li tabindex="0" data-tooltip="Compares Bitcoin market value with realized value to highlight historically overheated or undervalued cycle zones.">
           MVRV Z-Score
@@ -183,9 +183,6 @@ import { LegalDialogService } from './services/legal-dialog.service';
         </li>
         <li tabindex="0" data-tooltip="Average on-chain acquisition price of circulating coins, often used as a cycle support baseline.">
           Realized Price
-        </li>
-        <li tabindex="0" data-tooltip="Long-term moving average used to compare current price against broad market trend.">
-          200-Day MA
         </li>
         <li tabindex="0" data-tooltip="Compares Bitcoin price with the 2-year moving average and multiplier bands for broad buy and sell zones.">
           2-Year MA Multiplier
@@ -3917,6 +3914,14 @@ export const appRoutes: Route[] = [
     loadComponent: () =>
       import('./components/stock-to-flow-chart-page/stock-to-flow-chart-page.component').then(
         (module) => module.StockToFlowChartPageComponent,
+      ),
+  },
+  {
+    path: 'charts/stock-to-income',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./components/stock-to-income-chart-page/stock-to-income-chart-page.component').then(
+        (module) => module.StockToIncomeChartPageComponent,
       ),
   },
   {
