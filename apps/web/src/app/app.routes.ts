@@ -127,7 +127,7 @@ import { LegalDialogService } from './services/legal-dialog.service';
 
     <!-- Indicators strip -->
     <div class="lp-strip" aria-label="Available analytical models" role="list">
-      <span class="lp-strip__label" aria-hidden="true" i18n="Indicators strip label@@landing.stripLabel">Models</span>
+      <span class="lp-strip__label" aria-hidden="true" i18n="Indicators strip label@@landing.stripLabel">Models (36)</span>
       <ul class="lp-strip__list">
         <li tabindex="0" data-tooltip="Compares Bitcoin market value with realized value to highlight historically overheated or undervalued cycle zones.">
           MVRV Z-Score

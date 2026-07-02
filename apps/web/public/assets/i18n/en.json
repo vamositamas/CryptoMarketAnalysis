@@ -991,7 +991,7 @@
   "landing.functionWorkspaceCopy": "Save dashboards, follow recent charts, and organize the signals that matter to your research.",
   "landing.functionWorkflowTitle": "Research workflow",
   "landing.functionWorkflowCopy": "Use alerts, trading plans, exports, and admin tools without subscriptions or paid data feeds.",
-  "landing.stripLabel": "Models",
+  "landing.stripLabel": "Models (36)",
   "landing.model.soprRatio": "SOPR Ratio",
   "landing.model.soprRatio.tooltip": "Compares long-term and short-term holder profit-taking behavior through the LTH/STH SOPR ratio.",
   "landing.model.compareBullMarkets": "Compare Bull Markets",
