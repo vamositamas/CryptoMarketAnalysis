@@ -7,11 +7,11 @@
     "dev:web": "nx serve web",
     "data:init-historical": "nx run api:data-init-historical",
     "build": "nx run-many --target=build",
-    "build:vercel": "npx nx build web --configuration=production && npx esbuild api/_handler.ts --bundle --packages=external --platform=node --target=node20 --outfile=api/_bundle.js --tsconfig=api/tsconfig.json --format=cjs",
+    "build:vercel": "npx nx build web --configuration=production && npx esbuild api/_handler.ts --bundle --packages=external --platform=node --target=node24 --outfile=api/_bundle.js --tsconfig=api/tsconfig.json --format=cjs",
     "test": "nx run-many --target=test"
   },
   "engines": {
-    "node": ">=20 <21",
+    "node": ">=24 <25",
     "npm": ">=10 <11"
   },
   "devDependencies": {
